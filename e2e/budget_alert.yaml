@@ -1,0 +1,26 @@
+appId: com.naansa.Duasaku
+---
+- clearState
+- launchApp
+- assertVisible: "Home"
+
+# Step 1: Navigate to Wallets/Budget to see current state
+- tapOn: "Wallets" # Tab title
+
+# Step 2: Add a large transaction that should trigger a warning
+- tapOn:
+    id: "global_add_transaction_fab"
+- tapOn:
+    id: "smart_input_field"
+- inputText: "Expensive Dinner 5000000" # High amount to trigger budget limit
+- tapOn:
+    id: "smart_input_save_button"
+
+# Step 3: Verify success animation
+- assertVisible: "Transaction Saved!"
+- takeScreenshot: "transaction_success"
+
+# Step 4: Check if the Budget Progress Widget on Home shows 100% or warning color
+- tapOn: "Home"
+- assertVisible: "100%"
+- takeScreenshot: "budget_alert_dashboard"

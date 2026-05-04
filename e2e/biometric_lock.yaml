@@ -1,0 +1,20 @@
+appId: com.naansa.Duasaku
+---
+- launchApp
+# Assume biometric is enabled from previous state or we go to settings to enable it
+- tapOn: "Profile"
+- tapOn: "Settings"
+- tapOn:
+    id: "biometric_switch"
+# Maestro will automatically handle the system biometric prompt if configured, 
+# or we can use `stopApp` and `launchApp` to trigger the lock screen.
+- stopApp
+- launchApp
+- assertVisible:
+    id: "lock_screen_container"
+- tapOn:
+    id: "lock_screen_unlock_button"
+# Maestro authenticate command
+- authenticate
+- assertVisible:
+    id: "dashboard_balance_text"

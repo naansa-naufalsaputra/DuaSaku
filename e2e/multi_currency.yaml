@@ -1,0 +1,39 @@
+appId: com.naansa.Duasaku
+---
+- clearState
+- launchApp
+- assertVisible: "Home"
+- takeScreenshot: "home_screen"
+
+# Test "20k" format
+- tapOn:
+    id: "global_add_transaction_fab"
+- tapOn:
+    id: "smart_input_field"
+- inputText: "Kopi 20k"
+- tapOn:
+    id: "smart_input_save_button"
+- assertVisible: "Transaction Saved!"
+- takeScreenshot: "transaction_20k_saved"
+
+# Test "50.000" format
+- tapOn:
+    id: "global_add_transaction_fab"
+- tapOn:
+    id: "smart_input_field"
+- inputText: "Makan Siang 50.000"
+- tapOn:
+    id: "smart_input_save_button"
+- assertVisible: "Transaction Saved!"
+- takeScreenshot: "transaction_50k_saved"
+
+# Test "10rb" format
+- tapOn:
+    id: "global_add_transaction_fab"
+- tapOn:
+    id: "smart_input_field"
+- inputText: "Parkir 10rb"
+- tapOn:
+    id: "smart_input_save_button"
+- assertVisible: "Transaction Saved!"
+- takeScreenshot: "multi_currency_test_done"

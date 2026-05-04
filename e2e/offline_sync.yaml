@@ -1,0 +1,30 @@
+appId: com.naansa.Duasaku
+---
+- clearState
+- launchApp
+- assertVisible: "Home"
+
+# Simulate Offline by setting Airplane Mode via adb
+- runCommand: "adb shell cmd connectivity airplane-mode enable"
+- stopApp
+- launchApp
+
+# Add transaction while offline
+- tapOn:
+    id: "global_add_transaction_fab"
+- tapOn:
+    id: "smart_input_field"
+- inputText: "Offline Expense 10000"
+- tapOn:
+    id: "smart_input_save_button"
+
+# Verify offline message in status bar or success message
+- assertVisible: "Disimpan offline"
+
+# Re-enable network
+- runCommand: "adb shell cmd connectivity airplane-mode disable"
+- stopApp
+- launchApp
+
+# Verify it eventually syncs (or at least the pending indicator is visible)
+- assertVisible: "Offline Expense"

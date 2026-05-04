@@ -1,0 +1,15 @@
+appId: com.naansa.Duasaku
+---
+- launchApp
+- tapOn:
+    id: "global_add_transaction_fab"
+- wait: 1000
+- tapOn:
+    id: "smart_input_field"
+- takeScreenshot: "smart_input_opened"
+- inputText: "50k makan siang"
+- tapOn:
+    id: "smart_input_save_button"
+- assertVisible:
+    id: "smart_input_success_text"
+- takeScreenshot: "transaction_added"

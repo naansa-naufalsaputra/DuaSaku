@@ -1,0 +1,42 @@
+name: E2E Tests (Maestro)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  maestro-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Run Lint & Type Check
+        run: |
+          npm run lint
+          npx tsc --noEmit
+          
+      - name: Setup Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          export PATH="$PATH:$HOME/.maestro/bin"
+          
+      # Note: Running actual mobile tests requires an emulator or 
+      # a cloud provider like Maestro Cloud. 
+      # This workflow demonstrates the setup and validation of the test files.
+      - name: Validate Maestro Scripts
+        run: |
+          export PATH="$PATH:$HOME/.maestro/bin"
+          maestro --version
+          # Check if e2e directory exists and has files
+          ls -R e2e/

@@ -1,0 +1,13 @@
+appId: com.naansa.Duasaku
+---
+- launchApp
+- assertVisible:
+    id: "dashboard_balance_text"
+- takeScreenshot: "privacy_mode_off"
+- tapOn:
+    id: "privacy_toggle_button"
+- assertVisible: "••••••••"
+- takeScreenshot: "privacy_mode_on"
+- tapOn:
+    id: "privacy_toggle_button"
+- assertNotVisible: "••••••••"
