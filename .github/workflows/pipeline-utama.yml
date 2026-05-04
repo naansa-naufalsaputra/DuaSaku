@@ -80,7 +80,7 @@ jobs:
       - name: 📱 Run E2E Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 34
           target: google_apis
           arch: x86_64
           profile: Nexus 6
