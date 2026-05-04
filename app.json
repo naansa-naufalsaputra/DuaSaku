@@ -67,11 +67,12 @@
             "minSdkVersion": 24,
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
-            "kotlinVersion": "1.8.10"
+            "kotlinVersion": "1.7.20"
           }
         }
       ],
-      "./plugins/withManifestToolsReplace.js"
+      "./plugins/withManifestToolsReplace.js",
+      "./plugins/withKotlinResolutionStrategy.js"
     ],
     "extra": {
       "router": {},
