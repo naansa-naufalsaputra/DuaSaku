@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Menjalankan Pre-push Hooks (Shift Left Strategy)..."
+
+echo "1/3: 🩺 Menjalankan Expo Doctor..."
+npx expo-doctor || exit 1
+
+echo "2/3: 🔎 Mengecek TypeScript Errors..."
+npx tsc --noEmit || exit 1
+
+# Optional: Run linter if exists
+# echo "🔎 Mengecek Linter..."
+# npx eslint . || exit 1
+
+echo "3/3: 📦 Simulasi Bundling (Export)..."
+# We only do a quick check, not a full export if it takes too long.
+# For now, let's stick to the user's suggestion.
+npx expo export --dry-run || exit 1
+
+echo "✅ Pre-push check BERHASIL! Melanjutkan proses push..."
