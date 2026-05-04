@@ -64,15 +64,15 @@
         {
           "android": {
             "usesCleartextTraffic": true,
-            "minSdkVersion": 24,
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "kotlinVersion": "1.7.20"
+            "kotlinVersion": "1.9.25",
+            "kotlinCompilerExtensionVersion": "1.5.14",
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 24
           }
         }
       ],
-      "./plugins/withManifestToolsReplace.js",
-      "./plugins/withKotlinResolutionStrategy.js"
+      "./plugins/withManifestToolsReplace.js"
     ],
     "extra": {
       "router": {},
