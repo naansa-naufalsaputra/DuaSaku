@@ -46,6 +46,22 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
 
+      - name: 📢 Discord Notification (Success)
+        if: success()
+        uses: rtCamp/action-discord-notifier@v2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_MESSAGE: "🚀 Build APK Selesai! Versi terbaru siap dites."
+          DISCORD_COLOR: "#28a745"
+
+      - name: 📢 Discord Notification (Failure)
+        if: failure()
+        uses: rtCamp/action-discord-notifier@v2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_MESSAGE: "❌ Build APK Gagal! Cek log GitHub Actions."
+          DISCORD_COLOR: "#dc3545"
+
   test:
     name: 🧪 Maestro E2E Test
     needs: build
@@ -94,3 +110,18 @@ jobs:
             ~/.maestro/tests/
             android-build/
           retention-days: 3
+
+      - name: 🧹 Cleanup Test Data
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/cleanup-test-data.js
+
+      - name: 🤖 Discord Result
+        if: always()
+        uses: rtCamp/action-discord-notifier@v2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: "DuaSaku Bot"
+          DISCORD_MESSAGE: "🤖 E2E Test Selesai!\nStatus: **${{ job.status }}**\nLink: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
