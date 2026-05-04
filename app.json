@@ -70,7 +70,8 @@
             "kotlinVersion": "1.8.10"
           }
         }
-      ]
+      ],
+      "./plugins/withManifestToolsReplace.js"
     ],
     "extra": {
       "router": {},
