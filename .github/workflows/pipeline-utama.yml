@@ -1,13 +1,15 @@
-name: Maestro E2E Testing
+name: Ultimate Pipeline (Build & E2E)
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  e2e:
+  build:
+    name: 🏗️ Build APK
     runs-on: ubuntu-latest
-    # Memerlukan akselerasi hardware untuk emulator
-    # GitHub Actions ubuntu-latest mendukung KVM
     steps:
       - name: 🏗 Checkout code
         uses: actions/checkout@v4
@@ -23,6 +25,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
 
       - name: 📦 Install dependencies
         run: npm install
@@ -35,6 +38,33 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuaSaku-Release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 7
+
+  test:
+    name: 🧪 Maestro E2E Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: DuaSaku-Release-APK
+          path: android-build
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: 🦅 Install Maestro CLI
         run: |
@@ -52,5 +82,15 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            adb install android/app/build/outputs/apk/release/app-release.apk
+            adb install android-build/app-release.apk
             maestro test e2e/
+
+      - name: 📤 Upload Error Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maestro-Error-Reports
+          path: |
+            ~/.maestro/tests/
+            android-build/
+          retention-days: 3
