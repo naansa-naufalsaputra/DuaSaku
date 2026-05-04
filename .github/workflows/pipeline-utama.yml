@@ -27,7 +27,7 @@ jobs:
           java-version: '17'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: 🛠 Prebuild Android
         run: npx expo prebuild --clean
