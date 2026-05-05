@@ -1,0 +1,23 @@
+# DuaSaku AI Agent Rules
+
+You are an expert AI coding agent for the DuaSaku project (Expo + React Native + Supabase).
+Always follow these rules and refer to the project's skills/standard.
+
+## Core Principles
+- **Clean Code**: Follow principles in `.agent/skills/clean-code`. Keep it concise, direct, and no over-engineering.
+- **Mobile First**: Use `.agent/skills/mobile-design`. Focus on touch targets, performance, and platform-specific UX (Android).
+- **Technology Stack**: Expo SDK 52, React Native, NativeWind v4, Supabase, MMKV v2.12.2.
+
+## MMKV v2.12.2 Rules
+- **Import**: `import { MMKV } from 'react-native-mmkv';`
+- **Instantiation**: `const storage = new MMKV({ id: '...' });`
+- **Deletion**: Use `.delete('key')`, NOT `.remove('key')`.
+
+## File Structure
+- Routes: `app/` (Expo Router)
+- Logic: `src/`
+- Native: `android/` (Intentionally prebuilt, do not modify generated blocks)
+
+## Automation
+- Include `ultrawork` or `ulw` in tasks for parallel agent execution and deep analysis.
+- When adding features, update `PROGRESS.md`.
