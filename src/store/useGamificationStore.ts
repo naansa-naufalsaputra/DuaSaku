@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
-const storage = createMMKV();
+const storage = new MMKV();
 
 const mmkvStorage = {
   setItem: (name: string, value: string) => storage.set(name, value),
   getItem: (name: string) => storage.getString(name) ?? null,
-  removeItem: (name: string) => storage.remove(name),
+  removeItem: (name: string) => storage.delete(name),
 };
 
 export interface Badge {

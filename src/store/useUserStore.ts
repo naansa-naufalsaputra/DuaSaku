@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { Session } from '@supabase/supabase-js';
 import i18n from '../lib/i18n';
 
-const storage = createMMKV({
+const storage = new MMKV({
   id: 'user-storage'
 });
 
@@ -17,7 +17,7 @@ const mmkvStorage: StateStorage = {
     return value ?? null;
   },
   removeItem: (name) => {
-    return storage.remove(name);
+    return storage.delete(name);
   },
 };
 

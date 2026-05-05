@@ -1,9 +1,9 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { getSyncQueue } from './offlineSync';
 import { supabase } from './supabase';
 
 const CONFLICT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes (smarter window)
-const storage = createMMKV();
+const storage = new MMKV();
 
 interface TransactionCheck {
   amount: number;

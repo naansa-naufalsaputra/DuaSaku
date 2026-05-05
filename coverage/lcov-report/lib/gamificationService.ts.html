@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for lib/lottieCache.ts</title>
+    <title>Code coverage report for lib/gamificationService.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">lib</a> lottieCache.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">lib</a> gamificationService.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>0/34</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>0/28</span>
             </div>
         
             
@@ -114,46 +114,18 @@
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
 <a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -164,58 +136,119 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import * as FileSystem from 'expo-file-system';
-import { Paths } from 'expo-file-system/next';
-&nbsp;
-const LOTTIE_CACHE_DIR = <span class="cstat-no" title="statement not covered" >`${Paths.cache.uri}/lottie_cache/`;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { supabase } from './supabase';
+import { useGamificationStore } from '../store/useGamificationStore';
+import { fetchBudgetsWithSpending } from './budgetService';
 &nbsp;
 /**
- * Ensures the cache directory exists.
+ * Menghitung Financial Health Score (1-100)
  */
-async function <span class="fstat-no" title="function not covered" >ensureDirExists(</span>) {
-  const dirInfo = <span class="cstat-no" title="statement not covered" >await FileSystem.getInfoAsync(LOTTIE_CACHE_DIR);</span>
-<span class="cstat-no" title="statement not covered" >  if (!dirInfo.exists) {</span>
-<span class="cstat-no" title="statement not covered" >    await FileSystem.makeDirectoryAsync(LOTTIE_CACHE_DIR, { intermediates: true });</span>
-  }
-}
-&nbsp;
-/**
- * Gets a local URI for a Lottie JSON.
- * Downloads it if not already cached.
- */
-export async function <span class="fstat-no" title="function not covered" >getCachedLottie(</span>url: string): Promise&lt;string&gt; {
-<span class="cstat-no" title="statement not covered" >  await ensureDirExists();</span>
-  
-  // Create a filename from the URL
-  const filename = <span class="cstat-no" title="statement not covered" >url.split('/').pop() || 'animation.json';</span>
-  const fileUri = <span class="cstat-no" title="statement not covered" >`${LOTTIE_CACHE_DIR}${filename}`;</span>
-  
-  const fileInfo = <span class="cstat-no" title="statement not covered" >await FileSystem.getInfoAsync(fileUri);</span>
-  
-<span class="cstat-no" title="statement not covered" >  if (fileInfo.exists) {</span>
-<span class="cstat-no" title="statement not covered" >    return fileUri;</span>
-  }
+export const calculateHealthScore = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (userId: string) =&gt; {</span>
+  const store = <span class="cstat-no" title="statement not covered" >useGamificationStore.getState();</span>
+  let score = <span class="cstat-no" title="statement not covered" >0;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(`[LottieCache] Downloading: ${url}`);</span>
-    const { uri } = <span class="cstat-no" title="statement not covered" >await FileSystem.downloadAsync(url, fileUri);</span>
-<span class="cstat-no" title="statement not covered" >    return uri;</span>
-  } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error(`[LottieCache] Failed to download ${url}:`, error);</span>
-<span class="cstat-no" title="statement not covered" >    return url; </span>// Fallback to remote URL if download fails
-  }
-}
+    // 1. Budget Health (Max 40 points)
+    const budgets = <span class="cstat-no" title="statement not covered" >await fetchBudgetsWithSpending(userId);</span>
+<span class="cstat-no" title="statement not covered" >    if (budgets.length &gt; 0) {</span>
+      const underBudgetCount = <span class="cstat-no" title="statement not covered" >budgets.filter(<span class="fstat-no" title="function not covered" >b </span>=&gt; <span class="cstat-no" title="statement not covered" >b.percentage &lt;= 100)</span>.length;</span>
+<span class="cstat-no" title="statement not covered" >      score += (underBudgetCount / budgets.length) * 40;</span>
+    } else {
+<span class="cstat-no" title="statement not covered" >      score += 30; </span>// Default points if no budget set
+    }
 &nbsp;
-/**
- * Clears all cached Lottie animations.
- */
-export async function <span class="fstat-no" title="function not covered" >clearLottieCache(</span>) {
-  const dirInfo = <span class="cstat-no" title="statement not covered" >await FileSystem.getInfoAsync(LOTTIE_CACHE_DIR);</span>
-<span class="cstat-no" title="statement not covered" >  if (dirInfo.exists) {</span>
-<span class="cstat-no" title="statement not covered" >    await FileSystem.deleteAsync(LOTTIE_CACHE_DIR, { idempotent: true });</span>
+    // 2. Savings Rate (Max 30 points)
+    const now = <span class="cstat-no" title="statement not covered" >new Date();</span>
+    const startOfMonth = <span class="cstat-no" title="statement not covered" >new Date(now.getFullYear(), now.getMonth(), 1).toISOString();</span>
+    
+    const { data: txs } = <span class="cstat-no" title="statement not covered" >await supabase</span>
+      .from('transactions')
+      .select('amount, type')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (txs &amp;&amp; txs.length &gt; 0) {</span>
+      let income = <span class="cstat-no" title="statement not covered" >0;</span>
+      let expense = <span class="cstat-no" title="statement not covered" >0;</span>
+<span class="cstat-no" title="statement not covered" >      txs.forEach(<span class="fstat-no" title="function not covered" >t </span>=&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        if (t.type === 'income') <span class="cstat-no" title="statement not covered" >income += t.amount;</span></span>
+        else <span class="cstat-no" title="statement not covered" >expense += t.amount;</span>
+      });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      if (income &gt; 0) {</span>
+        const savingsRate = <span class="cstat-no" title="statement not covered" >(income - expense) / income;</span>
+<span class="cstat-no" title="statement not covered" >        if (savingsRate &gt;= 0.3) <span class="cstat-no" title="statement not covered" >score += 30;</span></span>
+        else <span class="cstat-no" title="statement not covered" >if (savingsRate &gt; 0) <span class="cstat-no" title="statement not covered" >score += (savingsRate / 0.3) * 30;</span></span>
+        
+        // Unlock Badge: Money Saver
+<span class="cstat-no" title="statement not covered" >        if (savingsRate &gt;= 0.3) <span class="cstat-no" title="statement not covered" >store.unlockBadge('saver_master');</span></span>
+      }
+    }
+&nbsp;
+    // 3. Consistency (Max 30 points)
+    const streakPoints = <span class="cstat-no" title="statement not covered" >Math.min(store.streakDays * 4.2, 30);</span> // 7 days = ~30 points
+<span class="cstat-no" title="statement not covered" >    score += streakPoints;</span>
+&nbsp;
+    // Unlock Badge: Streak 7
+<span class="cstat-no" title="statement not covered" >    if (store.streakDays &gt;= 7) <span class="cstat-no" title="statement not covered" >store.unlockBadge('streak_7');</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    store.setHealthScore(Math.round(score));</span>
+    
+  } catch (error) {
+<span class="cstat-no" title="statement not covered" >    console.error('Error calculating health score:', error);</span>
   }
-}
+};
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

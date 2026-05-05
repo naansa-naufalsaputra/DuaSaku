@@ -1,12 +1,12 @@
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { supabase } from './supabase';
 import { processSyncQueue, getPendingCount } from './offlineSync';
 import { processDueRecurrences } from './recurringService';
 
 const BACKGROUND_FETCH_TASK = 'BACKGROUND_FETCH_TASK';
-const storage = createMMKV();
+const storage = new MMKV();
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   try {

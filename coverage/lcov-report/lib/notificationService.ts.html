@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/52</span>
+                <span class='fraction'>0/54</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/36</span>
+                <span class='fraction'>0/38</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/50</span>
+                <span class='fraction'>0/51</span>
             </div>
         
             
@@ -223,7 +223,13 @@
 <a name='L158'></a><a href='#L158'>158</a>
 <a name='L159'></a><a href='#L159'>159</a>
 <a name='L160'></a><a href='#L160'>160</a>
-<a name='L161'></a><a href='#L161'>161</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -244,6 +250,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -255,6 +264,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -399,23 +411,29 @@ const LAST_TX_KEY = <span class="cstat-no" title="statement not covered" >'last_
  * Utilitas untuk ekstraksi nominal dan deteksi tipe transaksi
  */
 const parseNotificationData = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>ext: string, incomeKeywords: string[]) =&gt; {</span>
-  // Deteksi tipe: Income jika mengandung kata kunci tertentu
-  const isIncome = <span class="cstat-no" title="statement not covered" >incomeKeywords.some(<span class="fstat-no" title="function not covered" >ke</span>yword =&gt; <span class="cstat-no" title="statement not covered" >text.toLowerCase().includes(keyword))</span>;</span>
+  // 1. Deteksi Tipe (Income/Expense)
+  const isIncome = <span class="cstat-no" title="statement not covered" >incomeKeywords.some(<span class="fstat-no" title="function not covered" >ke</span>yword =&gt; <span class="cstat-no" title="statement not covered" >text.toLowerCase().includes(keyword.toLowerCase()))</span>;</span>
   const type = <span class="cstat-no" title="statement not covered" >isIncome ? 'income' : 'expense';</span>
 &nbsp;
-  // Multi-regex untuk format Rp (titik) dan IDR (koma)
-  const patterns = <span class="cstat-no" title="statement not covered" >[</span>
-    /Rp\s?(\d{1,3}(?:\.\d{3})*)/i,
-    /IDR\s?(\d{1,3}(?:,\d{3})*)/i
+  // 2. Templates Spesifik untuk Akurasi Tinggi
+  
+  // Pattern: Mencari angka setelah "Rp" atau "IDR" atau angka besar yang berdiri sendiri
+  // Regex ini menangani: Rp 50.000, Rp. 50.000, 50.000,00
+  const amountPatterns = <span class="cstat-no" title="statement not covered" >[</span>
+    /(?:Rp\.?\s?|IDR\s?|Nominal:\s?|Sebesar\s?|Sejumlah\s?)(\d{1,3}(?:\.\d{3})+)/i,
+    /(\d{1,3}(?:\.\d{3})+(?:\.\d{2})?)/ // Fallback: angka berformat titik (ribuan)
   ];
 &nbsp;
   let amount = <span class="cstat-no" title="statement not covered" >0;</span>
-<span class="cstat-no" title="statement not covered" >  for (const pattern of patterns) {</span>
+<span class="cstat-no" title="statement not covered" >  for (const pattern of amountPatterns) {</span>
     const match = <span class="cstat-no" title="statement not covered" >text.match(pattern);</span>
 <span class="cstat-no" title="statement not covered" >    if (match) {</span>
-      // Membersihkan karakter non-numerik (titik/koma)
-<span class="cstat-no" title="statement not covered" >      amount = parseInt(match[1].replace(/[.,]/g, ''), 10);</span>
-<span class="cstat-no" title="statement not covered" >      break;</span>
+      // Hilangkan titik ribuan dan ambil angka bulatnya
+      const rawAmount = <span class="cstat-no" title="statement not covered" >match[1].replace(/\./g, '').split(',')[0];</span>
+<span class="cstat-no" title="statement not covered" >      amount = parseInt(rawAmount, 10);</span>
+      
+      // Validasi: Abaikan jika angka terlalu kecil (mungkin bukan nominal, misal jam 10.00)
+<span class="cstat-no" title="statement not covered" >      if (amount &gt; 100) <span class="cstat-no" title="statement not covered" >break; </span></span>
     }
   }
 &nbsp;
@@ -550,7 +568,7 @@ export const notificationService = <span class="cstat-no" title="statement not c
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-04T04:32:10.522Z
+                at 2026-05-05T10:08:27.022Z
             </div>
         <script src="../prettify.js"></script>
         <script>

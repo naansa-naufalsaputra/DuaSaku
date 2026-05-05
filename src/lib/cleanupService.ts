@@ -1,4 +1,4 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { clearLottieCache } from './lottieCache';
 
 /**
@@ -15,12 +15,12 @@ export const CleanupService = {
 
     try {
       // 1. Clear Offline Sync Queue
-      const syncStorage = createMMKV({ id: 'offline-sync' });
+      const syncStorage = new MMKV({ id: 'offline-sync' });
       syncStorage.clearAll();
 
       // 2. Clear Settings (Optional: depends if you want to keep them for next user)
       // Usually, settings like "isAutoRecordEnabled" should be reset for privacy.
-      const settingsStorage = createMMKV({ id: 'settings-storage' });
+      const settingsStorage = new MMKV({ id: 'settings-storage' });
       settingsStorage.clearAll();
 
       // 3. Clear Lottie Animations (to keep the app lean)
@@ -28,7 +28,7 @@ export const CleanupService = {
 
       // 4. User Storage (session, profile) is handled by useUserStore.persist.clear() 
       // or simply by the signOut() flow if managed correctly.
-      const userStorage = createMMKV({ id: 'user-storage' });
+      const userStorage = new MMKV({ id: 'user-storage' });
       userStorage.clearAll();
 
       console.log('[CleanupService] All caches cleared successfully.');

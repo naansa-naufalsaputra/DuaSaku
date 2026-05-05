@@ -1,9 +1,9 @@
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
-const storage = createMMKV();
+const storage = new MMKV();
 
 const GEOFENCE_TASK = 'GEOFENCE_TASK';
 

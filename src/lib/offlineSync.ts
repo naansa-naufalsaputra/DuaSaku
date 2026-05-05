@@ -8,12 +8,12 @@
  * 4. NetworkMonitor triggers processSyncQueue() when connection is restored
  */
 
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { supabase } from './supabase';
 import { DeviceEventEmitter } from 'react-native';
 import { checkBudgetAlert } from './notifications';
 
-const storage = createMMKV({ id: 'offline-sync' });
+const storage = new MMKV({ id: 'offline-sync' });
 
 const QUEUE_KEY = 'sync_queue';
 const FAILED_KEY = 'sync_failed';
@@ -182,7 +182,7 @@ export async function processSyncQueue(): Promise<{ synced: number; failed: numb
 
 /** Clear the failed queue (user acknowledges failures) */
 export function clearFailedQueue(): void {
-  storage.remove(FAILED_KEY);
+  storage.delete(FAILED_KEY);
 }
 
 /** Retry all failed items by moving them back to the main queue */
@@ -191,6 +191,6 @@ export function retryFailedQueue(): void {
   const queue = getSyncQueue();
   const retried = failed.map(tx => ({ ...tx, retryCount: 0 }));
   storage.set(QUEUE_KEY, JSON.stringify([...queue, ...retried]));
-  storage.remove(FAILED_KEY);
+  storage.delete(FAILED_KEY);
   DeviceEventEmitter.emit('sync_queue_changed', { pending: queue.length + retried.length });
 }

@@ -1,7 +1,7 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { StateStorage } from 'zustand/middleware';
 
-const storage = createMMKV({
+const storage = new MMKV({
   id: 'duasaku-storage'
 });
 
@@ -14,6 +14,6 @@ export const mmkvStorage: StateStorage = {
     return value ?? null;
   },
   removeItem: (name) => {
-    return storage.remove(name);
+    return storage.delete(name);
   },
 };

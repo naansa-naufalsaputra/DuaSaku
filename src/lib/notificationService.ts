@@ -1,4 +1,4 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { supabase } from './supabase';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { enqueueTransaction, processSyncQueue } from './offlineSync';
@@ -7,7 +7,7 @@ import { predictCategory } from './categoryIntelligence';
 import { checkBudgetAlert } from './notifications';
 import { useNotificationLogStore } from '../store/useNotificationLogStore';
 
-const storage = createMMKV({ id: 'notification-history' });
+const storage = new MMKV({ id: 'notification-history' });
 const LAST_TX_KEY = 'last_processed_notification';
 
 /**
