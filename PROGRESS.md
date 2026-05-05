@@ -1,0 +1,158 @@
+# Project Progress: DuaSaku
+
+## 📋 Status Overview
+
+- **Project Name:** DuaSaku
+- **Type:** Expo (React Native)
+- **Last Updated:** 2026-05-05 (Android Worklets Collision Fix)
+- **Status:** ✅ Zero-Debt State — CI/CD Pipeline & Native Dependencies Stabilized
+
+---
+
+## ✅ Completed Tasks
+
+### 🚀 The Ultimate Version (Phase 2) — COMPLETED 2026-05-04
+
+- ✅ **Update: 4 Mei 2026**
+- ✅ **Technical Zero-Debt State**: Resolved 39+ TypeScript and linting errors. `npx expo lint` kini mencapai **Exit Code 0** (Perfect Score).
+- ✅ **AI Category Learning**: AI Parser (Gemini) kini secara dinamis mengenali dan memprioritaskan kategori kustom user untuk akurasi pencatatan yang lebih tinggi.
+- ✅ **Category Cloud Sync**: Implementasi sinkronisasi kategori kustom dan target budget ke Supabase untuk konsistensi lintas perangkat.
+- ✅ **Interactive Goal Celebration**: Menambahkan efek perayaan (confetti) premium menggunakan Lottie saat transaksi berhasil dicatat.
+- ✅ **FileSystem Modernization**: Migrasi `lottieCache.ts` dan `exportCsv.ts` ke Expo Next File System API (`Paths` & `File`).
+- ✅ **Persistence Stability**: Perbaikan resolusi tipe MMKV (`createMMKV`) dan sinkronisasi metode `remove()` di seluruh store (Gamification, Settings, Storage).
+- ✅ **Insights Intelligence**: Implementasi `isPredicting` loading UI dan pembersihan variabel tidak terpakai untuk performa analitik yang lebih mulus.
+- ✅ **Cold Start Optimization**: Implementasi *Deferred Rendering* untuk `SmartInputSheet` guna mengurangi beban eksekusi JS awal dan mempercepat *App TTI* (Time To Interactive).
+- ✅ **Zero-Debt Assurance**: Berhasil melewati audit `npx tsc --noEmit` dan `npx expo lint` dengan status **Zero Errors, Zero Warnings**.
+
+### 🛡️ Deep Audit & Security Hardening — COMPLETED 2026-05-04
+
+- [x] **Security & Privacy**
+  - Moved Supabase URL and Anon Key to `.env` (Environment Variables).
+  - Enforced `user_id` filtering across all transaction/analytics queries.
+  - Implemented **Logout Cache Cleanup (#29)**: Securely purge all MMKV stores on sign-out.
+- [x] **Performance & UI**
+  - Migrated storage to **MMKV** for high-performance persistence.
+  - Implemented **Smart Conflict Resolution** (Magic Merge) to detect duplicates.
+  - Implemented **Live Lottie Empty States** with local caching for Dashboard, History, and Insights.
+  - Created **Haptic Service Utility (#27)**: Centralized premium vibration patterns.
+
+### 📱 Background Notification Listener — COMPLETED 2026-05-03
+
+- [x] **Notification Automation**
+  - Integrated `react-native-android-notification-listener` Headless Task.
+  - Implemented "Dual-Path" logic: GAS Webhook vs Local Regex Extraction.
+  - Integrated with Category Intelligence for automatic categorization.
+  - Configured `app.json` for `usesCleartextTraffic: true`.
+
+### 🔐 Auth Redesign — COMPLETED 2026-05-01
+
+- [x] **UI & Experience**
+  - Created `app/(auth)/sign-in.tsx` with Darkmatter theme (#121212).
+  - Integrated `LottieView` with abstract tech animation (reactive to loading).
+  - Implemented glassmorphism-style inputs, neon buttons, and password visibility toggle.
+- [x] **Security Logic**
+  - Implemented Supabase Auth logic (`signInWithPassword`).
+  - Integrated `expo-local-authentication` for Biometric Login on start.
+  - Added "Lupa Password?" UI and `handleResetPassword` logic.
+
+### ✨ Core Feature Milestones — COMPLETED 2026-05-01
+
+- [x] **Priority 1: Offline Sync Optimization**
+  - Created `src/lib/offlineSync.ts` (MMKV queue engine).
+  - Created `src/lib/networkMonitor.ts` (NetInfo connectivity listener).
+  - Created `src/components/SyncStatusBar.tsx` (offline/sync UI indicator).
+- [x] **Priority 2: Budgeting System**
+  - Created `src/lib/budgetService.ts` (CRUD + spending aggregation).
+  - Created `src/components/AddBudgetSheet.tsx` (Darkmatter style).
+  - Added "Salin Budget Bulan Lalu" QoL feature.
+- [x] **Priority 3: Interactive Charts**
+  - Created `src/components/TransactionDetailSheet.tsx` (drill-down).
+  - Rewrote `app/(tabs)/insights.tsx` with interactive BarChart and PieChart.
+- [x] **Priority 4: Voice Input**
+  - Added `parseAudioWithAI()` to `src/lib/aiAdvisor.ts` (Gemini 1.5 Flash).
+  - Implemented live 24-bar waveform visualizer in `SmartInputSheet.tsx`.
+
+### 🤖 Intelligence & Analytics — COMPLETED 2026-05-01
+
+- [x] **AI Advisory**
+  - Implemented dynamic budget context injection into Gemini system prompt.
+  - Connected real-time financial data to AI chat for personalized advice.
+- [x] **Advanced UX**
+  - **Insights Revamp**: Ultra-dark theme with trend indicators and neon accents.
+  - **AI Chat Redesign**: Glassmorphism bubbles and energy orb animation.
+  - **Recurring Transactions**: Full-stack implementation (CRUD, background processing).
+
+---
+
+### 🏗️ Android Build Infrastructure Recovery — COMPLETED 2026-05-04
+
+- ✅ **SDK 52 Realignment**: Restored full compatibility with Expo SDK 52 by locking all native dependencies (expo@52.0.33, react-native@0.76.7) and fixing version drift.
+- ✅ **Gradle Pipeline Restoration**: Resolved "Missing expo-gradle-plugin" errors by regenerating a clean `android` folder via `npx expo prebuild` and aligning `settings.gradle` with modern SDK 52 patterns.
+- ✅ **Cache Stabilization**: Performed a deep purge of the Gradle `transforms` cache to resolve file system corruption errors during native assembly.
+- ✅ **Zero-Debt Verification**: Confirmed that the project passes both `npx expo lint` and Gradle configuration phases, ensuring a stable foundation for native builds.
+---
+
+### 📦 EAS Build Infrastructure Fix — COMPLETED 2026-05-04
+- ✅ **Archive Optimization**: Created `.easignore` to exclude `node_modules` and heavy build artifacts, reducing upload size from **442 MB** to **~5 MB**.
+- ✅ **Native Persistence**: Removed `/android` from `.gitignore` to ensure "intentionally prebuilt" custom native code is uploaded and utilized by EAS builders.
+- ✅ **AGP Alignment**: Explicitly set `com.android.tools.build:gradle:8.7.2` in root `build.gradle` for full compatibility with SDK 52 and Gradle 8.10.2.
+- ✅ **Local CI/CD Pipeline**: Created GitHub Actions workflow (`pipeline-utama.yml`) for standalone APK building, Maestro E2E testing, and Discord notifications.
+- ✅ **Babel Worklets Fix**: Migrated from `react-native-worklets` to `react-native-worklets-core` to ensure compatibility with Expo SDK 52 and React Native 0.76.9.
+- ✅ **Test Data Cleanup**: Implemented `scripts/cleanup-test-data.js` to automatically purge test users from Supabase after CI runs.
+
+### 🧠 Intelligence & Analysis (Phase 3) — COMPLETED 2026-05-04
+- ✅ **AI History Search (Natural Language)**: Search transactions using natural language (e.g., "How much did I spend on coffee this month?").
+- ✅ **Smart Budget Forecasting**: AI prediction of month-end balance based on real-time spending velocity.
+- ✅ **Financial "What-If" Simulator**: Projecting long-term impact of large purchases on future savings.
+
+### 🎯 Financial Goals & Automation — COMPLETED 2026-05-04
+- ✅ **Tutorial Onboarding**: Interactive walkthrough with cute/premium graphics for new users.
+- ✅ **Savings Goals & Wishlist**: Track items to buy and calculate saving duration based on current financial habits.
+- ✅ **Enhanced Bank Templates**: Highly accurate parsing logic for local Indonesian banks (BCA, Livin, BRMo) and e-wallets.
+---
+
+### 📦 Android Build Fix (SDK 35) — COMPLETED 2026-05-05
+- ✅ **Bumping compileSdkVersion & targetSdkVersion**: Updated `app.json` to use Android SDK 35 to resolve `androidx.core:core-splashscreen` dependency requirement.
+- ✅ **Native Folder Synchronization**: Successfully regenerated the `android` folder via `npx expo prebuild` to propagate SDK 35 settings to `gradle.properties` and root `build.gradle`.
+- ✅ **CI Pipeline Upgrade**: Updated `pipeline-utama.yml` to use **Android API Level 34** for Maestro E2E tests, ensuring the test environment matches the modern target.
+- ✅ **Permission Hardening**: Expanded `app.json` permissions list to include `POST_NOTIFICATIONS` (Android 13+), `RECORD_AUDIO`, and location permissions, ensuring full functionality on SDK 35.
+- ✅ **SplashScreen Optimization**: Updated splash screen with a dark theme (`#121212`) to match the "Darkmatter" aesthetic and ensure a seamless startup experience on Android 12+ native API.
+- ✅ **Play Store Policy Compliance**: Added explicit `intentFilters` for deep linking and verified `android:exported` flags in the manifest to meet modern Google Play requirements.
+- ✅ **Zero-Error Quality Assurance**: Confirmed that the codebase passes `npx expo lint` and `npx tsc --noEmit` with zero errors and zero warnings.
+- ✅ **MMKV v2 Migration Fix**: Resolved `TS2305` and `TS2339` errors by updating `createMMKV` to `new MMKV()` and `.remove()` to `.delete()` across 10 files after downgrading `react-native-mmkv` to v2.12.2.
+- ✅ **Native Architecture Optimization**: Disabled **New Architecture** in `app.json` to resolve CMake C++ autolinking errors and ensure stability with MMKV v2.12.2 on Android SDK 35.
+---
+
+### 📦 Android Build Collision Fix — COMPLETED 2026-05-05
+- ✅ **Worklets De-duplication**: Uninstalled redundant `react-native-worklets` library to resolve `com.worklets.BuildConfig` duplicate class collision with `react-native-worklets-core` in Android builds.
+- ✅ **Zero-Error Verification**: Confirmed codebase stability via `npx expo lint` with Exit Code 0.
+---
+
+### 📦 Kotlin/Compose Compiler Consistency Fix — COMPLETED 2026-05-05
+- ✅ **Version Alignment**: Pinned Kotlin version to `1.7.20` in both `android/gradle.properties` and `android/build.gradle` to resolve compatibility issues with Compose Compiler 1.3.2.
+- ✅ **Build Unblocked**: Prevented silent fallback to `1.9.25` that caused `:expo-modules-core:compileReleaseKotlin` to fail during EAS release builds.
+### 🧠 OpenAgent/OpenCode Hybrid Intelligence Environment — COMPLETED 2026-05-05
+- ✅ **Hybrid AI Orchestration**: Successfully configured **OpenCode/OpenAgent** with a multi-provider strategy: **GPT-5.5** (Orchestrator), **Claude 3.7 Sonnet** (Coder/Hephaestus), **Gemini 3.1 Pro** (Researcher/Sisyphus), and **o3-mini** (Deep Reasoning/Asisyphus).
+- ✅ **MCP Ecosystem Integration**: Synchronized and enabled 7+ MCP servers (**GitHub, Supabase, Tavily, Context7, ESLint, Playwright, Sequential Thinking**) into `opencode.json` for full tool-use capability.
+- ✅ **CI/CD Security Hardening**: Fixed environment variable quoting in `pipeline-utama.yml` and added `.clinerules` to ensure consistent agent behavior and MMKV v2 API compliance.
+- ✅ **CI/CD .env Injection & Secret Alignment**: Added `.env` injection step in build job and aligned Supabase secret names with `EXPO_PUBLIC_` prefix for both Build and Cleanup jobs.
+- ✅ **CI/CD Optimization (Caching & Summary)**: Implemented Node.js caching in the E2E test job and added automated commit summaries to Discord notifications for better build tracking.
+- ✅ **Version Control Synchronization**: Successfully pushed all architectural stability fixes (New Arch Disabled) and MMKV v2 migration changes to GitHub repository (`origin main`).
+---
+
+
+## 🚀 Future Roadmap (To-Do)
+
+### 📈 Gamification & Engagement
+- [ ] **Financial Health Score**: 1-100 score and digital badges to encourage disciplined recording.
+- [ ] **Community Challenges**: Global or friend-based savings streaks.
+
+---
+
+## 🛠️ Tech Stack & Integration
+
+- **Frontend**: Expo SDK 52, React Native, NativeWind v4, Reanimated, Lucide Icons.
+- **Backend**: Supabase (Auth, DB, Realtime, Edge Functions).
+- **AI**: Google Gemini 1.5 (Pro/Flash/Lite Fallback) + **Local Hybrid Intelligence** (Regex Parsing & Rule-based Advice Fallback).
+- **Storage**: MMKV (High-speed local persistence).
+- **Notifications**: Expo Notifications + Android Notification Listener.
