@@ -70,10 +70,7 @@
             "minSdkVersion": 24,
             "packagingOptions": {
               "pickFirst": [
-                "**/libc++_shared.so",
-                "**/libfbjni.so",
-                "**/libjsi.so",
-                "**/libreactnativejni.so"
+                "**/*.so"
               ]
             }
           }
