@@ -67,7 +67,15 @@
             "kotlinCompilerExtensionVersion": "1.5.14",
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
-            "minSdkVersion": 24
+            "minSdkVersion": 24,
+            "packagingOptions": {
+              "pickFirst": [
+                "**/libc++_shared.so",
+                "**/libfbjni.so",
+                "**/libjsi.so",
+                "**/libreactnativejni.so"
+              ]
+            }
           }
         }
       ],
