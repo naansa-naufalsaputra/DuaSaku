@@ -11,6 +11,25 @@ import { useGamificationStore } from '../../src/store/useGamificationStore';
 import { Target as TargetIcon, BrainCircuit, Trophy } from 'lucide-react-native';
 import { TextInput } from 'react-native';
 
+const ProfileItem = ({ icon: Icon, title, value, onPress, showChevron = true, color = "#fafafa" }: any) => (
+  <TouchableOpacity 
+    className="flex-row items-center justify-between p-4 bg-surface-container mb-2 rounded-2xl border border-border"
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <View className="flex-row items-center gap-4">
+      <View className="w-10 h-10 bg-background rounded-xl items-center justify-center border border-border">
+        <Icon color={color} size={20} />
+      </View>
+      <View>
+        <Text className="text-foreground font-h3 text-base">{title}</Text>
+        {value && <Text className="text-on-surface-variant text-xs font-body-sm">{value}</Text>}
+      </View>
+    </View>
+    {showChevron && <ChevronRight color="#52525b" size={20} />}
+  </TouchableOpacity>
+);
+
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const { hapticMedium, hapticSuccess } = useHaptic();
@@ -60,25 +79,6 @@ export default function ProfileScreen() {
     i18n.changeLanguage(newLang);
     hapticMedium();
   };
-
-  const ProfileItem = ({ icon: Icon, title, value, onPress, showChevron = true, color = "#fafafa" }: any) => (
-    <TouchableOpacity 
-      className="flex-row items-center justify-between p-4 bg-surface-container mb-2 rounded-2xl border border-border"
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <div className="flex-row items-center gap-4">
-        <View className="w-10 h-10 bg-background rounded-xl items-center justify-center border border-border">
-          <Icon color={color} size={20} />
-        </View>
-        <View>
-          <Text className="text-foreground font-h3 text-base">{title}</Text>
-          {value && <Text className="text-on-surface-variant text-xs font-body-sm">{value}</Text>}
-        </View>
-      </div>
-      {showChevron && <ChevronRight color="#52525b" size={20} />}
-    </TouchableOpacity>
-  );
 
   return (
     <View className="flex-1 bg-background">
@@ -192,7 +192,7 @@ export default function ProfileScreen() {
               <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nama Target</Text>
               <TextInput
                 value={financialGoal.name}
-                onChangeText={(text) => setFinancialGoal({ ...financialGoal, name: text })}
+                onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, name: text }))}
                 placeholder="Contoh: Liburan ke Bali"
                 placeholderTextColor="#52525b"
                 className="bg-background text-foreground px-4 py-3 rounded-2xl border border-border font-body-sm text-sm"
@@ -204,7 +204,7 @@ export default function ProfileScreen() {
                 <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nominal Target</Text>
                 <TextInput
                   value={financialGoal.targetAmount.toString()}
-                  onChangeText={(text) => setFinancialGoal({ ...financialGoal, targetAmount: Number(text) || 0 })}
+                  onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, targetAmount: Number(text) || 0 }))}
                   placeholder="0"
                   placeholderTextColor="#52525b"
                   keyboardType="numeric"
@@ -215,7 +215,7 @@ export default function ProfileScreen() {
                 <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Sudah Terkumpul</Text>
                 <TextInput
                   value={financialGoal.currentAmount.toString()}
-                  onChangeText={(text) => setFinancialGoal({ ...financialGoal, currentAmount: Number(text) || 0 })}
+                  onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, currentAmount: Number(text) || 0 }))}
                   placeholder="0"
                   placeholderTextColor="#52525b"
                   keyboardType="numeric"
