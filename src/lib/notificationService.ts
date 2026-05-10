@@ -6,6 +6,7 @@ import { isDuplicateTransaction } from './conflictResolution';
 import { predictCategory } from './categoryIntelligence';
 import { checkBudgetAlert } from './notifications';
 import { useNotificationLogStore } from '../store/useNotificationLogStore';
+import i18n from './i18n';
 
 const storage = new MMKV({ id: 'notification-history',
   encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
@@ -124,7 +125,7 @@ export const notificationService = async (notification: any) => {
 
     // GUNAKAN OFFLINE QUEUE (Agar tetap tercatat meski offline)
     enqueueTransaction({
-      title: `Auto-record ${appName}`,
+      title: i18n.t('autoRecord', { appName }),
       amount: amount,
       type: type as 'expense' | 'income',
       category: predictedCategory,

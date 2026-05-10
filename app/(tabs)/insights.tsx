@@ -454,9 +454,9 @@ export default function AnalyticsScreen() {
               <View className="w-10 h-10 bg-blue-500/20 rounded-2xl items-center justify-center border border-blue-500/20">
                 <Calculator color="#60a5fa" size={20} />
               </View>
-              <View>
-                <Text className="text-lg text-white font-bold">What-If Simulator</Text>
-                <Text className="text-on-surface-variant text-xs">Model the impact of large purchases</Text>
+              <View className="mb-4">
+                <Text className="text-lg text-white font-bold">{t('simulator')}</Text>
+                <Text className="text-on-surface-variant text-xs">{t('simulatorDesc')}</Text>
               </View>
             </View>
 
@@ -509,18 +509,18 @@ export default function AnalyticsScreen() {
           <View className="mb-8 gap-4">
             {isPredicting ? (
               <View className="bg-surface-container/40 border border-white/5 p-6 rounded-[32px] items-center py-10">
-                <ActivityIndicator color="#c084fc" size="small" />
-                <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest mt-3">🧠 Menghitung Proyeksi Finansial...</Text>
+                <ActivityIndicator color="#c084fc" size="large" />
+                <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest mt-3">{t('aiPredicting')}</Text>
               </View>
             ) : (
               <>
                 {prediction && (
               <View className="bg-surface-container/60 border border-white/10 p-6 rounded-[32px]">
                 <View className="flex-row items-center gap-3 mb-3">
-                  <View className="w-8 h-8 bg-blue-500/20 rounded-xl items-center justify-center">
-                    <TrendingUp color="#60a5fa" size={16} />
+                  <View className="w-10 h-10 bg-purple-500/20 rounded-xl items-center justify-center border border-purple-500/20">
+                    <TrendingUp color="#c084fc" size={20} />
                   </View>
-                  <Text className="text-white font-bold">Prediksi Akhir Bulan</Text>
+                  <Text className="text-white font-bold">{t('endOfMonthPrediction')}</Text>
                 </View>
                 <Text className="text-on-surface-variant text-xs leading-5">{prediction}</Text>
               </View>
@@ -529,10 +529,10 @@ export default function AnalyticsScreen() {
             {budgetRecommendations && (
               <View className="bg-surface-container/60 border border-white/10 p-6 rounded-[32px]">
                 <View className="flex-row items-center gap-3 mb-3">
-                  <View className="w-8 h-8 bg-green-500/20 rounded-xl items-center justify-center">
-                    <TargetIcon color="#4ade80" size={16} />
+                  <View className="w-10 h-10 bg-indigo-500/20 rounded-xl items-center justify-center border border-indigo-500/20">
+                    <TargetIcon color="#818cf8" size={20} />
                   </View>
-                  <Text className="text-white font-bold">Rekomendasi Anggaran</Text>
+                  <Text className="text-white font-bold">{t('budgetRecommendation')}</Text>
                 </View>
                 <Text className="text-on-surface-variant text-xs leading-5">{budgetRecommendations}</Text>
               </View>
@@ -544,10 +544,10 @@ export default function AnalyticsScreen() {
 
         {/* Trends Section */}
         <View className="mb-8">
-          <View className="flex-row justify-between items-end mb-5 px-1">
+          <View className="mt-8 mb-4 flex-row justify-between items-end px-2">
             <View>
-              <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest mb-1">Expense Flow</Text>
-              <Text className="text-white text-xl" style={{ fontFamily: 'Manrope_700Bold' }}>{t('trends')}</Text>
+              <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest mb-1">{t('expenseFlow')}</Text>
+              <Text className="text-white font-h2 text-xl" style={{ fontFamily: 'Manrope_700Bold' }}>{t('trends')}</Text>
             </View>
             <View className="bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
               <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-tighter">{t('tapBarForDetail')}</Text>

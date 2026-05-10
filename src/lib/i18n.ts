@@ -105,7 +105,26 @@ const resources = {
       spendingTooFast: "You're spending too fast! Projected month-end expense:",
       totalAssets: "Total Assets",
       monthlyCashflow: "Monthly Cashflow",
-      expenseForecast: "Expense Forecast"
+      expenseForecast: "Expense Forecast",
+      simulator: "What-If Simulator",
+      simulatorDesc: "Model the impact of large purchases",
+      aiPredicting: "🧠 Calculating Financial Projection...",
+      endOfMonthPrediction: "End of Month Prediction",
+      budgetRecommendation: "Budget Recommendation",
+      freeAccount: "Free Account",
+      editProfile: "Edit Profile",
+      achievements: "Achievements",
+      accountSettings: "Account Settings",
+      aiIntelligence: "AI Intelligence",
+      aiPersonality: "Assistant Personality",
+      aiPersonalityDesc: "Choose your AI's speaking style",
+      financialTarget: "Financial Target",
+      financialTargetDesc: "AI will remind you of this target",
+      targetName: "Target Name",
+      targetAmount: "Target Amount",
+      collectedAmount: "Collected Amount",
+      lockApp: "Lock app on open",
+      autoRecord: "Auto-record {{appName}}"
     }
   },
   id: {
@@ -211,7 +230,26 @@ const resources = {
       spendingTooFast: "Pengeluaran terlalu cepat! Estimasi akhir bulan:",
       totalAssets: "Total Aset",
       monthlyCashflow: "Arus Kas Bulanan",
-      expenseForecast: "Estimasi Pengeluaran"
+      expenseForecast: "Estimasi Pengeluaran",
+      simulator: "Simulator Skenario",
+      simulatorDesc: "Modelkan dampak pengeluaran besar",
+      aiPredicting: "🧠 Menghitung Proyeksi Finansial...",
+      endOfMonthPrediction: "Prediksi Akhir Bulan",
+      budgetRecommendation: "Rekomendasi Anggaran",
+      freeAccount: "Akun Gratis",
+      editProfile: "Edit Profil",
+      achievements: "Pencapaian",
+      accountSettings: "Pengaturan Akun",
+      aiIntelligence: "Kecerdasan AI",
+      aiPersonality: "Kepribadian Asisten",
+      aiPersonalityDesc: "Pilih gaya bicara AI-mu",
+      financialTarget: "Target Keuangan",
+      financialTargetDesc: "AI akan mengingatkan target ini",
+      targetName: "Nama Target",
+      targetAmount: "Nominal Target",
+      collectedAmount: "Sudah Terkumpul",
+      lockApp: "Kunci aplikasi saat dibuka",
+      autoRecord: "Catat Otomatis {{appName}}"
     }
   }
 };

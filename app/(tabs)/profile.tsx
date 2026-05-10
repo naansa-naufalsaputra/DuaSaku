@@ -94,15 +94,15 @@ export default function ProfileScreen() {
             <User color="#10b981" size={48} />
           </View>
           <Text className="text-foreground font-h2 text-xl mb-1">{userProfile?.name || 'User'}</Text>
-          <Text className="text-on-surface-variant font-body-sm text-sm">Free Account</Text>
+          <Text className="text-on-surface-variant font-body-sm text-sm">{t('freeAccount')}</Text>
           
           <TouchableOpacity className="mt-6 bg-primary px-6 py-2.5 rounded-full">
-            <Text className="text-primary-foreground font-label-md">Edit Profil</Text>
+            <Text className="text-primary-foreground font-label-md">{t('editProfile')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Badges Section */}
-        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">Pencapaian</Text>
+        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">{t('achievements')}</Text>
         <View className="flex-row flex-wrap gap-3">
           {badges.map((badge) => (
             <View 
@@ -126,11 +126,11 @@ export default function ProfileScreen() {
         </View>
 
         {/* Sections */}
-        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-10 mb-4 px-1">Pengaturan Akun</Text>
+        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-10 mb-4 px-1">{t('accountSettings')}</Text>
         <ProfileItem icon={Wallet} title="Dompet & Saldo" value="Kelola sumber dana kamu" />
         <ProfileItem icon={Download} title="Ekspor Data" value="Download laporan transaksi (CSV)" />
         
-        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">Kecerdasan AI</Text>
+        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">{t('aiIntelligence')}</Text>
         
         {/* Personality Selector */}
         <View className="p-4 bg-surface-container mb-4 rounded-3xl border border-border">
@@ -139,8 +139,8 @@ export default function ProfileScreen() {
               <BrainCircuit color="#10b981" size={20} />
             </View>
             <View>
-              <Text className="text-foreground font-h3 text-base">Kepribadian Asisten</Text>
-              <Text className="text-on-surface-variant text-xs font-body-sm">Pilih gaya bicara AI-mu</Text>
+              <Text className="text-foreground font-h3 text-base">{t('aiPersonality')}</Text>
+              <Text className="text-on-surface-variant text-xs font-body-sm">{t('aiPersonalityDesc')}</Text>
             </View>
           </View>
           
@@ -182,14 +182,14 @@ export default function ProfileScreen() {
               <TargetIcon color="#3b82f6" size={20} />
             </View>
             <View>
-              <Text className="text-foreground font-h3 text-base">Target Keuangan</Text>
-              <Text className="text-on-surface-variant text-xs font-body-sm">AI akan mengingatkan target ini</Text>
+              <Text className="text-foreground font-h3 text-base">{t('financialTarget')}</Text>
+              <Text className="text-on-surface-variant text-xs font-body-sm">{t('financialTargetDesc')}</Text>
             </View>
           </View>
           
           <View className="gap-4">
             <View>
-              <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nama Target</Text>
+              <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('targetName')}</Text>
               <TextInput
                 value={financialGoal.name}
                 onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, name: text }))}
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
 
             <View className="flex-row gap-3">
               <View className="flex-1">
-                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nominal Target</Text>
+                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('targetAmount')}</Text>
                 <TextInput
                   value={financialGoal.targetAmount.toString()}
                   onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, targetAmount: Number(text) || 0 }))}
@@ -212,7 +212,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Sudah Terkumpul</Text>
+                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('collectedAmount')}</Text>
                 <TextInput
                   value={financialGoal.currentAmount.toString()}
                   onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, currentAmount: Number(text) || 0 }))}
@@ -226,7 +226,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-6 mb-4 px-1">Preferensi</Text>
+        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-6 mb-4 px-1">{t('preferences')}</Text>
         <ProfileItem 
           icon={Languages} 
           title={t('language')} 
@@ -241,7 +241,7 @@ export default function ProfileScreen() {
             </View>
             <View>
               <Text className="text-foreground font-h3 text-base">{t('biometricUnlock')}</Text>
-              <Text className="text-on-surface-variant text-xs font-body-sm">Kunci aplikasi saat dibuka</Text>
+              <Text className="text-on-surface-variant text-xs font-body-sm">{t('lockApp')}</Text>
             </View>
           </View>
           <Switch 
@@ -252,7 +252,7 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">Lainnya</Text>
+        <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">{t('other')}</Text>
         <ProfileItem icon={CircleHelp} title="Pusat Bantuan" />
         <ProfileItem icon={LogOut} title={t('logout')} color="#ef4444" showChevron={false} onPress={handleLogout} />
 
