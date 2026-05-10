@@ -320,7 +320,7 @@ export default function DashboardScreen() {
           
           <View className="flex-row justify-between items-start mb-6">
             <View>
-              <Text style={styles.assetsTitle}>Total Assets</Text>
+              <Text style={styles.assetsTitle}>{t('totalAssets')}</Text>
               <View className="flex-row items-center gap-2">
                 <Text style={styles.balanceText}>
                   {isPrivacyModeEnabled ? '••••••' : formatCurrency(balance)}
@@ -337,7 +337,7 @@ export default function DashboardScreen() {
 
           <View style={styles.cashflowContainer}>
             <View>
-              <Text style={styles.cashflowLabel}>Monthly Cashflow</Text>
+              <Text style={styles.cashflowLabel}>{t('monthlyCashflow')}</Text>
               <View className="flex-row items-center gap-1.5">
                 <View className="w-2 h-2 rounded-full bg-green-500" />
                 <Text className="text-white font-bold text-sm">{formatCurrency(monthlyIncome)}</Text>
@@ -345,7 +345,7 @@ export default function DashboardScreen() {
             </View>
             <View className="w-[1px] h-8 bg-white/10" />
             <View className="items-end">
-              <Text style={styles.cashflowLabel}>Expense Forecast</Text>
+              <Text style={styles.cashflowLabel}>{t('expenseForecast')}</Text>
               <View className="flex-row items-center gap-1.5">
                 <Text className="text-white font-bold text-sm">{formatCurrency(forecast?.predicted_total || 0)}</Text>
                 <View className="w-2 h-2 rounded-full bg-orange-500" />
@@ -358,8 +358,8 @@ export default function DashboardScreen() {
         <View className="mt-8">
           <View className="flex-row justify-between items-center mb-4 px-2">
             <View>
-              <Text className="text-white font-h2 text-xl">{t('myWallets') || 'Dompet Saya'}</Text>
-              <Text className="text-on-surface-variant text-xs uppercase font-bold tracking-widest mt-0.5">Manage Assets</Text>
+              <Text className="text-white font-h2 text-xl">{t('myWallets')}</Text>
+              <Text className="text-on-surface-variant text-xs uppercase font-bold tracking-widest mt-0.5">{t('manageAssets')}</Text>
             </View>
             <TouchableOpacity 
               className="flex-row items-center gap-1.5 bg-purple-500/10 px-4 py-2 rounded-full border border-purple-500/20"
@@ -369,7 +369,7 @@ export default function DashboardScreen() {
               }}
             >
               <Plus color="#c084fc" size={14} />
-              <Text className="text-purple-400 font-bold text-xs">Transfer</Text>
+              <Text className="text-purple-400 font-bold text-xs">{t('transfer')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -412,7 +412,7 @@ export default function DashboardScreen() {
               ))
             ) : (
               <View className="w-full h-32 bg-surface-container rounded-[32px] border border-white/5 items-center justify-center border-dashed px-10">
-                <Text className="text-on-surface-variant/50 text-center text-sm">No wallets found. Add one to track your assets.</Text>
+                <Text className="text-on-surface-variant/50 text-center text-sm">{t('noWalletsFound')}</Text>
               </View>
             )}
             
@@ -424,7 +424,7 @@ export default function DashboardScreen() {
               <View className="w-12 h-12 bg-surface-container rounded-full items-center justify-center mb-2 border border-white/5">
                 <Plus color="#94a3b8" size={24} />
               </View>
-              <Text className="text-on-surface-variant font-bold text-xs">Tambah Dompet</Text>
+              <Text className="text-on-surface-variant font-bold text-xs">{t('addWallet')}</Text>
             </TouchableOpacity>
           </Animated.ScrollView>
         </View>
@@ -436,13 +436,13 @@ export default function DashboardScreen() {
               <View className="w-8 h-8 bg-orange-500/10 rounded-full items-center justify-center border border-orange-500/20">
                 <Cpu color="#f97316" size={16} />
               </View>
-              <Text className="text-white font-h2 text-xl">Challenges</Text>
+              <Text className="text-white font-h2 text-xl">{t('challenges')}</Text>
             </View>
             <TouchableOpacity 
               className="px-3 py-1 bg-white/5 rounded-full"
               onPress={() => router.push('/leaderboard' as any)}
             >
-              <Text className="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Top players</Text>
+              <Text className="text-on-surface-variant text-xs font-bold uppercase tracking-wider">{t('topPlayers')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -459,16 +459,16 @@ export default function DashboardScreen() {
             <View className="flex-row justify-between items-center mb-5">
               <View className="flex-1">
                 <View className="flex-row items-center gap-2 mb-1">
-                  <Text className="text-orange-400 font-bold text-xs uppercase tracking-[2px]">Active Challenge</Text>
+                  <Text className="text-orange-400 font-bold text-xs uppercase tracking-[2px]">{t('activeChallenge')}</Text>
                   <View className="w-1.5 h-1.5 bg-orange-500/30 rounded-full" />
-                  <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-wider">Expires in 2d</Text>
+                  <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-wider">{t('expiresIn2d')}</Text>
                 </View>
-                <Text className="text-white font-bold text-xl">7-Day Savings Streak</Text>
-                <Text className="text-on-surface-variant text-sm mt-1 leading-4">Don't spend more than Rp 50k today to keep your streak alive!</Text>
+                <Text className="text-white font-bold text-xl">{t('savingsStreak')}</Text>
+                <Text className="text-on-surface-variant text-sm mt-1 leading-4">{t('streakDescription')}</Text>
               </View>
               <View className="items-center bg-orange-500/10 p-4 rounded-[28px] border border-orange-500/20">
                 <Text className="text-white font-bold text-3xl">🔥{streakDays}</Text>
-                <Text className="text-orange-400 text-[12px] font-bold uppercase tracking-widest">DAYS</Text>
+                <Text className="text-orange-400 text-[12px] font-bold uppercase tracking-widest">{t('days')}</Text>
               </View>
             </View>
 
@@ -488,9 +488,9 @@ export default function DashboardScreen() {
                     <Text className="text-xs">👤</Text>
                   </View>
                 ))}
-                <Text className="text-on-surface-variant text-xs font-bold ml-4 mt-1">+420 participants</Text>
+                <Text className="text-on-surface-variant text-xs font-bold ml-4 mt-1">+420 {t('participants')}</Text>
               </View>
-              <Text className="text-orange-400 font-bold text-sm">Lihat Leaderboard</Text>
+              <Text className="text-orange-400 font-bold text-sm">{t('viewLeaderboard')}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -509,7 +509,7 @@ export default function DashboardScreen() {
                 </View>
                 <View>
                   <Text className="text-white font-bold text-base">{useSettingsStore.getState().financialGoal.name}</Text>
-                  <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest">Target Keuangan</Text>
+                  <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest">{t('financialGoal')}</Text>
                 </View>
               </View>
               <Text className="text-purple-400 font-bold text-lg">
@@ -528,7 +528,7 @@ export default function DashboardScreen() {
             
             <View className="flex-row justify-between mt-3">
               <Text className="text-on-surface-variant text-xs font-medium">
-                {formatCurrency(useSettingsStore.getState().financialGoal.currentAmount)} terkumpul
+                {formatCurrency(useSettingsStore.getState().financialGoal.currentAmount)} {t('collected')}
               </Text>
               <Text className="text-on-surface-variant text-xs">
                 {formatCurrency(useSettingsStore.getState().financialGoal.targetAmount)}
@@ -581,7 +581,7 @@ export default function DashboardScreen() {
                 <View className="w-8 h-8 bg-surface-container rounded-full items-center justify-center border border-white/5">
                   <Plus color="#94a3b8" size={16} />
                 </View>
-                <Text className="text-white font-h2 text-xl">Wishlist</Text>
+                <Text className="text-white font-h2 text-xl">{t('wishlist')}</Text>
               </View>
               <TouchableOpacity onPress={() => router.push('/profile')}>
                 <Text className="text-purple-400 font-bold">{t('manage')}</Text>
@@ -627,7 +627,7 @@ export default function DashboardScreen() {
                           {Math.round(progress)}% {t('saved')}
                         </Text>
                         <Text className="text-purple-400 text-[12px] font-bold uppercase">
-                          {daysLeft === null ? 'Need Savings Data' : daysLeft === 0 ? 'Ready!' : `${daysLeft} days left`}
+                          {daysLeft === null ? t('needSavingsData') : daysLeft === 0 ? t('ready') : `${daysLeft} ${t('daysLeft')}`}
                         </Text>
                       </View>
                       <TouchableOpacity 
@@ -655,9 +655,9 @@ export default function DashboardScreen() {
               <Bell color="#f87171" size={24} />
             </View>
             <View className="flex-1">
-              <Text className="text-red-400 font-bold text-sm uppercase tracking-wider">Smart Warning</Text>
+              <Text className="text-red-400 font-bold text-sm uppercase tracking-wider">{t('smartWarning')}</Text>
               <Text className="text-white font-medium text-sm mt-1">
-                You're spending too fast! Projected month-end expense: {formatCurrency(forecast.forecastedExpense)}
+                {t('spendingTooFast')} {formatCurrency(forecast.forecastedExpense)}
               </Text>
             </View>
           </View>
