@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, forwardRef, useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, DeviceEventEmitter } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, DeviceEventEmitter, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,7 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { Sparkles, Plus, WifiOff, Mic, Square } from 'lucide-react-native';
+import { Sparkles, Plus, WifiOff, Mic, Square, ArrowRight, Wallet as WalletIcon } from 'lucide-react-native';
 import { Audio } from 'expo-av';
 import LottieView from 'lottie-react-native';
 import { getCachedLottie } from '../lib/lottieCache';
@@ -32,6 +32,7 @@ import { calculateHealthScore } from '../lib/gamificationService';
 import { useCategoryStore } from '../store/useCategoryStore';
 import { isDuplicateTransaction } from '../lib/conflictResolution';
 import { updateTransaction } from '../lib/transactionService';
+import { createTransfer } from '../lib/transferService';
 // import { predictCategory } from '../lib/categoryIntelligence';
 
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -66,12 +67,7 @@ const WaveBar = ({ levels, index }: { levels: SharedValue<number[]>; index: numb
   return (
     <Animated.View
       style={[
-        {
-          width: 3,
-          borderRadius: 1.5,
-          backgroundColor: '#ef4444',
-          marginHorizontal: 1.5,
-        },
+        styles.waveBar,
         animatedStyle,
       ]}
     />
@@ -100,6 +96,13 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
   const [showCelebration, setShowCelebration] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<any>(null);
 
+  // Transfer Mode state
+  const [isTransferMode, setIsTransferMode] = useState(false);
+  const [wallets, setWallets] = useState<any[]>([]);
+  const [fromWalletId, setFromWalletId] = useState<string | null>(null);
+  const [toWalletId, setToWalletId] = useState<string | null>(null);
+  const [selectingWalletFor, setSelectingWalletFor] = useState<'from' | 'to' | null>(null);
+
   // Edit Mode state
   const [editingId, setEditingId] = useState<string | null>(null);
   const isEditMode = !!editingId;
@@ -127,6 +130,23 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
   useEffect(() => {
     // High-quality confetti celebration
     getCachedLottie('https://lottie.host/819d44c8-3c5e-42c2-8419-867c2957f864/D3m6Jv2X1R.json').then(setSuccessUri);
+    
+    // Fetch wallets
+    if (userId) {
+      supabase.from('wallets').select('*').eq('user_id', userId).then(({ data }) => {
+        if (data) {
+          setWallets(data);
+          if (data.length > 0) {
+            setFromWalletId(data[0].id);
+            if (data.length > 1) {
+              setToWalletId(data[1].id);
+            } else {
+              setToWalletId(data[0].id);
+            }
+          }
+        }
+      });
+    }
   }, [userId]);
 
   // Voice recording state
@@ -140,6 +160,12 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
 
   // Pulse animation for the recording dot
   const dotScale = useSharedValue(1);
+
+  const lottieSource = useMemo(() => ({ 
+    uri: showCelebration 
+      ? 'https://lottie.host/df2c1c3f-4e9e-4e4b-9e4f-0e4b3a2c1d0f/celebrate.json' 
+      : (successUri || 'https://assets3.lottiefiles.com/packages/lf20_at6ayqnr.json') 
+  }), [showCelebration, successUri]);
 
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener('open_smart_input', (data?: { text?: string }) => {
@@ -417,6 +443,24 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
         setStatusMessage(`❌ Gagal: ${res.error}`);
         return;
       }
+    } else if (isTransferMode && fromWalletId && toWalletId) {
+      setStatusMessage('✨ Memproses transfer...');
+      const res = await createTransfer({
+        fromWalletId,
+        toWalletId,
+        amount: parsedData.amount,
+        title: parsedData.title,
+        category: parsedData.category,
+        userId: userId || null,
+      });
+
+      if (!res.success) {
+        setStatusMessage(`❌ Gagal: ${res.error}`);
+        return;
+      }
+      
+      // Unlock badge for first transfer
+      useGamificationStore.getState().unlockBadge('transfer_expert');
     } else {
       enqueueTransaction({
         title: parsedData.title,
@@ -428,6 +472,7 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
         location_name,
         created_at: createdAt,
         user_id: userId || null,
+        wallet_id: fromWalletId || undefined,
       });
     }
 
@@ -444,12 +489,17 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
     DeviceEventEmitter.emit('transaction_added');
 
     // Gamification Updates
-    const oldUnlockedBadges = useGamificationStore.getState().badges.filter(b => !!b.unlockedAt).map(b => b.id);
-    useGamificationStore.getState().updateStreak();
-    if (userId) await calculateHealthScore(userId);
-    const newUnlockedBadges = useGamificationStore.getState().badges.filter(b => !!b.unlockedAt);
+    const state = useGamificationStore.getState();
+    const oldUnlockedIds = new Set(state.badges.reduce((acc, b) => {
+      if (b.unlockedAt) acc.push(b.id);
+      return acc;
+    }, [] as string[]));
     
-    const newlyUnlocked = newUnlockedBadges.find(b => !oldUnlockedBadges.includes(b.id));
+    state.updateStreak();
+    if (userId) await calculateHealthScore(userId);
+    
+    const currentBadges = useGamificationStore.getState().badges;
+    const newlyUnlocked = currentBadges.find(b => b.unlockedAt && !oldUnlockedIds.has(b.id));
 
     // Task B: Check budget alert for this category (non-blocking)
     if (parsedData.type === 'expense') {
@@ -547,16 +597,16 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
     >
       <View className="flex-1 px-4 flex-col py-4">
         {showSuccess ? (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={styles.successContainer}>
             <LottieView
-              source={{ uri: showCelebration ? 'https://lottie.host/df2c1c3f-4e9e-4e4b-9e4f-0e4b3a2c1d0f/celebrate.json' : (successUri || 'https://assets3.lottiefiles.com/packages/lf20_at6ayqnr.json') }}
+              source={lottieSource}
               autoPlay
               loop={showCelebration}
-              style={{ width: 200, height: 200 }}
+              style={styles.lottie}
             />
             <Text 
               testID="smart_input_success_text"
-              style={{ fontFamily: 'Manrope_700Bold', color: '#10b981', marginTop: 10, fontSize: 18 }}
+              style={styles.successText}
             >
               {unlockedBadge ? `Badge Unlocked: ${unlockedBadge.name}!` : 'Transaction Saved!'}
             </Text>
@@ -581,50 +631,24 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
 
             {/* Waveform Recording Indicator */}
             {isRecording && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                  paddingVertical: 10,
-                  paddingHorizontal: 14,
-                  backgroundColor: '#450a0a',
-                  borderRadius: 14,
-                  marginBottom: 8,
-                  borderWidth: 1,
-                  borderColor: '#7f1d1d',
-                }}
-              >
+              <View style={styles.recordingIndicator}>
                 {/* Pulsing red dot */}
                 <Animated.View
                   style={[
-                    {
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: '#ef4444',
-                    },
+                    styles.pulseDot,
                     dotAnimStyle,
                   ]}
                 />
 
                 {/* Live waveform visualization */}
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: 32,
-                  }}
-                >
+                <View style={styles.waveformContainer}>
                   {Array.from({ length: NUM_BARS }).map((_, i) => (
                     <WaveBar key={i} levels={waveformLevels} index={i} />
                   ))}
                 </View>
 
                 {/* Duration counter */}
-                <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 14, color: '#fca5a5' }}>
+                <Text style={styles.durationText}>
                   {formatDuration(recordingDuration)}
                 </Text>
               </View>
@@ -635,22 +659,103 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
               <Text className="text-xs font-body-sm text-on-surface-variant pb-2">{statusMessage}</Text>
             )}
 
+            {/* Mode Switcher & Wallet Selectors */}
+            <View className="mb-4">
+              <View className="flex-row items-center justify-between mb-3 bg-[#09090b] rounded-2xl p-1 border border-border">
+                <TouchableOpacity 
+                  onPress={() => setIsTransferMode(false)}
+                  className={`flex-1 py-2 rounded-xl items-center ${!isTransferMode ? 'bg-background border border-border' : ''}`}
+                >
+                  <Text className={`font-label-sm ${!isTransferMode ? 'text-foreground' : 'text-slate-500'}`}>Transaksi</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setIsTransferMode(true)}
+                  className={`flex-1 py-2 rounded-xl items-center ${isTransferMode ? 'bg-background border border-border' : ''}`}
+                >
+                  <Text className={`font-label-sm ${isTransferMode ? 'text-foreground' : 'text-slate-500'}`}>Transfer</Text>
+                </TouchableOpacity>
+              </View>
+
+              {isTransferMode && (
+                <View className="mb-3">
+                  <View className="flex-row items-center gap-3 bg-[#09090b] rounded-3xl p-3 border border-border">
+                    <TouchableOpacity 
+                      onPress={() => setSelectingWalletFor('from')}
+                      className={`flex-1 ${selectingWalletFor === 'from' ? 'border border-primary/50 bg-primary/5 rounded-2xl' : ''}`}
+                    >
+                      <Text className="text-xs text-slate-500 uppercase font-bold mb-1 ml-1">Dari</Text>
+                      <View className="flex-row items-center gap-2 bg-background rounded-2xl px-3 py-2 border border-border/50">
+                        <WalletIcon size={14} color="#ef4444" />
+                        <Text className="text-sm text-foreground flex-1" numberOfLines={1}>
+                          {wallets.find(w => w.id === fromWalletId)?.name || 'Pilih Wallet'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    
+                    <View className="mt-4">
+                      <ArrowRight size={16} color="#71717a" />
+                    </View>
+
+                    <TouchableOpacity 
+                      onPress={() => setSelectingWalletFor('to')}
+                      className={`flex-1 ${selectingWalletFor === 'to' ? 'border border-primary/50 bg-primary/5 rounded-2xl' : ''}`}
+                    >
+                      <Text className="text-xs text-slate-500 uppercase font-bold mb-1 ml-1">Ke</Text>
+                      <View className="flex-row items-center gap-2 bg-background rounded-2xl px-3 py-2 border border-border/50">
+                        <WalletIcon size={14} color="#10b981" />
+                        <Text className="text-sm text-foreground flex-1" numberOfLines={1}>
+                          {wallets.find(w => w.id === toWalletId)?.name || 'Pilih Wallet'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  {selectingWalletFor && (
+                    <Animated.View className="mt-2 bg-[#09090b] rounded-2xl p-2 border border-border">
+                      <Animated.ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {wallets.map((w) => (
+                          <TouchableOpacity
+                            key={w.id}
+                            onPress={() => {
+                              if (selectingWalletFor === 'from') setFromWalletId(w.id);
+                              else setToWalletId(w.id);
+                              setSelectingWalletFor(null);
+                            }}
+                            className={`mr-2 px-4 py-2 rounded-xl border ${
+                              (selectingWalletFor === 'from' ? fromWalletId : toWalletId) === w.id 
+                                ? 'bg-primary border-primary' 
+                                : 'bg-background border-border'
+                            }`}
+                          >
+                            <Text className={`text-xs font-bold ${
+                              (selectingWalletFor === 'from' ? fromWalletId : toWalletId) === w.id 
+                                ? 'text-[#18181b]' 
+                                : 'text-slate-400'
+                            }`}>
+                              {w.name}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </Animated.ScrollView>
+                    </Animated.View>
+                  )}
+                </View>
+              )}
+            </View>
+
             {/* Input Row */}
             <View className="flex-row items-center gap-2">
               {/* Mic Button */}
               <TouchableOpacity
                 onPress={handleMicPress}
                 disabled={submitting && !isRecording}
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: isRecording ? '#ef4444' : '#09090b',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderWidth: 1,
-                  borderColor: isRecording ? '#7f1d1d' : '#27272a',
-                }}
+                style={[
+                  styles.micButton,
+                  {
+                    backgroundColor: isRecording ? '#ef4444' : '#09090b',
+                    borderColor: isRecording ? '#7f1d1d' : '#27272a',
+                  }
+                ]}
               >
                 {isRecording ? (
                   <Square color="#fafafa" size={18} fill="#fafafa" />
@@ -699,5 +804,67 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
 });
 
 SmartInputSheet.displayName = 'SmartInputSheet';
+
+const styles = StyleSheet.create({
+  waveBar: {
+    width: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#ef4444',
+    marginHorizontal: 1.5,
+  },
+  successContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lottie: {
+    width: 200,
+    height: 200,
+  },
+  successText: {
+    fontFamily: 'Manrope_700Bold',
+    color: '#10b981',
+    marginTop: 10,
+    fontSize: 18,
+  },
+  recordingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: '#450a0a',
+    borderRadius: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#7f1d1d',
+  },
+  pulseDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#ef4444',
+  },
+  waveformContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 32,
+  },
+  durationText: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 14,
+    color: '#fca5a5',
+  },
+  micButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  }
+});
 
 export default SmartInputSheet;

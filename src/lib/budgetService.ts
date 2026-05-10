@@ -209,12 +209,11 @@ export async function copyBudgetsFromLastMonth(userId: string): Promise<{ copied
     return { copied: 0, error: 'Tidak ada budget bulan lalu untuk disalin' };
   }
 
-  let copied = 0;
-  for (const budget of lastBudgets) {
-    const result = await upsertBudget(userId, budget.category, budget.budget_amount, currentMY);
-    if (result.success) copied++;
-  }
+  const results = await Promise.all(
+    lastBudgets.map(budget => upsertBudget(userId, budget.category, budget.budget_amount, currentMY))
+  );
 
+  const copied = results.filter(r => r.success).length;
   return { copied };
 }
 

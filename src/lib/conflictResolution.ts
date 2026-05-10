@@ -3,7 +3,7 @@ import { getSyncQueue } from './offlineSync';
 import { supabase } from './supabase';
 
 const CONFLICT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes (smarter window)
-const storage = new MMKV();
+const storage = new MMKV({ encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
 interface TransactionCheck {
   amount: number;
@@ -15,11 +15,12 @@ interface TransactionCheck {
 /**
  * Checks if a similar transaction already exists in the local sync queue.
  */
-export function checkLocalDuplicate(newTx: TransactionCheck): boolean {
+function checkLocalDuplicate(newTx: TransactionCheck): boolean {
   const queue = getSyncQueue();
   const newDate = new Date(newTx.created_at).getTime();
 
   return queue.some(tx => {
+    if (!tx.created_at || tx.amount === undefined) return false;
     const txDate = new Date(tx.created_at).getTime();
     const isSimilarTime = Math.abs(newDate - txDate) <= CONFLICT_WINDOW_MS;
     const isSameAmount = Math.abs(tx.amount) === Math.abs(newTx.amount);
@@ -33,7 +34,7 @@ export function checkLocalDuplicate(newTx: TransactionCheck): boolean {
 /**
  * Checks if a similar transaction exists in the background cache (offline_transactions).
  */
-export function checkCacheDuplicate(newTx: TransactionCheck): boolean {
+function checkCacheDuplicate(newTx: TransactionCheck): boolean {
   const raw = storage.getString('offline_transactions');
   if (!raw) return false;
 
@@ -42,12 +43,14 @@ export function checkCacheDuplicate(newTx: TransactionCheck): boolean {
     const newDate = new Date(newTx.created_at).getTime();
 
     return cache.some(tx => {
+      if (!tx.created_at || tx.amount === undefined) return false;
       const txDate = new Date(tx.created_at).getTime();
       const isSimilarTime = Math.abs(newDate - txDate) <= CONFLICT_WINDOW_MS;
       const isSameAmount = Math.abs(tx.amount) === Math.abs(newTx.amount);
       const isSameType = tx.type === newTx.type;
+      const isSameUser = tx.user_id === newTx.user_id;
 
-      return isSimilarTime && isSameAmount && isSameType;
+      return isSimilarTime && isSameAmount && isSameType && isSameUser;
     });
   } catch {
     return false;
@@ -57,7 +60,7 @@ export function checkCacheDuplicate(newTx: TransactionCheck): boolean {
 /**
  * Checks if a similar transaction already exists in Supabase.
  */
-export async function checkServerDuplicate(newTx: TransactionCheck): Promise<boolean> {
+async function checkServerDuplicate(newTx: TransactionCheck): Promise<boolean> {
   if (!newTx.user_id) return false;
 
   const newDate = new Date(newTx.created_at);

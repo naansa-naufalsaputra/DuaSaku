@@ -12,29 +12,17 @@ import { DeviceEventEmitter } from 'react-native';
 import { processSyncQueue, getPendingCount } from './offlineSync';
 
 let isConnected = true;
-let unsubscribe: (() => void) | null = null;
 
 /** Get current connectivity status */
 export function getIsConnected(): boolean {
   return isConnected;
 }
-
 /** Start listening for network changes */
 export function startNetworkMonitor(): void {
-  if (unsubscribe) return; // Already listening
-
-  unsubscribe = NetInfo.addEventListener(handleConnectivityChange);
+  NetInfo.addEventListener(handleConnectivityChange);
 
   // Also do an initial check
   NetInfo.fetch().then(handleConnectivityChange);
-}
-
-/** Stop listening */
-export function stopNetworkMonitor(): void {
-  if (unsubscribe) {
-    unsubscribe();
-    unsubscribe = null;
-  }
 }
 
 /** Handle connectivity state changes */

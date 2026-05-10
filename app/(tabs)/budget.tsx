@@ -8,10 +8,9 @@ import {
   RefreshControl,
   DeviceEventEmitter,
   Switch,
+  StyleSheet,
 } from 'react-native';
 import {
-  Target,
-  PiggyBank,
   Plus,
   ArrowRight,
   Zap,
@@ -53,6 +52,7 @@ import AddBudgetSheet from '../../src/components/AddBudgetSheet';
 import AddRecurringSheet from '../../src/components/AddRecurringSheet';
 import * as Haptics from 'expo-haptics';
 import { useUserStore } from '../../src/store/useUserStore';
+import EmptyState from '../../src/components/ui/EmptyState';
 
 export default function BudgetScreen() {
   const { t } = useTranslation();
@@ -95,12 +95,18 @@ export default function BudgetScreen() {
     }
   }, [userId]);
 
+  const loadBudgetsRef = useRef(loadBudgets);
+  useEffect(() => { loadBudgetsRef.current = loadBudgets; }, [loadBudgets]);
+
   useEffect(() => {
     loadBudgets();
     loadRecurring();
-    const sub = DeviceEventEmitter.addListener('transaction_added', loadBudgets);
-    return () => sub.remove();
   }, [loadBudgets, loadRecurring]);
+
+  useEffect(() => {
+    const sub = DeviceEventEmitter.addListener('transaction_added', () => loadBudgetsRef.current());
+    return () => sub.remove();
+  }, []);
 
   const handleToggleRecurring = async (id: string, isActive: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -189,53 +195,28 @@ export default function BudgetScreen() {
     categories.find(c => c.key === key) || { emoji: '📦', color: '#6b7280', label: key };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={styles.container}>
       {/* Header */}
-      <View
-        style={{
-          paddingHorizontal: 24,
-          paddingTop: 56,
-          paddingBottom: 16,
-          backgroundColor: '#09090b',
-          borderBottomWidth: 1,
-          borderBottomColor: '#18181b',
-        }}
-      >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
           <View>
-            <Text style={{ fontFamily: 'Manrope_800ExtraBold', fontSize: 24, color: '#fafafa', letterSpacing: -0.5 }}>
+            <Text style={styles.headerTitle}>
               {t('budget')}
             </Text>
-            <Text style={{ fontFamily: 'Inter', fontSize: 13, color: '#71717a', marginTop: 2 }}>
+            <Text style={styles.headerSubtitle}>
               {monthLabel}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
               onPress={() => router.push('/manage-categories')}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 16,
-                backgroundColor: '#18181b',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 1,
-                borderColor: '#27272a',
-              }}
+              style={styles.settingsButton}
             >
               <Settings color="#fafafa" size={20} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleAddNew}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 16,
-                backgroundColor: '#10b981',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={styles.addButton}
             >
               <Plus color="#09090b" size={22} />
             </TouchableOpacity>
@@ -244,112 +225,71 @@ export default function BudgetScreen() {
       </View>
 
       <ScrollView
-        style={{ flex: 1, paddingHorizontal: 24 }}
+        style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fafafa" />
         }
       >
         {/* Summary Card */}
-        <View
-          style={{
-            marginTop: 20,
-            padding: 24,
-            backgroundColor: '#18181b',
-            borderRadius: 28,
-            borderWidth: 1,
-            borderColor: '#27272a',
-          }}
-        >
+        <View style={styles.summaryCard}>
           {/* Status Badge */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <View style={styles.statusRow}>
             <Zap color={status.color} size={18} />
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 13, color: '#71717a' }}>
+            <Text style={styles.statusLabel}>
               Status Anggaran
             </Text>
             <View
-              style={{
-                marginLeft: 'auto',
-                backgroundColor: status.color + '20',
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 8,
-              }}
+              style={[styles.statusBadge, { backgroundColor: status.color + '20' }]}
             >
-              <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 11, color: status.color }}>
+              <Text style={[styles.statusBadgeText, { color: status.color }]}>
                 {status.text}
               </Text>
             </View>
           </View>
 
           {/* Main Amount */}
-          <Text style={{ fontFamily: 'Manrope_800ExtraBold', fontSize: 32, color: '#fafafa', marginBottom: 4 }}>
+          <Text style={styles.mainAmount}>
             {loading ? '...' : formatCurrency(totalRemaining)}
           </Text>
-          <Text style={{ fontFamily: 'Inter', fontSize: 13, color: '#71717a', marginBottom: 20 }}>
+          <Text style={styles.amountLabel}>
             Sisa dari total {formatCurrency(totalBudget)}
           </Text>
 
           {/* Overall Progress Bar */}
-          <View
-            style={{
-              height: 8,
-              backgroundColor: '#09090b',
-              borderRadius: 4,
-              overflow: 'hidden',
-              marginBottom: 16,
-            }}
-          >
+          <View style={styles.overallProgressBarContainer}>
             <View
-              style={{
-                width: `${Math.min(overallPercentage, 100)}%`,
-                height: '100%',
-                backgroundColor: overallPercentage > 90 ? '#ef4444' : overallPercentage > 75 ? '#f59e0b' : '#10b981',
-                borderRadius: 4,
-              }}
+              style={[
+                styles.overallProgressBar,
+                {
+                  width: `${Math.min(overallPercentage, 100)}%`,
+                  backgroundColor: overallPercentage > 90 ? '#ef4444' : overallPercentage > 75 ? '#f59e0b' : '#10b981',
+                }
+              ]}
             />
           </View>
 
           {/* Two-column stats */}
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#09090b',
-                padding: 14,
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: '#1a1a1f',
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <View style={styles.statLabelRow}>
                 <TrendingDown color="#ef4444" size={14} />
-                <Text style={{ fontFamily: 'Inter', fontSize: 11, color: '#71717a' }}>Terpakai</Text>
+                <Text style={styles.statLabelText}>Terpakai</Text>
               </View>
-              <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 16, color: '#fafafa' }}>
+              <Text style={styles.statValueText}>
                 {formatCurrency(totalSpent)}
               </Text>
             </View>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#09090b',
-                padding: 14,
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: '#1a1a1f',
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <View style={styles.statBox}>
+              <View style={styles.statLabelRow}>
                 <TrendingUp color="#10b981" size={14} />
-                <Text style={{ fontFamily: 'Inter', fontSize: 11, color: '#71717a' }}>Tersisa</Text>
+                <Text style={styles.statLabelText}>Tersisa</Text>
               </View>
               <Text
-                style={{
-                  fontFamily: 'Manrope_700Bold',
-                  fontSize: 16,
-                  color: totalRemaining < 0 ? '#ef4444' : '#fafafa',
-                }}
+                style={[
+                  styles.statValueText,
+                  { color: totalRemaining < 0 ? '#ef4444' : '#fafafa' }
+                ]}
               >
                 {totalRemaining < 0 ? '-' : ''}{formatCurrency(totalRemaining)}
               </Text>
@@ -358,27 +298,11 @@ export default function BudgetScreen() {
         </View>
 
         {/* Budget List Header */}
-        <View
-          style={{
-            marginTop: 32,
-            marginBottom: 16,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: 'Inter_SemiBold',
-              fontSize: 11,
-              color: '#71717a',
-              textTransform: 'uppercase',
-              letterSpacing: 1.5,
-            }}
-          >
+        <View style={styles.listHeader}>
+          <Text style={styles.listHeaderTitle}>
             Daftar Anggaran ({budgets.length})
           </Text>
-          <TouchableOpacity onPress={handleAddNew} style={{ padding: 4 }}>
+          <TouchableOpacity onPress={handleAddNew} style={styles.listAddButton}>
             <Plus color="#10b981" size={20} />
           </TouchableOpacity>
         </View>
@@ -408,30 +332,9 @@ export default function BudgetScreen() {
               onPress={handleCopyFromLastMonth}
               disabled={isCopying}
               activeOpacity={0.7}
-              style={{
-                marginTop: 16,
-                padding: 20,
-                backgroundColor: '#18181b',
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: '#27272a',
-                borderStyle: 'dashed',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 14,
-                opacity: isCopying ? 0.6 : 1,
-              }}
+              style={[styles.copyCard, { opacity: isCopying ? 0.6 : 1 }]}
             >
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 14,
-                  backgroundColor: '#3b82f615',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <View style={styles.copyIconContainer}>
                 {isCopying ? (
                   <ActivityIndicator size="small" color="#3b82f6" />
                 ) : (
@@ -560,11 +463,11 @@ export default function BudgetScreen() {
                             borderRadius: 6,
                           }}
                         >
-                          <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 10, color: '#10b981' }}>
+                          <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#10b981' }}>
                             {getFrequencyLabel(rt.frequency)}
                           </Text>
                         </View>
-                        <Text style={{ fontFamily: 'Inter', fontSize: 11, color: '#52525b' }}>
+                        <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#52525b' }}>
                           Next: {rt.next_due}
                         </Text>
                       </View>
@@ -653,7 +556,9 @@ function BudgetItem({
   const barColor = budget.isOver ? '#ef4444' : budget.percentage > 75 ? '#f59e0b' : meta.color;
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onEdit}
       style={{
         backgroundColor: '#18181b',
         padding: 20,
@@ -702,7 +607,7 @@ function BudgetItem({
               borderColor: '#27272a',
             }}
           >
-            <ArrowRight color="#71717a" size={14} />
+            <ArrowRight color="#71717a" size={16} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onDelete}
@@ -710,11 +615,11 @@ function BudgetItem({
               width: 32,
               height: 32,
               borderRadius: 10,
-              backgroundColor: '#09090b',
+              backgroundColor: '#450a0a',
               alignItems: 'center',
               justifyContent: 'center',
               borderWidth: 1,
-              borderColor: '#27272a',
+              borderColor: '#7f1d1d',
             }}
           >
             <Trash2 color="#ef4444" size={14} />
@@ -722,102 +627,216 @@ function BudgetItem({
         </View>
       </View>
 
-      {/* Progress bar */}
-      <View
-        style={{
-          height: 6,
-          backgroundColor: '#09090b',
-          borderRadius: 3,
-          overflow: 'hidden',
-          marginBottom: 12,
-        }}
-      >
+      {/* Progress Bar Container */}
+      <View style={{ height: 8, backgroundColor: '#09090b', borderRadius: 4, overflow: 'hidden', marginBottom: 12 }}>
         <Animated.View
-          style={[{
-            height: '100%',
-            backgroundColor: barColor,
-            borderRadius: 3,
-          }, animatedBarStyle]}
+          style={[
+            {
+              height: '100%',
+              backgroundColor: barColor,
+              borderRadius: 4,
+            },
+            animatedBarStyle
+          ]}
         />
       </View>
 
-      {/* Bottom stats */}
+      {/* Stats row */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#71717a' }}>
-          {budget.percentage}% terpakai
-          {meta.target && budget.remaining > 0 ? (
-            <Text style={{ color: '#10b981' }}> • +{formatCurrency(budget.remaining)} goal</Text>
-          ) : null}
-        </Text>
-        <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#a1a1aa' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 13, color: '#fafafa' }}>
+            {Math.round(budget.percentage)}%
+          </Text>
+          <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#52525b' }}>
+            terpakai
+          </Text>
+        </View>
+        <Text style={{ fontFamily: 'Inter_Medium', fontSize: 12, color: '#71717a' }}>
           {formatCurrency(budget.spent)} / {formatCurrency(budget.budget_amount)}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
-/** Empty state with CTA */
-function EmptyState({ onAdd }: { onAdd: () => void }) {
-  return (
-    <View
-      style={{
-        marginTop: 20,
-        padding: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#18181b',
-        borderRadius: 28,
-        borderWidth: 1,
-        borderColor: '#27272a',
-        borderStyle: 'dashed',
-      }}
-    >
-      <View
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: 20,
-          backgroundColor: '#10b98115',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <PiggyBank color="#10b981" size={28} />
-      </View>
-      <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 18, color: '#fafafa', marginBottom: 6 }}>
-        Mulai Atur Anggaran
-      </Text>
-      <Text
-        style={{
-          fontFamily: 'Inter',
-          fontSize: 14,
-          color: '#71717a',
-          textAlign: 'center',
-          marginBottom: 20,
-          lineHeight: 20,
-        }}
-      >
-        Pasang limit pengeluaran per kategori{'\n'}agar keuanganmu tetap terkendali
-      </Text>
-      <TouchableOpacity
-        onPress={onAdd}
-        style={{
-          backgroundColor: '#10b981',
-          paddingVertical: 14,
-          paddingHorizontal: 28,
-          borderRadius: 16,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <Target color="#09090b" size={18} />
-        <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 15, color: '#09090b' }}>
-          Tambah Budget Pertama
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#09090b',
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: '#09090b',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontFamily: 'Manrope_800ExtraBold',
+    color: '#fafafa',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_Medium',
+    color: '#71717a',
+    marginTop: 2,
+  },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#18181b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#10b981',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  summaryCard: {
+    backgroundColor: '#18181b',
+    padding: 24,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: '#27272a',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  statusLabel: {
+    fontFamily: 'Inter_Medium',
+    fontSize: 13,
+    color: '#71717a',
+    marginLeft: 8,
+    flex: 1,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusBadgeText: {
+    fontFamily: 'Inter_Bold',
+    fontSize: 12,
+    textTransform: 'uppercase',
+  },
+  mainAmount: {
+    fontFamily: 'Manrope_800ExtraBold',
+    fontSize: 32,
+    color: '#fafafa',
+  },
+  amountLabel: {
+    fontFamily: 'Inter',
+    fontSize: 13,
+    color: '#71717a',
+    marginTop: 4,
+  },
+  overallProgressBarContainer: {
+    height: 10,
+    backgroundColor: '#09090b',
+    borderRadius: 5,
+    marginTop: 24,
+    overflow: 'hidden',
+  },
+  overallProgressBar: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: 24,
+    gap: 12,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#09090b',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  statLabelText: {
+    fontFamily: 'Inter_Medium',
+    fontSize: 12,
+    color: '#71717a',
+  },
+  statValueText: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 15,
+    color: '#fafafa',
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 32,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  listHeaderTitle: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 18,
+    color: '#fafafa',
+  },
+  listAddButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#10b98115',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  copyCard: {
+    marginTop: 16,
+    padding: 20,
+    backgroundColor: '#3b82f610',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#3b82f630',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  copyIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#3b82f615',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

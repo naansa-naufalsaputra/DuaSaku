@@ -118,7 +118,7 @@ export default function ProfileScreen() {
               <Text className={`font-bold text-sm ${badge.unlockedAt ? 'text-foreground' : 'text-on-surface-variant'}`}>
                 {badge.name}
               </Text>
-              <Text className="text-[10px] text-on-surface-variant leading-3 mt-1">
+              <Text className="text-[12px] text-on-surface-variant leading-3 mt-1">
                 {badge.description}
               </Text>
             </View>
@@ -189,7 +189,7 @@ export default function ProfileScreen() {
           
           <View className="gap-4">
             <View>
-              <Text className="text-on-surface-variant text-[10px] uppercase font-bold mb-1 ml-1">Nama Target</Text>
+              <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nama Target</Text>
               <TextInput
                 value={financialGoal.name}
                 onChangeText={(text) => setFinancialGoal({ ...financialGoal, name: text })}
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
 
             <View className="flex-row gap-3">
               <View className="flex-1">
-                <Text className="text-on-surface-variant text-[10px] uppercase font-bold mb-1 ml-1">Nominal Target</Text>
+                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Nominal Target</Text>
                 <TextInput
                   value={financialGoal.targetAmount.toString()}
                   onChangeText={(text) => setFinancialGoal({ ...financialGoal, targetAmount: Number(text) || 0 })}
@@ -212,7 +212,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-on-surface-variant text-[10px] uppercase font-bold mb-1 ml-1">Sudah Terkumpul</Text>
+                <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">Sudah Terkumpul</Text>
                 <TextInput
                   value={financialGoal.currentAmount.toString()}
                   onChangeText={(text) => setFinancialGoal({ ...financialGoal, currentAmount: Number(text) || 0 })}

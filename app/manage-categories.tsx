@@ -154,56 +154,59 @@ export default function ManageCategoriesScreen() {
               Kategori Lainnya
             </Text>
 
-            {categories.filter(c => !budgets.find(b => b.category === c.key)).map((c) => {
-              const isCustom = customCategories.some(cust => cust.name === c.key);
-              return (
-                <View key={c.key} style={{ marginBottom: 12 }}>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      router.push('/(tabs)/budget'); // Redirect to budget to add
-                    }}
-                    style={{
-                      backgroundColor: '#18181b',
-                      padding: 16,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: '#27272a',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      opacity: 0.6,
-                    }}
-                  >
-                    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: (c.color || '#6b7280') + '15', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                      <Text style={{ fontSize: 22 }}>{c.emoji}</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 16, color: '#fafafa' }}>
-                        {c.label}
-                      </Text>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#52525b' }}>
-                        Belum diatur anggarannya
-                      </Text>
-                    </View>
+            {categories.reduce((acc: React.ReactNode[], c) => {
+              if (!budgets.find(b => b.category === c.key)) {
+                const isCustom = customCategories.some(cust => cust.name === c.key);
+                acc.push(
+                  <View key={c.key} style={{ marginBottom: 12 }}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push('/(tabs)/budget');
+                      }}
+                      style={{
+                        backgroundColor: '#18181b',
+                        padding: 16,
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: '#27272a',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        opacity: 0.6,
+                      }}
+                    >
+                      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: (c.color || '#6b7280') + '15', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
+                        <Text style={{ fontSize: 22 }}>{c.emoji}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 16, color: '#fafafa' }}>
+                          {c.label}
+                        </Text>
+                        <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#52525b' }}>
+                          Belum diatur anggarannya
+                        </Text>
+                      </View>
 
-                    {isCustom && (
-                      <TouchableOpacity 
-                        onPress={() => {
-                          const custom = customCategories.find(cust => cust.name === c.key);
-                          if (custom) removeCustomCategory(custom.id);
-                        }}
-                        style={{ padding: 8, marginRight: 4 }}
-                      >
-                        <Trash2 color="#ef4444" size={18} />
-                      </TouchableOpacity>
-                    )}
+                      {isCustom && (
+                        <TouchableOpacity 
+                          onPress={() => {
+                            const custom = customCategories.find(cust => cust.name === c.key);
+                            if (custom) removeCustomCategory(custom.id);
+                          }}
+                          style={{ padding: 8, marginRight: 4 }}
+                        >
+                          <Trash2 color="#ef4444" size={18} />
+                        </TouchableOpacity>
+                      )}
 
-                    <Plus color="#3f3f46" size={20} />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
+                      <Plus color="#3f3f46" size={20} />
+                    </TouchableOpacity>
+                  </View>
+                );
+              }
+              return acc;
+            }, [])}
           </>
         ) : (
           <EmptyState 

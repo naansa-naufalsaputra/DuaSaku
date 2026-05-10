@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, DeviceEventEmitter } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Home, PieChart, Wallet, User, Plus, MapPin, Bot } from 'lucide-react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -20,8 +20,17 @@ export default function TabsLayout() {
       }, 50); // Small delay to allow mounting
     });
 
+    const sub = DeviceEventEmitter.addListener('open-smart-input', (data) => {
+      setHasOpenedSheet(true);
+      setTimeout(() => {
+        sheetRef.current?.snapToIndex(1);
+        setIsInputOpen(true);
+      }, 50);
+    });
+
     return () => {
       subscription.remove();
+      sub.remove();
     };
   }, []);
 
@@ -45,15 +54,7 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarActiveTintColor: '#fafafa',
           tabBarInactiveTintColor: '#a1a1aa',
-          tabBarStyle: {
-            backgroundColor: '#09090b',
-            borderTopWidth: 1,
-            borderTopColor: '#27272a',
-            elevation: 0,
-            shadowOpacity: 0,
-            paddingBottom: 8,
-            height: 60,
-          },
+          tabBarStyle: styles.tabBar,
         }}
       >
         <Tabs.Screen
@@ -103,7 +104,8 @@ export default function TabsLayout() {
       {/* Global FAB */}
       <TouchableOpacity
         testID="global_add_transaction_fab"
-        className="absolute bottom-24 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg z-50"
+        className="absolute bottom-24 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center z-50"
+        style={styles.fabShadow}
         onPress={toggleInputSheet}
         activeOpacity={0.8}
       >
@@ -121,3 +123,22 @@ export default function TabsLayout() {
   );
 }
 
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: 'rgba(9, 9, 11, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: '#27272a',
+    elevation: 0,
+    shadowOpacity: 0,
+    paddingBottom: 8,
+    height: 64,
+  },
+  fabShadow: {
+    shadowColor: '#facc15',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
+  }
+});

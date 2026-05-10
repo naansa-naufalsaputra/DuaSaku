@@ -7,7 +7,8 @@ import { predictCategory } from './categoryIntelligence';
 import { checkBudgetAlert } from './notifications';
 import { useNotificationLogStore } from '../store/useNotificationLogStore';
 
-const storage = new MMKV({ id: 'notification-history' });
+const storage = new MMKV({ id: 'notification-history',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 const LAST_TX_KEY = 'last_processed_notification';
 
 /**

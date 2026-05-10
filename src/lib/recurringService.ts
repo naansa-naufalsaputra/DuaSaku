@@ -212,9 +212,7 @@ export async function processDueRecurrences(userId: string): Promise<{ processed
     return { processed: 0 };
   }
 
-  let processed = 0;
-
-  for (const rt of data as RecurringTransaction[]) {
+  const updatePromises = (data as RecurringTransaction[]).map(async (rt) => {
     // Insert as a real transaction via the offline queue
     enqueueTransaction({
       title: `${rt.title} (auto)`,
@@ -230,13 +228,14 @@ export async function processDueRecurrences(userId: string): Promise<{ processed
 
     // Advance next_due
     const newDue = advanceNextDue(rt.next_due, rt.frequency, rt.day_of_week, rt.day_of_month);
-    await supabase
+    return supabase
       .from('recurring_transactions')
       .update({ next_due: newDue })
       .eq('id', rt.id);
+  });
 
-    processed++;
-  }
+  const results = await Promise.all(updatePromises);
+  const processed = results.filter(r => !r.error).length;
 
   if (processed > 0) {
     DeviceEventEmitter.emit('transaction_added');

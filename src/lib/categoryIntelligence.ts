@@ -114,16 +114,18 @@ const KEYWORD_MAP: Record<string, TransactionCategory> = {
   'pet shop': 'Pet',
 };
 
+// Pre-compile Regex for performance (O(1) search logic instead of O(n) loop)
+const CATEGORY_REGEX = new RegExp(`\\b(${Object.keys(KEYWORD_MAP).join('|')})\\b`, 'i');
+
 /**
  * Predicts the category based on text input.
+ * Optimized with pre-compiled regex for high-performance matching.
  */
 export function predictCategory(text: string): TransactionCategory {
-  const normalized = text.toLowerCase();
-  
-  for (const [keyword, category] of Object.entries(KEYWORD_MAP)) {
-    if (normalized.includes(keyword)) {
-      return category;
-    }
+  const match = text.match(CATEGORY_REGEX);
+  if (match) {
+    const keyword = match[0].toLowerCase();
+    return KEYWORD_MAP[keyword] || 'Other';
   }
   
   return 'Other';

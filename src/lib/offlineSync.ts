@@ -13,23 +13,27 @@ import { supabase } from './supabase';
 import { DeviceEventEmitter } from 'react-native';
 import { checkBudgetAlert } from './notifications';
 
-const storage = new MMKV({ id: 'offline-sync' });
+const storage = new MMKV({ id: 'offline-sync',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
-const QUEUE_KEY = 'sync_queue';
-const FAILED_KEY = 'sync_failed';
-const MAX_RETRIES = 3;
+const QUEUE_KEY = 'offline_sync_queue';
 
 export interface QueuedTransaction {
   localId: string;
-  title: string;
-  amount: number;
-  type: 'expense' | 'income';
-  category: string;
-  latitude: number | null;
-  longitude: number | null;
-  location_name: string | null;
-  created_at: string;
-  user_id: string | null;
+  remoteId?: string; // The UUID from Supabase, required for UPDATE/DELETE
+  action: 'INSERT' | 'UPDATE' | 'DELETE';
+  title?: string;
+  amount?: number;
+  type?: 'expense' | 'income';
+  category?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  location_name?: string | null;
+  created_at?: string;
+  user_id?: string | null;
+  wallet_id?: string | null;
+  is_transfer?: boolean | null;
+  transfer_group_id?: string | null;
   retryCount: number;
   queuedAt: string;
 }
@@ -44,7 +48,12 @@ export function getSyncQueue(): QueuedTransaction[] {
   const raw = storage.getString(QUEUE_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw);
+    const queue = JSON.parse(raw);
+    // Migration/Normalization: Ensure all items have an action
+    return queue.map((item: any) => ({
+      ...item,
+      action: item.action || 'INSERT',
+    }));
   } catch {
     return [];
   }
@@ -55,24 +64,17 @@ export function getPendingCount(): number {
   return getSyncQueue().length;
 }
 
-/** Get failed items (exceeded max retries) */
-export function getFailedQueue(): QueuedTransaction[] {
-  const raw = storage.getString(FAILED_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
 /** Save a transaction to the offline queue */
-export function enqueueTransaction(tx: Omit<QueuedTransaction, 'localId' | 'retryCount' | 'queuedAt'>): string {
+export function enqueueTransaction(
+  tx: Omit<QueuedTransaction, 'localId' | 'retryCount' | 'queuedAt' | 'action'>,
+  action: 'INSERT' | 'UPDATE' | 'DELETE' = 'INSERT'
+): string {
   const queue = getSyncQueue();
   const localId = generateLocalId();
   const queuedTx: QueuedTransaction = {
     ...tx,
     localId,
+    action,
     retryCount: 0,
     queuedAt: new Date().toISOString(),
   };
@@ -92,14 +94,6 @@ function dequeueTransaction(localId: string): void {
   DeviceEventEmitter.emit('sync_queue_changed', { pending: queue.length });
 }
 
-/** Move a transaction to the failed queue */
-function moveToFailed(tx: QueuedTransaction): void {
-  const failed = getFailedQueue();
-  failed.push(tx);
-  storage.set(FAILED_KEY, JSON.stringify(failed));
-  dequeueTransaction(tx.localId);
-}
-
 /** Increment retry count for a queued item */
 function incrementRetry(localId: string): void {
   const queue = getSyncQueue().map(tx => {
@@ -115,8 +109,6 @@ let isProcessing = false;
 
 /**
  * Process all pending items in the sync queue.
- * Called by NetworkMonitor when connectivity is restored,
- * and after each new transaction is enqueued while online.
  */
 export async function processSyncQueue(): Promise<{ synced: number; failed: number }> {
   if (isProcessing) return { synced: 0, failed: 0 };
@@ -125,72 +117,74 @@ export async function processSyncQueue(): Promise<{ synced: number; failed: numb
   if (queue.length === 0) return { synced: 0, failed: 0 };
 
   isProcessing = true;
-  let synced = 0;
-  let failed = 0;
-
+  
   try {
-    for (const tx of queue) {
-      try {
-        const { error } = await supabase.from('transactions').insert([
-          {
-            title: tx.title,
-            amount: tx.amount,
-            type: tx.type,
-            category: tx.category,
-            latitude: tx.latitude,
-            longitude: tx.longitude,
-            location_name: tx.location_name,
-            created_at: tx.created_at,
-            user_id: tx.user_id,
-          },
-        ]);
-
-        if (error) {
-          throw error;
-        }
-
-        // Success — remove from queue
-        dequeueTransaction(tx.localId);
-        synced++;
-
-        // Trigger budget check after successful sync
-        if (tx.type === 'expense') {
-          checkBudgetAlert(tx.category).catch(console.warn);
-        }
-      } catch (err) {
-        console.warn(`[OfflineSync] Failed to sync ${tx.localId}:`, err);
-        if (tx.retryCount >= MAX_RETRIES) {
-          moveToFailed(tx);
-          failed++;
-        } else {
-          incrementRetry(tx.localId);
-        }
+    const results = await Promise.allSettled(queue.map(async (tx) => {
+      let error;
+      
+      if (tx.action === 'INSERT') {
+        const payload: any = {
+          title: tx.title,
+          amount: tx.amount,
+          type: tx.type,
+          category: tx.category,
+          latitude: tx.latitude ?? null,
+          longitude: tx.longitude ?? null,
+          location_name: tx.location_name ?? null,
+          created_at: tx.created_at,
+          user_id: tx.user_id,
+          wallet_id: tx.wallet_id,
+          is_transfer: tx.is_transfer ?? false,
+          transfer_group_id: tx.transfer_group_id ?? null,
+        };
+        const { error: insError } = await supabase.from('transactions').insert([payload]);
+        error = insError;
+      } else if (tx.action === 'UPDATE' && tx.remoteId) {
+        const { localId, remoteId, action, retryCount, queuedAt, ...updateData } = tx;
+        Object.keys(updateData).forEach(key => (updateData as any)[key] === undefined && delete (updateData as any)[key]);
+        
+        const { error: updError } = await supabase
+          .from('transactions')
+          .update(updateData)
+          .eq('id', tx.remoteId);
+        error = updError;
+      } else if (tx.action === 'DELETE' && tx.remoteId) {
+        const { error: delError } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('id', tx.remoteId);
+        error = delError;
       }
+
+      if (error) throw error;
+
+      // Success
+      dequeueTransaction(tx.localId);
+      if (tx.type === 'expense' && tx.category) {
+        checkBudgetAlert(tx.category).catch(console.warn);
+      }
+      return tx.localId;
+    }));
+
+    const syncedCount = results.filter(r => r.status === 'fulfilled').length;
+    const failedCount = results.filter(r => r.status === 'rejected').length;
+
+    // Log failures
+    results.forEach((res, idx) => {
+      if (res.status === 'rejected') {
+        console.warn(`[Sync] Item ${queue[idx].localId} failed:`, res.reason);
+        incrementRetry(queue[idx].localId);
+      }
+    });
+
+    if (syncedCount > 0) {
+      DeviceEventEmitter.emit('transaction_added');
+      DeviceEventEmitter.emit('sync_completed', { synced: syncedCount, failed: failedCount });
     }
+
+    return { synced: syncedCount, failed: failedCount };
   } finally {
     isProcessing = false;
   }
-
-  if (synced > 0) {
-    // Notify UI to refresh data
-    DeviceEventEmitter.emit('transaction_added');
-    DeviceEventEmitter.emit('sync_completed', { synced, failed });
-  }
-
-  return { synced, failed };
 }
 
-/** Clear the failed queue (user acknowledges failures) */
-export function clearFailedQueue(): void {
-  storage.delete(FAILED_KEY);
-}
-
-/** Retry all failed items by moving them back to the main queue */
-export function retryFailedQueue(): void {
-  const failed = getFailedQueue();
-  const queue = getSyncQueue();
-  const retried = failed.map(tx => ({ ...tx, retryCount: 0 }));
-  storage.set(QUEUE_KEY, JSON.stringify([...queue, ...retried]));
-  storage.delete(FAILED_KEY);
-  DeviceEventEmitter.emit('sync_queue_changed', { pending: queue.length + retried.length });
-}

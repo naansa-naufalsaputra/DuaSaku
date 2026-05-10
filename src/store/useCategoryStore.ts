@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from '../lib/storage';
 import { supabase } from '../lib/supabase';
 
-export interface CustomCategory {
+interface CustomCategory {
   id: string;
   name: string;
   emoji: string;
@@ -11,7 +11,7 @@ export interface CustomCategory {
   targetAmount?: number;
 }
 
-export const DEFAULT_CATEGORIES: { key: string; label: string; emoji: string; color: string; target?: number }[] = [
+const DEFAULT_CATEGORIES: { key: string; label: string; emoji: string; color: string; target?: number }[] = [
   { key: 'Food',          label: 'Makan & Minum',  emoji: '🍔', color: '#10b981' },
   { key: 'Transport',     label: 'Transportasi',   emoji: '🚗', color: '#3b82f6' },
   { key: 'Shopping',      label: 'Belanja',        emoji: '🛍️', color: '#ec4899' },

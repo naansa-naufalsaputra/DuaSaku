@@ -9,6 +9,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Notifications from 'expo-notifications';
 import { Fingerprint, Lock } from 'lucide-react-native';
+import * as Linking from 'expo-linking';
+import { DeviceEventEmitter } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import '../global.css';
 import '../src/lib/i18n';
@@ -20,6 +22,7 @@ import { startNetworkMonitor } from '../src/lib/networkMonitor';
 import { processDueRecurrences } from '../src/lib/recurringService';
 import { registerBackgroundFetchAsync } from '../src/lib/backgroundTasks';
 import { useCategoryStore } from '../src/store/useCategoryStore';
+import { startRealtimeSync, stopRealtimeSync } from '../src/lib/realtimeSync';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,10 +64,17 @@ export default function RootLayout() {
 
   // Biometric Authentication logic
   const authenticate = useCallback(async () => {
-    // Jika fitur biometrik dimatikan atau belum login, jangan kunci
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    // Jika fitur biometrik dimatikan, jangan kunci
+    if (!biometricEnabled) {
+      setIsUnlocked(true);
+      return;
+    }
+
+    // Jika fitur biometrik aktif, cek session secara async
+    const sessionResponse = await supabase.auth.getSession();
+    const currentSession = sessionResponse.data?.session;
     
-    if (!currentSession || !biometricEnabled) {
+    if (!currentSession) {
       setIsUnlocked(true);
       return;
     }
@@ -135,6 +145,7 @@ export default function RootLayout() {
 
       // Process any due recurring transactions
       if (initialSession) {
+        startRealtimeSync(initialSession.user.id);
         processDueRecurrences(initialSession.user.id).catch(console.error);
       }
 
@@ -147,6 +158,22 @@ export default function RootLayout() {
       }
     };
 
+    // Handle Deep Linking
+    const handleUrl = (url: string) => {
+      const { path, queryParams } = Linking.parse(url);
+      if (path === 'smart-input') {
+        DeviceEventEmitter.emit('open-smart-input', queryParams);
+      }
+    };
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleUrl(url);
+    });
+
+    const linkingSub = Linking.addEventListener('url', (event) => {
+      handleUrl(event.url);
+    });
+
     init();
 
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -156,9 +183,11 @@ export default function RootLayout() {
           newSession.user.user_metadata?.display_name || newSession.user.user_metadata?.full_name || 'User',
           newSession.user.user_metadata?.avatar_url || null
         );
+        startRealtimeSync(newSession.user.id);
         // We don't automatically lock on session change unless it's a login
         setIsUnlocked(true);
       } else {
+        stopRealtimeSync();
         setIsUnlocked(true);
       }
     });
@@ -183,44 +212,50 @@ export default function RootLayout() {
     return () => {
       authSub.unsubscribe();
       appStateSub.remove();
+      linkingSub.remove();
     };
   }, [loaded, biometricEnabled, session, authenticate, setSession, setUserProfile]);
 
   if (!loaded && !error) return null;
 
-  if (!isAuthInitialized) {
-    return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <ActivityIndicator size="large" color="#fafafa" />
-      </View>
-    );
-  }
-
-  // UI saat aplikasi terkunci (Cold Start)
-  if (isAuthInitialized && session && !isUnlocked && biometricEnabled) {
-    return (
-      <View testID="lock_screen_container" style={styles.lockedContainer}>
-        <View style={styles.lockIconContainer}>
-          <Lock color="#10b981" size={40} />
+  const renderContent = () => {
+    if (!isAuthInitialized) {
+      return (
+        <View className="flex-1 bg-background items-center justify-center">
+          <ActivityIndicator size="large" color="#fafafa" />
         </View>
-        <Text style={styles.lockedTitle}>DuaSaku Terkunci</Text>
-        <Text style={styles.lockedSubtitle}>{t('unlockDesc') || 'Gunakan biometrik untuk masuk'}</Text>
-        
-        <TouchableOpacity testID="lock_screen_unlock_button" style={styles.retryButton} onPress={authenticate} activeOpacity={0.7}>
-          <Fingerprint color="#fafafa" size={24} />
-          <Text style={styles.retryText}>Buka Kunci</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+      );
+    }
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#09090b' }}>
+    if (session && !isUnlocked && biometricEnabled) {
+      return (
+        <View testID="lock_screen_container" style={styles.lockedContainer}>
+          <View style={styles.lockIconContainer}>
+            <Lock color="#10b981" size={40} />
+          </View>
+          <Text style={styles.lockedTitle}>DuaSaku Terkunci</Text>
+          <Text style={styles.lockedSubtitle}>{t('unlockDesc') || 'Gunakan biometrik untuk masuk'}</Text>
+          
+          <TouchableOpacity testID="lock_screen_unlock_button" style={styles.retryButton} onPress={authenticate} activeOpacity={0.7}>
+            <Fingerprint color="#fafafa" size={24} />
+            <Text style={styles.retryText}>Buka Kunci</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="tutorial" />
       </Stack>
+    );
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#09090b' }}>
+      {renderContent()}
       <Toast />
     </GestureHandlerRootView>
   );

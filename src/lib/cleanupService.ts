@@ -15,12 +15,14 @@ export const CleanupService = {
 
     try {
       // 1. Clear Offline Sync Queue
-      const syncStorage = new MMKV({ id: 'offline-sync' });
+      const syncStorage = new MMKV({ id: 'offline-sync',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
       syncStorage.clearAll();
 
       // 2. Clear Settings (Optional: depends if you want to keep them for next user)
       // Usually, settings like "isAutoRecordEnabled" should be reset for privacy.
-      const settingsStorage = new MMKV({ id: 'settings-storage' });
+      const settingsStorage = new MMKV({ id: 'settings-storage',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
       settingsStorage.clearAll();
 
       // 3. Clear Lottie Animations (to keep the app lean)
@@ -28,7 +30,8 @@ export const CleanupService = {
 
       // 4. User Storage (session, profile) is handled by useUserStore.persist.clear() 
       // or simply by the signOut() flow if managed correctly.
-      const userStorage = new MMKV({ id: 'user-storage' });
+      const userStorage = new MMKV({ id: 'user-storage',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
       userStorage.clearAll();
 
       console.log('[CleanupService] All caches cleared successfully.');

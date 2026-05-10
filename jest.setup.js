@@ -35,3 +35,16 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: jest.fn() },
   Tabs: { Screen: jest.fn() },
 }));
+
+jest.mock('react-native-mmkv', () => ({
+  MMKV: jest.fn(() => ({
+    set: jest.fn(),
+    getString: jest.fn(),
+    getNumber: jest.fn(),
+    getBoolean: jest.fn(),
+    delete: jest.fn(),
+    getAllKeys: jest.fn(() => []),
+    clearAll: jest.fn(),
+  })),
+}));
+

@@ -6,7 +6,7 @@ import { processSyncQueue, getPendingCount } from './offlineSync';
 import { processDueRecurrences } from './recurringService';
 
 const BACKGROUND_FETCH_TASK = 'BACKGROUND_FETCH_TASK';
-const storage = new MMKV();
+const storage = new MMKV({ encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   try {

@@ -315,7 +315,7 @@ export default function AIScreen() {
                 <Wallet color="#c084fc" size={24} />
               </View>
               <View>
-                <Text className="text-purple-400 text-[10px] uppercase font-bold tracking-widest mb-0.5">Analisis Transaksi</Text>
+                <Text className="text-purple-400 text-[12px] uppercase font-bold tracking-widest mb-0.5">Analisis Transaksi</Text>
                 <Text className="text-white font-bold text-lg">{title}</Text>
               </View>
             </View>
@@ -377,7 +377,7 @@ export default function AIScreen() {
             className="absolute top-16 right-6 bg-amber-500/20 border border-amber-500/50 px-3 py-1 rounded-full flex-row items-center gap-1"
           >
             <View className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-            <Text className="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Hybrid Mode (Local)</Text>
+            <Text className="text-amber-500 text-[12px] font-bold uppercase tracking-widest">Hybrid Mode (Local)</Text>
           </Animated.View>
         )}
 
@@ -472,10 +472,10 @@ export default function AIScreen() {
               )}
               
               <View className="flex-row justify-between items-center mt-2 border-t border-white/5 pt-2">
-                <Text className="text-slate-600 text-[9px] uppercase tracking-tighter">
+                <Text className="text-slate-600 text-[12px] uppercase tracking-tighter">
                   {item.role === 'assistant' ? 'DuaSaku AI' : 'Anda'}
                 </Text>
-                <Text className="text-slate-500 text-[10px]">
+                <Text className="text-slate-500 text-[12px]">
                   {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </View>

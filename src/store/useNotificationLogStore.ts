@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from '../lib/storage';
 
-export interface NotificationLog {
+interface NotificationLog {
   id: string;
   timestamp: number;
   app: string;

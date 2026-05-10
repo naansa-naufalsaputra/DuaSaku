@@ -251,15 +251,17 @@ export default function AnalyticsScreen() {
     }
   };
 
+  const fetchAnalyticsRef = useRef(fetchAnalytics);
+  useEffect(() => { fetchAnalyticsRef.current = fetchAnalytics; }, [fetchAnalytics]);
+
   useEffect(() => {
     fetchAnalytics();
-    
-    const subscription = DeviceEventEmitter.addListener('transaction_added', () => {
-      fetchAnalytics();
-    });
-
-    return () => subscription.remove();
   }, [fetchAnalytics]);
+
+  useEffect(() => {
+    const sub = DeviceEventEmitter.addListener('transaction_added', () => fetchAnalyticsRef.current());
+    return () => sub.remove();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -363,7 +365,7 @@ export default function AnalyticsScreen() {
       >
         {/* Header Analytic: Total Spending & Trend */}
         <View className="mb-8 px-2">
-          <Text className="text-slate-500 font-medium text-[10px] uppercase tracking-[3px] mb-2">{t('totalSpendingThisMonth')}</Text>
+          <Text className="text-slate-500 font-medium text-[12px] uppercase tracking-[3px] mb-2">{t('totalSpendingThisMonth')}</Text>
           <View className="flex-row items-baseline gap-3">
             {loading ? (
               <Skeleton width={200} height={40} radius={8} />
@@ -374,7 +376,7 @@ export default function AnalyticsScreen() {
             )}
             {spendingTrend && (
               <View className={`flex-row items-center px-2.5 py-1 rounded-full ${spendingTrend.isDown ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
-                <Text className={`text-[11px] font-bold ${spendingTrend.isDown ? 'text-green-400' : 'text-red-400'}`}>
+                <Text className={`text-[12px] font-bold ${spendingTrend.isDown ? 'text-green-400' : 'text-red-400'}`}>
                   {spendingTrend.isDown ? '↓' : '↑'} {spendingTrend.value}%
                 </Text>
               </View>
@@ -493,7 +495,7 @@ export default function AnalyticsScreen() {
                         className="w-4 bg-blue-500/40 rounded-t-lg" 
                         style={{ height: Math.max(10, (res.balance.amount / (simulationResult[5].balance.amount || 1)) * 40) }} 
                       />
-                      <Text className="text-[8px] text-slate-500">M{res.month}</Text>
+                      <Text className="text-[12px] text-slate-500">M{res.month}</Text>
                     </View>
                   ))}
                 </View>
@@ -508,7 +510,7 @@ export default function AnalyticsScreen() {
             {isPredicting ? (
               <View className="bg-slate-900/40 border border-white/5 p-6 rounded-[32px] items-center py-10">
                 <ActivityIndicator color="#c084fc" size="small" />
-                <Text className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mt-3">🧠 Menghitung Proyeksi Finansial...</Text>
+                <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest mt-3">🧠 Menghitung Proyeksi Finansial...</Text>
               </View>
             ) : (
               <>
@@ -544,11 +546,11 @@ export default function AnalyticsScreen() {
         <View className="mb-8">
           <View className="flex-row justify-between items-end mb-5 px-1">
             <View>
-              <Text className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Expense Flow</Text>
+              <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest mb-1">Expense Flow</Text>
               <Text className="text-white text-xl" style={{ fontFamily: 'Manrope_700Bold' }}>{t('trends')}</Text>
             </View>
             <View className="bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-              <Text className="text-slate-500 text-[9px] uppercase font-bold tracking-tighter">{t('tapBarForDetail')}</Text>
+              <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-tighter">{t('tapBarForDetail')}</Text>
             </View>
           </View>
           
@@ -569,8 +571,8 @@ export default function AnalyticsScreen() {
                   hideRules
                   xAxisThickness={0}
                   yAxisThickness={0}
-                  yAxisTextStyle={{ color: '#64748b', fontSize: 10, fontFamily: 'Inter' }}
-                  xAxisLabelTextStyle={{ color: '#64748b', fontSize: 10, textAlign: 'center', fontFamily: 'Inter' }}
+                  yAxisTextStyle={{ color: '#64748b', fontSize: 12, fontFamily: 'Inter' }}
+                  xAxisLabelTextStyle={{ color: '#64748b', fontSize: 12, textAlign: 'center', fontFamily: 'Inter' }}
                   noOfSections={4}
                   yAxisLabelWidth={yAxisLabelWidth}
                   height={180}
@@ -599,11 +601,11 @@ export default function AnalyticsScreen() {
         <View className="mb-10">
           <View className="flex-row justify-between items-end mb-5 px-1">
             <View>
-              <Text className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">{t('distribution')}</Text>
+              <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest mb-1">{t('distribution')}</Text>
               <Text className="text-white text-xl" style={{ fontFamily: 'Manrope_700Bold' }}>{t('topCategories')}</Text>
             </View>
             <View className="bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-              <Text className="text-slate-500 text-[9px] uppercase font-bold tracking-tighter">{t('tapSliceForDetail')}</Text>
+              <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-tighter">{t('tapSliceForDetail')}</Text>
             </View>
           </View>
 
@@ -629,7 +631,7 @@ export default function AnalyticsScreen() {
                     focusOnPress
                   />
                   <View className="absolute items-center justify-center">
-                    <Text className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">{t('total')}</Text>
+                    <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest mb-1">{t('total')}</Text>
                     <Text className="text-white text-lg" style={{ fontFamily: 'Manrope_700Bold' }}>{formatCurrency(totalExpense)}</Text>
                   </View>
                 </View>
@@ -687,7 +689,7 @@ export default function AnalyticsScreen() {
         {budgets.length > 0 && (
           <View className="mb-10">
             <View className="mb-5 px-1">
-              <Text className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">{t('budgetStatus') || 'Budget Health'}</Text>
+              <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest mb-1">{t('budgetStatus') || 'Budget Health'}</Text>
               <Text className="text-white text-xl" style={{ fontFamily: 'Manrope_700Bold' }}>{t('budgetMonitoring') || 'Budget Monitoring'}</Text>
             </View>
             

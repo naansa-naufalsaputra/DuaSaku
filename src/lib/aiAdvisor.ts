@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { BudgetWithSpending, BUDGET_CATEGORIES } from './budgetService';
+import { BUDGET_CATEGORIES } from './budgetService';
 import { mmkvStorage } from './storage';
 
 // Ambil API Key dari file .env yang sudah kamu buat sebelumnya
@@ -47,7 +47,7 @@ function setAICache(key: string, value: string) {
 /**
  * LOCAL SENTIMENT: Detect user emotion locally to adjust AI tone
  */
-export function detectSentimentLocally(input: string): 'happy' | 'sad' | 'worried' | 'neutral' {
+function detectSentimentLocally(input: string): 'happy' | 'sad' | 'worried' | 'neutral' {
   const query = input.toLowerCase();
   const sadKeywords = ['sedih', 'boros', 'susah', 'rugi', 'gagal', 'kurang', 'aduh', 'waduh', 'hiks'];
   const happyKeywords = ['senang', 'hemat', 'untung', 'berhasil', 'yeay', 'mantap', 'hore', 'alhamdulillah'];
@@ -118,42 +118,6 @@ export interface UserContext {
 /**
  * LOCAL: Suggest quick actions based on query context
  */
-export function suggestActionsLocally(query: string, result?: any): AIAction[] {
-  const actions: AIAction[] = [];
-  const q = query.toLowerCase();
-
-  if (q.includes('budget') || q.includes('anggaran') || q.includes('limit')) {
-    actions.push({
-      id: 'add_budget',
-      label: 'Atur Budget Baru',
-      icon: 'plus',
-      type: 'NAVIGATE',
-      payload: { screen: '(tabs)/analytics' }
-    });
-  }
-
-  if (q.includes('history') || q.includes('riwayat') || q.includes('transaksi') || q.includes('cari')) {
-    actions.push({
-      id: 'view_history',
-      label: 'Lihat Semua Riwayat',
-      icon: 'list',
-      type: 'NAVIGATE',
-      payload: { screen: 'history' }
-    });
-  }
-
-  if (q.includes('pencapaian') || q.includes('skor') || q.includes('sehat')) {
-    actions.push({
-      id: 'view_gamification',
-      label: 'Cek Financial Score',
-      icon: 'award',
-      type: 'NAVIGATE',
-      payload: { screen: '(tabs)/profile' }
-    });
-  }
-
-  return actions;
-}
 
 /**
  * Membangun instruksi sistem yang dinamis berdasarkan profil user
@@ -199,7 +163,7 @@ function buildSystemInstruction(context?: UserContext): string {
 /**
  * LOCAL FALLBACK: Parse transaction using regex when AI is offline/busy
  */
-export function parseTransactionLocally(input: string): any | null {
+function parseTransactionLocally(input: string): any | null {
   const amountMatch = input.match(/(\d+[\d\s,.]*k?|[\d\s,.]*ribu|[\d\s,.]*jt)/i);
   if (!amountMatch) return null;
 
@@ -448,141 +412,112 @@ export async function recommendBudgets(
   }
 }
 
+
 /**
- * LOCAL FALLBACK: Basic search filters using keyword matching
+ * Search history with AI query parsing
  */
-export function parseSearchLocally(query: string): {
+export interface SearchFilters {
   category?: string;
   startDate?: string;
   endDate?: string;
-  keyword?: string;
   type?: 'expense' | 'income' | 'all';
-} {
-  const queryLower = query.toLowerCase();
-  const foundCategory = BUDGET_CATEGORIES.find(c => 
-    queryLower.includes(c.key.toLowerCase()) || 
-    queryLower.includes(c.label.toLowerCase())
-  );
-
-  let type: 'expense' | 'income' | 'all' = 'all';
-  if (queryLower.includes('masuk') || queryLower.includes('pendapatan')) type = 'income';
-  else if (queryLower.includes('keluar') || queryLower.includes('belanja')) type = 'expense';
-
-  // Basic date detection
-  let startDate, endDate;
-  const today = new Date();
-  if (queryLower.includes('bulan ini')) {
-    startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-    endDate = today.toISOString().split('T')[0];
-  }
-
-  return {
-    category: foundCategory?.key,
-    keyword: query.split(' ').filter(w => w.length > 2 && !queryLower.includes(w.toLowerCase())).join(' ') || query,
-    type,
-    startDate,
-    endDate
-  };
+  keyword?: string;
 }
 
-/**
- * LOCAL FALLBACK: Generate financial advice based on local budget data (No AI)
- */
-export function generateLocalHealthAdvice(budgets: BudgetWithSpending[]): string {
-  if (budgets.length === 0) return 'Belum ada data budget. Atur budget pertamamu di tab Analytics!';
-  
-  const overBudgets = budgets.filter(b => b.isOver);
-  const nearLimit = budgets.filter(b => b.percentage > 80 && !b.isOver);
-
-  if (overBudgets.length > 0) {
-    return `🚨 Kamu sudah melebihi budget di: ${overBudgets.map(b => b.category).join(', ')}. Rem dulu pengeluaranmu ya!`;
+export async function parseSearchQuery(inputText: string, context?: UserContext): Promise<SearchFilters | null> {
+  if (!apiKey) {
+    const q = inputText.toLowerCase();
+    if (q.includes('makan')) return { category: 'Food' };
+    if (q.includes('transport')) return { category: 'Transport' };
+    return { keyword: inputText };
   }
-
-  if (nearLimit.length > 0) {
-    return `⚠️ Hati-hati, budget untuk ${nearLimit.map(b => b.category).join(', ')} sudah hampir habis (>80%).`;
-  }
-
-  return '✅ Keuanganmu aman! Semua pengeluaran masih terkendali di bawah limit budget.';
-}
-
-/**
- * AI memproses query bahasa alami menjadi kriteria pencarian terstruktur.
- */
-export async function parseSearchQuery(
-  query: string,
-  userContext?: UserContext
-): Promise<{
-  category?: string;
-  startDate?: string;
-  endDate?: string;
-  keyword?: string;
-  type?: 'expense' | 'income' | 'all';
-} | null> {
-  if (!apiKey) return parseSearchLocally(query);
 
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const systemInstruction = buildSystemInstruction(userContext);
-
     const prompt = `
-      Anda adalah asisten pencarian transaksi cerdas. 
-      Tugas Anda adalah mengubah query bahasa alami menjadi filter JSON murni tanpa markdown.
+      Analyze this user query for financial history search and extract filters as JSON.
+      Query: "${inputText}"
       
-      Hari ini adalah tanggal: ${today}.
-
-      Format JSON wajib:
+      JSON format:
       {
-        "category": "Nama kategori (kosongkan jika tidak spesifik)",
+        "category": "string",
         "startDate": "YYYY-MM-DD",
         "endDate": "YYYY-MM-DD",
-        "keyword": "Kata kunci pencarian (misal: kopi, bensin)",
-        "type": "expense", "income", atau "all"
+        "type": "expense" | "income" | "all",
+        "keyword": "string"
       }
-
-      Input user: "${query}"
+      
+      Rules:
+      1. Kategori harus sesuai dengan data transaksi (e.g., Food, Transport, Utilities, Entertainment, Income).
+      2. Gunakan format tanggal YYYY-MM-DD.
+      3. Jika tidak ada filter, biarkan null.
+      
+      Return ONLY JSON.
     `;
-
-    const result = await callGeminiWithFallback(prompt, false, undefined, systemInstruction);
-    const responseText = result.response.text().trim();
-    const jsonStr = responseText
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/```$/i, '')
-      .trim();
-
+    const result = await callGeminiWithFallback(prompt);
+    const text = result.response.text();
+    const jsonStr = text.replace(/```json|```/g, '').trim();
     return JSON.parse(jsonStr);
   } catch (error) {
-    console.warn('[AIAdvisor] AI Search Query failed, using local fallback:', error);
-    return parseSearchLocally(query);
+    console.error('[AI] parseSearchQuery error:', error);
+    return { keyword: inputText };
   }
 }
 
-/**
- * AI memberikan jawaban naratif berdasarkan hasil pencarian transaksi.
- */
-export async function answerSearchQuery(
-  query: string,
-  transactions: any[],
-  userContext?: UserContext
-): Promise<string> {
-  const instruction = buildSystemInstruction(userContext);
-  const dataStr = transactions.map(t => `${t.date || t.created_at}: ${t.title || t.note} - Rp ${t.amount} (${t.category})`).join('\n');
-  
-  try {
-    const prompt = `
-      User bertanya: "${query}"
-      Data transaksi:
-      ${dataStr || 'Tidak ada data.'}
-      
-      Berikan jawaban naratif singkat dan personal. Jika data kosong, katakan dengan sopan.
-    `;
+export async function answerSearchQuery(query: string, results: any[], context?: UserContext): Promise<string> {
+  const instruction = buildSystemInstruction(context);
+  const prompt = `
+    User bertanya: "${query}"
+    Data transaksi yang ditemukan: ${JSON.stringify(results.slice(0, 10))}
+    
+    Tugas:
+    1. Berikan jawaban yang membantu berdasarkan data di atas.
+    2. Jika user bertanya "berapa total", hitunglah totalnya.
+    3. Jika user bertanya "kapan terakhir", carilah tanggal terbarunya.
+    4. Gunakan gaya bahasa asisten keuangan yang ramah.
+  `;
 
+  try {
     const result = await callGeminiWithFallback(prompt, false, undefined, instruction);
     return result.response.text();
-  } catch {
-    // Local answer generator if AI fails to answer
-    if (transactions.length === 0) return "Maaf, saya tidak menemukan transaksi yang kamu cari.";
-    const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
-    return `Saya menemukan ${transactions.length} transaksi dengan total Rp ${total.toLocaleString()}. Kamu bisa cek detailnya di daftar riwayat.`;
+  } catch (error) {
+    console.error('[AI] answerSearchQuery error:', error);
+    return `Saya menemukan ${results.length} transaksi yang sesuai dengan pencarian Anda.`;
   }
+}
+
+export function suggestActionsLocally(query: string, results?: any[]): AIAction[] {
+  const actions: AIAction[] = [];
+  const q = query.toLowerCase();
+
+  if (q.includes('catat') || q.includes('tambah') || q.includes('beli') || q.includes('bayar')) {
+    actions.push({
+      id: 'add_tx',
+      label: 'Tambah Transaksi',
+      icon: 'plus',
+      type: 'OPEN_SHEET',
+      payload: {}
+    });
+  }
+
+  if (q.includes('riwayat') || q.includes('history') || q.includes('cari')) {
+    actions.push({
+      id: 'view_history',
+      label: 'Riwayat Lengkap',
+      icon: 'list',
+      type: 'NAVIGATE',
+      payload: { screen: '/history' }
+    });
+  }
+
+  if (results && results.length > 0) {
+    actions.push({
+      id: 'view_analytics',
+      label: 'Analisis Budget',
+      icon: 'award',
+      type: 'NAVIGATE',
+      payload: { screen: '/analytics' }
+    });
+  }
+
+  return actions;
 }

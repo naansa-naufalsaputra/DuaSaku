@@ -182,45 +182,21 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
         snapPoints={snapPoints}
         enablePanDownToClose
         onChange={handleSheetChanges}
-        handleIndicatorStyle={{ backgroundColor: '#27272a', width: 48, marginTop: 4 }}
-        backgroundStyle={{
-          backgroundColor: '#18181b',
-          borderRadius: 24,
-          borderWidth: 1,
-          borderColor: '#27272a',
-        }}
+        handleIndicatorStyle={styles.indicator}
+        backgroundStyle={styles.sheetBackground}
       >
-        <BottomSheetView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 8 }}>
+        <BottomSheetView style={styles.sheetContent}>
           {/* Header */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16,
-            }}
-          >
+          <View style={styles.header}>
             <View>
-              <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 20, color: '#fafafa' }}>
+              <Text style={styles.headerTitle}>
                 {isCreatingCustom ? 'Kategori Kustom' : editData ? 'Edit Budget' : 'Tambah Budget'}
               </Text>
-              <Text style={{ fontFamily: 'Inter', fontSize: 13, color: '#71717a', marginTop: 2 }}>
+              <Text style={styles.headerSubtitle}>
                 {monthLabel}
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={resetAndClose}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 12,
-                backgroundColor: '#09090b',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 1,
-                borderColor: '#27272a',
-              }}
-            >
+            <TouchableOpacity onPress={resetAndClose} style={styles.closeButton}>
               <X color="#71717a" size={18} />
             </TouchableOpacity>
           </View>
@@ -235,22 +211,11 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
                 }} 
               />
               
-              <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 10 }}>
+              <Text style={styles.inputLabel}>
                 Nama Kategori
               </Text>
               <TextInput
-                style={{
-                  backgroundColor: '#09090b',
-                  borderRadius: 16,
-                  borderWidth: 1,
-                  borderColor: '#27272a',
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
-                  fontFamily: 'Inter_Medium',
-                  fontSize: 16,
-                  color: '#fafafa',
-                  marginBottom: 20
-                }}
+                style={styles.textInput}
                 placeholder="Contoh: Gym, Kursus, dll"
                 placeholderTextColor="#3f3f46"
                 value={customName}
@@ -259,24 +224,16 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
               
               <TouchableOpacity 
                 onPress={() => setIsCreatingCustom(false)}
-                style={{ marginBottom: 12, alignItems: 'center' }}
+                style={styles.cancelButton}
               >
-                <Text style={{ color: '#71717a', fontSize: 13, fontFamily: 'Inter' }}>Batal, pilih yang ada</Text>
+                <Text style={styles.cancelText}>Batal, pilih yang ada</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <>
               {/* Category Grid */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <Text
-                  style={{
-                    fontFamily: 'Inter_SemiBold',
-                    fontSize: 12,
-                    color: '#71717a',
-                    textTransform: 'uppercase',
-                    letterSpacing: 1.5,
-                  }}
-                >
+              <View style={styles.categoryHeader}>
+                <Text style={styles.inputLabel}>
                   Pilih Kategori
                 </Text>
                 <TouchableOpacity 
@@ -284,18 +241,18 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
                     setIsCreatingCustom(true);
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                  style={styles.customCatButton}
                 >
                   <Plus color="#10b981" size={14} />
-                  <Text style={{ color: '#10b981', fontSize: 12, fontFamily: 'Inter_SemiBold' }}>Kustom</Text>
+                  <Text style={styles.customCatText}>Kustom</Text>
                 </TouchableOpacity>
               </View>
               
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={{ marginBottom: 20, flexGrow: 0 }}
-                contentContainerStyle={{ gap: 8 }}
+                style={styles.categoryScroll}
+                contentContainerStyle={styles.categoryScrollContent}
               >
                 {categories.map((cat) => {
                   const isSelected = selectedCategory === cat.key;
@@ -306,25 +263,23 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
                         setSelectedCategory(cat.key);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }}
-                      style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 16,
-                        borderRadius: 16,
-                        backgroundColor: isSelected ? cat.color + '20' : '#09090b',
-                        borderWidth: 1.5,
-                        borderColor: isSelected ? cat.color : '#27272a',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 8,
-                      }}
+                      style={[
+                        styles.categoryChip,
+                        {
+                          backgroundColor: isSelected ? cat.color + '20' : '#09090b',
+                          borderColor: isSelected ? cat.color : '#27272a',
+                        }
+                      ]}
                     >
-                      <Text style={{ fontSize: 18 }}>{cat.emoji}</Text>
+                      <Text style={styles.emojiText}>{cat.emoji}</Text>
                       <Text
-                        style={{
-                          fontFamily: isSelected ? 'Inter_SemiBold' : 'Inter',
-                          fontSize: 14,
-                          color: isSelected ? cat.color : '#a1a1aa',
-                        }}
+                        style={[
+                          styles.categoryLabel,
+                          {
+                            fontFamily: isSelected ? 'Inter_SemiBold' : 'Inter',
+                            color: isSelected ? cat.color : '#a1a1aa',
+                          }
+                        ]}
                       >
                         {cat.label}
                       </Text>
@@ -337,49 +292,13 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
           )}
 
           {/* Amount Input */}
-          <Text
-            style={{
-              fontFamily: 'Inter_SemiBold',
-              fontSize: 12,
-              color: '#71717a',
-              textTransform: 'uppercase',
-              letterSpacing: 1.5,
-              marginBottom: 10,
-            }}
-          >
+          <Text style={styles.inputLabel}>
             Limit Bulanan
           </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: '#09090b',
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#27272a',
-              paddingHorizontal: 20,
-              paddingVertical: 14,
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: 'Manrope_700Bold',
-                fontSize: 18,
-                color: '#52525b',
-                marginRight: 8,
-              }}
-            >
-              Rp
-            </Text>
+          <View style={styles.amountInputContainer}>
+            <Text style={styles.currencyPrefix}>Rp</Text>
             <TextInput
-              style={{
-                flex: 1,
-                fontFamily: 'Manrope_700Bold',
-                fontSize: 24,
-                color: '#fafafa',
-                padding: 0,
-              }}
+              style={styles.amountInput}
               placeholder="0"
               placeholderTextColor="#3f3f46"
               keyboardType="numeric"
@@ -389,7 +308,7 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
           </View>
 
           {/* Quick Amount Chips */}
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+          <View style={styles.quickAmountGrid}>
             {[200000, 500000, 1000000, 2000000].map((val) => (
               <TouchableOpacity
                 key={val}
@@ -397,22 +316,16 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
                   setAmount(String(val));
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
-                style={{
-                  flex: 1,
-                  paddingVertical: 8,
-                  borderRadius: 12,
-                  backgroundColor: '#09090b',
-                  borderWidth: 1,
-                  borderColor: amount === String(val) ? '#10b981' : '#27272a',
-                  alignItems: 'center',
-                }}
+                style={[
+                  styles.quickChip,
+                  { borderColor: amount === String(val) ? '#10b981' : '#27272a' }
+                ]}
               >
                 <Text
-                  style={{
-                    fontFamily: 'Inter_SemiBold',
-                    fontSize: 11,
-                    color: amount === String(val) ? '#10b981' : '#71717a',
-                  }}
+                  style={[
+                    styles.quickChipText,
+                    { color: amount === String(val) ? '#10b981' : '#71717a' }
+                  ]}
                 >
                   {val >= 1000000 ? `${val / 1000000}jt` : `${val / 1000}rb`}
                 </Text>
@@ -421,35 +334,13 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
           </View>
 
           {/* Target Tabungan (Optional) */}
-          <Text
-            style={{
-              fontFamily: 'Inter_SemiBold',
-              fontSize: 12,
-              color: '#71717a',
-              textTransform: 'uppercase',
-              letterSpacing: 1.5,
-              marginTop: 12,
-              marginBottom: 10,
-            }}
-          >
+          <Text style={[styles.inputLabel, { marginTop: 12 }]}>
             Target Tabungan (Opsional)
           </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: '#09090b',
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: '#27272a',
-              paddingHorizontal: 20,
-              paddingVertical: 14,
-              marginBottom: 12,
-            }}
-          >
-            <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 18, color: '#52525b', marginRight: 8 }}>Rp</Text>
+          <View style={styles.amountInputContainer}>
+            <Text style={styles.currencyPrefix}>Rp</Text>
             <TextInput
-              style={{ flex: 1, fontFamily: 'Manrope_700Bold', fontSize: 24, color: '#10b981', padding: 0 }}
+              style={[styles.amountInput, { color: '#10b981' }]}
               placeholder="0"
               placeholderTextColor="#3f3f46"
               keyboardType="numeric"
@@ -458,7 +349,7 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
             />
           </View>
           
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+          <View style={styles.quickAmountGrid}>
             {[100000, 250000, 500000, 1000000].map((val) => (
               <TouchableOpacity
                 key={val}
@@ -466,17 +357,15 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
                   setTargetAmount(String(val));
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
-                style={{
-                  flex: 1,
-                  paddingVertical: 8,
-                  borderRadius: 12,
-                  backgroundColor: '#09090b',
-                  borderWidth: 1,
-                  borderColor: targetAmount === String(val) ? '#10b981' : '#27272a',
-                  alignItems: 'center',
-                }}
+                style={[
+                  styles.quickChip,
+                  { borderColor: targetAmount === String(val) ? '#10b981' : '#27272a' }
+                ]}
               >
-                <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 11, color: targetAmount === String(val) ? '#10b981' : '#71717a' }}>
+                <Text style={[
+                  styles.quickChipText,
+                  { color: targetAmount === String(val) ? '#10b981' : '#71717a' }
+                ]}>
                   {val >= 1000000 ? `${val / 1000000}jt` : `${val / 1000}rb`}
                 </Text>
               </TouchableOpacity>
@@ -485,15 +374,7 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
 
           {/* Error */}
           {error && (
-            <Text
-              style={{
-                fontFamily: 'Inter',
-                fontSize: 13,
-                color: '#ef4444',
-                marginBottom: 12,
-                textAlign: 'center',
-              }}
-            >
+            <Text style={styles.errorText}>
               {error}
             </Text>
           )}
@@ -502,28 +383,17 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
           <TouchableOpacity
             onPress={handleSave}
             disabled={saving}
-            style={{
-              backgroundColor: saving ? '#27272a' : '#10b981',
-              paddingVertical: 16,
-              borderRadius: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}
+            style={[
+              styles.saveButton,
+              { backgroundColor: saving ? '#27272a' : '#10b981' }
+            ]}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#fafafa" />
             ) : (
               <>
                 <Target color="#09090b" size={20} />
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_700Bold',
-                    fontSize: 16,
-                    color: '#09090b',
-                  }}
-                >
+                <Text style={styles.saveButtonText}>
                   {editData ? 'Simpan Perubahan' : 'Pasang Budget'}
                 </Text>
               </>
@@ -534,6 +404,180 @@ const AddBudgetSheet = forwardRef<BottomSheet, AddBudgetSheetProps>(
     );
   }
 );
+
+const styles = RNStyleSheet.create({
+  indicator: {
+    backgroundColor: '#27272a',
+    width: 48,
+    marginTop: 4
+  },
+  sheetBackground: {
+    backgroundColor: '#18181b',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  sheetContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 8
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 20,
+    color: '#fafafa'
+  },
+  headerSubtitle: {
+    fontFamily: 'Inter',
+    fontSize: 13,
+    color: '#71717a',
+    marginTop: 2
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#09090b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  inputLabel: {
+    fontFamily: 'Inter_SemiBold',
+    fontSize: 12,
+    color: '#71717a',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 10,
+  },
+  textInput: {
+    backgroundColor: '#09090b',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#27272a',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontFamily: 'Inter_Medium',
+    fontSize: 16,
+    color: '#fafafa',
+    marginBottom: 20
+  },
+  cancelButton: {
+    marginBottom: 12,
+    alignItems: 'center'
+  },
+  cancelText: {
+    color: '#71717a',
+    fontSize: 13,
+    fontFamily: 'Inter'
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  customCatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4
+  },
+  customCatText: {
+    color: '#10b981',
+    fontSize: 12,
+    fontFamily: 'Inter_SemiBold'
+  },
+  categoryScroll: {
+    marginBottom: 20,
+    flexGrow: 0
+  },
+  categoryScrollContent: {
+    gap: 8
+  },
+  categoryChip: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  emojiText: {
+    fontSize: 18
+  },
+  categoryLabel: {
+    fontSize: 14,
+  },
+  amountInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#09090b',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#27272a',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
+  currencyPrefix: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 18,
+    color: '#52525b',
+    marginRight: 8,
+  },
+  amountInput: {
+    flex: 1,
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 24,
+    color: '#fafafa',
+    padding: 0,
+  },
+  quickAmountGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 20
+  },
+  quickChip: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: '#09090b',
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  quickChipText: {
+    fontFamily: 'Inter_SemiBold',
+    fontSize: 12,
+  },
+  errorText: {
+    fontFamily: 'Inter',
+    fontSize: 13,
+    color: '#ef4444',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  saveButton: {
+    paddingVertical: 16,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  saveButtonText: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 16,
+    color: '#09090b',
+  }
+});
 
 AddBudgetSheet.displayName = 'AddBudgetSheet';
 

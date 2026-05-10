@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { useGamificationStore } from '../store/useGamificationStore';
 import { fetchBudgetsWithSpending } from './budgetService';
+import { mmkvStorage } from './storage';
 
 /**
  * Menghitung Financial Health Score (1-100)
@@ -47,9 +48,23 @@ export const calculateHealthScore = async (userId: string) => {
       }
     }
 
-    // 3. Consistency (Max 30 points)
-    const streakPoints = Math.min(store.streakDays * 4.2, 30); // 7 days = ~30 points
+    // 3. Consistency (Max 20 points)
+    const streakPoints = Math.min(store.streakDays * 2.8, 20); // 7 days = ~20 points
     score += streakPoints;
+
+    // 4. Wallet Diversification (Max 5 points)
+    const { data: wallets } = await supabase.from('wallets').select('id').eq('user_id', userId);
+    if (wallets && wallets.length >= 2) score += 5;
+
+    // 5. Goal Progress (Max 5 points)
+    const wishlistData = mmkvStorage.getItem('settings_wishlist');
+    if (wishlistData) {
+      try {
+        const wishlist = JSON.parse(wishlistData as string);
+        const hasProgress = wishlist.some((item: any) => item.savedAmount > 0);
+        if (hasProgress) score += 5;
+      } catch {}
+    }
 
     // Unlock Badge: Streak 7
     if (store.streakDays >= 7) store.unlockBadge('streak_7');

@@ -155,7 +155,7 @@ export default function SyncStatusBar() {
           {config.text}
         </Text>
         {syncState === 'pending' && (
-          <Text style={{ color: '#60a5fa', fontSize: 11, fontFamily: 'Inter_SemiBold' }}>Sync</Text>
+          <Text style={{ color: '#60a5fa', fontSize: 12, fontFamily: 'Inter_SemiBold' }}>Sync</Text>
         )}
       </TouchableOpacity>
     </Animated.View>

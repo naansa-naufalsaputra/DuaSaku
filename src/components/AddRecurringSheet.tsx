@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, forwardRef, useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Alert, StyleSheet } from 'react-native';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Repeat, Calendar, DollarSign, Tag } from 'lucide-react-native';
 import { BUDGET_CATEGORIES } from '../lib/budgetService';
@@ -120,39 +120,17 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
         snapPoints={snapPoints}
         enablePanDownToClose
         onChange={handleSheetChanges}
-        handleIndicatorStyle={{ backgroundColor: '#27272a', width: 48, marginTop: 4 }}
-        backgroundStyle={{
-          backgroundColor: '#18181b',
-          borderRadius: 24,
-          borderWidth: 1,
-          borderColor: '#27272a',
-        }}
+        handleIndicatorStyle={styles.handleIndicator}
+        backgroundStyle={styles.sheetBackground}
       >
         <BottomSheetView style={{ flex: 1 }}>
           {/* Header */}
-          <View
-            style={{
-              paddingHorizontal: 20,
-              paddingTop: 4,
-              paddingBottom: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: '#27272a',
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 12,
-                  backgroundColor: '#10b98115',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <View style={styles.headerIconContainer}>
                 <Repeat color="#10b981" size={18} />
               </View>
-              <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 20, color: '#fafafa' }}>
+              <Text style={styles.headerTitle}>
                 Transaksi Berulang
               </Text>
             </View>
@@ -164,7 +142,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             contentContainerStyle={{ paddingTop: 16, paddingBottom: 40 }}
           >
             {/* Quick Templates */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Template Cepat
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -190,7 +168,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             </ScrollView>
 
             {/* Title Input */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Nama Transaksi
             </Text>
             <View
@@ -217,7 +195,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             </View>
 
             {/* Amount Input */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Nominal (Rp)
             </Text>
             <View
@@ -245,7 +223,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             </View>
 
             {/* Type Toggle */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Tipe
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
@@ -283,7 +261,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             </View>
 
             {/* Category */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Kategori
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
@@ -338,7 +316,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             </View>
 
             {/* Frequency */}
-            <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <Text style={styles.sectionLabel}>
               Frekuensi
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
@@ -373,30 +351,24 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             {/* Weekly: Day of Week Selector */}
             {frequency === 'weekly' && (
               <>
-                <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <Text style={styles.sectionLabel}>
                   Hari dalam Minggu
                 </Text>
-                <View style={{ flexDirection: 'row', gap: 6, marginBottom: 16 }}>
+                <View style={styles.weeklySelector}>
                   {DAY_NAMES.map((name, idx) => (
                     <TouchableOpacity
                       key={idx}
                       onPress={() => setDayOfWeek(idx)}
-                      style={{
-                        flex: 1,
-                        paddingVertical: 10,
-                        borderRadius: 10,
-                        backgroundColor: dayOfWeek === idx ? '#10b98120' : '#09090b',
-                        borderWidth: 1,
-                        borderColor: dayOfWeek === idx ? '#10b981' : '#27272a',
-                        alignItems: 'center',
-                      }}
+                      style={[
+                        styles.dayButton,
+                        dayOfWeek === idx ? styles.dayButtonSelected : styles.dayButtonUnselected
+                      ]}
                     >
                       <Text
-                        style={{
-                          fontFamily: 'Inter_SemiBold',
-                          fontSize: 11,
-                          color: dayOfWeek === idx ? '#10b981' : '#71717a',
-                        }}
+                        style={[
+                          styles.dayButtonText,
+                          dayOfWeek === idx ? styles.dayButtonTextSelected : styles.dayButtonTextUnselected
+                        ]}
                       >
                         {name}
                       </Text>
@@ -409,22 +381,10 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             {/* Monthly: Day of Month Selector */}
             {frequency === 'monthly' && (
               <>
-                <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#71717a', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <Text style={styles.sectionLabel}>
                   Tanggal dalam Bulan
                 </Text>
-                <View
-                  style={{
-                    backgroundColor: '#09090b',
-                    borderRadius: 14,
-                    borderWidth: 1,
-                    borderColor: '#27272a',
-                    paddingHorizontal: 14,
-                    paddingVertical: 4,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 16,
-                  }}
-                >
+                <View style={styles.inputContainer}>
                   <Calendar color="#52525b" size={16} />
                   <BottomSheetTextInput
                     placeholder="1"
@@ -436,7 +396,7 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
                       else if (v === '') setDayOfMonth(1);
                     }}
                     keyboardType="numeric"
-                    style={{ flex: 1, marginLeft: 10, fontSize: 15, color: '#fafafa', paddingVertical: 12 }}
+                    style={styles.textInput}
                   />
                 </View>
               </>
@@ -446,18 +406,15 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
             <TouchableOpacity
               onPress={handleSave}
               disabled={saving}
-              style={{
-                backgroundColor: saving ? '#27272a' : '#10b981',
-                paddingVertical: 16,
-                borderRadius: 16,
-                alignItems: 'center',
-                marginTop: 8,
-              }}
+              style={[
+                styles.saveButton,
+                saving ? styles.saveButtonDisabled : styles.saveButtonEnabled
+              ]}
             >
               {saving ? (
                 <ActivityIndicator color="#fafafa" />
               ) : (
-                <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 16, color: '#09090b' }}>
+                <Text style={styles.saveButtonText}>
                   Simpan Recurring
                 </Text>
               )}
@@ -472,3 +429,119 @@ const AddRecurringSheet = forwardRef<BottomSheet, AddRecurringSheetProps>(
 AddRecurringSheet.displayName = 'AddRecurringSheet';
 
 export default AddRecurringSheet;
+
+const styles = StyleSheet.create({
+  handleIndicator: {
+    backgroundColor: '#27272a',
+    width: 48,
+    marginTop: 4,
+  },
+  sheetBackground: {
+    backgroundColor: '#18181b',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#27272a',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#10b98115',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 20,
+    color: '#fafafa',
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+  sectionLabel: {
+    fontFamily: 'Inter_SemiBold',
+    fontSize: 12,
+    color: '#71717a',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  weeklySelector: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 16,
+  },
+  dayButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  dayButtonSelected: {
+    backgroundColor: '#10b98120',
+    borderColor: '#10b981',
+  },
+  dayButtonUnselected: {
+    backgroundColor: '#09090b',
+    borderColor: '#27272a',
+  },
+  dayButtonText: {
+    fontFamily: 'Inter_SemiBold',
+    fontSize: 12,
+  },
+  dayButtonTextSelected: {
+    color: '#10b981',
+  },
+  dayButtonTextUnselected: {
+    color: '#71717a',
+  },
+  inputContainer: {
+    backgroundColor: '#09090b',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#27272a',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  textInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 15,
+    color: '#fafafa',
+    paddingVertical: 12,
+  },
+  saveButton: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  saveButtonEnabled: {
+    backgroundColor: '#10b981',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#27272a',
+  },
+  saveButtonText: {
+    fontFamily: 'Manrope_700Bold',
+    fontSize: 16,
+    color: '#09090b',
+  },
+});

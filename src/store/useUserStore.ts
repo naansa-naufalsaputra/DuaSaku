@@ -4,9 +4,8 @@ import { MMKV } from 'react-native-mmkv';
 import { Session } from '@supabase/supabase-js';
 import i18n from '../lib/i18n';
 
-const storage = new MMKV({
-  id: 'user-storage'
-});
+const storage = new MMKV({ id: 'user-storage',
+  encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
 const mmkvStorage: StateStorage = {
   setItem: (name, value) => {
