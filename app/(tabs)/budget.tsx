@@ -274,7 +274,7 @@ export default function BudgetScreen() {
             <View style={styles.statBox}>
               <View style={styles.statLabelRow}>
                 <TrendingDown color="#ef4444" size={14} />
-                <Text style={styles.statLabelText}>Terpakai</Text>
+                <Text style={styles.statLabelText}>{t('used')}</Text>
               </View>
               <Text style={styles.statValueText}>
                 {formatCurrency(totalSpent)}
@@ -283,7 +283,7 @@ export default function BudgetScreen() {
             <View style={styles.statBox}>
               <View style={styles.statLabelRow}>
                 <TrendingUp color="#10b981" size={14} />
-                <Text style={styles.statLabelText}>Tersisa</Text>
+                <Text style={styles.statLabelText}>{t('remaining')}</Text>
               </View>
               <Text
                 style={[
@@ -400,7 +400,7 @@ export default function BudgetScreen() {
               }}
             >
               <Plus color="#10b981" size={14} />
-              <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#10b981' }}>Tambah</Text>
+              <Text style={{ fontFamily: 'Inter_SemiBold', fontSize: 12, color: '#10b981' }}>{t('add')}</Text>
             </TouchableOpacity>
           </View>
 

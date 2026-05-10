@@ -7,8 +7,10 @@ import { GoogleIcon } from '../../src/components/GoogleIcon';
 import { Fingerprint } from 'lucide-react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -107,7 +109,7 @@ export default function LoginScreen() {
     <View className="flex-1 bg-background justify-center px-container-margin py-section-gap">
       <View className="items-center mb-10">
         <Text className="font-h1 text-4xl text-primary tracking-tight">DuaSaku</Text>
-        <Text className="font-body-md text-on-surface-variant mt-2">Manage your finances elegantly</Text>
+        <Text className="font-body-md text-on-surface-variant mt-2">{t('manageFinancesElegantly')}</Text>
       </View>
 
       <View className="flex-col gap-4">
@@ -141,7 +143,7 @@ export default function LoginScreen() {
           onPress={signIn}
           disabled={loading}
         >
-          {loading ? <ActivityIndicator color="#fff" /> : <Text className="font-label-lg text-on-primary">Sign In</Text>}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text className="font-label-lg text-on-primary">{t('signIn')}</Text>}
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -149,12 +151,12 @@ export default function LoginScreen() {
           onPress={signUp}
           disabled={loading}
         >
-          <Text className="font-label-lg text-foreground">Sign Up</Text>
+          <Text className="font-label-lg text-foreground">{t('signUp')}</Text>
         </TouchableOpacity>
 
         <View className="flex-row items-center my-2">
           <View className="flex-1 h-[1px] bg-[#27272a]" />
-          <Text className="font-body-sm text-on-surface-variant px-4">OR</Text>
+          <Text className="font-body-sm text-on-surface-variant px-4">{t('or')}</Text>
           <View className="flex-1 h-[1px] bg-[#27272a]" />
         </View>
 
@@ -164,7 +166,7 @@ export default function LoginScreen() {
           disabled={loading}
         >
           <GoogleIcon size={24} />
-          <Text className="font-label-lg text-black font-semibold">Continue with Google</Text>
+          <Text className="font-label-lg text-black font-semibold">{t('continueWithGoogle')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 

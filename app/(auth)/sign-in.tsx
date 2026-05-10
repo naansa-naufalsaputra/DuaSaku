@@ -239,7 +239,7 @@ export default function SignInScreen() {
           <View className="w-full gap-y-5">
             {/* Email Input */}
             <View className="gap-y-2">
-              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">Email Address</Text>
+              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">{t('emailAddress')}</Text>
               <TextInput
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-base"
                 placeholder="name@example.com"
@@ -267,12 +267,12 @@ export default function SignInScreen() {
             {/* Password Input */}
             <View className="gap-y-2">
               <View className="flex-row justify-between items-center ml-1">
-                <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest">Password</Text>
+                <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest">{t('password')}</Text>
                 <TouchableOpacity 
                   onPress={handleResetPassword} 
                   activeOpacity={0.7}
                 >
-                  <Text className="text-on-surface-variant active:text-white text-xs font-medium">Lupa Password?</Text>
+                  <Text className="text-on-surface-variant active:text-white text-xs font-medium">{t('forgotPassword')}</Text>
                 </TouchableOpacity>
               </View>
               <View className="relative">
@@ -308,14 +308,14 @@ export default function SignInScreen() {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white text-lg font-bold tracking-tight">Sign In</Text>
+                <Text className="text-white text-lg font-bold tracking-tight">{t('signIn')}</Text>
               )}
             </TouchableOpacity>
 
             {/* Biometric Option */}
             {isBiometricAvailable && (
               <View className="items-center mt-4">
-                <Text className="text-white/30 text-xs mb-4 uppercase tracking-tighter">Or use biometrics</Text>
+                <Text className="text-white/30 text-xs mb-4 uppercase tracking-tighter">{t('orUseBiometrics')}</Text>
                 <TouchableOpacity 
                   onPress={() => handleBiometricAuth()}
                   className="w-16 h-16 rounded-full bg-white/5 border border-white/10 items-center justify-center"
@@ -330,7 +330,7 @@ export default function SignInScreen() {
             <View className="flex-row justify-center mt-6 mb-10">
               <Text className="text-white/40">Don&apos;t have an account? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/sign-up')}>
-                <Text className="text-[#8b5cf6] font-bold">Sign Up</Text>
+                <Text className="text-[#8b5cf6] font-bold">{t('signUp')}</Text>
               </TouchableOpacity>
             </View>
           </View>

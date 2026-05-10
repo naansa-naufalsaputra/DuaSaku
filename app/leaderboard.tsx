@@ -36,7 +36,7 @@ export default function LeaderboardScreen() {
         >
           <ChevronLeft color="white" size={24} />
         </TouchableOpacity>
-        <Text className="text-white font-h2 text-xl">Leaderboard</Text>
+        <Text className="text-white font-h2 text-xl">{t('leaderboardTitle')}</Text>
         <TouchableOpacity className="p-2 bg-surface-container rounded-full border border-white/5">
           <Users color="white" size={20} />
         </TouchableOpacity>
@@ -90,13 +90,13 @@ export default function LeaderboardScreen() {
                 <Text className="text-2xl">👤</Text>
               </View>
               <View>
-                <Text className="text-white font-bold text-lg">Kamu</Text>
-                <Text className="text-indigo-300 text-xs font-medium">Global Rank: #42</Text>
+                <Text className="text-white font-bold text-lg">{t('you')}</Text>
+                <Text className="text-indigo-300 text-xs font-medium">{t('globalRank', { rank: 42 })}</Text>
               </View>
             </View>
             <View className="items-end">
               <Text className="text-white font-bold text-xl">{healthScore * 10}</Text>
-              <Text className="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Points</Text>
+              <Text className="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">{t('points')}</Text>
             </View>
           </View>
           
@@ -105,21 +105,21 @@ export default function LeaderboardScreen() {
           <View className="flex-row justify-around">
             <View className="items-center">
               <Text className="text-white font-bold text-base">🔥 {streakDays}</Text>
-              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Streak</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">{t('streak')}</Text>
             </View>
             <View className="items-center">
               <Text className="text-white font-bold text-base">3</Text>
-              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Badges</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">{t('badges')}</Text>
             </View>
             <View className="items-center">
               <Text className="text-white font-bold text-base">Top 15%</Text>
-              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Percentile</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">{t('percentile')}</Text>
             </View>
           </View>
         </LinearGradient>
 
         {/* Full List */}
-        <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-widest mb-6 ml-2">Top Saviours</Text>
+        <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-widest mb-6 ml-2">{t('topSaviours')}</Text>
         
         <View className="mb-20">
           {MOCK_LEADERBOARD.map((item) => (
@@ -145,7 +145,7 @@ export default function LeaderboardScreen() {
               
               <View className="items-end">
                 <Text className="text-white font-bold text-sm">{item.score.toLocaleString()}</Text>
-                <Text className="text-on-surface-variant/50 text-[8px] font-bold uppercase tracking-wider">Points</Text>
+                <Text className="text-on-surface-variant/50 text-[8px] font-bold uppercase tracking-wider">{t('points')}</Text>
               </View>
             </View>
           ))}

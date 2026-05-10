@@ -233,12 +233,12 @@ export default function RootLayout() {
           <View style={styles.lockIconContainer}>
             <Lock color="#10b981" size={40} />
           </View>
-          <Text style={styles.lockedTitle}>DuaSaku Terkunci</Text>
+          <Text style={styles.lockedTitle}>{t('appLocked')}</Text>
           <Text style={styles.lockedSubtitle}>{t('unlockDesc') || 'Gunakan biometrik untuk masuk'}</Text>
           
           <TouchableOpacity testID="lock_screen_unlock_button" style={styles.retryButton} onPress={authenticate} activeOpacity={0.7}>
             <Fingerprint color="#fafafa" size={24} />
-            <Text style={styles.retryText}>Buka Kunci</Text>
+            <Text style={styles.retryText}>{t('unlockBtn')}</Text>
           </TouchableOpacity>
         </View>
       );

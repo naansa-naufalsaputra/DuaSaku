@@ -6,13 +6,14 @@ import { useSettingsStore } from '../src/store/useSettingsStore';
 import { useHaptic } from '../src/hooks/useHaptic';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Sparkles } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get('window');
 
 interface TutorialSlide {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   lottie: string;
   colors: [string, string, ...string[]];
 }
@@ -20,29 +21,29 @@ interface TutorialSlide {
 const SLIDES: TutorialSlide[] = [
   {
     id: '1',
-    title: 'Halo, Aku DuaSaku!',
-    description: 'Asisten finansial pribadimu yang siap membantu mengelola uang dengan cerdas dan menyenangkan.',
+    titleKey: 'tutorialTitle1',
+    descriptionKey: 'tutorialDesc1',
     lottie: 'https://lottie.host/819d44c8-3c5e-42c2-8419-867c2957f864/D3m6Jv2X1R.json', // Welcome robot
     colors: ['#1e293b', '#0f172a']
   },
   {
     id: '2',
-    title: 'Catat Lewat Suara',
-    description: 'Cukup bicara "Tadi beli kopi 20 ribu", dan aku akan otomatis mencatatnya untukmu. Praktis kan?',
+    titleKey: 'tutorialTitle2',
+    descriptionKey: 'tutorialDesc2',
     lottie: 'https://lottie.host/9e4d0752-1678-4395-8149-6e3e55389656/Z8B9fC6D6V.json', // Voice/Audio waves
     colors: ['#1e1b4b', '#0f172a']
   },
   {
     id: '3',
-    title: 'Analisis Masa Depan',
-    description: 'Aku bisa memprediksi sisa saldomu di akhir bulan dan memberi saran anggaran agar kamu tetap hemat.',
+    titleKey: 'tutorialTitle3',
+    descriptionKey: 'tutorialDesc3',
     lottie: 'https://lottie.host/6e2a9e3e-4b6d-4c6e-8d6f-7e6d5c4b3a21/insight.json', // Chart/Insights
     colors: ['#164e63', '#0f172a']
   },
   {
     id: '4',
-    title: 'Kumpulkan Lencana',
-    description: 'Semakin disiplin kamu mencatat, semakin tinggi skor kesehatan finansialmu dan lencana keren yang kamu dapat!',
+    titleKey: 'tutorialTitle4',
+    descriptionKey: 'tutorialDesc4',
     lottie: 'https://lottie.host/a8b9c0d1-e2f3-4a5b-6c7d-8e9f0a1b2c3d/badge.json', // Trophy/Medal
     colors: ['#14532d', '#0f172a']
   }
@@ -53,6 +54,7 @@ export default function TutorialScreen() {
   const flatListRef = useRef<FlatList>(null);
   const { hapticMedium, hapticSuccess } = useHaptic();
   const setHasCompletedTutorial = useSettingsStore(state => state.setHasCompletedTutorial);
+  const { t } = useTranslation();
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
@@ -76,10 +78,10 @@ export default function TutorialScreen() {
         />
       </View>
       <Text className="text-white text-3xl font-bold text-center mb-4" style={{ fontFamily: 'Manrope_800ExtraBold' }}>
-        {item.title}
+        {t(item.titleKey)}
       </Text>
       <Text className="text-on-surface-variant text-lg text-center leading-7">
-        {item.description}
+        {t(item.descriptionKey)}
       </Text>
     </View>
   );
@@ -122,7 +124,7 @@ export default function TutorialScreen() {
           onPress={handleNext}
         >
           <Text className="text-white font-bold text-lg">
-            {currentIndex === SLIDES.length - 1 ? 'Mulai Sekarang' : 'Lanjutkan'}
+            {currentIndex === SLIDES.length - 1 ? t('startNow') : t('continue')}
           </Text>
           {currentIndex === SLIDES.length - 1 ? (
             <Sparkles color="white" size={20} />
@@ -139,7 +141,7 @@ export default function TutorialScreen() {
               router.replace('/(tabs)');
             }}
           >
-            <Text className="text-on-surface-variant font-medium">Lewati Tutorial</Text>
+            <Text className="text-on-surface-variant font-medium">{t('skipTutorial')}</Text>
           </TouchableOpacity>
         )}
       </View>

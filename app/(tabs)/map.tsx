@@ -92,7 +92,7 @@ export default function MapScreen() {
       {/* Overlays */}
       <View className="absolute top-14 left-6 right-6 flex-row justify-between items-center">
         <View className="bg-[#18181b]/90 px-4 py-2 rounded-2xl border border-[#27272a] shadow-lg">
-          <Text className="text-foreground font-h3 text-base">Expense Map</Text>
+          <Text className="text-foreground font-h3 text-base">{t('expenseMap')}</Text>
           <Text className="text-on-surface-variant text-xs">{markers.length} Locations</Text>
         </View>
         <TouchableOpacity className="w-12 h-12 bg-[#18181b]/90 rounded-2xl items-center justify-center border border-[#27272a] shadow-lg">

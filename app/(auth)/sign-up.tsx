@@ -175,7 +175,7 @@ export default function SignUpScreen() {
           <View className="w-full gap-y-5">
             {/* Full Name Input */}
             <View className="gap-y-2">
-              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">Full Name</Text>
+              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">{t('fullName')}</Text>
               <View className="relative">
                 <TextInput
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-base pl-12"
@@ -193,7 +193,7 @@ export default function SignUpScreen() {
 
             {/* Email Input */}
             <View className="gap-y-2">
-              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">Email Address</Text>
+              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">{t('emailAddress')}</Text>
               <View className="relative">
                 <TextInput
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-base pl-12"
@@ -225,7 +225,7 @@ export default function SignUpScreen() {
 
             {/* Password Input */}
             <View className="gap-y-2">
-              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">Password</Text>
+              <Text className="text-white/70 text-xs font-semibold uppercase tracking-widest ml-1">{t('password')}</Text>
               <View className="relative">
                 <TextInput
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-base pl-12 pr-14"
@@ -262,13 +262,13 @@ export default function SignUpScreen() {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white text-lg font-bold tracking-tight">Create Account</Text>
+                <Text className="text-white text-lg font-bold tracking-tight">{t('createAccount')}</Text>
               )}
             </TouchableOpacity>
 
             <View className="flex-row items-center my-2">
               <View className="flex-1 h-[1px] bg-white/10" />
-              <Text className="text-white/20 text-xs font-bold px-4">OR</Text>
+              <Text className="text-white/20 text-xs font-bold px-4">{t('or')}</Text>
               <View className="flex-1 h-[1px] bg-white/10" />
             </View>
 
@@ -280,14 +280,14 @@ export default function SignUpScreen() {
               disabled={loading}
             >
               <GoogleIcon size={20} />
-              <Text className="text-black text-base font-semibold ml-2">Continue with Google</Text>
+              <Text className="text-black text-base font-semibold ml-2">{t('continueWithGoogle')}</Text>
             </TouchableOpacity>
 
             {/* Footer */}
             <View className="flex-row justify-center mt-6 mb-10">
-              <Text className="text-white/40">Already have an account? </Text>
+              <Text className="text-white/40">{t('alreadyHaveAccount')}</Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
-                <Text className="text-[#8b5cf6] font-bold">Sign In</Text>
+                <Text className="text-[#8b5cf6] font-bold">{t('signIn')}</Text>
               </TouchableOpacity>
             </View>
           </View>

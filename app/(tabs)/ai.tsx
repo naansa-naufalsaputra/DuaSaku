@@ -315,18 +315,18 @@ export default function AIScreen() {
                 <Wallet color="#c084fc" size={24} />
               </View>
               <View>
-                <Text className="text-purple-400 text-[12px] uppercase font-bold tracking-widest mb-0.5">Analisis Transaksi</Text>
+                <Text className="text-purple-400 text-[12px] uppercase font-bold tracking-widest mb-0.5">{t('transactionAnalysis')}</Text>
                 <Text className="text-white font-bold text-lg">{title}</Text>
               </View>
             </View>
             
             <View className="bg-black/40 rounded-2xl p-4 mb-4 border border-white/5">
               <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-on-surface-variant text-xs">Kategori</Text>
+                <Text className="text-on-surface-variant text-xs">{t('category')}</Text>
                 <Text className="text-white font-semibold">{category}</Text>
               </View>
               <View className="flex-row justify-between items-center">
-                <Text className="text-on-surface-variant text-xs">Jumlah</Text>
+                <Text className="text-on-surface-variant text-xs">{t('amount')}</Text>
                 <Text className="text-purple-400 font-bold text-lg">Rp {parseInt(amount).toLocaleString()}</Text>
               </View>
             </View>
@@ -336,7 +336,7 @@ export default function AIScreen() {
               activeOpacity={0.8}
               className="bg-purple-600 flex-row items-center justify-center py-4 rounded-2xl shadow-lg"
             >
-              <Text className="text-white font-bold text-base mr-2">Simpan ke Catatan</Text>
+              <Text className="text-white font-bold text-base mr-2">{t('saveToNotes')}</Text>
               <ArrowRight color="white" size={18} />
             </TouchableOpacity>
           </View>
@@ -377,14 +377,14 @@ export default function AIScreen() {
             className="absolute top-16 right-6 bg-amber-500/20 border border-amber-500/50 px-3 py-1 rounded-full flex-row items-center gap-1"
           >
             <View className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-            <Text className="text-amber-500 text-[12px] font-bold uppercase tracking-widest">Hybrid Mode (Local)</Text>
+            <Text className="text-amber-500 text-[12px] font-bold uppercase tracking-widest">{t('hybridModeLocal')}</Text>
           </Animated.View>
         )}
 
         <View className="flex-row items-center gap-2 mt-[-10]">
           <View className="absolute w-24 h-24 bg-purple-600/20 rounded-full blur-3xl" />
         </View>
-        <Text className="text-white text-lg font-bold -mt-4" style={{ fontFamily: 'Manrope_Bold' }}>AI Financial Advisor</Text>
+        <Text className="text-white text-lg font-bold -mt-4" style={{ fontFamily: 'Manrope_Bold' }}>{t('aiFinancialAdvisor')}</Text>
         
         {/* Search Bar Glassmorphism */}
         <View className="w-full px-6 mt-4">
