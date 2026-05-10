@@ -107,7 +107,7 @@ export default function HistoryScreen() {
       <View className="px-6 pt-14 pb-4 flex-row items-center justify-between border-b border-white/5">
         <TouchableOpacity 
           onPress={() => router.back()}
-          className="w-10 h-10 bg-slate-800/50 rounded-full items-center justify-center border border-white/5"
+          className="w-10 h-10 bg-surface-container rounded-full items-center justify-center border border-white/5"
         >
           <ChevronLeft color="white" size={24} />
         </TouchableOpacity>
@@ -117,7 +117,7 @@ export default function HistoryScreen() {
 
       {/* Search & Filter */}
       <View className="px-6 mt-6 gap-y-4">
-        <View className="flex-row items-center bg-slate-800/30 rounded-2xl px-4 py-3 border border-white/5">
+        <View className="flex-row items-center bg-surface-container rounded-2xl px-4 py-3 border border-white/5">
           <Search color="#94a3b8" size={20} />
           <TextInput 
             className="flex-1 ml-3 text-white text-base"
@@ -141,9 +141,9 @@ export default function HistoryScreen() {
                 hapticLight();
                 setFilter(f as any);
               }}
-              className={`px-5 py-2.5 rounded-full border ${filter === f ? 'bg-purple-600 border-purple-400' : 'bg-slate-800/30 border-white/5'}`}
+              className={`px-5 py-2.5 rounded-full border ${filter === f ? 'bg-purple-600 border-purple-400' : 'bg-surface-container border-white/5'}`}
             >
-              <Text className={`capitalize font-bold text-sm ${filter === f ? 'text-white' : 'text-slate-400'}`}>
+              <Text className={`capitalize font-bold text-sm ${filter === f ? 'text-white' : 'text-on-surface-variant'}`}>
                 {t(f)}
               </Text>
             </TouchableOpacity>
@@ -167,30 +167,30 @@ export default function HistoryScreen() {
           stickySectionHeadersEnabled={false}
           renderSectionHeader={({ section: { title } }) => (
             <View className="mt-6 mb-4">
-              <Text className="text-slate-500 text-xs font-bold uppercase tracking-[2px]">{title}</Text>
+              <Text className="text-on-surface-variant text-xs font-bold uppercase tracking-[2px]">{title}</Text>
             </View>
           )}
           renderItem={({ item }) => (
             <TouchableOpacity 
               activeOpacity={0.7}
-              className="mb-4 bg-slate-900/40 p-4 rounded-3xl border border-white/5 flex-row items-center justify-between"
+              className="mb-4 bg-surface-container p-4 rounded-3xl border border-white/5 flex-row items-center justify-between"
             >
               <View className="flex-row items-center gap-4">
-                <View className="w-12 h-12 bg-slate-800/80 rounded-2xl items-center justify-center border border-white/10">
+                <View className="w-12 h-12 bg-surface-container rounded-2xl items-center justify-center border border-white/10">
                   <Text className="text-2xl">
                     {CATEGORY_EMOJI[item.category] || '📦'}
                   </Text>
                 </View>
                 <View>
                   <Text className="text-white font-bold text-base">{item.title || item.note || 'Transaksi'}</Text>
-                  <Text className="text-slate-500 text-xs font-medium uppercase tracking-wider">{item.category || 'Other'}</Text>
+                  <Text className="text-on-surface-variant text-xs font-medium uppercase tracking-wider">{item.category || 'Other'}</Text>
                 </View>
               </View>
               <View className="items-end">
                 <Text className={`font-bold text-base ${item.type === 'income' ? 'text-green-400' : 'text-white'}`}>
                   {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
                 </Text>
-                <Text className="text-slate-600 text-[10px]">
+                <Text className="text-on-surface-variant/50 text-[10px]">
                   {new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </View>

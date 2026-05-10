@@ -28,7 +28,7 @@ export default function LeaderboardScreen() {
       {/* Header */}
       <View className="px-6 pt-14 pb-6 flex-row items-center justify-between">
         <TouchableOpacity 
-          className="p-2 bg-slate-800/50 rounded-full border border-white/5"
+          className="p-2 bg-surface-container rounded-full border border-white/5"
           onPress={() => {
             hapticLight();
             router.back();
@@ -37,7 +37,7 @@ export default function LeaderboardScreen() {
           <ChevronLeft color="white" size={24} />
         </TouchableOpacity>
         <Text className="text-white font-h2 text-xl">Leaderboard</Text>
-        <TouchableOpacity className="p-2 bg-slate-800/50 rounded-full border border-white/5">
+        <TouchableOpacity className="p-2 bg-surface-container rounded-full border border-white/5">
           <Users color="white" size={20} />
         </TouchableOpacity>
       </View>
@@ -47,21 +47,21 @@ export default function LeaderboardScreen() {
         <View className="flex-row justify-center items-end gap-4 mt-8 mb-10 h-48">
           {/* Rank 2 */}
           <View className="items-center">
-            <View className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-400 items-center justify-center mb-2">
+            <View className="w-14 h-14 rounded-full bg-surface-container border-2 border-slate-400 items-center justify-center mb-2">
               <Text className="text-2xl">{MOCK_LEADERBOARD[1].avatar}</Text>
             </View>
-            <View className="w-16 h-20 bg-slate-800/60 rounded-t-2xl border-t border-x border-slate-400/30 items-center pt-2">
-              <Text className="text-slate-400 font-bold text-xs">#2</Text>
+            <View className="w-16 h-20 bg-surface-container rounded-t-2xl border-t border-x border-slate-400/30 items-center pt-2">
+              <Text className="text-on-surface-variant font-bold text-xs">#2</Text>
               <Medal color="#94a3b8" size={16} />
             </View>
           </View>
 
           {/* Rank 1 */}
           <View className="items-center">
-            <View className="w-18 h-18 rounded-full bg-slate-800 border-2 border-amber-400 items-center justify-center mb-2 shadow-lg shadow-amber-400/20">
+            <View className="w-18 h-18 rounded-full bg-surface-container border-2 border-amber-400 items-center justify-center mb-2 shadow-lg shadow-amber-400/20">
               <Text className="text-3xl">{MOCK_LEADERBOARD[0].avatar}</Text>
             </View>
-            <View className="w-20 h-28 bg-slate-800/80 rounded-t-2xl border-t border-x border-amber-400/30 items-center pt-2">
+            <View className="w-20 h-28 bg-surface-container rounded-t-2xl border-t border-x border-amber-400/30 items-center pt-2">
               <Trophy color="#fbbf24" size={24} />
               <Text className="text-amber-400 font-bold text-sm mt-1">#1</Text>
             </View>
@@ -69,10 +69,10 @@ export default function LeaderboardScreen() {
 
           {/* Rank 3 */}
           <View className="items-center">
-            <View className="w-14 h-14 rounded-full bg-slate-800 border-2 border-amber-700 items-center justify-center mb-2">
+            <View className="w-14 h-14 rounded-full bg-surface-container border-2 border-amber-700 items-center justify-center mb-2">
               <Text className="text-2xl">{MOCK_LEADERBOARD[2].avatar}</Text>
             </View>
-            <View className="w-16 h-16 bg-slate-800/40 rounded-t-2xl border-t border-x border-amber-700/30 items-center pt-2">
+            <View className="w-16 h-16 bg-surface-container rounded-t-2xl border-t border-x border-amber-700/30 items-center pt-2">
               <Text className="text-amber-700 font-bold text-xs">#3</Text>
               <Medal color="#b45309" size={16} />
             </View>
@@ -105,39 +105,39 @@ export default function LeaderboardScreen() {
           <View className="flex-row justify-around">
             <View className="items-center">
               <Text className="text-white font-bold text-base">🔥 {streakDays}</Text>
-              <Text className="text-slate-500 text-[8px] font-bold uppercase">Streak</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Streak</Text>
             </View>
             <View className="items-center">
               <Text className="text-white font-bold text-base">3</Text>
-              <Text className="text-slate-500 text-[8px] font-bold uppercase">Badges</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Badges</Text>
             </View>
             <View className="items-center">
               <Text className="text-white font-bold text-base">Top 15%</Text>
-              <Text className="text-slate-500 text-[8px] font-bold uppercase">Percentile</Text>
+              <Text className="text-on-surface-variant text-[8px] font-bold uppercase">Percentile</Text>
             </View>
           </View>
         </LinearGradient>
 
         {/* Full List */}
-        <Text className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 ml-2">Top Saviours</Text>
+        <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-widest mb-6 ml-2">Top Saviours</Text>
         
         <View className="mb-20">
           {MOCK_LEADERBOARD.map((item) => (
             <View 
               key={item.id}
-              className="flex-row items-center justify-between mb-4 bg-slate-900/40 p-4 rounded-3xl border border-white/5"
+              className="flex-row items-center justify-between mb-4 bg-surface-container p-4 rounded-3xl border border-white/5"
             >
               <View className="flex-row items-center gap-4">
                 <View className="w-8 items-center">
-                  <Text className={`font-bold ${item.rank <= 3 ? 'text-white' : 'text-slate-500'}`}>{item.rank}</Text>
+                  <Text className={`font-bold ${item.rank <= 3 ? 'text-white' : 'text-on-surface-variant'}`}>{item.rank}</Text>
                 </View>
-                <View className="w-10 h-10 bg-slate-800 rounded-xl items-center justify-center">
+                <View className="w-10 h-10 bg-surface-container rounded-xl items-center justify-center">
                   <Text className="text-lg">{item.avatar}</Text>
                 </View>
                 <View>
                   <Text className="text-white font-bold text-sm">{item.name}</Text>
                   <View className="flex-row items-center gap-1">
-                    <Text className="text-slate-500 text-[10px]">🔥 {item.streak} days</Text>
+                    <Text className="text-on-surface-variant text-[10px]">🔥 {item.streak} days</Text>
                     {item.trend === 'up' && <TrendingUp size={10} color="#10b981" />}
                   </View>
                 </View>
@@ -145,7 +145,7 @@ export default function LeaderboardScreen() {
               
               <View className="items-end">
                 <Text className="text-white font-bold text-sm">{item.score.toLocaleString()}</Text>
-                <Text className="text-slate-600 text-[8px] font-bold uppercase tracking-wider">Points</Text>
+                <Text className="text-on-surface-variant/50 text-[8px] font-bold uppercase tracking-wider">Points</Text>
               </View>
             </View>
           ))}

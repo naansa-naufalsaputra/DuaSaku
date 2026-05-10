@@ -306,7 +306,7 @@ export default function AIScreen() {
             </Text>
           ) : null}
           
-          <View className="bg-slate-900/80 border border-purple-500/40 rounded-3xl p-5 shadow-2xl overflow-hidden">
+          <View className="bg-surface-container border border-purple-500/40 rounded-3xl p-5 shadow-2xl overflow-hidden">
             {/* Glossy Background Accent */}
             <View className="absolute -right-6 -top-6 w-24 h-24 bg-purple-600/10 rounded-full" />
             
@@ -322,11 +322,11 @@ export default function AIScreen() {
             
             <View className="bg-black/40 rounded-2xl p-4 mb-4 border border-white/5">
               <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-slate-400 text-xs">Kategori</Text>
+                <Text className="text-on-surface-variant text-xs">Kategori</Text>
                 <Text className="text-white font-semibold">{category}</Text>
               </View>
               <View className="flex-row justify-between items-center">
-                <Text className="text-slate-400 text-xs">Jumlah</Text>
+                <Text className="text-on-surface-variant text-xs">Jumlah</Text>
                 <Text className="text-purple-400 font-bold text-lg">Rp {parseInt(amount).toLocaleString()}</Text>
               </View>
             </View>
@@ -413,7 +413,7 @@ export default function AIScreen() {
         
         <TouchableOpacity 
           onPress={handleClearChat}
-          className="absolute right-6 top-16 w-8 h-8 bg-slate-800/50 rounded-full items-center justify-center border border-white/5"
+          className="absolute right-6 top-16 w-8 h-8 bg-surface-container rounded-full items-center justify-center border border-white/5"
         >
           <RotateCcw color="#94a3b8" size={16} />
         </TouchableOpacity>
@@ -433,7 +433,7 @@ export default function AIScreen() {
             className={`mb-6 flex-row ${item.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {item.role === 'assistant' && (
-              <View className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center mr-2 mt-auto border border-white/10">
+              <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mr-2 mt-auto border border-white/10">
                 <Sparkles color="#a855f7" size={16} />
               </View>
             )}
@@ -441,8 +441,8 @@ export default function AIScreen() {
             <View 
               className={`max-w-[85%] p-4 ${
                 item.role === 'user' 
-                ? 'bg-slate-800 rounded-2xl rounded-br-none' 
-                : 'bg-slate-900/60 border border-purple-500/30 rounded-2xl rounded-bl-[4px]'
+                ? 'bg-surface-container rounded-2xl rounded-br-none' 
+                : 'bg-surface-container border border-purple-500/30 rounded-2xl rounded-bl-[4px]'
               } shadow-sm`}
               style={item.role === 'assistant' ? {
                 shadowColor: '#a855f7',
@@ -472,10 +472,10 @@ export default function AIScreen() {
               )}
               
               <View className="flex-row justify-between items-center mt-2 border-t border-white/5 pt-2">
-                <Text className="text-slate-600 text-[12px] uppercase tracking-tighter">
+                <Text className="text-on-surface-variant/50 text-[12px] uppercase tracking-tighter">
                   {item.role === 'assistant' ? 'DuaSaku AI' : 'Anda'}
                 </Text>
-                <Text className="text-slate-500 text-[12px]">
+                <Text className="text-on-surface-variant text-[12px]">
                   {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </View>
@@ -491,17 +491,17 @@ export default function AIScreen() {
         ListEmptyComponent={searchQuery.length > 0 ? (
           <Animated.View entering={FadeIn} exiting={FadeOut} className="flex-1 items-center justify-center mt-10">
             <Search color="#334155" size={48} />
-            <Text className="text-slate-500 mt-4 font-body-md text-center">
+            <Text className="text-on-surface-variant mt-4 font-body-md text-center">
               Tidak ada riwayat obrolan terkait &quot;{searchQuery}&quot;
             </Text>
           </Animated.View>
         ) : null}
         ListFooterComponent={loading ? (
           <View className="flex-row justify-start mb-6">
-            <View className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center mr-2 border border-white/10">
+            <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mr-2 border border-white/10">
               <Sparkles color="#a855f7" size={16} />
             </View>
-            <View className="bg-slate-900/40 p-4 rounded-3xl rounded-bl-none border border-white/10">
+            <View className="bg-surface-container p-4 rounded-3xl rounded-bl-none border border-white/10">
               <MoreHorizontal color="#94a3b8" size={24} />
             </View>
           </View>
@@ -514,7 +514,7 @@ export default function AIScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         className="absolute bottom-6 left-4 right-4"
       >
-        <View className="flex-row items-center gap-3 bg-slate-900/95 p-2 rounded-[32px] border border-white/10 shadow-2xl">
+        <View className="flex-row items-center gap-3 bg-surface-container p-2 rounded-[32px] border border-white/10 shadow-2xl">
           <TouchableOpacity 
             onPressIn={() => {
               hapticLight();
@@ -543,7 +543,7 @@ export default function AIScreen() {
           <TouchableOpacity 
             onPress={handleSend}
             disabled={!inputText.trim() || loading}
-            className={`w-12 h-12 rounded-full items-center justify-center ${inputText.trim() ? 'bg-white' : 'bg-slate-800'}`}
+            className={`w-12 h-12 rounded-full items-center justify-center ${inputText.trim() ? 'bg-white' : 'bg-surface-container'}`}
           >
             {loading ? (
               <ActivityIndicator color={inputText.trim() ? '#121212' : '#94a3b8'} size="small" />

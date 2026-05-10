@@ -272,7 +272,7 @@ export default function SignInScreen() {
                   onPress={handleResetPassword} 
                   activeOpacity={0.7}
                 >
-                  <Text className="text-slate-400 active:text-white text-xs font-medium">Lupa Password?</Text>
+                  <Text className="text-on-surface-variant active:text-white text-xs font-medium">Lupa Password?</Text>
                 </TouchableOpacity>
               </View>
               <View className="relative">

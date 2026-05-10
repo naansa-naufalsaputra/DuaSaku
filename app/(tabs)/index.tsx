@@ -251,7 +251,7 @@ export default function DashboardScreen() {
       <View className="px-6 pt-14 pb-4 flex-row justify-between items-center">
         <View>
           <View className="flex-row items-center gap-2">
-            <Text className="text-slate-400 font-body-sm text-sm">{getTimeOfDay()}</Text>
+            <Text className="text-on-surface-variant font-body-sm text-sm">{getTimeOfDay()}</Text>
             {streakDays > 0 && (
               <View className="flex-row items-center bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
                 <Text className="text-xs mr-1">🔥</Text>
@@ -286,10 +286,10 @@ export default function DashboardScreen() {
           </View>
         </View>
         <View className="flex-row gap-3">
-          <TouchableOpacity className="p-2.5 bg-slate-800/50 rounded-full border border-white/5">
+          <TouchableOpacity className="p-2.5 bg-surface-container rounded-full border border-white/5">
             <Bell color="#fafafa" size={20} />
           </TouchableOpacity>
-          <TouchableOpacity className="p-2.5 bg-slate-800/50 rounded-full border border-white/5">
+          <TouchableOpacity className="p-2.5 bg-surface-container rounded-full border border-white/5">
             <Search color="#fafafa" size={20} />
           </TouchableOpacity>
         </View>
@@ -359,7 +359,7 @@ export default function DashboardScreen() {
           <View className="flex-row justify-between items-center mb-4 px-2">
             <View>
               <Text className="text-white font-h2 text-xl">{t('myWallets') || 'Dompet Saya'}</Text>
-              <Text className="text-slate-500 text-xs uppercase font-bold tracking-widest mt-0.5">Manage Assets</Text>
+              <Text className="text-on-surface-variant text-xs uppercase font-bold tracking-widest mt-0.5">Manage Assets</Text>
             </View>
             <TouchableOpacity 
               className="flex-row items-center gap-1.5 bg-purple-500/10 px-4 py-2 rounded-full border border-purple-500/20"
@@ -411,20 +411,20 @@ export default function DashboardScreen() {
                 </TouchableOpacity>
               ))
             ) : (
-              <View className="w-full h-32 bg-slate-900/20 rounded-[32px] border border-white/5 items-center justify-center border-dashed px-10">
-                <Text className="text-slate-600 text-center text-sm">No wallets found. Add one to track your assets.</Text>
+              <View className="w-full h-32 bg-surface-container rounded-[32px] border border-white/5 items-center justify-center border-dashed px-10">
+                <Text className="text-on-surface-variant/50 text-center text-sm">No wallets found. Add one to track your assets.</Text>
               </View>
             )}
             
             {/* Add Wallet Placeholder */}
             <TouchableOpacity 
-              className="w-52 h-32 bg-slate-900/20 p-5 rounded-[32px] border border-white/10 border-dashed mr-4 items-center justify-center"
+              className="w-52 h-32 bg-surface-container p-5 rounded-[32px] border border-white/10 border-dashed mr-4 items-center justify-center"
               onPress={() => hapticMedium()}
             >
-              <View className="w-12 h-12 bg-slate-800/50 rounded-full items-center justify-center mb-2 border border-white/5">
+              <View className="w-12 h-12 bg-surface-container rounded-full items-center justify-center mb-2 border border-white/5">
                 <Plus color="#94a3b8" size={24} />
               </View>
-              <Text className="text-slate-500 font-bold text-xs">Tambah Dompet</Text>
+              <Text className="text-on-surface-variant font-bold text-xs">Tambah Dompet</Text>
             </TouchableOpacity>
           </Animated.ScrollView>
         </View>
@@ -442,7 +442,7 @@ export default function DashboardScreen() {
               className="px-3 py-1 bg-white/5 rounded-full"
               onPress={() => router.push('/leaderboard' as any)}
             >
-              <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">Top players</Text>
+              <Text className="text-on-surface-variant text-xs font-bold uppercase tracking-wider">Top players</Text>
             </TouchableOpacity>
           </View>
 
@@ -461,10 +461,10 @@ export default function DashboardScreen() {
                 <View className="flex-row items-center gap-2 mb-1">
                   <Text className="text-orange-400 font-bold text-xs uppercase tracking-[2px]">Active Challenge</Text>
                   <View className="w-1.5 h-1.5 bg-orange-500/30 rounded-full" />
-                  <Text className="text-slate-500 font-bold text-xs uppercase tracking-wider">Expires in 2d</Text>
+                  <Text className="text-on-surface-variant font-bold text-xs uppercase tracking-wider">Expires in 2d</Text>
                 </View>
                 <Text className="text-white font-bold text-xl">7-Day Savings Streak</Text>
-                <Text className="text-slate-400 text-sm mt-1 leading-4">Don't spend more than Rp 50k today to keep your streak alive!</Text>
+                <Text className="text-on-surface-variant text-sm mt-1 leading-4">Don't spend more than Rp 50k today to keep your streak alive!</Text>
               </View>
               <View className="items-center bg-orange-500/10 p-4 rounded-[28px] border border-orange-500/20">
                 <Text className="text-white font-bold text-3xl">🔥{streakDays}</Text>
@@ -484,11 +484,11 @@ export default function DashboardScreen() {
             <View className="flex-row justify-between items-center">
               <View className="flex-row -space-x-2">
                 {[1, 2, 3].map((i) => (
-                  <View key={i} className="w-8 h-8 rounded-full bg-slate-800 border border-slate-900 items-center justify-center">
+                  <View key={i} className="w-8 h-8 rounded-full bg-surface-container border border-border items-center justify-center">
                     <Text className="text-xs">👤</Text>
                   </View>
                 ))}
-                <Text className="text-slate-500 text-xs font-bold ml-4 mt-1">+420 participants</Text>
+                <Text className="text-on-surface-variant text-xs font-bold ml-4 mt-1">+420 participants</Text>
               </View>
               <Text className="text-orange-400 font-bold text-sm">Lihat Leaderboard</Text>
             </View>
@@ -509,7 +509,7 @@ export default function DashboardScreen() {
                 </View>
                 <View>
                   <Text className="text-white font-bold text-base">{useSettingsStore.getState().financialGoal.name}</Text>
-                  <Text className="text-slate-400 text-[12px] uppercase font-bold tracking-widest">Target Keuangan</Text>
+                  <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest">Target Keuangan</Text>
                 </View>
               </View>
               <Text className="text-purple-400 font-bold text-lg">
@@ -517,7 +517,7 @@ export default function DashboardScreen() {
               </Text>
             </View>
 
-            <View className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-white/5">
+            <View className="w-full h-3 bg-surface-container rounded-full overflow-hidden border border-white/5">
               <View 
                 className="h-full bg-purple-500 rounded-full"
                 style={{ 
@@ -527,10 +527,10 @@ export default function DashboardScreen() {
             </View>
             
             <View className="flex-row justify-between mt-3">
-              <Text className="text-slate-400 text-xs font-medium">
+              <Text className="text-on-surface-variant text-xs font-medium">
                 {formatCurrency(useSettingsStore.getState().financialGoal.currentAmount)} terkumpul
               </Text>
-              <Text className="text-slate-500 text-xs">
+              <Text className="text-on-surface-variant text-xs">
                 {formatCurrency(useSettingsStore.getState().financialGoal.targetAmount)}
               </Text>
             </View>
@@ -541,7 +541,7 @@ export default function DashboardScreen() {
         {/* Budget Progress Widget */}
         {topBudget && (
           <TouchableOpacity 
-            className="mt-8 bg-slate-900/60 p-5 rounded-[28px] border border-white/10"
+            className="mt-8 bg-surface-container p-5 rounded-[28px] border border-white/10"
             onPress={() => router.push('/analytics')}
           >
             <View className="flex-row justify-between items-center mb-3">
@@ -549,13 +549,13 @@ export default function DashboardScreen() {
                 <Text className="text-xl">{getCategoryMeta(topBudget.category).emoji}</Text>
                 <Text className="text-white font-bold text-lg">{topBudget.category}</Text>
               </View>
-              <Text className={`font-bold ${topBudget.percentage >= 100 ? 'text-red-400' : topBudget.percentage >= 80 ? 'text-amber-400' : 'text-slate-400'}`}>
+              <Text className={`font-bold ${topBudget.percentage >= 100 ? 'text-red-400' : topBudget.percentage >= 80 ? 'text-amber-400' : 'text-on-surface-variant'}`}>
                 {Math.round(topBudget.percentage)}%
               </Text>
             </View>
             
             {/* Progress Bar Container */}
-            <View className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <View className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
               <View 
                 className={`h-full rounded-full ${topBudget.percentage >= 100 ? 'bg-red-500' : topBudget.percentage >= 80 ? 'bg-amber-500' : 'bg-purple-500'}`}
                 style={{ width: `${Math.min(topBudget.percentage, 100)}%` }}
@@ -563,7 +563,7 @@ export default function DashboardScreen() {
             </View>
             
             <View className="flex-row justify-between mt-2">
-              <Text className="text-slate-500 text-[12px] font-bold uppercase tracking-wider">
+              <Text className="text-on-surface-variant text-[12px] font-bold uppercase tracking-wider">
                 {formatCurrency(topBudget.spent)} {t('of')} {formatCurrency(topBudget.budget_amount)}
               </Text>
               {topBudget.percentage >= 100 && (
@@ -578,7 +578,7 @@ export default function DashboardScreen() {
           <View className="mt-10">
             <View className="flex-row justify-between items-center mb-6">
               <View className="flex-row items-center gap-2">
-                <View className="w-8 h-8 bg-slate-800 rounded-full items-center justify-center border border-white/5">
+                <View className="w-8 h-8 bg-surface-container rounded-full items-center justify-center border border-white/5">
                   <Plus color="#94a3b8" size={16} />
                 </View>
                 <Text className="text-white font-h2 text-xl">Wishlist</Text>
@@ -601,20 +601,20 @@ export default function DashboardScreen() {
                 return (
                   <TouchableOpacity 
                     key={item.id}
-                    className="w-64 bg-slate-900/60 p-5 rounded-[32px] border border-white/10 mr-4"
+                    className="w-64 bg-surface-container p-5 rounded-[32px] border border-white/10 mr-4"
                     onPress={() => hapticLight()}
                   >
                     <View className="flex-row justify-between items-start mb-4">
-                      <View className="w-12 h-12 bg-slate-800 rounded-2xl items-center justify-center border border-white/5">
+                      <View className="w-12 h-12 bg-surface-container rounded-2xl items-center justify-center border border-white/5">
                         <Text style={styles.wishlistEmoji}>{item.icon || '🛍️'}</Text>
                       </View>
                       <View className="items-end">
                         <Text className="text-white font-bold text-lg">{formatCurrency(item.price)}</Text>
-                        <Text className="text-slate-500 text-[12px] uppercase font-bold tracking-widest">{item.name}</Text>
+                        <Text className="text-on-surface-variant text-[12px] uppercase font-bold tracking-widest">{item.name}</Text>
                       </View>
                     </View>
 
-                    <View className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-3">
+                    <View className="w-full h-2 bg-surface-container rounded-full overflow-hidden mb-3">
                       <View 
                         className="h-full bg-purple-500 rounded-full"
                         style={{ width: `${Math.min(progress, 100)}%` }}
@@ -623,7 +623,7 @@ export default function DashboardScreen() {
 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-1">
-                        <Text className="text-slate-400 text-[12px] font-bold uppercase">
+                        <Text className="text-on-surface-variant text-[12px] font-bold uppercase">
                           {Math.round(progress)}% {t('saved')}
                         </Text>
                         <Text className="text-purple-400 text-[12px] font-bold uppercase">
@@ -677,7 +677,7 @@ export default function DashboardScreen() {
             <Text className="text-white font-bold text-base">{t('newTransaction')}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            className="w-14 h-14 bg-slate-800/50 rounded-2xl items-center justify-center border border-white/10"
+            className="w-14 h-14 bg-surface-container rounded-2xl items-center justify-center border border-white/10"
             onPress={() => hapticLight()}
           >
             <CreditCard color="white" size={20} />
@@ -688,7 +688,7 @@ export default function DashboardScreen() {
         <View className="mt-10 mb-20">
           <View className="flex-row justify-between items-center mb-6">
             <View className="flex-row items-center gap-2">
-              <View className="w-8 h-8 bg-slate-800 rounded-full items-center justify-center border border-white/5">
+              <View className="w-8 h-8 bg-surface-container rounded-full items-center justify-center border border-white/5">
                 <History color="#94a3b8" size={16} />
               </View>
               <Text className="text-white font-h2 text-xl">{t('recentTransactions')}</Text>
@@ -722,7 +722,7 @@ export default function DashboardScreen() {
                       {tx.note || tx.title || t('transaction')}
                       {tx._isPending && <Text className="text-amber-400 text-xs italic"> • {t('syncing')}</Text>}
                     </Text>
-                    <Text className="text-slate-500 text-xs font-medium uppercase tracking-wider">{tx.category || t('other')}</Text>
+                    <Text className="text-on-surface-variant text-xs font-medium uppercase tracking-wider">{tx.category || t('other')}</Text>
                   </View>
                 </View>
                 <View className="items-end">
@@ -732,7 +732,7 @@ export default function DashboardScreen() {
                   ]}>
                     {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                   </Text>
-                  <Text className="text-slate-600 text-xs">
+                  <Text className="text-on-surface-variant/50 text-xs">
                     {new Date(tx.created_at || Date.now()).toLocaleDateString(t('language') === 'Bahasa' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short' })}
                   </Text>
                 </View>

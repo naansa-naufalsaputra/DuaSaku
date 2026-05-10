@@ -78,7 +78,7 @@ export default function TutorialScreen() {
       <Text className="text-white text-3xl font-bold text-center mb-4" style={{ fontFamily: 'Manrope_800ExtraBold' }}>
         {item.title}
       </Text>
-      <Text className="text-slate-400 text-lg text-center leading-7">
+      <Text className="text-on-surface-variant text-lg text-center leading-7">
         {item.description}
       </Text>
     </View>
@@ -139,7 +139,7 @@ export default function TutorialScreen() {
               router.replace('/(tabs)');
             }}
           >
-            <Text className="text-slate-500 font-medium">Lewati Tutorial</Text>
+            <Text className="text-on-surface-variant font-medium">Lewati Tutorial</Text>
           </TouchableOpacity>
         )}
       </View>

@@ -611,7 +611,7 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
               {unlockedBadge ? `Badge Unlocked: ${unlockedBadge.name}!` : 'Transaction Saved!'}
             </Text>
             {unlockedBadge && (
-              <Text className="text-slate-400 text-sm mt-2 text-center px-10">
+              <Text className="text-on-surface-variant text-sm mt-2 text-center px-10">
                 {unlockedBadge.description}
               </Text>
             )}
@@ -666,13 +666,13 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
                   onPress={() => setIsTransferMode(false)}
                   className={`flex-1 py-2 rounded-xl items-center ${!isTransferMode ? 'bg-background border border-border' : ''}`}
                 >
-                  <Text className={`font-label-sm ${!isTransferMode ? 'text-foreground' : 'text-slate-500'}`}>Transaksi</Text>
+                  <Text className={`font-label-sm ${!isTransferMode ? 'text-foreground' : 'text-on-surface-variant'}`}>Transaksi</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   onPress={() => setIsTransferMode(true)}
                   className={`flex-1 py-2 rounded-xl items-center ${isTransferMode ? 'bg-background border border-border' : ''}`}
                 >
-                  <Text className={`font-label-sm ${isTransferMode ? 'text-foreground' : 'text-slate-500'}`}>Transfer</Text>
+                  <Text className={`font-label-sm ${isTransferMode ? 'text-foreground' : 'text-on-surface-variant'}`}>Transfer</Text>
                 </TouchableOpacity>
               </View>
 
@@ -683,7 +683,7 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
                       onPress={() => setSelectingWalletFor('from')}
                       className={`flex-1 ${selectingWalletFor === 'from' ? 'border border-primary/50 bg-primary/5 rounded-2xl' : ''}`}
                     >
-                      <Text className="text-xs text-slate-500 uppercase font-bold mb-1 ml-1">Dari</Text>
+                      <Text className="text-xs text-on-surface-variant uppercase font-bold mb-1 ml-1">Dari</Text>
                       <View className="flex-row items-center gap-2 bg-background rounded-2xl px-3 py-2 border border-border/50">
                         <WalletIcon size={14} color="#ef4444" />
                         <Text className="text-sm text-foreground flex-1" numberOfLines={1}>
@@ -700,7 +700,7 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
                       onPress={() => setSelectingWalletFor('to')}
                       className={`flex-1 ${selectingWalletFor === 'to' ? 'border border-primary/50 bg-primary/5 rounded-2xl' : ''}`}
                     >
-                      <Text className="text-xs text-slate-500 uppercase font-bold mb-1 ml-1">Ke</Text>
+                      <Text className="text-xs text-on-surface-variant uppercase font-bold mb-1 ml-1">Ke</Text>
                       <View className="flex-row items-center gap-2 bg-background rounded-2xl px-3 py-2 border border-border/50">
                         <WalletIcon size={14} color="#10b981" />
                         <Text className="text-sm text-foreground flex-1" numberOfLines={1}>
@@ -730,7 +730,7 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
                             <Text className={`text-xs font-bold ${
                               (selectingWalletFor === 'from' ? fromWalletId : toWalletId) === w.id 
                                 ? 'text-[#18181b]' 
-                                : 'text-slate-400'
+                                : 'text-on-surface-variant'
                             }`}>
                               {w.name}
                             </Text>
