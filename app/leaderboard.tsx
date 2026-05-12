@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useHaptic } from '../src/hooks/useHaptic';
 import { PremiumBackground } from '../src/components/PremiumBackground';
 import { useGamificationStore } from '../src/store/useGamificationStore';
+import { useTranslation } from 'react-i18next';
 
 const MOCK_LEADERBOARD = [
   { id: '1', name: 'Naufal Saputra', score: 2850, streak: 12, avatar: '👤', rank: 1, trend: 'up' },
@@ -18,6 +19,7 @@ const MOCK_LEADERBOARD = [
 ];
 
 export default function LeaderboardScreen() {
+  const { t } = useTranslation();
   const { hapticLight } = useHaptic();
   const { streakDays, healthScore } = useGamificationStore();
 

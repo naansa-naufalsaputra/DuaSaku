@@ -3,7 +3,7 @@ import { getSyncQueue } from './offlineSync';
 import { supabase } from './supabase';
 
 const CONFLICT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes (smarter window)
-const storage = new MMKV({ encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
+const storage = new MMKV({ id: 'conflict-resolution', encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
 interface TransactionCheck {
   amount: number;

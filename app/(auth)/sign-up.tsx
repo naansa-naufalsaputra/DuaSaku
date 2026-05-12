@@ -20,11 +20,13 @@ import { supabase } from '../../src/lib/supabase';
 import Toast from 'react-native-toast-message';
 import { GoogleIcon } from '../../src/components/GoogleIcon';
 import { makeRedirectUri } from 'expo-auth-session';
+import { useTranslation } from 'react-i18next';
 
 const EMAIL_DOMAINS = ['@gmail.com', '@yahoo.com', '@outlook.com'];
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   
   // States
   const [fullName, setFullName] = useState('');

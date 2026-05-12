@@ -20,11 +20,13 @@ import * as SecureStore from 'expo-secure-store';
 import { Eye, EyeOff, Fingerprint } from 'lucide-react-native';
 import { supabase } from '../../src/lib/supabase';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 const EMAIL_DOMAINS = ['@gmail.com', '@yahoo.com', '@outlook.com'];
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   
   // States
   const [email, setEmail] = useState('');

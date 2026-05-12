@@ -54,3 +54,10 @@ android_backup/
 tutorial.md
 AGENTS.md
 PROGRESS.md
+
+# Coverage reports
+coverage/
+
+# Temporary build logs
+android/build_output.txt
+

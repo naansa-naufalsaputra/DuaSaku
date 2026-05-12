@@ -23,8 +23,27 @@ import { processDueRecurrences } from '../src/lib/recurringService';
 import { registerBackgroundFetchAsync } from '../src/lib/backgroundTasks';
 import { useCategoryStore } from '../src/store/useCategoryStore';
 import { startRealtimeSync, stopRealtimeSync } from '../src/lib/realtimeSync';
+import { updateDuaSakuWidget } from '../src/widgets/widget-task-handler';
+import { logger } from '../src/lib/logger';
 
 SplashScreen.preventAutoHideAsync();
+
+// Global Error Handler
+if (!__DEV__) {
+  const originalHandler = ErrorUtils.getGlobalHandler();
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    logger.fatal(`Global Crash: ${error.message}`, error, { isFatal });
+    originalHandler(error, isFatal);
+  });
+}
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -44,7 +63,8 @@ export default function RootLayout() {
   const router = useRouter();
 
   const { session, setSession, setUserProfile, biometricEnabled } = useUserStore();
-  const { hasCompletedTutorial } = useSettingsStore();
+  const { hasCompletedTutorial, biometricGracePeriod } = useSettingsStore();
+  const lastBackgroundTime = useRef<number | null>(null);
 
   // Navigation Guard logic
   useEffect(() => {
@@ -139,6 +159,38 @@ export default function RootLayout() {
         }
         if (finalStatus !== 'granted') {
           console.warn('[Notifications] Permission denied — budget alerts will not appear.');
+          return;
+        }
+
+        try {
+          // projectId from app.json
+          const projectId = 'db27d986-6bf8-4dad-9139-1d11fd36ce05';
+          const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+          const pushToken = tokenData.data;
+          
+          if (initialSession?.user) {
+            await supabase.from('profiles').update({ expo_push_token: pushToken }).eq('id', initialSession.user.id);
+          }
+        } catch (error) {
+          console.error('[Notifications] Error fetching push token:', error);
+        }
+
+        // Schedule daily local notification fallback
+        try {
+          await Notifications.cancelAllScheduledNotificationsAsync();
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: "Jangan lupa catat pengeluaranmu! 📝",
+              body: "Sudah 24 jam sejak terakhir kali kamu buka DuaSaku. Yuk, update catatan finansialmu hari ini.",
+              data: { url: "/(tabs)" },
+            },
+            trigger: {
+              seconds: 24 * 60 * 60, // 24 hours
+              repeats: false,
+            } as any,
+          });
+        } catch (error) {
+          console.warn('[Notifications] Error scheduling local fallback:', error);
         }
       };
       setupNotifications();
@@ -174,6 +226,20 @@ export default function RootLayout() {
       handleUrl(event.url);
     });
 
+    const notificationSub = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification received in foreground:', notification);
+    });
+
+    const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
+      const url = response.notification.request.content.data?.url;
+      if (url) {
+        handleUrl(url); // Also, check if it's an internal route that can be navigated to
+        if (url.startsWith('/')) {
+          router.push(url as any);
+        }
+      }
+    });
+
     init();
 
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -194,15 +260,20 @@ export default function RootLayout() {
 
     // Handle AppState changes (Background to Foreground lock)
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active' &&
-        biometricEnabled &&
-        session
-      ) {
-        // App returned to foreground, lock it!
-        setIsUnlocked(false);
-        authenticate();
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        if (appState.current === 'active') {
+          lastBackgroundTime.current = Date.now();
+          updateDuaSakuWidget().catch(console.warn);
+        }
+      } else if (nextAppState === 'active' && appState.current.match(/inactive|background/)) {
+        if (biometricEnabled && session) {
+          const timeInBackground = lastBackgroundTime.current ? (Date.now() - lastBackgroundTime.current) / 1000 : Infinity;
+          if (timeInBackground >= biometricGracePeriod) {
+            setIsUnlocked(false);
+            authenticate();
+          }
+        }
+        lastBackgroundTime.current = null;
       }
       appState.current = nextAppState;
     };
@@ -213,8 +284,10 @@ export default function RootLayout() {
       authSub.unsubscribe();
       appStateSub.remove();
       linkingSub.remove();
+      notificationSub.remove();
+      responseSub.remove();
     };
-  }, [loaded, biometricEnabled, session, authenticate, setSession, setUserProfile]);
+  }, [loaded, biometricEnabled, session, authenticate, setSession, setUserProfile, biometricGracePeriod]);
 
   if (!loaded && !error) return null;
 

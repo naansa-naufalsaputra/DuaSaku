@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { MMKV } from 'react-native-mmkv';
 
-const storage = new MMKV({ encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
+const storage = new MMKV({ id: 'settings-storage', encryptionKey: process.env.EXPO_PUBLIC_MMKV_ENCRYPTION_KEY || 'DuaSaku-BankGrade-SecureKey-2026' });
 
 const mmkvStorage: StateStorage = {
   setItem: (name, value) => {
@@ -41,6 +41,7 @@ interface SettingsState {
   };
   wishlist: WishlistItem[];
   hasCompletedTutorial: boolean;
+  budgetAlertThreshold: number;
   toggleAutoRecord: () => void;
   togglePrivacyMode: () => void;
   setUseGasWebhook: (enabled: boolean) => void;
@@ -55,6 +56,9 @@ interface SettingsState {
   addFundsToWishlist: (id: string, amount: number) => void;
   addCustomApp: (packageName: string) => void;
   removeCustomApp: (packageName: string) => void;
+  setBudgetAlertThreshold: (threshold: number) => void;
+  biometricGracePeriod: number;
+  setBiometricGracePeriod: (seconds: number) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -77,6 +81,8 @@ export const useSettingsStore = create<SettingsState>()(
       },
       wishlist: [],
       hasCompletedTutorial: false,
+      budgetAlertThreshold: 0.8,
+      biometricGracePeriod: 30, // Default 30 seconds
       toggleAutoRecord: () => set((state) => ({ isAutoRecordEnabled: !state.isAutoRecordEnabled })),
       togglePrivacyMode: () => set((state) => ({ isPrivacyModeEnabled: !state.isPrivacyModeEnabled })),
       setUseGasWebhook: (enabled) => set({ useGasWebhook: enabled }),
@@ -87,6 +93,7 @@ export const useSettingsStore = create<SettingsState>()(
         financialGoal: { ...state.financialGoal, currentAmount: amount } 
       })),
       setHasCompletedTutorial: (completed) => set({ hasCompletedTutorial: completed }),
+      setBiometricGracePeriod: (seconds) => set({ biometricGracePeriod: seconds }),
       
       addToWishlist: (item) => set((state) => ({
         wishlist: [
@@ -113,6 +120,7 @@ export const useSettingsStore = create<SettingsState>()(
       removeCustomApp: (pkg) => set((state) => ({ 
         customBankApps: state.customBankApps.filter(p => p !== pkg) 
       })),
+      setBudgetAlertThreshold: (threshold) => set({ budgetAlertThreshold: threshold }),
     }),
     {
       name: 'duasaku-settings-storage',

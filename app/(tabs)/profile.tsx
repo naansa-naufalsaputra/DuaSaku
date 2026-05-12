@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { User, Shield, Languages, CircleHelp, LogOut, ChevronRight, Download, Wallet } from 'lucide-react-native';
 import { useUserStore } from '../../src/store/useUserStore';
@@ -33,15 +33,17 @@ const ProfileItem = ({ icon: Icon, title, value, onPress, showChevron = true, co
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const { hapticMedium, hapticSuccess } = useHaptic();
-  const userProfile = useUserStore(state => state.userProfile);
-  const biometricEnabled = useUserStore(state => state.biometricEnabled);
-  const setBiometricEnabled = useUserStore(state => state.setBiometricEnabled);
+  const { session, biometricEnabled, setBiometricEnabled, userProfile } = useUserStore();
   
   const { 
     aiPersonality, 
     setAiPersonality, 
     financialGoal,
-    setFinancialGoal 
+    setFinancialGoal,
+    budgetAlertThreshold,
+    setBudgetAlertThreshold,
+    biometricGracePeriod, 
+    setBiometricGracePeriod 
   } = useSettingsStore();
 
   const { badges } = useGamificationStore();
@@ -78,6 +80,27 @@ export default function ProfileScreen() {
     const newLang = i18n.language === 'id' ? 'en' : 'id';
     i18n.changeLanguage(newLang);
     hapticMedium();
+  };
+
+  const updateGoal = async (newGoal: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id) {
+      await supabase.from('profiles').update({ financial_goal: newGoal }).eq('id', user.id);
+    }
+  };
+
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleThresholdChange = (newVal: number) => {
+    setBudgetAlertThreshold(newVal);
+    hapticMedium();
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        await supabase.from('profiles').update({ budget_alert_threshold: newVal }).eq('id', user.id);
+      }
+    }, 1000);
   };
 
   return (
@@ -192,7 +215,8 @@ export default function ProfileScreen() {
               <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('targetName')}</Text>
               <TextInput
                 value={financialGoal.name}
-                onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, name: text }))}
+                onChangeText={(text) => setFinancialGoal({ ...financialGoal, name: text })}
+                onEndEditing={(e) => updateGoal(e.nativeEvent.text)}
                 placeholder="Contoh: Liburan ke Bali"
                 placeholderTextColor="#52525b"
                 className="bg-background text-foreground px-4 py-3 rounded-2xl border border-border font-body-sm text-sm"
@@ -204,7 +228,7 @@ export default function ProfileScreen() {
                 <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('targetAmount')}</Text>
                 <TextInput
                   value={financialGoal.targetAmount.toString()}
-                  onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, targetAmount: Number(text) || 0 }))}
+                  onChangeText={(text) => setFinancialGoal({ ...financialGoal, targetAmount: Number(text) || 0 })}
                   placeholder="0"
                   placeholderTextColor="#52525b"
                   keyboardType="numeric"
@@ -215,7 +239,7 @@ export default function ProfileScreen() {
                 <Text className="text-on-surface-variant text-[12px] uppercase font-bold mb-1 ml-1">{t('collectedAmount')}</Text>
                 <TextInput
                   value={financialGoal.currentAmount.toString()}
-                  onChangeText={(text) => setFinancialGoal(prev => ({ ...prev, currentAmount: Number(text) || 0 }))}
+                  onChangeText={(text) => setFinancialGoal({ ...financialGoal, currentAmount: Number(text) || 0 })}
                   placeholder="0"
                   placeholderTextColor="#52525b"
                   keyboardType="numeric"
@@ -250,6 +274,66 @@ export default function ProfileScreen() {
             trackColor={{ false: '#27272a', true: '#10b981' }}
             thumbColor="#fafafa"
           />
+        </View>
+
+        {biometricEnabled && (
+          <View className="flex-row items-center justify-between p-4 bg-surface-container mb-2 rounded-2xl border border-border">
+            <View className="flex-1 mr-4">
+              <Text className="text-foreground font-h3 text-base">Jeda Kunci Otomatis ({biometricGracePeriod}s)</Text>
+              <Text className="text-on-surface-variant text-xs font-body-sm mt-1">Aplikasi tidak akan terkunci jika Anda keluar sementara kurang dari waktu ini.</Text>
+            </View>
+            <View className="flex-row items-center border border-border rounded-xl bg-background overflow-hidden">
+              <TouchableOpacity 
+                className="px-3 py-2 bg-surface-container"
+                onPress={() => {
+                  const newVal = Math.max(0, biometricGracePeriod - 5);
+                  setBiometricGracePeriod(newVal);
+                  hapticMedium();
+                }}
+              >
+                <Text className="text-foreground text-lg font-bold">-</Text>
+              </TouchableOpacity>
+              <Text className="px-3 font-body-sm text-foreground text-sm">{biometricGracePeriod}s</Text>
+              <TouchableOpacity 
+                className="px-3 py-2 bg-surface-container"
+                onPress={() => {
+                  const newVal = Math.min(300, biometricGracePeriod + 5);
+                  setBiometricGracePeriod(newVal);
+                  hapticMedium();
+                }}
+              >
+                <Text className="text-foreground text-lg font-bold">+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        <View className="flex-row items-center justify-between p-4 bg-surface-container mb-2 rounded-2xl border border-border">
+          <View className="flex-1 mr-4">
+            <Text className="text-foreground font-h3 text-base">Batas Alert Budget ({(budgetAlertThreshold * 100).toFixed(0)}%)</Text>
+            <Text className="text-on-surface-variant text-xs font-body-sm mt-1">Notifikasi akan dikirim jika pengeluaran melebihi batas ini.</Text>
+          </View>
+          <View className="flex-row items-center border border-border rounded-xl bg-background overflow-hidden">
+            <TouchableOpacity 
+              className="px-3 py-2 bg-surface-container"
+              onPress={() => {
+                const newVal = Math.max(0.1, budgetAlertThreshold - 0.1);
+                handleThresholdChange(newVal);
+              }}
+            >
+              <Text className="text-foreground text-lg font-bold">-</Text>
+            </TouchableOpacity>
+            <Text className="px-3 font-body-sm text-foreground text-sm">{(budgetAlertThreshold * 100).toFixed(0)}%</Text>
+            <TouchableOpacity 
+              className="px-3 py-2 bg-surface-container"
+              onPress={() => {
+                const newVal = Math.min(1.0, budgetAlertThreshold + 0.1);
+                handleThresholdChange(newVal);
+              }}
+            >
+              <Text className="text-foreground text-lg font-bold">+</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <Text className="text-on-surface-variant font-label-sm uppercase tracking-widest mt-8 mb-4 px-1">{t('other')}</Text>

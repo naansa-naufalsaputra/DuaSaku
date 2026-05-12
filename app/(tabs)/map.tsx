@@ -6,9 +6,11 @@ import { MapPin, Plus, Layers, Target } from 'lucide-react-native';
 import * as Location from 'expo-location';
 import { supabase } from '../../src/lib/supabase';
 import { useUserStore } from '../../src/store/useUserStore';
+import { useTranslation } from 'react-i18next';
 
 
 export default function MapScreen() {
+  const { t } = useTranslation();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [markers, setMarkers] = useState<any[]>([]);
   const [mapRegion, setMapRegion] = useState({

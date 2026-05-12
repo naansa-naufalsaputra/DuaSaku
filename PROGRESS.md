@@ -11,6 +11,12 @@
 
 ## ✅ Completed Tasks
 
+### 🏗️ Android Manifest Merger & Resource Stability — COMPLETED 2026-05-12
+- ✅ **Manifest Merger Resolution**: Resolved persistent `android:allowBackup` conflict between the main app and `react-native-android-notification-listener` by implementing `tools:replace` in both `main` and `debug` manifests.
+- ✅ **Debug Manifest Hardening**: Explicitly defined `android:allowBackup="true"` in `debug/AndroidManifest.xml` to satisfy the `tools:replace` requirement for concrete values during the merger.
+- ✅ **Widget Resource Recovery**: Fixed invalid `undefined` values for `minWidth` and `minHeight` in `widgetprovider_duasakuwidget.xml`, mencegah error kompilasi AAPT dimension.
+- ✅ **RN 0.76 Compatibility**: Updated `react-native-android-widget` to version `0.15.1` guna mengatasi breaking changes pada `CSSBackgroundDrawable.setRadius` di React Native 0.76 (Expo SDK 52).
+
 ### 🏥 Final Production Hardening & Codebase Stability — COMPLETED 2026-05-11
 - ✅ **Real-time Push Notifications**: Menerapkan `supabase.channel()` (Supabase Realtime) di `realtimeSync.ts` untuk menyinkronkan aplikasi di 2 device berbeda secara instan.
 - ✅ **Pengamanan Enkripsi MMKV**: Mengaktifkan enkripsi standar bank pada `MMKV` dengan *encryptionKey* (via `EXPO_PUBLIC_MMKV_ENCRYPTION_KEY`) di semua *instance* storage sehingga data keuangan yang di-cache lokal tak dapat dibaca jika device di-*root*.
@@ -22,6 +28,12 @@
 - ✅ **Zero-Debt Clean Code**: Optimized category rendering in `manage-categories.tsx` by replacing filter/map chains with a single `reduce` pass (TTI Optimization).
 - ✅ **Zero-Lint Quality**: Achieved **Perfect Score (Exit Code 0)** on `npx expo lint` with zero errors and zero warnings.
 - ✅ **Health Score**: Reached **100/100** on technical health (React complexity, linting, and accessibility).
+- ✅ **Full Localization (i18n)**: Migrated all hardcoded strings in Auth, Leaderboard, Budget, AI, and Tutorial screens to centralized i18n system for full EN/ID support.
+
+### 🔔 Interactive Notifications & Settings — COMPLETED 2026-05-11
+- ✅ **Dynamic Push Notification Handling**: Ditambahkan `addNotificationReceivedListener` dan `addNotificationResponseReceivedListener` pada level klien untuk mendukung *in-app banner*.
+- ✅ **Deep Linking**: Mengimplementasikan routing notifikasi (ex: ke `/(tabs)/insights`) berdasarkan payload skema URL notifikasi.
+- ✅ **Custom Budget Alert Threshold**: Menambahkan kustomisasi batas peringatan anggaran di Settings (klien) dan mengaitkannya ke Edge Function `budget-alerts` tanpa nilai hardcode.
 
 ### 🏥 Performance & Health Optimization — COMPLETED 2026-05-10
 - ✅ **Production-Ready Health Score**: Berhasil mencapai skor **98/100** pada audit `react-doctor` (Naik dari 70/100).
@@ -141,10 +153,11 @@
 - ✅ **Smart Budget Forecasting**: AI prediction of month-end balance based on real-time spending velocity.
 - ✅ **Financial "What-If" Simulator**: Projecting long-term impact of large purchases on future savings.
 
-### 🎯 Financial Goals & Automation — COMPLETED 2026-05-04
+### 🎯 Financial Goals & Automation — COMPLETED 2026-05-11
 - ✅ **Tutorial Onboarding**: Interactive walkthrough with cute/premium graphics for new users.
 - ✅ **Savings Goals & Wishlist**: Track items to buy and calculate saving duration based on current financial habits.
 - ✅ **Enhanced Bank Templates**: Highly accurate parsing logic for local Indonesian banks (BCA, Livin, BRMo) and e-wallets.
+- ✅ **Cron Job & Notifications (Tahap 3)**: Setup pg_cron di Supabase, Edge Function budget-alerts, dan handling Expo Push Token di klien untuk pengingat budget (80% usage alert).
 ---
 
 ### 📦 Android Build Fix (SDK 35) — COMPLETED 2026-05-05

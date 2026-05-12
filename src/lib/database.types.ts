@@ -138,6 +138,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          created_at: string | null
+          expo_push_token: string | null
+          budget_alert_threshold: number | null
+          financial_goal: string | null
+        }
+        Insert: {
+          id: string
+          created_at?: string | null
+          expo_push_token?: string | null
+          budget_alert_threshold?: number | null
+          financial_goal?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string | null
+          expo_push_token?: string | null
+          budget_alert_threshold?: number | null
+          financial_goal?: string | null
+        }
+        Relationships: []
+      }
       recurring_transactions: {
         Row: {
           amount: number

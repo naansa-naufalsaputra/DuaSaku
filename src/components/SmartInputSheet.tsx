@@ -10,8 +10,9 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { Sparkles, Plus, WifiOff, Mic, Square, ArrowRight, Wallet as WalletIcon } from 'lucide-react-native';
+import { Sparkles, Plus, WifiOff, Mic, Square, ArrowRight, Wallet as WalletIcon, Camera } from 'lucide-react-native';
 import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import LottieView from 'lottie-react-native';
 import { getCachedLottie } from '../lib/lottieCache';
 import { cssInterop } from 'nativewind';
@@ -21,7 +22,7 @@ import * as Haptics from 'expo-haptics';
 import { refreshDailyReminder, checkBudgetAlert } from '../lib/notifications';
 import { getCachedTopSpots } from '../lib/geofencing';
 import { supabase } from '../lib/supabase';
-import { parseTransactionWithAI, parseAudioWithAI, type UserContext } from '../lib/aiAdvisor';
+import { parseTransactionAi, parseAudioWithAI, scanReceiptAi, type UserContext } from '../lib/aiAdvisor';
 import { enqueueTransaction, processSyncQueue } from '../lib/offlineSync';
 import { getIsConnected } from '../lib/networkMonitor';
 import { useTranslation } from 'react-i18next';
@@ -375,6 +376,49 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
       stopRecording();
     } else {
       startRecording();
+    }
+  };
+
+  const handleScanReceipt = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      setStatusMessage('⚠️ Izin kamera diperlukan');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets && result.assets[0].base64) {
+      setSubmitting(true);
+      setStatusMessage('📸 Membaca struk dengan AI...');
+      try {
+        const mimeType = result.assets[0].mimeType || 'image/jpeg';
+        const parsedData = await scanReceiptAi(result.assets[0].base64, mimeType);
+        
+        if (!parsedData || parsedData.amount === 0) {
+          setStatusMessage('⚠️ Gagal membaca struk, coba foto lain');
+          setSubmitting(false);
+          return;
+        }
+
+        await saveTransaction({
+          title: parsedData.title,
+          amount: parsedData.amount,
+          category: parsedData.category || 'Other',
+          type: parsedData.type || 'expense',
+          date: new Date().toISOString().split('T')[0],
+        });
+      } catch (err) {
+        setStatusMessage('❌ Gagal membaca struk');
+        console.error(err);
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -745,6 +789,18 @@ const SmartInputSheet = forwardRef<BottomSheet, SmartInputSheetProps>(({ onClose
 
             {/* Input Row */}
             <View className="flex-row items-center gap-2">
+              {/* Camera Button */}
+              <TouchableOpacity
+                onPress={handleScanReceipt}
+                disabled={submitting || isRecording}
+                style={[
+                  styles.micButton,
+                  { backgroundColor: '#09090b', borderColor: '#27272a' }
+                ]}
+              >
+                <Camera color="#71717a" size={20} />
+              </TouchableOpacity>
+
               {/* Mic Button */}
               <TouchableOpacity
                 onPress={handleMicPress}

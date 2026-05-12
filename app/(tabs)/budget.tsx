@@ -326,7 +326,7 @@ export default function BudgetScreen() {
           })
         ) : (
           <>
-            <EmptyState onAdd={handleAddNew} />
+            <EmptyState message={t('noBudgetMessage', "Belum ada anggaran ditambahkan")} />
             {/* Copy from last month CTA */}
             <TouchableOpacity
               onPress={handleCopyFromLastMonth}

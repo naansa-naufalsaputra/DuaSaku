@@ -43,6 +43,7 @@ import { getBudgetHealthSummary } from '../../src/lib/budgetService';
 import { parseSearchQuery, answerSearchQuery, suggestActionsLocally, AIAction } from '../../src/lib/aiAdvisor';
 import { useSettingsStore } from '../../src/store/useSettingsStore';
 import { supabase } from '../../src/lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -59,6 +60,7 @@ interface Message {
 }
 
 export default function AIScreen() {
+  const { t } = useTranslation();
   const { session } = useUserStore();
   const userId = session?.user?.id;
   
