@@ -100,15 +100,15 @@ class GlassSurface extends StatelessWidget {
     // Applied after high contrast check so it can stack if needed,
     // but high contrast already sets 0.9 so this would push to 1.0 max.
     if (isBoldText) {
-      resolvedSurfaceOpacity =
-          (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
+      resolvedSurfaceOpacity = (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
     }
 
     // "Reduce Transparency" — use highContrast as proxy on platforms that
     // map the accessibility setting there. If highContrast is already handled
     // above, this acts as an additional check via accessibleNavigation.
-    final bool accessibleNavigation =
-        MediaQuery.of(context).accessibleNavigation;
+    final bool accessibleNavigation = MediaQuery.of(
+      context,
+    ).accessibleNavigation;
     if (accessibleNavigation) {
       resolvedSurfaceOpacity = 0.92;
       effectiveEnableBlur = false;
@@ -122,10 +122,7 @@ class GlassSurface extends StatelessWidget {
     final decoration = BoxDecoration(
       color: surfaceTintColor.withValues(alpha: resolvedSurfaceOpacity),
       borderRadius: roundedRadius,
-      border: Border.all(
-        color: borderGlowColor,
-        width: 1.0,
-      ),
+      border: Border.all(color: borderGlowColor, width: 1.0),
     );
 
     // Inner highlight: top-edge gradient to simulate light refraction
@@ -158,10 +155,7 @@ class GlassSurface extends StatelessWidget {
         children: [
           innerHighlight,
           Flexible(
-            child: Padding(
-              padding: padding ?? EdgeInsets.zero,
-              child: child,
-            ),
+            child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
           ),
         ],
       ),

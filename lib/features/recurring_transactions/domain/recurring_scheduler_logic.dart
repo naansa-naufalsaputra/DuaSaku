@@ -71,7 +71,9 @@ class RecurringSchedulerLogic {
     required DateTime nextExecutionDate,
     required DateTime now,
   }) {
-    final totalDuration = nextExecutionDate.difference(lastExecutionDate).inSeconds;
+    final totalDuration = nextExecutionDate
+        .difference(lastExecutionDate)
+        .inSeconds;
 
     if (totalDuration <= 0) {
       return 1.0;

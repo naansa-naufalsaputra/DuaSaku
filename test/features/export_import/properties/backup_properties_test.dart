@@ -49,18 +49,27 @@ void main() {
         // (b) Data object has all 11 table keys
         final parsedData = parsed['data'] as Map<String, dynamic>;
         for (final key in requiredTableKeys) {
-          expect(parsedData.containsKey(key), isTrue,
-              reason: 'Data should contain key "$key"');
-          expect(parsedData[key], isA<List>(),
-              reason: 'Data["$key"] should be a List');
+          expect(
+            parsedData.containsKey(key),
+            isTrue,
+            reason: 'Data should contain key "$key"',
+          );
+          expect(
+            parsedData[key],
+            isA<List>(),
+            reason: 'Data["$key"] should be a List',
+          );
         }
 
         // (c) Each table's array length equals original record count
         for (final key in requiredTableKeys) {
           final originalCount = dbState[key]!.length;
           final parsedCount = (parsedData[key] as List).length;
-          expect(parsedCount, equals(originalCount),
-              reason: 'Table "$key" count mismatch');
+          expect(
+            parsedCount,
+            equals(originalCount),
+            reason: 'Table "$key" count mismatch',
+          );
         }
       },
     );
@@ -99,8 +108,11 @@ void main() {
         final pattern = RegExp(
           r'^duasaku_backup_\d{4}-\d{2}-\d{2}_\d{6}\.json$',
         );
-        expect(pattern.hasMatch(fileName), isTrue,
-            reason: 'Filename "$fileName" should match pattern');
+        expect(
+          pattern.hasMatch(fileName),
+          isTrue,
+          reason: 'Filename "$fileName" should match pattern',
+        );
 
         // Assert: date components correspond to the timestamp
         expect(fileName, contains('$year-$month-$day'));

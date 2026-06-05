@@ -35,7 +35,9 @@ class FuzzyMatcher {
     if (cleanA.isEmpty || cleanB.isEmpty) return 0.0;
 
     final distance = computeLevenshtein(cleanA, cleanB);
-    final maxLength = cleanA.length > cleanB.length ? cleanA.length : cleanB.length;
+    final maxLength = cleanA.length > cleanB.length
+        ? cleanA.length
+        : cleanB.length;
     return 1.0 - (distance / maxLength);
   }
 

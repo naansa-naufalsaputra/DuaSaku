@@ -47,14 +47,9 @@ class MilestoneMarker extends StatelessWidget {
       height: markerSize,
       decoration: BoxDecoration(
         color: isReached ? markerColor : Colors.transparent,
-        border: Border.all(
-          color: markerColor,
-          width: isReached ? 2.0 : 1.5,
-        ),
+        border: Border.all(color: markerColor, width: isReached ? 2.0 : 1.5),
         shape: milestone == 100 ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: milestone != 100
-            ? BorderRadius.circular(3)
-            : null,
+        borderRadius: milestone != 100 ? BorderRadius.circular(3) : null,
         boxShadow: isReached
             ? [
                 BoxShadow(
@@ -93,9 +88,6 @@ class MilestoneMarker extends StatelessWidget {
           );
     }
 
-    return Tooltip(
-      message: '$milestone%',
-      child: marker,
-    );
+    return Tooltip(message: '$milestone%', child: marker);
   }
 }

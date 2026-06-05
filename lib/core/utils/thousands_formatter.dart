@@ -16,7 +16,7 @@ class ThousandsFormatter extends TextInputFormatter {
       return newValue.copyWith(text: '');
     }
 
-    // If the input contains math operators or parentheses, bypass thousands formatting 
+    // If the input contains math operators or parentheses, bypass thousands formatting
     // to allow freeform typing of the expression.
     final hasOperators = RegExp(r'[+\-*/()]').hasMatch(newValue.text);
     if (hasOperators) {

@@ -17,18 +17,18 @@ import '../services/recurring_notification_service.dart';
 /// Provides the RecurringNotificationService for scheduling reminders.
 final recurringNotificationServiceProvider =
     Provider<RecurringNotificationService>((ref) {
-  final plugin = FlutterLocalNotificationsPlugin();
-  return RecurringNotificationService(plugin);
-});
+      final plugin = FlutterLocalNotificationsPlugin();
+      return RecurringNotificationService(plugin);
+    });
 
 // ─── Repository Provider ──────────────────────────────────────────────────────
 
 /// Provides the recurring transaction repository (abstract interface type).
 final recurringTransactionRepositoryProvider =
     Provider<RecurringTransactionRepositoryInterface>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return RecurringTransactionRepository(db);
-});
+      final db = ref.watch(appDatabaseProvider);
+      return RecurringTransactionRepository(db);
+    });
 
 // ─── Main List Notifier ───────────────────────────────────────────────────────
 
@@ -46,20 +46,25 @@ class RecurringTransactionNotifier
     final completer = Completer<List<RecurringTransactionModel>>();
     bool isFirst = true;
 
-    final subscription = repo.watchAll(user.id).listen((data) {
-      if (isFirst) {
-        completer.complete(data);
-        isFirst = false;
-      } else {
-        state = AsyncData(data);
-      }
-    }, onError: (Object e, StackTrace stack) {
-      if (isFirst) {
-        completer.completeError(e, stack);
-      } else {
-        state = AsyncError(e, stack);
-      }
-    });
+    final subscription = repo
+        .watchAll(user.id)
+        .listen(
+          (data) {
+            if (isFirst) {
+              completer.complete(data);
+              isFirst = false;
+            } else {
+              state = AsyncData(data);
+            }
+          },
+          onError: (Object e, StackTrace stack) {
+            if (isFirst) {
+              completer.completeError(e, stack);
+            } else {
+              state = AsyncError(e, stack);
+            }
+          },
+        );
 
     ref.onDispose(() => subscription.cancel());
 
@@ -87,8 +92,9 @@ class RecurringTransactionNotifier
     switch (result) {
       case Success():
         // Re-schedule reminder notification (cancel old, schedule new if enabled)
-        final notificationService =
-            ref.read(recurringNotificationServiceProvider);
+        final notificationService = ref.read(
+          recurringNotificationServiceProvider,
+        );
         await notificationService.cancelNotifications(model.id);
         await _scheduleReminderIfEnabled(model);
         ref.invalidateSelf();
@@ -102,8 +108,7 @@ class RecurringTransactionNotifier
     final repo = ref.read(recurringTransactionRepositoryProvider);
 
     // Cancel any scheduled notifications before deleting
-    final notificationService =
-        ref.read(recurringNotificationServiceProvider);
+    final notificationService = ref.read(recurringNotificationServiceProvider);
     await notificationService.cancelNotifications(id);
 
     final result = await repo.delete(id);
@@ -146,8 +151,9 @@ class RecurringTransactionNotifier
     if (!model.notifyBefore) return;
 
     try {
-      final notificationService =
-          ref.read(recurringNotificationServiceProvider);
+      final notificationService = ref.read(
+        recurringNotificationServiceProvider,
+      );
       final transactionName = model.notes ?? 'Recurring Transaction';
 
       await notificationService.scheduleReminder(
@@ -163,10 +169,13 @@ class RecurringTransactionNotifier
   }
 }
 
-final recurringTransactionNotifierProvider = AsyncNotifierProvider<
-    RecurringTransactionNotifier, List<RecurringTransactionModel>>(() {
-  return RecurringTransactionNotifier();
-});
+final recurringTransactionNotifierProvider =
+    AsyncNotifierProvider<
+      RecurringTransactionNotifier,
+      List<RecurringTransactionModel>
+    >(() {
+      return RecurringTransactionNotifier();
+    });
 
 // ─── Dashboard Upcoming Provider ──────────────────────────────────────────────
 
@@ -174,11 +183,11 @@ final recurringTransactionNotifierProvider = AsyncNotifierProvider<
 /// for the dashboard widget. Auto-disposes when no longer watched.
 final upcomingRecurringProvider =
     FutureProvider.autoDispose<List<RecurringTransactionModel>>((ref) async {
-  final repo = ref.watch(recurringTransactionRepositoryProvider);
-  final user = ref.watch(userProvider);
-  if (user == null) return [];
-  return repo.getUpcoming(user.id, 7, 5);
-});
+      final repo = ref.watch(recurringTransactionRepositoryProvider);
+      final user = ref.watch(userProvider);
+      if (user == null) return [];
+      return repo.getUpcoming(user.id, 7, 5);
+    });
 
 // ─── Single Recurring Transaction by ID ───────────────────────────────────────
 
@@ -186,10 +195,10 @@ final upcomingRecurringProvider =
 /// Returns null if not found. Auto-disposes when no longer watched.
 final recurringTransactionByIdProvider = FutureProvider.autoDispose
     .family<RecurringTransactionModel?, String>((ref, id) async {
-  final repo = ref.watch(recurringTransactionRepositoryProvider);
-  final result = await repo.getById(id);
-  return switch (result) {
-    Success(:final value) => value,
-    Failure() => null,
-  };
-});
+      final repo = ref.watch(recurringTransactionRepositoryProvider);
+      final result = await repo.getById(id);
+      return switch (result) {
+        Success(:final value) => value,
+        Failure() => null,
+      };
+    });

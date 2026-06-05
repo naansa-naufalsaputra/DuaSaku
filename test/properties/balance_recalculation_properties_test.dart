@@ -1,7 +1,6 @@
 // Feature: system-audit-fixes, Property 4: Balance recalculation formula correctness
 // **Validates: Requirements 2.1, 2.3**
 
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,9 +16,11 @@ import 'package:duasaku_app/core/local_db/app_database.dart';
 /// Creates a fresh in-memory database for testing.
 AppDatabase _createTestDb() {
   return AppDatabase.forTesting(
-    NativeDatabase.memory(setup: (db) {
-      db.execute('PRAGMA foreign_keys = ON;');
-    }),
+    NativeDatabase.memory(
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    ),
   );
 }
 
@@ -54,10 +55,7 @@ String _randomTxType(Random rng) {
 /// Computes the expected balance for a wallet based on the formula:
 /// SUM(income to wallet) - SUM(expense from wallet)
 /// + SUM(transfers into wallet) - SUM(transfers out of wallet)
-double _computeExpectedBalance(
-  String walletId,
-  List<_TestTx> transactions,
-) {
+double _computeExpectedBalance(String walletId, List<_TestTx> transactions) {
   double balance = 0.0;
 
   for (final tx in transactions) {
@@ -110,9 +108,7 @@ void main() {
   // SUM(income to wallet) - SUM(expense from wallet)
   // + SUM(transfers into wallet) - SUM(transfers out of wallet)
   // ──────────────────────────────────────────────────────────────────────────
-  group(
-      'Property 4: Balance recalculation formula correctness',
-      () {
+  group('Property 4: Balance recalculation formula correctness', () {
     Glados2(
       any.intInRange(1, 5), // number of wallets
       any.intInRange(0, 99999), // random seed for scenario generation
@@ -132,16 +128,20 @@ void main() {
             // Arbitrary initial balance (should be overwritten by migration)
             final initialBalance = rng.nextDouble() * 20000 - 10000;
 
-            await db.into(db.wallets).insert(WalletsCompanion.insert(
-                  id: walletId,
-                  userId: 'test-user',
-                  name: 'Wallet $i',
-                  type: 'Cash',
-                  balance: Value(initialBalance),
-                  icon: 'wallet',
-                  color: '#000000',
-                  createdAt: DateTime(2024, 1, 1),
-                ));
+            await db
+                .into(db.wallets)
+                .insert(
+                  WalletsCompanion.insert(
+                    id: walletId,
+                    userId: 'test-user',
+                    name: 'Wallet $i',
+                    type: 'Cash',
+                    balance: Value(initialBalance),
+                    icon: 'wallet',
+                    color: '#000000',
+                    createdAt: DateTime(2024, 1, 1),
+                  ),
+                );
           }
 
           // --- Step 2: Generate and insert random transactions ---
@@ -169,12 +169,12 @@ void main() {
             } else if (txType == 'transfer' && walletIds.length < 2) {
               // Can't do transfer with 1 wallet, fall back to income
               walletId = walletIds[0];
-              testTransactions.add(_TestTx(
-                type: 'income',
-                amount: amount,
-                walletId: walletId,
-              ));
-              await db.into(db.transactions).insert(
+              testTransactions.add(
+                _TestTx(type: 'income', amount: amount, walletId: walletId),
+              );
+              await db
+                  .into(db.transactions)
+                  .insert(
                     TransactionsCompanion.insert(
                       userId: 'test-user',
                       walletId: Value(walletId),
@@ -189,15 +189,19 @@ void main() {
               walletId = walletIds[rng.nextInt(walletIds.length)];
             }
 
-            testTransactions.add(_TestTx(
-              type: txType,
-              amount: amount,
-              walletId: walletId,
-              fromWalletId: fromWalletId,
-              toWalletId: toWalletId,
-            ));
+            testTransactions.add(
+              _TestTx(
+                type: txType,
+                amount: amount,
+                walletId: walletId,
+                fromWalletId: fromWalletId,
+                toWalletId: toWalletId,
+              ),
+            );
 
-            await db.into(db.transactions).insert(
+            await db
+                .into(db.transactions)
+                .insert(
                   TransactionsCompanion.insert(
                     userId: 'test-user',
                     walletId: Value(walletId),
@@ -215,12 +219,14 @@ void main() {
 
           // --- Step 4: Verify each wallet's balance matches the expected formula ---
           for (final walletId in walletIds) {
-            final wallet = await (db.select(db.wallets)
-                  ..where((w) => w.id.equals(walletId)))
-                .getSingle();
+            final wallet = await (db.select(
+              db.wallets,
+            )..where((w) => w.id.equals(walletId))).getSingle();
 
-            final expectedBalance =
-                _computeExpectedBalance(walletId, testTransactions);
+            final expectedBalance = _computeExpectedBalance(
+              walletId,
+              testTransactions,
+            );
 
             expect(
               wallet.balance,
@@ -238,14 +244,20 @@ void main() {
 
     // Edge case: wallets with zero transactions get balance set to zero
     // (Validates Requirement 2.3)
-    Glados(any.intInRange(1, 5), ExploreConfig(numRuns: 100)).test(
-      'wallets with zero transactions get balance set to zero',
-      (walletCount) async {
-        final db = _createTestDb();
-        try {
-          // Insert wallets with non-zero initial balances
-          for (var i = 0; i < walletCount; i++) {
-            await db.into(db.wallets).insert(WalletsCompanion.insert(
+    Glados(
+      any.intInRange(1, 5),
+      ExploreConfig(numRuns: 100),
+    ).test('wallets with zero transactions get balance set to zero', (
+      walletCount,
+    ) async {
+      final db = _createTestDb();
+      try {
+        // Insert wallets with non-zero initial balances
+        for (var i = 0; i < walletCount; i++) {
+          await db
+              .into(db.wallets)
+              .insert(
+                WalletsCompanion.insert(
                   id: 'wallet-empty-$i',
                   userId: 'test-user',
                   name: 'Empty Wallet $i',
@@ -254,29 +266,29 @@ void main() {
                   icon: 'wallet',
                   color: '#000000',
                   createdAt: DateTime(2024, 1, 1),
-                ));
-          }
-
-          // No transactions inserted
-
-          // Execute the migration SQL
-          await db.customStatement(_balanceRecalcSql);
-
-          // Verify all wallets have balance = 0
-          final wallets = await db.select(db.wallets).get();
-          for (final wallet in wallets) {
-            expect(
-              wallet.balance,
-              closeTo(0.0, 0.001),
-              reason:
-                  'Wallet ${wallet.id} should have balance 0 with no transactions, '
-                  'but got ${wallet.balance}',
-            );
-          }
-        } finally {
-          await db.close();
+                ),
+              );
         }
-      },
-    );
+
+        // No transactions inserted
+
+        // Execute the migration SQL
+        await db.customStatement(_balanceRecalcSql);
+
+        // Verify all wallets have balance = 0
+        final wallets = await db.select(db.wallets).get();
+        for (final wallet in wallets) {
+          expect(
+            wallet.balance,
+            closeTo(0.0, 0.001),
+            reason:
+                'Wallet ${wallet.id} should have balance 0 with no transactions, '
+                'but got ${wallet.balance}',
+          );
+        }
+      } finally {
+        await db.close();
+      }
+    });
   });
 }

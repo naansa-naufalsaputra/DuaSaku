@@ -18,9 +18,9 @@ import '../widgets/edit_recurring_bottom_sheet.dart';
 /// Returns the last 5 execution logs for the timeline display.
 final executionLogsProvider = FutureProvider.autoDispose
     .family<List<ExecutionLogModel>, String>((ref, recurringId) async {
-  final repo = ref.watch(recurringTransactionRepositoryProvider);
-  return repo.getExecutionLogs(recurringId, limit: 5);
-});
+      final repo = ref.watch(recurringTransactionRepositoryProvider);
+      return repo.getExecutionLogs(recurringId, limit: 5);
+    });
 
 /// Detail screen for a single recurring transaction.
 ///
@@ -40,8 +40,9 @@ class RecurringTransactionDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final transactionAsync =
-        ref.watch(recurringTransactionByIdProvider(recurringTransactionId));
+    final transactionAsync = ref.watch(
+      recurringTransactionByIdProvider(recurringTransactionId),
+    );
 
     // Handle fallback: if transaction is not found (deleted), redirect to list with message.
     // This handles the case when a notification is tapped for a deleted recurring transaction.
@@ -101,9 +102,7 @@ class RecurringTransactionDetailScreen extends ConsumerWidget {
                   recurringTransactionId: recurringTransactionId,
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -205,58 +204,59 @@ class _DetailContent extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hero card with amount
-          Hero(
-            tag: 'recurring_card_${transaction.id}',
-            child: Material(
-              color: Colors.transparent,
-              child: _AmountCard(
-                transaction: transaction,
-                currencyFormat: currencyFormat,
-                amountColor: amountColor,
-                isDark: isDark,
-                theme: theme,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
+        children:
+            [
+                  // Hero card with amount
+                  Hero(
+                    tag: 'recurring_card_${transaction.id}',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: _AmountCard(
+                        transaction: transaction,
+                        currencyFormat: currencyFormat,
+                        amountColor: amountColor,
+                        isDark: isDark,
+                        theme: theme,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-          // Status and action buttons
-          _StatusSection(
-            transaction: transaction,
-            isDark: isDark,
-            theme: theme,
-            recurringTransactionId: recurringTransactionId,
-          ),
-          const SizedBox(height: 20),
+                  // Status and action buttons
+                  _StatusSection(
+                    transaction: transaction,
+                    isDark: isDark,
+                    theme: theme,
+                    recurringTransactionId: recurringTransactionId,
+                  ),
+                  const SizedBox(height: 20),
 
-          // Execution Timeline
-          _ExecutionTimelineSection(
-            transaction: transaction,
-            isDark: isDark,
-            theme: theme,
-            recurringTransactionId: recurringTransactionId,
-          ),
-          const SizedBox(height: 20),
+                  // Execution Timeline
+                  _ExecutionTimelineSection(
+                    transaction: transaction,
+                    isDark: isDark,
+                    theme: theme,
+                    recurringTransactionId: recurringTransactionId,
+                  ),
+                  const SizedBox(height: 20),
 
-          // Details section
-          _DetailsSection(
-            transaction: transaction,
-            dateFormat: dateFormat,
-            currencyFormat: currencyFormat,
-            isDark: isDark,
-            theme: theme,
-          ),
-        ]
-            .animate(interval: 80.ms)
-            .fadeIn(duration: 300.ms, curve: Curves.easeOutCubic)
-            .slideY(
-              begin: 0.05,
-              end: 0,
-              duration: 300.ms,
-              curve: Curves.easeOutCubic,
-            ),
+                  // Details section
+                  _DetailsSection(
+                    transaction: transaction,
+                    dateFormat: dateFormat,
+                    currencyFormat: currencyFormat,
+                    isDark: isDark,
+                    theme: theme,
+                  ),
+                ]
+                .animate(interval: 80.ms)
+                .fadeIn(duration: 300.ms, curve: Curves.easeOutCubic)
+                .slideY(
+                  begin: 0.05,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutCubic,
+                ),
       ),
     );
   }
@@ -291,9 +291,7 @@ class _AmountCard extends StatelessWidget {
             ? theme.colorScheme.surface.withValues(alpha: 0.6)
             : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: amountColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: amountColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -468,8 +466,9 @@ class _PauseResumeButton extends ConsumerWidget {
     return FilledButton.icon(
       onPressed: () async {
         HapticFeedback.lightImpact();
-        final notifier =
-            ref.read(recurringTransactionNotifierProvider.notifier);
+        final notifier = ref.read(
+          recurringTransactionNotifierProvider.notifier,
+        );
         if (isActive) {
           await notifier.pause(recurringTransactionId);
         } else {
@@ -481,18 +480,14 @@ class _PauseResumeButton extends ConsumerWidget {
         size: 18,
       ),
       label: Text(
-        isActive
-            ? 'recurring.btn_pause'.tr()
-            : 'recurring.btn_resume'.tr(),
+        isActive ? 'recurring.btn_pause'.tr() : 'recurring.btn_resume'.tr(),
       ),
       style: FilledButton.styleFrom(
         backgroundColor: isActive
             ? Colors.orange.withValues(alpha: 0.15)
             : Colors.green.withValues(alpha: 0.15),
         foregroundColor: isActive ? Colors.orange : Colors.green,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       ),
     );
@@ -529,8 +524,9 @@ class _ExecutionTimelineSection extends ConsumerWidget {
 
     // Include the next execution date itself as the first upcoming
     final allUpcoming = [transaction.nextExecutionDate, ...upcomingDates];
-    final displayUpcoming =
-        allUpcoming.length > 5 ? allUpcoming.sublist(0, 5) : allUpcoming;
+    final displayUpcoming = allUpcoming.length > 5
+        ? allUpcoming.sublist(0, 5)
+        : allUpcoming;
 
     return Container(
       width: double.infinity,
@@ -605,8 +601,7 @@ class _ExecutionTimelineSection extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Divider(
-                    color:
-                        theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                   ),
                 ),
                 Padding(
@@ -622,8 +617,7 @@ class _ExecutionTimelineSection extends ConsumerWidget {
                 ),
                 Expanded(
                   child: Divider(
-                    color:
-                        theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                   ),
                 ),
               ],
@@ -698,10 +692,7 @@ class _TimelineItem extends StatelessWidget {
               shape: BoxShape.circle,
               border: isPast
                   ? null
-                  : Border.all(
-                      color: theme.colorScheme.primary,
-                      width: 1.5,
-                    ),
+                  : Border.all(color: theme.colorScheme.primary, width: 1.5),
             ),
           ),
           const SizedBox(width: 12),
@@ -721,9 +712,7 @@ class _TimelineItem extends StatelessWidget {
           // Status indicator for past items
           if (isPast)
             Icon(
-              isSuccess
-                  ? Icons.check_circle_rounded
-                  : Icons.cancel_rounded,
+              isSuccess ? Icons.check_circle_rounded : Icons.cancel_rounded,
               size: 16,
               color: isSuccess ? Colors.green : Colors.red,
             ),

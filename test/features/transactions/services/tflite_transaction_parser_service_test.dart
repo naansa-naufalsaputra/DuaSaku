@@ -20,14 +20,20 @@ void main() {
       // ignore: invalid_use_of_protected_member
       expect(parserService.parseExtractedAmount('25.000'), equals(25000.0));
       // ignore: invalid_use_of_protected_member
-      expect(parserService.parseExtractedAmount('1.000.000'), equals(1000000.0));
+      expect(
+        parserService.parseExtractedAmount('1.000.000'),
+        equals(1000000.0),
+      );
     });
 
     test('should parse amounts with commas as thousands separators', () {
       // ignore: invalid_use_of_protected_member
       expect(parserService.parseExtractedAmount('25,000'), equals(25000.0));
       // ignore: invalid_use_of_protected_member
-      expect(parserService.parseExtractedAmount('1,000,000'), equals(1000000.0));
+      expect(
+        parserService.parseExtractedAmount('1,000,000'),
+        equals(1000000.0),
+      );
     });
 
     test('should parse decimal amounts with suffix', () {

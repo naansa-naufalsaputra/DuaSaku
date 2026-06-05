@@ -14,10 +14,7 @@ class ImportSummaryCard extends StatelessWidget {
   /// The import preview containing data counts.
   final ImportPreview preview;
 
-  const ImportSummaryCard({
-    super.key,
-    required this.preview,
-  });
+  const ImportSummaryCard({super.key, required this.preview});
 
   @override
   Widget build(BuildContext context) {
@@ -141,11 +138,7 @@ class _SummaryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: colorScheme.primary,
-        ),
+        Icon(icon, size: 20, color: colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Column(

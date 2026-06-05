@@ -55,8 +55,7 @@ class BudgetAlertModel {
       if (remainingBudget != null) 'remaining_budget': remainingBudget,
       if (overAmount != null) 'over_amount': overAmount,
       if (projectedOverspendDate != null)
-        'projected_overspend_date':
-            projectedOverspendDate!.toIso8601String(),
+        'projected_overspend_date': projectedOverspendDate!.toIso8601String(),
     };
   }
 
@@ -106,16 +105,17 @@ class BudgetAlertModel {
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
       alertType: alertType ?? this.alertType,
-      thresholdValue:
-          thresholdValue != null ? thresholdValue() : this.thresholdValue,
+      thresholdValue: thresholdValue != null
+          ? thresholdValue()
+          : this.thresholdValue,
       actualPercentage: actualPercentage ?? this.actualPercentage,
       message: message ?? this.message,
       isRead: isRead ?? this.isRead,
       createdAt: createdAt ?? this.createdAt,
-      categoryName:
-          categoryName != null ? categoryName() : this.categoryName,
-      remainingBudget:
-          remainingBudget != null ? remainingBudget() : this.remainingBudget,
+      categoryName: categoryName != null ? categoryName() : this.categoryName,
+      remainingBudget: remainingBudget != null
+          ? remainingBudget()
+          : this.remainingBudget,
       overAmount: overAmount != null ? overAmount() : this.overAmount,
       projectedOverspendDate: projectedOverspendDate != null
           ? projectedOverspendDate()
@@ -144,20 +144,20 @@ class BudgetAlertModel {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        userId,
-        categoryId,
-        alertType,
-        thresholdValue,
-        actualPercentage,
-        message,
-        isRead,
-        createdAt,
-        categoryName,
-        remainingBudget,
-        overAmount,
-        projectedOverspendDate,
-      );
+    id,
+    userId,
+    categoryId,
+    alertType,
+    thresholdValue,
+    actualPercentage,
+    message,
+    isRead,
+    createdAt,
+    categoryName,
+    remainingBudget,
+    overAmount,
+    projectedOverspendDate,
+  );
 
   @override
   String toString() =>

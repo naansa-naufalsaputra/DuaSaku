@@ -5,10 +5,7 @@ class ExportConfig {
   final Set<DataType> selectedTypes;
   final DateRangeFilter dateRange;
 
-  const ExportConfig({
-    required this.selectedTypes,
-    required this.dateRange,
-  });
+  const ExportConfig({required this.selectedTypes, required this.dateRange});
 }
 
 /// Sealed class representing date range filter options for CSV export.
@@ -103,10 +100,7 @@ class CustomRange extends DateRangeFilter {
   final DateTime start;
   final DateTime end;
 
-  const CustomRange({
-    required this.start,
-    required this.end,
-  });
+  const CustomRange({required this.start, required this.end});
 
   @override
   DateTime? get startDate => start;

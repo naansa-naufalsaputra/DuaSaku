@@ -40,8 +40,9 @@ class ExecutionLogModel {
           recurringTransactionId ?? this.recurringTransactionId,
       executedAt: executedAt ?? this.executedAt,
       status: status ?? this.status,
-      transactionId:
-          transactionId != null ? transactionId() : this.transactionId,
+      transactionId: transactionId != null
+          ? transactionId()
+          : this.transactionId,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
     );
   }
@@ -60,13 +61,13 @@ class ExecutionLogModel {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        recurringTransactionId,
-        executedAt,
-        status,
-        transactionId,
-        errorMessage,
-      );
+    id,
+    recurringTransactionId,
+    executedAt,
+    status,
+    transactionId,
+    errorMessage,
+  );
 
   @override
   String toString() =>

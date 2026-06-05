@@ -10,10 +10,7 @@ import '../../providers/unread_badge_provider.dart';
 ///
 /// Requirements: 4.4
 class AlertBadgeWidget extends ConsumerWidget {
-  const AlertBadgeWidget({
-    super.key,
-    required this.child,
-  });
+  const AlertBadgeWidget({super.key, required this.child});
 
   /// The child widget (typically a bell/notification icon) to overlay the badge on.
   final Widget child;
@@ -28,11 +25,7 @@ class AlertBadgeWidget extends ConsumerWidget {
       children: [
         child,
         if (count > 0)
-          Positioned(
-            top: -4,
-            right: -4,
-            child: _BadgeCount(count: count),
-          ),
+          Positioned(top: -4, right: -4, child: _BadgeCount(count: count)),
       ],
     );
   }
@@ -50,16 +43,11 @@ class _BadgeCount extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-      constraints: const BoxConstraints(
-        minWidth: 16,
-        minHeight: 16,
-      ),
+      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
       decoration: BoxDecoration(
         color: colorScheme.error,
         shape: displayText.length > 1 ? BoxShape.rectangle : BoxShape.circle,
-        borderRadius: displayText.length > 1
-            ? BorderRadius.circular(8)
-            : null,
+        borderRadius: displayText.length > 1 ? BorderRadius.circular(8) : null,
       ),
       alignment: Alignment.center,
       child: Text(

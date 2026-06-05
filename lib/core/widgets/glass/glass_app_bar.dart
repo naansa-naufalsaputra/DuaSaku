@@ -138,7 +138,8 @@ class _GlassAppBarState extends State<GlassAppBar> {
       child: SizedBox(
         height: kToolbarHeight,
         child: NavigationToolbar(
-          leading: widget.leading ??
+          leading:
+              widget.leading ??
               (Navigator.of(context).canPop()
                   ? IconButton(
                       icon: const Icon(Icons.arrow_back),
@@ -147,17 +148,18 @@ class _GlassAppBarState extends State<GlassAppBar> {
                   : null),
           middle: widget.title != null
               ? DefaultTextStyle(
-                  style: appBarTheme.titleTextStyle ??
+                  style:
+                      appBarTheme.titleTextStyle ??
                       theme.textTheme.titleLarge ??
-                      const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                   child: widget.title!,
                 )
               : null,
           trailing: widget.actions != null
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: widget.actions!,
-                )
+              ? Row(mainAxisSize: MainAxisSize.min, children: widget.actions!)
               : null,
           centerMiddle: true,
           middleSpacing: NavigationToolbar.kMiddleSpacing,
@@ -167,10 +169,7 @@ class _GlassAppBarState extends State<GlassAppBar> {
 
     // When no glass effect needed, render transparent
     if (!showGlass) {
-      return Container(
-        color: Colors.transparent,
-        child: content,
-      );
+      return Container(color: Colors.transparent, child: content);
     }
 
     // Render glass surface with blur
@@ -187,7 +186,9 @@ class _GlassAppBarState extends State<GlassAppBar> {
               border: Border(
                 bottom: BorderSide(
                   color: borderGlowColor.withValues(
-                    alpha: (borderGlowColor.a * (opacity / resolvedSurfaceOpacity)),
+                    alpha:
+                        (borderGlowColor.a *
+                        (opacity / resolvedSurfaceOpacity)),
                   ),
                   width: 1.0,
                 ),

@@ -98,12 +98,14 @@ class PredictionEngineService {
   }) async {
     // 1. Get budget for category+month — if none, return null silently (Req 6.4)
     // Query the budget directly from the Budgets table by categoryId
-    final budgetRow = await (_db.select(_db.budgets)
-          ..where((b) =>
-              b.userId.equals(userId) &
-              b.categoryId.equals(categoryId) &
-              b.month.equals(budgetMonth)))
-        .getSingleOrNull();
+    final budgetRow =
+        await (_db.select(_db.budgets)..where(
+              (b) =>
+                  b.userId.equals(userId) &
+                  b.categoryId.equals(categoryId) &
+                  b.month.equals(budgetMonth),
+            ))
+            .getSingleOrNull();
 
     if (budgetRow == null) return null;
 
@@ -120,8 +122,10 @@ class PredictionEngineService {
     }
 
     // Also check category-specific preferences
-    final categoryPrefsResult =
-        await _prefsRepo.getCategoryPreferences(userId, categoryId);
+    final categoryPrefsResult = await _prefsRepo.getCategoryPreferences(
+      userId,
+      categoryId,
+    );
     switch (categoryPrefsResult) {
       case Success(:final value):
         if (value != null && !value.isEnabled) return null;
@@ -225,15 +229,24 @@ class PredictionEngineService {
     required String budgetMonth,
   }) async {
     final periodStart = _parseBudgetMonth(budgetMonth);
-    final periodEnd = DateTime(periodStart.year, periodStart.month + 1, 0, 23, 59, 59);
+    final periodEnd = DateTime(
+      periodStart.year,
+      periodStart.month + 1,
+      0,
+      23,
+      59,
+      59,
+    );
 
     final query = _db.selectOnly(_db.transactions)
       ..addColumns([_db.transactions.amount.sum()])
-      ..where(_db.transactions.userId.equals(userId) &
-          _db.transactions.categoryId.equals(categoryId) &
-          _db.transactions.type.equals('expense') &
-          _db.transactions.date.isBiggerOrEqualValue(periodStart) &
-          _db.transactions.date.isSmallerOrEqualValue(periodEnd));
+      ..where(
+        _db.transactions.userId.equals(userId) &
+            _db.transactions.categoryId.equals(categoryId) &
+            _db.transactions.type.equals('expense') &
+            _db.transactions.date.isBiggerOrEqualValue(periodStart) &
+            _db.transactions.date.isSmallerOrEqualValue(periodEnd),
+      );
 
     final result = await query.getSingleOrNull();
     if (result == null) return 0.0;
@@ -252,20 +265,19 @@ class PredictionEngineService {
     final now = DateTime.now();
 
     final query = _db.select(_db.recurringTransactions)
-      ..where((t) =>
-          t.userId.equals(userId) &
-          t.categoryId.equals(categoryId) &
-          t.type.equals('expense') &
-          t.status.equals('active') &
-          t.nextExecutionDate.isBiggerOrEqualValue(now) &
-          t.nextExecutionDate.isSmallerOrEqualValue(periodEnd));
+      ..where(
+        (t) =>
+            t.userId.equals(userId) &
+            t.categoryId.equals(categoryId) &
+            t.type.equals('expense') &
+            t.status.equals('active') &
+            t.nextExecutionDate.isBiggerOrEqualValue(now) &
+            t.nextExecutionDate.isSmallerOrEqualValue(periodEnd),
+      );
 
     final upcomingTransactions = await query.get();
 
-    return upcomingTransactions.fold<double>(
-      0.0,
-      (sum, tx) => sum + tx.amount,
-    );
+    return upcomingTransactions.fold<double>(0.0, (sum, tx) => sum + tx.amount);
   }
 
   /// Parses a budget month string ('YYYY-MM') into a DateTime representing

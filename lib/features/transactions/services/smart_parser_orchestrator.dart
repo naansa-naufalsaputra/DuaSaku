@@ -45,11 +45,13 @@ class SmartParserOrchestrator implements TransactionParserServiceInterface {
           )
           .timeout(timeout);
     } catch (e, stackTrace) {
-      debugPrint('[SmartParserOrchestrator] TFLite parsing failed, falling back to Level 2 Lightweight ML: $e');
+      debugPrint(
+        '[SmartParserOrchestrator] TFLite parsing failed, falling back to Level 2 Lightweight ML: $e',
+      );
       if (kDebugMode) {
         debugPrint('[SmartParserOrchestrator] Stacktrace: $stackTrace');
       }
-      
+
       // 2. Try Level 2 Lightweight ML parser fallback
       try {
         baseResult = await lightweightMlService.parseTransaction(
@@ -58,7 +60,9 @@ class SmartParserOrchestrator implements TransactionParserServiceInterface {
           categories: categories,
         );
       } catch (e2) {
-        debugPrint('[SmartParserOrchestrator] Level 2 Lightweight ML failed, falling back to Level 1 Regex/Fuzzy: $e2');
+        debugPrint(
+          '[SmartParserOrchestrator] Level 2 Lightweight ML failed, falling back to Level 1 Regex/Fuzzy: $e2',
+        );
         // 3. Fallback to Level 1 Local Regex/Fuzzy parser
         baseResult = localService.parseTransactionSync(
           inputText: inputText,
@@ -79,7 +83,9 @@ class SmartParserOrchestrator implements TransactionParserServiceInterface {
           .extractDateTime(textWithoutAmount)
           .timeout(const Duration(seconds: 2));
     } catch (e) {
-      debugPrint('[SmartParserOrchestrator] ML Kit date extraction failed or timed out: $e');
+      debugPrint(
+        '[SmartParserOrchestrator] ML Kit date extraction failed or timed out: $e',
+      );
     }
 
     // 6. Fallback to DateTime.now() if no date is extracted or if models aren't ready

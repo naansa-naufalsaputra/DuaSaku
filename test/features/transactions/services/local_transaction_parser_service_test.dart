@@ -19,21 +19,24 @@ void main() {
       const CategoryInfo(name: 'Gaji', type: 'income'),
     ];
 
-    test('parses basic transaction with amount, intent, wallet, and synonym category', () async {
-      final result = await parserService.parseTransaction(
-        inputText: 'beli pertalite Rp 25.000 cash',
-        wallets: wallets,
-        categories: categories,
-      );
+    test(
+      'parses basic transaction with amount, intent, wallet, and synonym category',
+      () async {
+        final result = await parserService.parseTransaction(
+          inputText: 'beli pertalite Rp 25.000 cash',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      expect(result.amount, equals(25000.0));
-      expect(result.type, equals('expense'));
-      expect(result.walletId, equals('w-cash'));
-      // "pertalite" maps to "Transportasi" via CategorySynonymDictionary
-      expect(result.category, equals('Transportasi'));
-      // Notes should have amount and wallet prefix stripped but keep contextual words
-      expect(result.notes, equals('Beli pertalite cash'));
-    });
+        expect(result.amount, equals(25000.0));
+        expect(result.type, equals('expense'));
+        expect(result.walletId, equals('w-cash'));
+        // "pertalite" maps to "Transportasi" via CategorySynonymDictionary
+        expect(result.category, equals('Transportasi'));
+        // Notes should have amount and wallet prefix stripped but keep contextual words
+        expect(result.notes, equals('Beli pertalite cash'));
+      },
+    );
 
     test('parses income transaction and maps correct category', () async {
       final result = await parserService.parseTransaction(
@@ -50,31 +53,37 @@ void main() {
       expect(result.notes, equals('Dapat bonus gaji bca'));
     });
 
-    test('falls back to fuzzy category matching when synonyms do not match', () async {
-      // "makan" is not in synonym map but has high Levenshtein similarity to "Makanan"
-      final result = await parserService.parseTransaction(
-        inputText: 'makan siang 15k',
-        wallets: wallets,
-        categories: categories,
-      );
+    test(
+      'falls back to fuzzy category matching when synonyms do not match',
+      () async {
+        // "makan" is not in synonym map but has high Levenshtein similarity to "Makanan"
+        final result = await parserService.parseTransaction(
+          inputText: 'makan siang 15k',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      expect(result.amount, equals(15000.0));
-      expect(result.category, equals('Makanan'));
-      expect(result.notes, equals('Makan siang'));
-    });
+        expect(result.amount, equals(15000.0));
+        expect(result.category, equals('Makanan'));
+        expect(result.notes, equals('Makan siang'));
+      },
+    );
 
-    test('falls back to default type category if similarity is below threshold', () async {
-      final result = await parserService.parseTransaction(
-        inputText: 'sesuatu yang aneh 20000',
-        wallets: wallets,
-        categories: categories,
-      );
+    test(
+      'falls back to default type category if similarity is below threshold',
+      () async {
+        final result = await parserService.parseTransaction(
+          inputText: 'sesuatu yang aneh 20000',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      expect(result.amount, equals(20000.0));
-      // "sesuatu yang aneh" has low similarity to Makanan/Transportasi/Tagihan.
-      // Falls back to the first category that matches type 'expense' (Makanan).
-      expect(result.category, equals('Makanan'));
-      expect(result.notes, equals('Sesuatu yang aneh'));
-    });
+        expect(result.amount, equals(20000.0));
+        // "sesuatu yang aneh" has low similarity to Makanan/Transportasi/Tagihan.
+        // Falls back to the first category that matches type 'expense' (Makanan).
+        expect(result.category, equals('Makanan'));
+        expect(result.notes, equals('Sesuatu yang aneh'));
+      },
+    );
   });
 }

@@ -124,15 +124,10 @@ class DateRangePickerWidget extends StatelessWidget {
       context: context,
       firstDate: DateTime(2020),
       lastDate: now,
-      initialDateRange: DateTimeRange(
-        start: initialStart,
-        end: initialEnd,
-      ),
+      initialDateRange: DateTimeRange(start: initialStart, end: initialEnd),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: colorScheme,
-          ),
+          data: Theme.of(context).copyWith(colorScheme: colorScheme),
           child: child!,
         );
       },
@@ -145,18 +140,13 @@ class DateRangePickerWidget extends StatelessWidget {
 
   String _labelForPreset(DateRangePreset preset) {
     return switch (preset) {
-      DateRangePreset.thisMonth =>
-        'export_import.date_range.this_month'.tr(),
-      DateRangePreset.lastMonth =>
-        'export_import.date_range.last_month'.tr(),
+      DateRangePreset.thisMonth => 'export_import.date_range.this_month'.tr(),
+      DateRangePreset.lastMonth => 'export_import.date_range.last_month'.tr(),
       DateRangePreset.last3Months =>
         'export_import.date_range.last_3_months'.tr(),
-      DateRangePreset.thisYear =>
-        'export_import.date_range.this_year'.tr(),
-      DateRangePreset.allTime =>
-        'export_import.date_range.all_time'.tr(),
-      DateRangePreset.custom =>
-        'export_import.date_range.custom'.tr(),
+      DateRangePreset.thisYear => 'export_import.date_range.this_year'.tr(),
+      DateRangePreset.allTime => 'export_import.date_range.all_time'.tr(),
+      DateRangePreset.custom => 'export_import.date_range.custom'.tr(),
     };
   }
 }

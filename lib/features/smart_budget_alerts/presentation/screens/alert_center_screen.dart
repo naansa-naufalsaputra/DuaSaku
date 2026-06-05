@@ -165,9 +165,7 @@ class _AlertCenterScreenState extends ConsumerState<AlertCenterScreen> {
                   scrollController: _scrollController,
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -183,8 +181,9 @@ class _AlertCenterScreenState extends ConsumerState<AlertCenterScreen> {
                       Text(
                         'alert.error_loading'.tr(),
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                           fontSize: 16,
                         ),
                         textAlign: TextAlign.center,

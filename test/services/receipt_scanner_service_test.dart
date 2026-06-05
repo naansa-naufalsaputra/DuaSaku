@@ -3,7 +3,8 @@ import 'package:duasaku_app/services/receipt_scanner_service.dart';
 import 'package:duasaku_app/features/transactions/domain/transaction_parser_service_interface.dart';
 import 'package:mockito/mockito.dart';
 
-class MockTransactionParserService extends Mock implements TransactionParserServiceInterface {}
+class MockTransactionParserService extends Mock
+    implements TransactionParserServiceInterface {}
 
 void main() {
   late ReceiptScannerServiceImpl scanner;
@@ -36,11 +37,7 @@ void main() {
     });
 
     test('Falls back to default if all top lines are noise', () {
-      final lines = [
-        'Jl. Kaliurang KM 5',
-        'Telp: 081234',
-        'www.alfamart.com',
-      ];
+      final lines = ['Jl. Kaliurang KM 5', 'Telp: 081234', 'www.alfamart.com'];
       final merchant = scanner.extractMerchantName(lines);
       expect(merchant, 'Struk Belanja');
     });
@@ -76,77 +73,83 @@ void main() {
       final beforeTest = DateTime.now();
       final date = scanner.extractDate(lines);
       final afterTest = DateTime.now();
-      expect(date.isAfter(beforeTest.subtract(const Duration(seconds: 1))), true);
+      expect(
+        date.isAfter(beforeTest.subtract(const Duration(seconds: 1))),
+        true,
+      );
       expect(date.isBefore(afterTest.add(const Duration(seconds: 1))), true);
     });
   });
 
   group('ReceiptScannerServiceImpl - Total Amount Extraction', () {
-    test('Extracts correct total adjacent to total keyword with high confidence', () {
-      final lines = [
-        'Kopi Kenangan',
-        'Espresso: 25.000',
-        'Croissant: 30.000',
-        'TOTAL: 55.000',
-        'CASH: 100.000',
-      ];
-      final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
-      expect(amount, 55000.0);
-      expect(lowConfidence, false);
-    });
+    test(
+      'Extracts correct total adjacent to total keyword with high confidence',
+      () {
+        final lines = [
+          'Kopi Kenangan',
+          'Espresso: 25.000',
+          'Croissant: 30.000',
+          'TOTAL: 55.000',
+          'CASH: 100.000',
+        ];
+        final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
+        expect(amount, 55000.0);
+        expect(lowConfidence, false);
+      },
+    );
 
-    test('Sanitizes OCR errors replacing O/o with 0 inside digit structures', () {
-      final lines = [
-        'Starbucks Coffee',
-        'Grand Total: Rp 7O.OOO', // O instead of 0
-        'Bayar: 1OO.ooo',        // o instead of 0
-      ];
-      final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
-      expect(amount, 70000.0);
-      expect(lowConfidence, false);
-    });
+    test(
+      'Sanitizes OCR errors replacing O/o with 0 inside digit structures',
+      () {
+        final lines = [
+          'Starbucks Coffee',
+          'Grand Total: Rp 7O.OOO', // O instead of 0
+          'Bayar: 1OO.ooo', // o instead of 0
+        ];
+        final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
+        expect(amount, 70000.0);
+        expect(lowConfidence, false);
+      },
+    );
 
     test('Correctly handles colloquial ooo representing 000', () {
-      final lines = [
-        'TOTAL: 15.ooo',
-      ];
+      final lines = ['TOTAL: 15.ooo'];
       final (amount, _) = scanner.extractTotalAmount(lines);
       expect(amount, 15000.0);
     });
 
     test('Parses English decimal thousands and ignores cents', () {
-      final lines = [
-        'TOTAL: 125,500.00',
-      ];
+      final lines = ['TOTAL: 125,500.00'];
       final (amount, _) = scanner.extractTotalAmount(lines);
       expect(amount, 125500.0);
     });
 
     test('Parses Indonesian thousand dots and decimal commas', () {
-      final lines = [
-        'TOTAL: Rp 125.500,00',
-      ];
+      final lines = ['TOTAL: Rp 125.500,00'];
       final (amount, _) = scanner.extractTotalAmount(lines);
       expect(amount, 125500.0);
     });
 
-    test('Falls back to the largest valid number if no keyword matches, set lowConfidence to true', () {
-      final lines = [
-        'Item A: 12.000',
-        'Item B: 85.000', // Largest number, no total keyword
-        'No Label here',
-      ];
-      final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
-      expect(amount, 85000.0);
-      expect(lowConfidence, true);
-    });
+    test(
+      'Falls back to the largest valid number if no keyword matches, set lowConfidence to true',
+      () {
+        final lines = [
+          'Item A: 12.000',
+          'Item B: 85.000', // Largest number, no total keyword
+          'No Label here',
+        ];
+        final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
+        expect(amount, 85000.0);
+        expect(lowConfidence, true);
+      },
+    );
 
     test('Excludes years and barcode ids from fallbacks', () {
       final lines = [
         'Tahun 2026',
         'Item A: 15.000',
         'Serial: 9988776655', // Too large
-        'Qty: 1',             // Too small
+        'Qty: 1', // Too small
       ];
       final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
       expect(amount, 15000.0);
@@ -154,10 +157,7 @@ void main() {
     });
 
     test('Returns 0.0 with low confidence if no numbers found', () {
-      final lines = [
-        'Starbucks Coffee',
-        'No prices listed',
-      ];
+      final lines = ['Starbucks Coffee', 'No prices listed'];
       final (amount, lowConfidence) = scanner.extractTotalAmount(lines);
       expect(amount, 0.0);
       expect(lowConfidence, true);

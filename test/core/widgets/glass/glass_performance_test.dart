@@ -186,15 +186,12 @@ void main() {
               CustomScrollView(
                 slivers: [
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return GlassCard(
-                          enableBlur: false,
-                          child: Text('Sliver Item $index'),
-                        );
-                      },
-                      childCount: 5,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return GlassCard(
+                        enableBlur: false,
+                        child: Text('Sliver Item $index'),
+                      );
+                    }, childCount: 5),
                   ),
                 ],
               ),
@@ -221,10 +218,7 @@ void main() {
         (tester) async {
           await tester.pumpWidget(
             _buildApp(
-              const GlassSurface(
-                enableBlur: true,
-                child: Text('Content'),
-              ),
+              const GlassSurface(enableBlur: true, child: Text('Content')),
             ),
           );
 
@@ -248,10 +242,7 @@ void main() {
         (tester) async {
           await tester.pumpWidget(
             _buildApp(
-              const GlassSurface(
-                enableBlur: false,
-                child: Text('Content'),
-              ),
+              const GlassSurface(enableBlur: false, child: Text('Content')),
             ),
           );
 
@@ -269,132 +260,111 @@ void main() {
         },
       );
 
-      testWidgets(
-        'GlassCard wraps in RepaintBoundary for GPU isolation',
-        (tester) async {
-          await tester.pumpWidget(
-            _buildApp(
-              const GlassCard(
-                enableBlur: true,
-                child: Text('Card Content'),
-              ),
-            ),
-          );
+      testWidgets('GlassCard wraps in RepaintBoundary for GPU isolation', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildApp(
+            const GlassCard(enableBlur: true, child: Text('Card Content')),
+          ),
+        );
 
-          final repaintBoundaries = find.descendant(
-            of: find.byType(GlassCard),
-            matching: find.byType(RepaintBoundary),
-          );
-          expect(
-            repaintBoundaries,
-            findsAtLeast(1),
-            reason:
-                'Requirement 13.2: GlassCard must include RepaintBoundary '
-                'for GPU isolation',
-          );
-        },
-      );
+        final repaintBoundaries = find.descendant(
+          of: find.byType(GlassCard),
+          matching: find.byType(RepaintBoundary),
+        );
+        expect(
+          repaintBoundaries,
+          findsAtLeast(1),
+          reason:
+              'Requirement 13.2: GlassCard must include RepaintBoundary '
+              'for GPU isolation',
+        );
+      });
     });
 
     // -------------------------------------------------------------------------
     // Requirement 13.5 (enableBlur: false path): No BackdropFilter in tree
     // -------------------------------------------------------------------------
     group('enableBlur: false path produces no BackdropFilter', () {
-      testWidgets(
-        'GlassSurface with enableBlur: false has no BackdropFilter',
-        (tester) async {
-          await tester.pumpWidget(
-            _buildApp(
-              const GlassSurface(
-                enableBlur: false,
-                child: Text('No blur'),
-              ),
-            ),
-          );
+      testWidgets('GlassSurface with enableBlur: false has no BackdropFilter', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildApp(
+            const GlassSurface(enableBlur: false, child: Text('No blur')),
+          ),
+        );
 
-          expect(
-            find.descendant(
-              of: find.byType(GlassSurface),
-              matching: find.byType(BackdropFilter),
-            ),
-            findsNothing,
-            reason:
-                'enableBlur: false must not produce any BackdropFilter widget',
-          );
-        },
-      );
+        expect(
+          find.descendant(
+            of: find.byType(GlassSurface),
+            matching: find.byType(BackdropFilter),
+          ),
+          findsNothing,
+          reason:
+              'enableBlur: false must not produce any BackdropFilter widget',
+        );
+      });
 
-      testWidgets(
-        'GlassSurface with enableBlur: true DOES have BackdropFilter',
-        (tester) async {
-          await tester.pumpWidget(
-            _buildApp(
-              const GlassSurface(
-                enableBlur: true,
-                child: Text('With blur'),
-              ),
-            ),
-          );
+      testWidgets('GlassSurface with enableBlur: true DOES have BackdropFilter', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildApp(
+            const GlassSurface(enableBlur: true, child: Text('With blur')),
+          ),
+        );
 
-          expect(
-            find.descendant(
-              of: find.byType(GlassSurface),
-              matching: find.byType(BackdropFilter),
-            ),
-            findsOneWidget,
-            reason:
-                'enableBlur: true must produce exactly one BackdropFilter widget',
-          );
-        },
-      );
+        expect(
+          find.descendant(
+            of: find.byType(GlassSurface),
+            matching: find.byType(BackdropFilter),
+          ),
+          findsOneWidget,
+          reason:
+              'enableBlur: true must produce exactly one BackdropFilter widget',
+        );
+      });
 
-      testWidgets(
-        'GlassCard with enableBlur: false has no BackdropFilter',
-        (tester) async {
-          await tester.pumpWidget(
-            _buildApp(
-              const GlassCard(
-                enableBlur: false,
-                child: Text('No blur card'),
-              ),
-            ),
-          );
+      testWidgets('GlassCard with enableBlur: false has no BackdropFilter', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildApp(
+            const GlassCard(enableBlur: false, child: Text('No blur card')),
+          ),
+        );
 
-          expect(
-            find.descendant(
-              of: find.byType(GlassCard),
-              matching: find.byType(BackdropFilter),
-            ),
-            findsNothing,
-            reason:
-                'GlassCard with enableBlur: false must not produce BackdropFilter',
-          );
-        },
-      );
+        expect(
+          find.descendant(
+            of: find.byType(GlassCard),
+            matching: find.byType(BackdropFilter),
+          ),
+          findsNothing,
+          reason:
+              'GlassCard with enableBlur: false must not produce BackdropFilter',
+        );
+      });
 
-      testWidgets(
-        'GlassCard with enableBlur: true DOES have BackdropFilter',
-        (tester) async {
-          await tester.pumpWidget(
-            _buildApp(
-              const GlassCard(
-                enableBlur: true,
-                child: Text('With blur card'),
-              ),
-            ),
-          );
+      testWidgets('GlassCard with enableBlur: true DOES have BackdropFilter', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _buildApp(
+            const GlassCard(enableBlur: true, child: Text('With blur card')),
+          ),
+        );
 
-          expect(
-            find.descendant(
-              of: find.byType(GlassCard),
-              matching: find.byType(BackdropFilter),
-            ),
-            findsOneWidget,
-            reason:
-                'GlassCard with enableBlur: true must produce BackdropFilter',
-          );
-        },
-      );
+        expect(
+          find.descendant(
+            of: find.byType(GlassCard),
+            matching: find.byType(BackdropFilter),
+          ),
+          findsOneWidget,
+          reason: 'GlassCard with enableBlur: true must produce BackdropFilter',
+        );
+      });
     });
   });
 }

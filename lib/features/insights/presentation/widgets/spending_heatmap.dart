@@ -71,8 +71,8 @@ class SpendingHeatmap extends ConsumerWidget {
                   Text(
                     'Spending Intensity (90 Days)',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   _buildLegend(themeDetails.heatmapColors),
                 ],
@@ -109,55 +109,75 @@ class SpendingHeatmap extends ConsumerWidget {
                     ),
                     // 13 columns (weeks), animated dynamically to maintain high frame rate
                     Row(
-                      children: List.generate(weeks.length, (wIndex) {
-                        final week = weeks[wIndex];
-                        return Column(
-                          children: List.generate(week.length, (dIndex) {
-                            final date = week[dIndex];
-                            final dateKey = DateFormat('yyyy-MM-dd').format(date);
-                            final expense = dailyExpenses[dateKey] ?? 0.0;
+                      children:
+                          List.generate(weeks.length, (wIndex) {
+                                final week = weeks[wIndex];
+                                return Column(
+                                  children: List.generate(week.length, (
+                                    dIndex,
+                                  ) {
+                                    final date = week[dIndex];
+                                    final dateKey = DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(date);
+                                    final expense =
+                                        dailyExpenses[dateKey] ?? 0.0;
 
-                            // Choose color shade based on expense density
-                            Color cellColor;
-                            if (expense == 0) {
-                              cellColor = themeDetails.heatmapColors[0];
-                            } else if (expense <= dailyBudget * 0.25) {
-                              cellColor = themeDetails.heatmapColors[1];
-                            } else if (expense <= dailyBudget * 0.60) {
-                              cellColor = themeDetails.heatmapColors[2];
-                            } else if (expense <= dailyBudget) {
-                              cellColor = themeDetails.heatmapColors[3];
-                            } else {
-                              cellColor = themeDetails.heatmapColors[4];
-                            }
+                                    // Choose color shade based on expense density
+                                    Color cellColor;
+                                    if (expense == 0) {
+                                      cellColor = themeDetails.heatmapColors[0];
+                                    } else if (expense <= dailyBudget * 0.25) {
+                                      cellColor = themeDetails.heatmapColors[1];
+                                    } else if (expense <= dailyBudget * 0.60) {
+                                      cellColor = themeDetails.heatmapColors[2];
+                                    } else if (expense <= dailyBudget) {
+                                      cellColor = themeDetails.heatmapColors[3];
+                                    } else {
+                                      cellColor = themeDetails.heatmapColors[4];
+                                    }
 
-                            final isCurrentDay = date.year == today.year &&
-                                date.month == today.month &&
-                                date.day == today.day;
+                                    final isCurrentDay =
+                                        date.year == today.year &&
+                                        date.month == today.month &&
+                                        date.day == today.day;
 
-                            return Tooltip(
-                              message: '${DateFormat('EEEE, d MMMM y').format(date)}\nSpent: Rp ${NumberFormat('#,###', 'id_ID').format(expense)}',
-                              triggerMode: TooltipTriggerMode.tap,
-                              preferBelow: false,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                margin: const EdgeInsets.all(2.0),
-                                decoration: BoxDecoration(
-                                  color: cellColor,
-                                  borderRadius: BorderRadius.circular(3),
-                                  border: isCurrentDay
-                                      ? Border.all(
-                                          color: themeDetails.themeData.colorScheme.primary,
-                                          width: 1.5,
-                                        )
-                                      : null,
-                                ),
+                                    return Tooltip(
+                                      message:
+                                          '${DateFormat('EEEE, d MMMM y').format(date)}\nSpent: Rp ${NumberFormat('#,###', 'id_ID').format(expense)}',
+                                      triggerMode: TooltipTriggerMode.tap,
+                                      preferBelow: false,
+                                      child: Container(
+                                        width: 16,
+                                        height: 16,
+                                        margin: const EdgeInsets.all(2.0),
+                                        decoration: BoxDecoration(
+                                          color: cellColor,
+                                          borderRadius: BorderRadius.circular(
+                                            3,
+                                          ),
+                                          border: isCurrentDay
+                                              ? Border.all(
+                                                  color: themeDetails
+                                                      .themeData
+                                                      .colorScheme
+                                                      .primary,
+                                                  width: 1.5,
+                                                )
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              })
+                              .animate(interval: 40.ms)
+                              .fade(duration: 250.ms)
+                              .slideX(
+                                begin: 0.15,
+                                end: 0,
+                                curve: Curves.easeOutCubic,
                               ),
-                            );
-                          }),
-                        );
-                      }).animate(interval: 40.ms).fade(duration: 250.ms).slideX(begin: 0.15, end: 0, curve: Curves.easeOutCubic),
                     ),
                   ],
                 ),
@@ -189,7 +209,11 @@ class SpendingHeatmap extends ConsumerWidget {
       child: Center(
         child: Text(
           label,
-          style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 11,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -199,17 +223,33 @@ class SpendingHeatmap extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Less ', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
-        ...colors.map((c) => Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 1.0),
-              decoration: BoxDecoration(
-                color: c,
-                borderRadius: BorderRadius.circular(1.5),
-              ),
-            )),
-        const Text(' More', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
+        const Text(
+          'Less ',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        ...colors.map(
+          (c) => Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 1.0),
+            decoration: BoxDecoration(
+              color: c,
+              borderRadius: BorderRadius.circular(1.5),
+            ),
+          ),
+        ),
+        const Text(
+          ' More',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }

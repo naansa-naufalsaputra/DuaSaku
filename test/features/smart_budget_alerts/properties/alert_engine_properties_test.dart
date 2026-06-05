@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/core/utils/app_error.dart';
 import 'package:duasaku_app/core/utils/result.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/alert_repository_interface.dart';
@@ -61,26 +60,31 @@ List<BudgetAlertModel> evaluateThresholdsLogic({
     if (percentage < threshold) continue;
     if (alreadyTriggeredThresholds.contains(threshold)) continue;
 
-    final alertType =
-        percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
-    final remainingBudget =
-        budgetLimit - totalSpent > 0 ? budgetLimit - totalSpent : 0.0;
-    final overAmount =
-        alertType == AlertType.overBudget ? totalSpent - budgetLimit : null;
+    final alertType = percentage >= 100
+        ? AlertType.overBudget
+        : AlertType.threshold;
+    final remainingBudget = budgetLimit - totalSpent > 0
+        ? budgetLimit - totalSpent
+        : 0.0;
+    final overAmount = alertType == AlertType.overBudget
+        ? totalSpent - budgetLimit
+        : null;
 
-    alerts.add(BudgetAlertModel(
-      id: 'alert_${threshold}_$categoryId',
-      userId: userId,
-      categoryId: categoryId,
-      alertType: alertType,
-      thresholdValue: threshold,
-      actualPercentage: percentage,
-      message: 'Test alert for threshold $threshold%',
-      isRead: false,
-      createdAt: DateTime.now(),
-      remainingBudget: remainingBudget,
-      overAmount: overAmount,
-    ));
+    alerts.add(
+      BudgetAlertModel(
+        id: 'alert_${threshold}_$categoryId',
+        userId: userId,
+        categoryId: categoryId,
+        alertType: alertType,
+        thresholdValue: threshold,
+        actualPercentage: percentage,
+        message: 'Test alert for threshold $threshold%',
+        isRead: false,
+        createdAt: DateTime.now(),
+        remainingBudget: remainingBudget,
+        overAmount: overAmount,
+      ),
+    );
   }
 
   return alerts;
@@ -147,8 +151,9 @@ BudgetAlertModel? evaluatePredictionLogic({
     isRead: false,
     createdAt: DateTime.now(),
     overAmount: estimatedOverAmount,
-    remainingBudget:
-        budgetLimit - totalSpent > 0 ? budgetLimit - totalSpent : 0,
+    remainingBudget: budgetLimit - totalSpent > 0
+        ? budgetLimit - totalSpent
+        : 0,
   );
 }
 
@@ -156,9 +161,7 @@ BudgetAlertModel? evaluatePredictionLogic({
 ///
 /// Returns true if a notification would be sent, false otherwise.
 /// Key check: if master toggle (isEnabled) is false, returns false.
-bool shouldSendNotification({
-  required AlertPreferenceModel globalPrefs,
-}) {
+bool shouldSendNotification({required AlertPreferenceModel globalPrefs}) {
   // Master toggle check (Req 5.5)
   if (!globalPrefs.isEnabled) {
     return false;
@@ -179,7 +182,8 @@ bool shouldSendNotification({
   int elapsedDays,
   int remainingDays,
   double upcomingRecurring,
-}) _generateSpendingScenario(int seed) {
+})
+_generateSpendingScenario(int seed) {
   final rng = Random(seed);
 
   // Budget limit: 100,000 to 10,000,000 (realistic Rupiah amounts)
@@ -192,10 +196,9 @@ bool shouldSendNotification({
   // Thresholds: random subset of valid thresholds
   final allThresholds = [50, 75, 90, 100];
   final thresholdCount = 1 + rng.nextInt(allThresholds.length);
-  final thresholds = (List<int>.from(allThresholds)..shuffle(rng))
-      .take(thresholdCount)
-      .toList()
-    ..sort();
+  final thresholds = (List<int>.from(
+    allThresholds,
+  )..shuffle(rng)).take(thresholdCount).toList()..sort();
 
   // Elapsed days: 3-25 (valid for prediction)
   final elapsedDays = 3 + rng.nextInt(23);
@@ -243,21 +246,21 @@ class InMemoryAlertRepository implements AlertRepositoryInterface {
     String userId, {
     int? limit,
     int? offset,
-  }) async =>
-      Success(insertedAlerts.where((a) => a.userId == userId).toList());
+  }) async => Success(insertedAlerts.where((a) => a.userId == userId).toList());
 
   @override
   Stream<List<BudgetAlertModel>> watchAlerts(String userId) =>
       Stream.value(insertedAlerts.where((a) => a.userId == userId).toList());
 
   @override
-  Future<Result<int, AppError>> getUnreadCount(String userId) async =>
-      Success(
-          insertedAlerts.where((a) => a.userId == userId && !a.isRead).length);
+  Future<Result<int, AppError>> getUnreadCount(String userId) async => Success(
+    insertedAlerts.where((a) => a.userId == userId && !a.isRead).length,
+  );
 
   @override
   Stream<int> watchUnreadCount(String userId) => Stream.value(
-      insertedAlerts.where((a) => a.userId == userId && !a.isRead).length);
+    insertedAlerts.where((a) => a.userId == userId && !a.isRead).length,
+  );
 
   @override
   Future<Result<void, AppError>> markAsRead(List<String> alertIds) async =>
@@ -284,16 +287,18 @@ class InMemoryAlertThresholdStatusRepository
 
   @override
   Future<Result<List<AlertThresholdStatusModel>, AppError>>
-      getTriggeredThresholds(
+  getTriggeredThresholds(
     String userId,
     String categoryId,
     String budgetMonth,
   ) async {
     final matching = _statuses
-        .where((s) =>
-            s.userId == userId &&
-            s.categoryId == categoryId &&
-            s.budgetMonth == budgetMonth)
+        .where(
+          (s) =>
+              s.userId == userId &&
+              s.categoryId == categoryId &&
+              s.budgetMonth == budgetMonth,
+        )
         .toList();
     return Success(matching);
   }
@@ -313,11 +318,13 @@ class InMemoryAlertThresholdStatusRepository
     String budgetMonth,
     int thresholdValue,
   ) async {
-    _statuses.removeWhere((s) =>
-        s.userId == userId &&
-        s.categoryId == categoryId &&
-        s.budgetMonth == budgetMonth &&
-        s.thresholdValue == thresholdValue);
+    _statuses.removeWhere(
+      (s) =>
+          s.userId == userId &&
+          s.categoryId == categoryId &&
+          s.budgetMonth == budgetMonth &&
+          s.thresholdValue == thresholdValue,
+    );
     return const Success(null);
   }
 
@@ -327,7 +334,8 @@ class InMemoryAlertThresholdStatusRepository
     String budgetMonth,
   ) async {
     _statuses.removeWhere(
-        (s) => s.userId == userId && s.budgetMonth == budgetMonth);
+      (s) => s.userId == userId && s.budgetMonth == budgetMonth,
+    );
     return const Success(null);
   }
 }
@@ -386,10 +394,12 @@ class AlertEngineSimulator {
         if (triggeredThresholds.contains(threshold)) continue;
 
         // Threshold crossed and not yet triggered — generate alert
-        final alertType =
-            percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
-        final remainingBudget =
-            budgetLimit - totalSpent > 0 ? budgetLimit - totalSpent : 0.0;
+        final alertType = percentage >= 100
+            ? AlertType.overBudget
+            : AlertType.threshold;
+        final remainingBudget = budgetLimit - totalSpent > 0
+            ? budgetLimit - totalSpent
+            : 0.0;
 
         final alert = BudgetAlertModel(
           id: 'alert_${alertCounter++}',
@@ -474,12 +484,16 @@ void main() {
           categoryId: categoryId,
         );
 
-        expect(alerts, isEmpty,
-            reason: 'Alert Engine must produce zero alerts when '
-                'master toggle isEnabled=false. '
-                'Scenario: budget=${scenario.budgetLimit}, '
-                'spent=${scenario.totalSpent}, '
-                'thresholds=${scenario.thresholds}');
+        expect(
+          alerts,
+          isEmpty,
+          reason:
+              'Alert Engine must produce zero alerts when '
+              'master toggle isEnabled=false. '
+              'Scenario: budget=${scenario.budgetLimit}, '
+              'spent=${scenario.totalSpent}, '
+              'thresholds=${scenario.thresholds}',
+        );
       },
     );
 
@@ -525,12 +539,16 @@ void main() {
           categoryId: categoryId,
         );
 
-        expect(predictionAlert, isNull,
-            reason: 'Prediction Engine must produce zero alerts when '
-                'master toggle isEnabled=false. '
-                'Scenario: budget=${scenario.budgetLimit}, '
-                'spent=${scenario.totalSpent}, '
-                'elapsedDays=${scenario.elapsedDays}');
+        expect(
+          predictionAlert,
+          isNull,
+          reason:
+              'Prediction Engine must produce zero alerts when '
+              'master toggle isEnabled=false. '
+              'Scenario: budget=${scenario.budgetLimit}, '
+              'spent=${scenario.totalSpent}, '
+              'elapsedDays=${scenario.elapsedDays}',
+        );
       },
     );
 
@@ -554,9 +572,13 @@ void main() {
         // Should NOT send notification
         final shouldSend = shouldSendNotification(globalPrefs: globalPrefs);
 
-        expect(shouldSend, isFalse,
-            reason: 'Notification Service must send zero notifications '
-                'when master toggle isEnabled=false');
+        expect(
+          shouldSend,
+          isFalse,
+          reason:
+              'Notification Service must send zero notifications '
+              'when master toggle isEnabled=false',
+        );
       },
     );
 
@@ -618,267 +640,287 @@ void main() {
   // Feature: smart-budget-alerts, Property 3: Threshold reset on spending decrease
   // **Validates: Requirements 1.7, 6.6**
   group('Property 3: Threshold reset on spending decrease', () {
-    Glados(any.intInRange(0, 999999)).test(
-      'When spending drops below a previously triggered threshold, '
-      'the threshold status SHALL be reset (percentage < thresholdValue)',
-      (seed) {
-        final rng = Random(seed);
+    Glados(
+      any.intInRange(0, 999999),
+    ).test('When spending drops below a previously triggered threshold, '
+        'the threshold status SHALL be reset (percentage < thresholdValue)', (
+      seed,
+    ) {
+      final rng = Random(seed);
 
-        // Generate random budget limit > 0
-        final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
+      // Generate random budget limit > 0
+      final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
 
-        // Generate a valid threshold value (10-100, multiples of 5)
-        final threshold = (rng.nextInt(19) + 2) * 5; // 10, 15, ..., 100
+      // Generate a valid threshold value (10-100, multiples of 5)
+      final threshold = (rng.nextInt(19) + 2) * 5; // 10, 15, ..., 100
 
-        // Calculate the threshold amount = threshold% * budgetLimit / 100
-        final thresholdAmount = (threshold / 100.0) * budgetLimit;
+      // Calculate the threshold amount = threshold% * budgetLimit / 100
+      final thresholdAmount = (threshold / 100.0) * budgetLimit;
 
-        // Phase 1: Spending ABOVE threshold (would have triggered the alert)
-        final spendingAbove =
-            thresholdAmount + rng.nextDouble() * (budgetLimit * 2 - thresholdAmount) + 1;
-        final percentageAbove = (spendingAbove / budgetLimit) * 100;
+      // Phase 1: Spending ABOVE threshold (would have triggered the alert)
+      final spendingAbove =
+          thresholdAmount +
+          rng.nextDouble() * (budgetLimit * 2 - thresholdAmount) +
+          1;
+      final percentageAbove = (spendingAbove / budgetLimit) * 100;
 
-        // Verify: spending above threshold should NOT trigger a reset
-        // (mirrors reevaluateAfterSpendingDecrease: if percentage < thresholdValue => reset)
-        expect(
-          percentageAbove < threshold,
-          isFalse,
-          reason: 'Spending ($spendingAbove) is above threshold '
-              '($threshold% of $budgetLimit = $thresholdAmount), '
-              'percentage ($percentageAbove%) >= threshold ($threshold%), '
-              'so threshold should NOT be reset',
-        );
+      // Verify: spending above threshold should NOT trigger a reset
+      // (mirrors reevaluateAfterSpendingDecrease: if percentage < thresholdValue => reset)
+      expect(
+        percentageAbove < threshold,
+        isFalse,
+        reason:
+            'Spending ($spendingAbove) is above threshold '
+            '($threshold% of $budgetLimit = $thresholdAmount), '
+            'percentage ($percentageAbove%) >= threshold ($threshold%), '
+            'so threshold should NOT be reset',
+      );
 
-        // Phase 2: Spending DECREASES below threshold (due to deletion/amount decrease)
-        final spendingBelow = rng.nextDouble() * thresholdAmount * 0.99;
-        final percentageBelow = (spendingBelow / budgetLimit) * 100;
+      // Phase 2: Spending DECREASES below threshold (due to deletion/amount decrease)
+      final spendingBelow = rng.nextDouble() * thresholdAmount * 0.99;
+      final percentageBelow = (spendingBelow / budgetLimit) * 100;
 
-        // Verify: spending below threshold SHOULD trigger a reset
-        expect(
-          percentageBelow < threshold,
-          isTrue,
-          reason: 'Spending ($spendingBelow) dropped below threshold '
-              '($threshold% of $budgetLimit = $thresholdAmount), '
-              'percentage ($percentageBelow%) < threshold ($threshold%), '
-              'so threshold SHALL be reset',
-        );
-      },
-    );
+      // Verify: spending below threshold SHOULD trigger a reset
+      expect(
+        percentageBelow < threshold,
+        isTrue,
+        reason:
+            'Spending ($spendingBelow) dropped below threshold '
+            '($threshold% of $budgetLimit = $thresholdAmount), '
+            'percentage ($percentageBelow%) < threshold ($threshold%), '
+            'so threshold SHALL be reset',
+      );
+    });
 
-    Glados(any.intInRange(0, 999999)).test(
-      'After threshold reset, spending rising back above threshold '
-      'allows the alert to be triggered again (re-triggering)',
-      (seed) {
-        final rng = Random(seed);
+    Glados(
+      any.intInRange(0, 999999),
+    ).test('After threshold reset, spending rising back above threshold '
+        'allows the alert to be triggered again (re-triggering)', (seed) {
+      final rng = Random(seed);
 
-        final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
-        final threshold = (rng.nextInt(19) + 2) * 5;
-        final thresholdAmount = (threshold / 100.0) * budgetLimit;
+      final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
+      final threshold = (rng.nextInt(19) + 2) * 5;
+      final thresholdAmount = (threshold / 100.0) * budgetLimit;
 
-        const userId = 'user_retrigger';
-        final categoryId = 'cat_${rng.nextInt(10)}';
+      const userId = 'user_retrigger';
+      final categoryId = 'cat_${rng.nextInt(10)}';
 
-        // Global prefs with master toggle ON
-        final globalPrefs = AlertPreferenceModel(
-          id: 'pref_global',
-          userId: userId,
-          categoryId: null,
-          isEnabled: true,
-          thresholds: [threshold],
-          predictionsEnabled: true,
-        );
+      // Global prefs with master toggle ON
+      final globalPrefs = AlertPreferenceModel(
+        id: 'pref_global',
+        userId: userId,
+        categoryId: null,
+        isEnabled: true,
+        thresholds: [threshold],
+        predictionsEnabled: true,
+      );
 
-        // Phase 1: Spending above threshold — alert triggered
-        final spendingAbove =
-            thresholdAmount + rng.nextDouble() * (budgetLimit - thresholdAmount) + 1;
+      // Phase 1: Spending above threshold — alert triggered
+      final spendingAbove =
+          thresholdAmount +
+          rng.nextDouble() * (budgetLimit - thresholdAmount) +
+          1;
 
-        final alertsPhase1 = evaluateThresholdsLogic(
-          globalPrefs: globalPrefs,
-          categoryPrefs: null,
-          budgetLimit: budgetLimit,
-          totalSpent: spendingAbove,
-          alreadyTriggeredThresholds: {}, // Nothing triggered yet
-          userId: userId,
-          categoryId: categoryId,
-        );
-        expect(alertsPhase1.length, equals(1),
-            reason: 'Phase 1: spending above threshold should trigger 1 alert');
+      final alertsPhase1 = evaluateThresholdsLogic(
+        globalPrefs: globalPrefs,
+        categoryPrefs: null,
+        budgetLimit: budgetLimit,
+        totalSpent: spendingAbove,
+        alreadyTriggeredThresholds: {}, // Nothing triggered yet
+        userId: userId,
+        categoryId: categoryId,
+      );
+      expect(
+        alertsPhase1.length,
+        equals(1),
+        reason: 'Phase 1: spending above threshold should trigger 1 alert',
+      );
 
-        // Phase 2: Spending decreases below threshold — reset occurs
-        final spendingBelow = rng.nextDouble() * thresholdAmount * 0.99;
-        final percentageBelow = (spendingBelow / budgetLimit) * 100;
+      // Phase 2: Spending decreases below threshold — reset occurs
+      final spendingBelow = rng.nextDouble() * thresholdAmount * 0.99;
+      final percentageBelow = (spendingBelow / budgetLimit) * 100;
 
-        // Verify reset condition is met (reevaluateAfterSpendingDecrease logic)
-        expect(percentageBelow < threshold, isTrue,
-            reason: 'Phase 2: spending decreased, percentage should be below threshold');
+      // Verify reset condition is met (reevaluateAfterSpendingDecrease logic)
+      expect(
+        percentageBelow < threshold,
+        isTrue,
+        reason:
+            'Phase 2: spending decreased, percentage should be below threshold',
+      );
 
-        // Phase 3: After reset, spending rises back above threshold
-        // Since threshold was reset, alreadyTriggeredThresholds is now empty again
-        final spendingAboveAgain =
-            thresholdAmount + rng.nextDouble() * (budgetLimit - thresholdAmount) + 1;
+      // Phase 3: After reset, spending rises back above threshold
+      // Since threshold was reset, alreadyTriggeredThresholds is now empty again
+      final spendingAboveAgain =
+          thresholdAmount +
+          rng.nextDouble() * (budgetLimit - thresholdAmount) +
+          1;
 
-        final alertsPhase3 = evaluateThresholdsLogic(
-          globalPrefs: globalPrefs,
-          categoryPrefs: null,
-          budgetLimit: budgetLimit,
-          totalSpent: spendingAboveAgain,
-          alreadyTriggeredThresholds: {}, // Reset — no longer triggered
-          userId: userId,
-          categoryId: categoryId,
-        );
-        expect(alertsPhase3.length, equals(1),
-            reason: 'Phase 3: after reset, spending rising back above threshold '
-                'should trigger a NEW alert. '
-                'Budget: $budgetLimit, Threshold: $threshold%, '
-                'ThresholdAmount: $thresholdAmount, '
-                'Phase1: $spendingAbove, Phase2: $spendingBelow, '
-                'Phase3: $spendingAboveAgain');
-      },
-    );
+      final alertsPhase3 = evaluateThresholdsLogic(
+        globalPrefs: globalPrefs,
+        categoryPrefs: null,
+        budgetLimit: budgetLimit,
+        totalSpent: spendingAboveAgain,
+        alreadyTriggeredThresholds: {}, // Reset — no longer triggered
+        userId: userId,
+        categoryId: categoryId,
+      );
+      expect(
+        alertsPhase3.length,
+        equals(1),
+        reason:
+            'Phase 3: after reset, spending rising back above threshold '
+            'should trigger a NEW alert. '
+            'Budget: $budgetLimit, Threshold: $threshold%, '
+            'ThresholdAmount: $thresholdAmount, '
+            'Phase1: $spendingAbove, Phase2: $spendingBelow, '
+            'Phase3: $spendingAboveAgain',
+      );
+    });
 
-    Glados(any.intInRange(0, 999999)).test(
-      'Threshold reset condition: percentage < thresholdValue '
-      'is equivalent to totalSpent < (thresholdValue/100) * budgetLimit',
-      (seed) {
-        final rng = Random(seed);
+    Glados(
+      any.intInRange(0, 999999),
+    ).test('Threshold reset condition: percentage < thresholdValue '
+        'is equivalent to totalSpent < (thresholdValue/100) * budgetLimit', (
+      seed,
+    ) {
+      final rng = Random(seed);
 
-        final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
-        final threshold = (rng.nextInt(19) + 2) * 5;
-        final thresholdAmount = (threshold / 100.0) * budgetLimit;
+      final budgetLimit = (rng.nextInt(9900) + 100) * 1000.0;
+      final threshold = (rng.nextInt(19) + 2) * 5;
+      final thresholdAmount = (threshold / 100.0) * budgetLimit;
 
-        // Generate arbitrary spending (0 to 2x budget)
-        final totalSpent = rng.nextDouble() * budgetLimit * 2;
-        final percentage = (totalSpent / budgetLimit) * 100;
+      // Generate arbitrary spending (0 to 2x budget)
+      final totalSpent = rng.nextDouble() * budgetLimit * 2;
+      final percentage = (totalSpent / budgetLimit) * 100;
 
-        // The reset condition from AlertEngineService.reevaluateAfterSpendingDecrease:
-        //   if (percentage < status.thresholdValue) => reset
-        final shouldReset = percentage < threshold;
+      // The reset condition from AlertEngineService.reevaluateAfterSpendingDecrease:
+      //   if (percentage < status.thresholdValue) => reset
+      final shouldReset = percentage < threshold;
 
-        // This is mathematically equivalent to:
-        //   totalSpent < (thresholdValue / 100) * budgetLimit
-        final equivalentCondition = totalSpent < thresholdAmount;
+      // This is mathematically equivalent to:
+      //   totalSpent < (thresholdValue / 100) * budgetLimit
+      final equivalentCondition = totalSpent < thresholdAmount;
 
-        expect(
-          shouldReset,
-          equals(equivalentCondition),
-          reason: 'Reset condition (percentage < threshold) should be '
-              'equivalent to (totalSpent < thresholdAmount). '
-              'totalSpent=$totalSpent, budgetLimit=$budgetLimit, '
-              'threshold=$threshold%, thresholdAmount=$thresholdAmount, '
-              'percentage=$percentage%',
-        );
-      },
-    );
+      expect(
+        shouldReset,
+        equals(equivalentCondition),
+        reason:
+            'Reset condition (percentage < threshold) should be '
+            'equivalent to (totalSpent < thresholdAmount). '
+            'totalSpent=$totalSpent, budgetLimit=$budgetLimit, '
+            'threshold=$threshold%, thresholdAmount=$thresholdAmount, '
+            'percentage=$percentage%',
+      );
+    });
   });
 
   // Feature: smart-budget-alerts, Property 2: No duplicate alerts per threshold per category per period
   // **Validates: Requirements 1.5**
-  group('Property 2: No duplicate alerts per threshold per category per period',
-      () {
-    Glados(any.intInRange(0, 999999)).test(
-      'for any sequence of expense transactions added to the same category '
-      'within the same budget period, at most one alert is generated per '
-      '(categoryId, thresholdValue, budgetMonth) tuple',
-      (seed) async {
-        final rng = Random(seed);
+  group('Property 2: No duplicate alerts per threshold per category per period', () {
+    Glados(
+      any.intInRange(0, 999999),
+    ).test('for any sequence of expense transactions added to the same category '
+        'within the same budget period, at most one alert is generated per '
+        '(categoryId, thresholdValue, budgetMonth) tuple', (seed) async {
+      final rng = Random(seed);
 
-        // Generate random test parameters
-        final budgetLimit =
-            (rng.nextInt(9000) + 1000).toDouble(); // 1000-10000
-        final categoryId = 'cat_${rng.nextInt(5)}';
-        final budgetMonth =
-            '2024-${(rng.nextInt(12) + 1).toString().padLeft(2, '0')}';
-        const userId = 'user_test';
+      // Generate random test parameters
+      final budgetLimit = (rng.nextInt(9000) + 1000).toDouble(); // 1000-10000
+      final categoryId = 'cat_${rng.nextInt(5)}';
+      final budgetMonth =
+          '2024-${(rng.nextInt(12) + 1).toString().padLeft(2, '0')}';
+      const userId = 'user_test';
 
-        // Generate random thresholds (1-4 values from valid set)
-        final availableThresholds = [50, 75, 90, 100];
-        final thresholdCount = rng.nextInt(4) + 1;
-        final thresholds = (List<int>.from(availableThresholds)..shuffle(rng))
-            .take(thresholdCount)
-            .toList()
-          ..sort();
+      // Generate random thresholds (1-4 values from valid set)
+      final availableThresholds = [50, 75, 90, 100];
+      final thresholdCount = rng.nextInt(4) + 1;
+      final thresholds = (List<int>.from(
+        availableThresholds,
+      )..shuffle(rng)).take(thresholdCount).toList()..sort();
 
-        // Generate a sequence of cumulative spending amounts (3-10 transactions)
-        // that deliberately cross thresholds multiple times
-        final txCount = rng.nextInt(8) + 3;
-        final cumulativeAmounts = <double>[];
-        double currentSpending = 0;
-        for (int i = 0; i < txCount; i++) {
-          // Each transaction adds between 5% and 40% of budget
-          final txAmount = budgetLimit * (0.05 + rng.nextDouble() * 0.35);
-          currentSpending += txAmount;
-          cumulativeAmounts.add(currentSpending);
-        }
+      // Generate a sequence of cumulative spending amounts (3-10 transactions)
+      // that deliberately cross thresholds multiple times
+      final txCount = rng.nextInt(8) + 3;
+      final cumulativeAmounts = <double>[];
+      double currentSpending = 0;
+      for (int i = 0; i < txCount; i++) {
+        // Each transaction adds between 5% and 40% of budget
+        final txAmount = budgetLimit * (0.05 + rng.nextDouble() * 0.35);
+        currentSpending += txAmount;
+        cumulativeAmounts.add(currentSpending);
+      }
 
-        // Set up in-memory tracking of triggered thresholds
-        final triggeredThresholds = <String, Set<int>>{};
-        String statusKey(String catId, String month) => '${catId}_$month';
+      // Set up in-memory tracking of triggered thresholds
+      final triggeredThresholds = <String, Set<int>>{};
+      String statusKey(String catId, String month) => '${catId}_$month';
 
-        // Track generated alerts
-        final generatedAlerts = <BudgetAlertModel>[];
-        int alertCounter = 0;
+      // Track generated alerts
+      final generatedAlerts = <BudgetAlertModel>[];
+      int alertCounter = 0;
 
-        // Simulate multiple threshold evaluations (one per transaction)
-        for (final totalSpent in cumulativeAmounts) {
-          if (budgetLimit <= 0) continue;
+      // Simulate multiple threshold evaluations (one per transaction)
+      for (final totalSpent in cumulativeAmounts) {
+        if (budgetLimit <= 0) continue;
 
-          final percentage = (totalSpent / budgetLimit) * 100;
-          final key = statusKey(categoryId, budgetMonth);
-          final alreadyTriggered = triggeredThresholds[key] ?? <int>{};
+        final percentage = (totalSpent / budgetLimit) * 100;
+        final key = statusKey(categoryId, budgetMonth);
+        final alreadyTriggered = triggeredThresholds[key] ?? <int>{};
 
-          final sortedThresholds = List<int>.from(thresholds)..sort();
-          for (final threshold in sortedThresholds) {
-            if (percentage < threshold) continue;
-            if (alreadyTriggered.contains(threshold)) continue;
+        final sortedThresholds = List<int>.from(thresholds)..sort();
+        for (final threshold in sortedThresholds) {
+          if (percentage < threshold) continue;
+          if (alreadyTriggered.contains(threshold)) continue;
 
-            // Threshold crossed and not yet triggered — generate alert
-            final alertType =
-                percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
-            final remainingBudget =
-                budgetLimit - totalSpent > 0 ? budgetLimit - totalSpent : 0.0;
+          // Threshold crossed and not yet triggered — generate alert
+          final alertType = percentage >= 100
+              ? AlertType.overBudget
+              : AlertType.threshold;
+          final remainingBudget = budgetLimit - totalSpent > 0
+              ? budgetLimit - totalSpent
+              : 0.0;
 
-            final alert = BudgetAlertModel(
-              id: 'alert_${alertCounter++}',
-              userId: userId,
-              categoryId: categoryId,
-              alertType: alertType,
-              thresholdValue: threshold,
-              actualPercentage: percentage,
-              message: 'Threshold $threshold% reached',
-              isRead: false,
-              createdAt: DateTime.now(),
-              remainingBudget: remainingBudget,
-            );
-
-            generatedAlerts.add(alert);
-
-            // Mark threshold as triggered (prevents future duplicates)
-            triggeredThresholds[key] =
-                (triggeredThresholds[key] ?? <int>{})..add(threshold);
-          }
-        }
-
-        // PROPERTY ASSERTION: For each unique (categoryId, thresholdValue, budgetMonth),
-        // the count of generated alerts SHALL be <= 1
-        final alertCounts = <String, int>{};
-        for (final alert in generatedAlerts) {
-          final alertKey =
-              '${alert.categoryId}_${alert.thresholdValue}_$budgetMonth';
-          alertCounts[alertKey] = (alertCounts[alertKey] ?? 0) + 1;
-        }
-
-        for (final entry in alertCounts.entries) {
-          expect(
-            entry.value,
-            lessThanOrEqualTo(1),
-            reason: 'Duplicate alert detected for key: ${entry.key}. '
-                'Count: ${entry.value}. '
-                'Budget: $budgetLimit, Thresholds: $thresholds, '
-                'Spending sequence: $cumulativeAmounts',
+          final alert = BudgetAlertModel(
+            id: 'alert_${alertCounter++}',
+            userId: userId,
+            categoryId: categoryId,
+            alertType: alertType,
+            thresholdValue: threshold,
+            actualPercentage: percentage,
+            message: 'Threshold $threshold% reached',
+            isRead: false,
+            createdAt: DateTime.now(),
+            remainingBudget: remainingBudget,
           );
+
+          generatedAlerts.add(alert);
+
+          // Mark threshold as triggered (prevents future duplicates)
+          triggeredThresholds[key] = (triggeredThresholds[key] ?? <int>{})
+            ..add(threshold);
         }
-      },
-    );
+      }
+
+      // PROPERTY ASSERTION: For each unique (categoryId, thresholdValue, budgetMonth),
+      // the count of generated alerts SHALL be <= 1
+      final alertCounts = <String, int>{};
+      for (final alert in generatedAlerts) {
+        final alertKey =
+            '${alert.categoryId}_${alert.thresholdValue}_$budgetMonth';
+        alertCounts[alertKey] = (alertCounts[alertKey] ?? 0) + 1;
+      }
+
+      for (final entry in alertCounts.entries) {
+        expect(
+          entry.value,
+          lessThanOrEqualTo(1),
+          reason:
+              'Duplicate alert detected for key: ${entry.key}. '
+              'Count: ${entry.value}. '
+              'Budget: $budgetLimit, Thresholds: $thresholds, '
+              'Spending sequence: $cumulativeAmounts',
+        );
+      }
+    });
 
     Glados(any.intInRange(0, 999999)).test(
       'repeated evaluations with the same spending amount above threshold '
@@ -907,20 +949,23 @@ void main() {
           final percentage = (spendingAboveThreshold / budgetLimit) * 100;
 
           if (percentage >= threshold && !triggeredSet.contains(threshold)) {
-            final alertType =
-                percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
+            final alertType = percentage >= 100
+                ? AlertType.overBudget
+                : AlertType.threshold;
 
-            generatedAlerts.add(BudgetAlertModel(
-              id: 'alert_$eval',
-              userId: userId,
-              categoryId: categoryId,
-              alertType: alertType,
-              thresholdValue: threshold,
-              actualPercentage: percentage,
-              message: 'Threshold $threshold% reached',
-              isRead: false,
-              createdAt: DateTime.now(),
-            ));
+            generatedAlerts.add(
+              BudgetAlertModel(
+                id: 'alert_$eval',
+                userId: userId,
+                categoryId: categoryId,
+                alertType: alertType,
+                thresholdValue: threshold,
+                actualPercentage: percentage,
+                message: 'Threshold $threshold% reached',
+                isRead: false,
+                createdAt: DateTime.now(),
+              ),
+            );
 
             triggeredSet.add(threshold);
           }
@@ -928,14 +973,17 @@ void main() {
 
         // PROPERTY ASSERTION: Exactly one alert for this threshold
         final alertsForThreshold = generatedAlerts
-            .where((a) =>
-                a.categoryId == categoryId && a.thresholdValue == threshold)
+            .where(
+              (a) =>
+                  a.categoryId == categoryId && a.thresholdValue == threshold,
+            )
             .toList();
 
         expect(
           alertsForThreshold.length,
           equals(1),
-          reason: 'Expected exactly 1 alert for threshold $threshold% '
+          reason:
+              'Expected exactly 1 alert for threshold $threshold% '
               'but got ${alertsForThreshold.length}. '
               'Budget: $budgetLimit, Spending: $spendingAboveThreshold, '
               'Evaluations: $evaluationCount',
@@ -943,48 +991,48 @@ void main() {
       },
     );
 
-    Glados(any.intInRange(0, 999999)).test(
-      'multiple categories with same thresholds produce independent alerts '
-      'without cross-category duplication',
-      (seed) async {
-        final rng = Random(seed);
+    Glados(
+      any.intInRange(0, 999999),
+    ).test('multiple categories with same thresholds produce independent alerts '
+        'without cross-category duplication', (seed) async {
+      final rng = Random(seed);
 
-        final budgetLimit = (rng.nextInt(5000) + 1000).toDouble();
-        const budgetMonth = '2024-03';
-        const userId = 'user_multi';
-        const thresholds = [50, 75, 90, 100];
+      final budgetLimit = (rng.nextInt(5000) + 1000).toDouble();
+      const budgetMonth = '2024-03';
+      const userId = 'user_multi';
+      const thresholds = [50, 75, 90, 100];
 
-        // Generate 2-4 categories
-        final categoryCount = rng.nextInt(3) + 2;
-        final categories =
-            List.generate(categoryCount, (i) => 'category_$i');
+      // Generate 2-4 categories
+      final categoryCount = rng.nextInt(3) + 2;
+      final categories = List.generate(categoryCount, (i) => 'category_$i');
 
-        // Track triggered thresholds per category
-        final triggeredPerCategory = <String, Set<int>>{};
-        final allAlerts = <BudgetAlertModel>[];
-        int alertCounter = 0;
+      // Track triggered thresholds per category
+      final triggeredPerCategory = <String, Set<int>>{};
+      final allAlerts = <BudgetAlertModel>[];
+      int alertCounter = 0;
 
-        // Each category gets its own spending sequence
-        for (final categoryId in categories) {
-          final txCount = rng.nextInt(5) + 2;
-          double currentSpending = 0;
+      // Each category gets its own spending sequence
+      for (final categoryId in categories) {
+        final txCount = rng.nextInt(5) + 2;
+        double currentSpending = 0;
 
-          for (int i = 0; i < txCount; i++) {
-            currentSpending += budgetLimit * (0.1 + rng.nextDouble() * 0.3);
-            final percentage = (currentSpending / budgetLimit) * 100;
+        for (int i = 0; i < txCount; i++) {
+          currentSpending += budgetLimit * (0.1 + rng.nextDouble() * 0.3);
+          final percentage = (currentSpending / budgetLimit) * 100;
 
-            final triggered = triggeredPerCategory[categoryId] ?? <int>{};
-            final sortedThresholds = List<int>.from(thresholds)..sort();
+          final triggered = triggeredPerCategory[categoryId] ?? <int>{};
+          final sortedThresholds = List<int>.from(thresholds)..sort();
 
-            for (final threshold in sortedThresholds) {
-              if (percentage < threshold) continue;
-              if (triggered.contains(threshold)) continue;
+          for (final threshold in sortedThresholds) {
+            if (percentage < threshold) continue;
+            if (triggered.contains(threshold)) continue;
 
-              final alertType = percentage >= 100
-                  ? AlertType.overBudget
-                  : AlertType.threshold;
+            final alertType = percentage >= 100
+                ? AlertType.overBudget
+                : AlertType.threshold;
 
-              allAlerts.add(BudgetAlertModel(
+            allAlerts.add(
+              BudgetAlertModel(
                 id: 'alert_${alertCounter++}',
                 userId: userId,
                 categoryId: categoryId,
@@ -994,32 +1042,32 @@ void main() {
                 message: 'Threshold $threshold% reached',
                 isRead: false,
                 createdAt: DateTime.now(),
-              ));
+              ),
+            );
 
-              triggeredPerCategory[categoryId] =
-                  (triggeredPerCategory[categoryId] ?? <int>{})..add(threshold);
-            }
+            triggeredPerCategory[categoryId] =
+                (triggeredPerCategory[categoryId] ?? <int>{})..add(threshold);
           }
         }
+      }
 
-        // PROPERTY ASSERTION: For each unique (categoryId, thresholdValue, budgetMonth),
-        // count <= 1
-        final alertCounts = <String, int>{};
-        for (final alert in allAlerts) {
-          final key =
-              '${alert.categoryId}_${alert.thresholdValue}_$budgetMonth';
-          alertCounts[key] = (alertCounts[key] ?? 0) + 1;
-        }
+      // PROPERTY ASSERTION: For each unique (categoryId, thresholdValue, budgetMonth),
+      // count <= 1
+      final alertCounts = <String, int>{};
+      for (final alert in allAlerts) {
+        final key = '${alert.categoryId}_${alert.thresholdValue}_$budgetMonth';
+        alertCounts[key] = (alertCounts[key] ?? 0) + 1;
+      }
 
-        for (final entry in alertCounts.entries) {
-          expect(
-            entry.value,
-            lessThanOrEqualTo(1),
-            reason: 'Duplicate alert for key: ${entry.key}. '
-                'Count: ${entry.value}',
-          );
-        }
-      },
-    );
+      for (final entry in alertCounts.entries) {
+        expect(
+          entry.value,
+          lessThanOrEqualTo(1),
+          reason:
+              'Duplicate alert for key: ${entry.key}. '
+              'Count: ${entry.value}',
+        );
+      }
+    });
   });
 }

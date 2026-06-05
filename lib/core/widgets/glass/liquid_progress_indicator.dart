@@ -156,10 +156,11 @@ class _LiquidProgressIndicatorState extends State<LiquidProgressIndicator>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final glassTheme = LiquidGlassTheme.of(context);
-    final fillColor =
-        widget.color ?? theme.colorScheme.primary;
-    final resolvedTrackColor = widget.trackColor ??
-        (glassTheme?.surfaceTintColor ?? theme.colorScheme.surfaceContainerHighest)
+    final fillColor = widget.color ?? theme.colorScheme.primary;
+    final resolvedTrackColor =
+        widget.trackColor ??
+        (glassTheme?.surfaceTintColor ??
+                theme.colorScheme.surfaceContainerHighest)
             .withValues(alpha: glassTheme?.surfaceOpacity ?? 0.3);
 
     switch (widget.variant) {
@@ -265,8 +266,7 @@ class _LinearLiquidPainter extends CustomPainter {
       final wavePhase = animationValue * 2 * math.pi;
       for (double y = 0; y <= size.height; y += 1) {
         final waveOffset =
-            math.sin(y / size.height * math.pi * 2 + wavePhase) *
-                waveAmplitude;
+            math.sin(y / size.height * math.pi * 2 + wavePhase) * waveAmplitude;
         path.lineTo(fillWidth + waveOffset, y);
       }
 
@@ -291,8 +291,7 @@ class _LinearLiquidPainter extends CustomPainter {
       final wavePhase = animationValue * 4 * math.pi;
       for (double y = 0; y <= size.height; y += 1) {
         final waveOffset =
-            math.sin(y / size.height * math.pi * 2 + wavePhase) *
-                waveAmplitude;
+            math.sin(y / size.height * math.pi * 2 + wavePhase) * waveAmplitude;
         path.lineTo(endX + waveOffset, y);
       }
 

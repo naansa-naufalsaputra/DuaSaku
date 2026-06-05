@@ -20,17 +20,17 @@ import '../widgets/goal_progress_bar.dart';
 // ---------------------------------------------------------------------------
 
 /// StreamProvider that watches deposits for a specific goal.
-final goalDepositsProvider =
-    StreamProvider.autoDispose.family<List<GoalDepositModel>, String>(
-  (ref, goalId) {
-    final repository = ref.watch(goalRepositoryProvider);
-    return repository.watchDeposits(goalId);
-  },
-);
+final goalDepositsProvider = StreamProvider.autoDispose
+    .family<List<GoalDepositModel>, String>((ref, goalId) {
+      final repository = ref.watch(goalRepositoryProvider);
+      return repository.watchDeposits(goalId);
+    });
 
 /// Provider that finds a specific goal by ID from the goal list.
-final goalByIdProvider =
-    Provider.autoDispose.family<GoalModel?, String>((ref, goalId) {
+final goalByIdProvider = Provider.autoDispose.family<GoalModel?, String>((
+  ref,
+  goalId,
+) {
   final goalsAsync = ref.watch(goalNotifierProvider);
   return goalsAsync.valueOrNull?.where((g) => g.id == goalId).firstOrNull;
 });
@@ -47,10 +47,7 @@ final goalByIdProvider =
 ///
 /// Requirements: 2.5, 5.1, 5.2, 5.4
 class GoalDetailScreen extends ConsumerWidget {
-  const GoalDetailScreen({
-    super.key,
-    required this.goalId,
-  });
+  const GoalDetailScreen({super.key, required this.goalId});
 
   /// The ID of the goal to display.
   final String goalId;
@@ -63,27 +60,20 @@ class GoalDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('goals.detail_title'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('goals.detail_title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
           SafeArea(
             child: goal == null
                 ? _NotFoundState(isDark: isDark, theme: theme)
-                : _DetailContent(
-                    goal: goal,
-                    isDark: isDark,
-                    theme: theme,
-                  ),
+                : _DetailContent(goal: goal, isDark: isDark, theme: theme),
           ),
         ],
       ),
     );
   }
 }
-
 
 // ─── Not Found State ──────────────────────────────────────────────────────────
 
@@ -149,61 +139,63 @@ class _DetailContent extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Goal header card
-          _GoalHeaderCard(
-            goal: goal,
-            goalColor: goalColor,
-            currencyFormat: currencyFormat,
-            isDark: isDark,
-            theme: theme,
-          ),
-          const SizedBox(height: 20),
+        children:
+            [
+                  // Goal header card
+                  _GoalHeaderCard(
+                    goal: goal,
+                    goalColor: goalColor,
+                    currencyFormat: currencyFormat,
+                    isDark: isDark,
+                    theme: theme,
+                  ),
+                  const SizedBox(height: 20),
 
-          // Progress section
-          _ProgressSection(
-            goal: goal,
-            goalColor: goalColor,
-            isDark: isDark,
-            theme: theme,
-          ),
-          const SizedBox(height: 20),
+                  // Progress section
+                  _ProgressSection(
+                    goal: goal,
+                    goalColor: goalColor,
+                    isDark: isDark,
+                    theme: theme,
+                  ),
+                  const SizedBox(height: 20),
 
-          // Celebration animation for completed goals
-          if (goal.progressPercentage >= 1.0)
-            _CelebrationSection(
-              goalColor: goalColor,
-              isDark: isDark,
-              theme: theme,
-            ),
+                  // Celebration animation for completed goals
+                  if (goal.progressPercentage >= 1.0)
+                    _CelebrationSection(
+                      goalColor: goalColor,
+                      isDark: isDark,
+                      theme: theme,
+                    ),
 
-          if (goal.progressPercentage >= 1.0) const SizedBox(height: 20),
+                  if (goal.progressPercentage >= 1.0)
+                    const SizedBox(height: 20),
 
-          // Action buttons
-          _ActionButtonsSection(
-            goal: goal,
-            goalColor: goalColor,
-            isDark: isDark,
-            theme: theme,
-          ),
-          const SizedBox(height: 20),
+                  // Action buttons
+                  _ActionButtonsSection(
+                    goal: goal,
+                    goalColor: goalColor,
+                    isDark: isDark,
+                    theme: theme,
+                  ),
+                  const SizedBox(height: 20),
 
-          // Deposit history
-          _DepositHistorySection(
-            goal: goal,
-            goalColor: goalColor,
-            isDark: isDark,
-            theme: theme,
-          ),
-        ]
-            .animate(interval: 80.ms)
-            .fadeIn(duration: 300.ms, curve: Curves.easeOutCubic)
-            .slideY(
-              begin: 0.05,
-              end: 0,
-              duration: 300.ms,
-              curve: Curves.easeOutCubic,
-            ),
+                  // Deposit history
+                  _DepositHistorySection(
+                    goal: goal,
+                    goalColor: goalColor,
+                    isDark: isDark,
+                    theme: theme,
+                  ),
+                ]
+                .animate(interval: 80.ms)
+                .fadeIn(duration: 300.ms, curve: Curves.easeOutCubic)
+                .slideY(
+                  begin: 0.05,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutCubic,
+                ),
       ),
     );
   }
@@ -253,9 +245,7 @@ class _GoalHeaderCard extends StatelessWidget {
             ? colorScheme.surface.withValues(alpha: 0.6)
             : colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: goalColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: goalColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -268,10 +258,7 @@ class _GoalHeaderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: Text(
-                goal.icon,
-                style: const TextStyle(fontSize: 28),
-              ),
+              child: Text(goal.icon, style: const TextStyle(fontSize: 28)),
             ),
           ),
           const SizedBox(height: 16),
@@ -331,9 +318,10 @@ class _GoalHeaderCard extends StatelessWidget {
                 icon: Icons.calendar_today_rounded,
                 label: remainingDays != null
                     ? (remainingDays >= 0
-                        ? 'goals.detail_remaining'
-                            .tr(args: [remainingDays.toString()])
-                        : 'goals.overdue'.tr())
+                          ? 'goals.detail_remaining'.tr(
+                              args: [remainingDays.toString()],
+                            )
+                          : 'goals.overdue'.tr())
                     : 'goals.detail_no_deadline'.tr(),
                 color: remainingDays != null && remainingDays < 0
                     ? theme.colorScheme.error
@@ -350,8 +338,7 @@ class _GoalHeaderCard extends StatelessWidget {
             Text(
               'goals.detail_completed_at'.tr(
                 args: [
-                  DateFormat('dd MMM yyyy', 'id_ID')
-                      .format(goal.completedAt!),
+                  DateFormat('dd MMM yyyy', 'id_ID').format(goal.completedAt!),
                 ],
               ),
               style: TextStyle(
@@ -450,7 +437,9 @@ class _ProgressSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'goals.progress_percentage'.tr(args: [progressPercent.toString()]),
+                'goals.progress_percentage'.tr(
+                  args: [progressPercent.toString()],
+                ),
                 style: TextStyle(
                   color: goalColor,
                   fontSize: 16,
@@ -459,8 +448,10 @@ class _ProgressSection extends StatelessWidget {
               ),
               if (goal.status == GoalStatus.completed)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -500,7 +491,6 @@ class _ProgressSection extends StatelessWidget {
   }
 }
 
-
 // ─── Celebration Section ──────────────────────────────────────────────────────
 
 class _CelebrationSection extends StatelessWidget {
@@ -526,9 +516,7 @@ class _CelebrationSection extends StatelessWidget {
             ? colorScheme.surface.withValues(alpha: 0.6)
             : colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.amber.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -541,11 +529,7 @@ class _CelebrationSection extends StatelessWidget {
       child: Column(
         children: [
           // Celebration icon with animation
-          const Icon(
-            Icons.emoji_events_rounded,
-            size: 48,
-            color: Colors.amber,
-          )
+          const Icon(Icons.emoji_events_rounded, size: 48, color: Colors.amber)
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scale(
                 begin: const Offset(1.0, 1.0),
@@ -558,10 +542,7 @@ class _CelebrationSection extends StatelessWidget {
                 color: Colors.amber.withValues(alpha: 0.3),
               ),
           const SizedBox(height: 12),
-          const Text(
-            '🎉',
-            style: TextStyle(fontSize: 32),
-          )
+          const Text('🎉', style: TextStyle(fontSize: 32))
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .shake(hz: 2, duration: 1500.ms),
           const SizedBox(height: 8),
@@ -689,9 +670,7 @@ class _ActionButtonsSection extends ConsumerWidget {
                 context.pop();
               }
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             child: Text('goals.action_archive'.tr()),
           ),
         ],
@@ -714,9 +693,7 @@ class _ActionButtonsSection extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              await ref
-                  .read(goalNotifierProvider.notifier)
-                  .deleteGoal(goal.id);
+              await ref.read(goalNotifierProvider.notifier).deleteGoal(goal.id);
               if (context.mounted) {
                 context.pop();
               }
@@ -756,9 +733,7 @@ class _ActionButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: color.withValues(alpha: 0.12),
         foregroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       ),
     );

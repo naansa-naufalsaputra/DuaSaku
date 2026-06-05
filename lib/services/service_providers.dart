@@ -16,28 +16,29 @@ final smartInputMlServiceProvider = Provider<SmartInputMlService>((ref) {
 });
 
 /// Provides a singleton [TransactionParserServiceInterface] with an orchestrated parsing strategy.
-final transactionParserServiceProvider = Provider<TransactionParserServiceInterface>((ref) {
-  final mode = ref.watch(parserModeProvider);
-  final tfliteService = TfliteTransactionParserService();
-  final localService = LocalTransactionParserService();
-  final mlService = ref.watch(smartInputMlServiceProvider);
+final transactionParserServiceProvider =
+    Provider<TransactionParserServiceInterface>((ref) {
+      final mode = ref.watch(parserModeProvider);
+      final tfliteService = TfliteTransactionParserService();
+      final localService = LocalTransactionParserService();
+      final mlService = ref.watch(smartInputMlServiceProvider);
 
-  switch (mode) {
-    case ParserMode.tfliteOnly:
-      return tfliteService;
-    case ParserMode.regexOnly:
-      return localService;
-    case ParserMode.lightweightMlOnly:
-      return const LightweightMlParser();
-    case ParserMode.auto:
-      return SmartParserOrchestrator(
-        tfliteService: tfliteService,
-        localService: localService,
-        lightweightMlService: const LightweightMlParser(),
-        mlService: mlService,
-      );
-  }
-});
+      switch (mode) {
+        case ParserMode.tfliteOnly:
+          return tfliteService;
+        case ParserMode.regexOnly:
+          return localService;
+        case ParserMode.lightweightMlOnly:
+          return const LightweightMlParser();
+        case ParserMode.auto:
+          return SmartParserOrchestrator(
+            tfliteService: tfliteService,
+            localService: localService,
+            lightweightMlService: const LightweightMlParser(),
+            mlService: mlService,
+          );
+      }
+    });
 
 /// Provides a singleton [ReceiptScannerService] configured with the active parser service.
 final receiptScannerServiceProvider = Provider<ReceiptScannerService>((ref) {

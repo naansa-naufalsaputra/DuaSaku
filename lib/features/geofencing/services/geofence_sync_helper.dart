@@ -8,7 +8,10 @@ import 'geofence_service.dart';
 
 class GeofenceSyncHelper {
   /// Fetches all user transactions from local DB, clusters them, and registers hotspots to GeofenceService.
-  static Future<void> syncGeofenceHotspots(AppDatabase db, String userId) async {
+  static Future<void> syncGeofenceHotspots(
+    AppDatabase db,
+    String userId,
+  ) async {
     try {
       // 1. Check if geofencing alerts are enabled in preferences
       final prefs = await SharedPreferences.getInstance();
@@ -27,7 +30,7 @@ class GeofenceSyncHelper {
         ),
       ]);
       query.where(db.transactions.userId.equals(userId));
-      
+
       final rows = await query.get();
       final transactions = rows.map((row) {
         final tx = row.readTable(db.transactions);
@@ -55,11 +58,13 @@ class GeofenceSyncHelper {
 
       // 4. Update the GeofenceService with the detected hotspots
       await GeofenceService.instance.updateGeofences(hotspots);
-      
+
       // Ensure we are actively monitoring location
       await GeofenceService.instance.startMonitoring();
-      
-      debugPrint('[GeofenceSync] Geofence sync completed. Registered ${hotspots.length} hotspots.');
+
+      debugPrint(
+        '[GeofenceSync] Geofence sync completed. Registered ${hotspots.length} hotspots.',
+      );
     } catch (e) {
       debugPrint('[GeofenceSync] Error in geofence sync: $e');
     }

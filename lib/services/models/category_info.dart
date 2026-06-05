@@ -6,8 +6,5 @@ class CategoryInfo {
   final String name;
   final String type;
 
-  const CategoryInfo({
-    required this.name,
-    required this.type,
-  });
+  const CategoryInfo({required this.name, required this.type});
 }

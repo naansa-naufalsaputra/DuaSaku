@@ -71,7 +71,8 @@ class GoalProgressBar extends StatelessWidget {
                   // Milestone markers
                   for (final milestone in const [25, 50, 75, 100])
                     Positioned(
-                      left: (totalWidth * milestone / 100) -
+                      left:
+                          (totalWidth * milestone / 100) -
                           (milestone == 100 ? 7 : 5),
                       child: MilestoneMarker(
                         milestone: milestone,
@@ -109,27 +110,24 @@ class _AnimatedProgressFill extends StatelessWidget {
         final fillWidth = constraints.maxWidth * progress.clamp(0.0, 1.0);
 
         return Container(
-          height: height,
-          width: fillWidth,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.8),
-                color,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(height / 2),
-            boxShadow: progress > 0
-                ? [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-        )
+              height: height,
+              width: fillWidth,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color.withValues(alpha: 0.8), color],
+                ),
+                borderRadius: BorderRadius.circular(height / 2),
+                boxShadow: progress > 0
+                    ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+            )
             .animate(onPlay: (controller) => controller.forward())
             .scaleX(
               begin: 0.0,

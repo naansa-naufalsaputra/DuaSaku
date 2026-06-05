@@ -57,7 +57,10 @@ abstract class RecurringTransactionRepositoryInterface {
   );
 
   /// Update the status of a recurring transaction.
-  Future<Result<void, AppError>> updateStatus(String id, RecurringStatus status);
+  Future<Result<void, AppError>> updateStatus(
+    String id,
+    RecurringStatus status,
+  );
 
   /// Increment the retry count for a recurring transaction (on DB error).
   Future<Result<void, AppError>> incrementRetryCount(String id);

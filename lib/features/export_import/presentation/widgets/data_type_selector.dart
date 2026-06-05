@@ -39,9 +39,9 @@ class DataTypeSelector extends StatelessWidget {
           return CheckboxListTile(
             title: Text(
               _labelForType(type),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
             ),
             value: isSelected,
             onChanged: (value) => onChanged(type, value ?? false),

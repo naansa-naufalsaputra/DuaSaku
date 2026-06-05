@@ -98,7 +98,10 @@ class IsolateHelpers {
   /// If the value contains a comma, double-quote, or newline, it is wrapped
   /// in double-quotes with internal double-quotes escaped by doubling them.
   static String _escapeCsvValue(String value) {
-    if (value.contains(',') || value.contains('"') || value.contains('\n') || value.contains('\r')) {
+    if (value.contains(',') ||
+        value.contains('"') ||
+        value.contains('\n') ||
+        value.contains('\r')) {
       final escaped = value.replaceAll('"', '""');
       return '"$escaped"';
     }
@@ -154,7 +157,8 @@ class IsolateHelpers {
     }
 
     // 2. Validate metadata exists
-    if (!parsed.containsKey('metadata') || parsed['metadata'] is! Map<String, dynamic>) {
+    if (!parsed.containsKey('metadata') ||
+        parsed['metadata'] is! Map<String, dynamic>) {
       throw const FormatException(
         'File backup tidak memiliki metadata. Hanya file backup DuaSaku yang didukung.',
       );
@@ -201,10 +205,9 @@ class IsolateHelpers {
     }
 
     // 6. Validate data field exists with all required table keys
-    if (!parsed.containsKey('data') || parsed['data'] is! Map<String, dynamic>) {
-      throw const FormatException(
-        'File backup tidak memiliki field "data".',
-      );
+    if (!parsed.containsKey('data') ||
+        parsed['data'] is! Map<String, dynamic>) {
+      throw const FormatException('File backup tidak memiliki field "data".');
     }
 
     final data = parsed['data'] as Map<String, dynamic>;
@@ -264,7 +267,9 @@ class IsolateHelpers {
     // Build ID sets for parent tables
     final walletIds = _extractIds(data['wallets'] as List);
     final categoryIds = _extractIds(data['categories'] as List);
-    final recurringTransactionIds = _extractIds(data['recurringTransactions'] as List);
+    final recurringTransactionIds = _extractIds(
+      data['recurringTransactions'] as List,
+    );
     final goalIds = _extractIds(data['goals'] as List);
 
     // Validate transactions → wallets, categories

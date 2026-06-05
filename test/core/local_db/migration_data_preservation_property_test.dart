@@ -1,7 +1,6 @@
 // Feature: system-audit-fixes, Property 5: Migration preserves all non-balance data
 // **Validates: Requirements 2.4**
 
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,9 +16,11 @@ import 'package:duasaku_app/core/local_db/app_database.dart';
 /// Creates a fresh in-memory database at schema v8 (full migration applied).
 AppDatabase _createTestDb() {
   return AppDatabase.forTesting(
-    NativeDatabase.memory(setup: (db) {
-      db.execute('PRAGMA foreign_keys = ON;');
-    }),
+    NativeDatabase.memory(
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    ),
   );
 }
 
@@ -107,7 +108,8 @@ class WalletSnapshot {
       createdAt == other.createdAt;
 
   @override
-  int get hashCode => Object.hash(id, userId, name, type, icon, color, createdAt);
+  int get hashCode =>
+      Object.hash(id, userId, name, type, icon, color, createdAt);
 
   @override
   String toString() =>
@@ -159,7 +161,18 @@ class TransactionSnapshot {
 
   @override
   int get hashCode => Object.hash(
-      id, userId, walletId, fromWalletId, toWalletId, categoryId, amount, notes, date, type, badge);
+    id,
+    userId,
+    walletId,
+    fromWalletId,
+    toWalletId,
+    categoryId,
+    amount,
+    notes,
+    date,
+    type,
+    badge,
+  );
 
   @override
   String toString() =>
@@ -180,9 +193,7 @@ void main() {
   // column of the `Wallets` table. No rows SHALL be inserted, deleted, or have
   // non-balance columns modified.
   // ──────────────────────────────────────────────────────────────────────────
-  group(
-      'Property 5: Migration preserves all non-balance data',
-      () {
+  group('Property 5: Migration preserves all non-balance data', () {
     Glados2(
       any.intInRange(1, 5), // number of wallets
       any.intInRange(0, 99999), // random seed
@@ -199,26 +210,40 @@ void main() {
             final walletId = 'wallet-$seed-$i';
             walletIds.add(walletId);
 
-            await db.into(db.wallets).insert(WalletsCompanion.insert(
-                  id: walletId,
-                  userId: 'test-user',
-                  name: _randomWalletName(rng),
-                  type: _randomWalletType(rng),
-                  balance: Value(rng.nextDouble() * 10000 - 5000), // random initial balance
-                  icon: _randomIcon(rng),
-                  color: _randomColor(rng),
-                  createdAt: DateTime(2023, rng.nextInt(12) + 1, rng.nextInt(28) + 1),
-                ));
+            await db
+                .into(db.wallets)
+                .insert(
+                  WalletsCompanion.insert(
+                    id: walletId,
+                    userId: 'test-user',
+                    name: _randomWalletName(rng),
+                    type: _randomWalletType(rng),
+                    balance: Value(
+                      rng.nextDouble() * 10000 - 5000,
+                    ), // random initial balance
+                    icon: _randomIcon(rng),
+                    color: _randomColor(rng),
+                    createdAt: DateTime(
+                      2023,
+                      rng.nextInt(12) + 1,
+                      rng.nextInt(28) + 1,
+                    ),
+                  ),
+                );
           }
 
           // --- Step 2: Insert a category for FK constraints ---
-          await db.into(db.categories).insert(CategoriesCompanion.insert(
-                id: 'cat-$seed',
-                userId: 'test-user',
-                name: 'Test Category',
-                type: 'expense',
-                createdAt: DateTime(2023, 1, 1),
-              ));
+          await db
+              .into(db.categories)
+              .insert(
+                CategoriesCompanion.insert(
+                  id: 'cat-$seed',
+                  userId: 'test-user',
+                  name: 'Test Category',
+                  type: 'expense',
+                  createdAt: DateTime(2023, 1, 1),
+                ),
+              );
 
           // --- Step 3: Generate and insert transactions ---
           final transactionCount = rng.nextInt(10) + 1; // 1-10 transactions
@@ -246,70 +271,94 @@ void main() {
               fromWalletId = null;
               toWalletId = null;
               // Override type to expense for this case
-              await db.into(db.transactions).insert(TransactionsCompanion.insert(
+              await db
+                  .into(db.transactions)
+                  .insert(
+                    TransactionsCompanion.insert(
+                      userId: 'test-user',
+                      walletId: Value(txWalletId),
+                      fromWalletId: Value(fromWalletId),
+                      toWalletId: Value(toWalletId),
+                      categoryId: Value('cat-$seed'),
+                      amount: amount,
+                      date: DateTime(
+                        2023,
+                        rng.nextInt(12) + 1,
+                        rng.nextInt(28) + 1,
+                      ),
+                      type: 'expense',
+                      notes: Value(
+                        rng.nextBool() ? 'Note $i seed $seed' : null,
+                      ),
+                      badge: Value(rng.nextBool() ? 'recurring' : null),
+                    ),
+                  );
+              continue;
+            } else {
+              txWalletId = walletId;
+            }
+
+            await db
+                .into(db.transactions)
+                .insert(
+                  TransactionsCompanion.insert(
                     userId: 'test-user',
                     walletId: Value(txWalletId),
                     fromWalletId: Value(fromWalletId),
                     toWalletId: Value(toWalletId),
                     categoryId: Value('cat-$seed'),
                     amount: amount,
-                    date: DateTime(2023, rng.nextInt(12) + 1, rng.nextInt(28) + 1),
-                    type: 'expense',
+                    date: DateTime(
+                      2023,
+                      rng.nextInt(12) + 1,
+                      rng.nextInt(28) + 1,
+                    ),
+                    type: txType,
                     notes: Value(rng.nextBool() ? 'Note $i seed $seed' : null),
                     badge: Value(rng.nextBool() ? 'recurring' : null),
-                  ));
-              continue;
-            } else {
-              txWalletId = walletId;
-            }
-
-            await db.into(db.transactions).insert(TransactionsCompanion.insert(
-                  userId: 'test-user',
-                  walletId: Value(txWalletId),
-                  fromWalletId: Value(fromWalletId),
-                  toWalletId: Value(toWalletId),
-                  categoryId: Value('cat-$seed'),
-                  amount: amount,
-                  date: DateTime(2023, rng.nextInt(12) + 1, rng.nextInt(28) + 1),
-                  type: txType,
-                  notes: Value(rng.nextBool() ? 'Note $i seed $seed' : null),
-                  badge: Value(rng.nextBool() ? 'recurring' : null),
-                ));
+                  ),
+                );
           }
 
           // --- Step 4: Snapshot all non-balance wallet data ---
           final walletsBefore = await db.select(db.wallets).get();
-          final walletSnapshotsBefore = walletsBefore
-              .map((w) => WalletSnapshot(
-                    id: w.id,
-                    userId: w.userId,
-                    name: w.name,
-                    type: w.type,
-                    icon: w.icon,
-                    color: w.color,
-                    createdAt: w.createdAt,
-                  ))
-              .toList()
-            ..sort((a, b) => a.id.compareTo(b.id));
+          final walletSnapshotsBefore =
+              walletsBefore
+                  .map(
+                    (w) => WalletSnapshot(
+                      id: w.id,
+                      userId: w.userId,
+                      name: w.name,
+                      type: w.type,
+                      icon: w.icon,
+                      color: w.color,
+                      createdAt: w.createdAt,
+                    ),
+                  )
+                  .toList()
+                ..sort((a, b) => a.id.compareTo(b.id));
 
           // --- Step 5: Snapshot all transaction data ---
           final txBefore = await db.select(db.transactions).get();
-          final txSnapshotsBefore = txBefore
-              .map((t) => TransactionSnapshot(
-                    id: t.id,
-                    userId: t.userId,
-                    walletId: t.walletId,
-                    fromWalletId: t.fromWalletId,
-                    toWalletId: t.toWalletId,
-                    categoryId: t.categoryId,
-                    amount: t.amount,
-                    notes: t.notes,
-                    date: t.date,
-                    type: t.type,
-                    badge: t.badge,
-                  ))
-              .toList()
-            ..sort((a, b) => a.id.compareTo(b.id));
+          final txSnapshotsBefore =
+              txBefore
+                  .map(
+                    (t) => TransactionSnapshot(
+                      id: t.id,
+                      userId: t.userId,
+                      walletId: t.walletId,
+                      fromWalletId: t.fromWalletId,
+                      toWalletId: t.toWalletId,
+                      categoryId: t.categoryId,
+                      amount: t.amount,
+                      notes: t.notes,
+                      date: t.date,
+                      type: t.type,
+                      badge: t.badge,
+                    ),
+                  )
+                  .toList()
+                ..sort((a, b) => a.id.compareTo(b.id));
 
           final walletCountBefore = walletsBefore.length;
           final txCountBefore = txBefore.length;
@@ -337,53 +386,72 @@ void main() {
 
           // --- Step 7: Verify non-balance wallet data is unchanged ---
           final walletsAfter = await db.select(db.wallets).get();
-          final walletSnapshotsAfter = walletsAfter
-              .map((w) => WalletSnapshot(
-                    id: w.id,
-                    userId: w.userId,
-                    name: w.name,
-                    type: w.type,
-                    icon: w.icon,
-                    color: w.color,
-                    createdAt: w.createdAt,
-                  ))
-              .toList()
-            ..sort((a, b) => a.id.compareTo(b.id));
+          final walletSnapshotsAfter =
+              walletsAfter
+                  .map(
+                    (w) => WalletSnapshot(
+                      id: w.id,
+                      userId: w.userId,
+                      name: w.name,
+                      type: w.type,
+                      icon: w.icon,
+                      color: w.color,
+                      createdAt: w.createdAt,
+                    ),
+                  )
+                  .toList()
+                ..sort((a, b) => a.id.compareTo(b.id));
 
           // Same number of wallets
-          expect(walletsAfter.length, equals(walletCountBefore),
-              reason: 'Wallet count should not change after migration');
+          expect(
+            walletsAfter.length,
+            equals(walletCountBefore),
+            reason: 'Wallet count should not change after migration',
+          );
 
           // All non-balance columns identical
-          expect(walletSnapshotsAfter, equals(walletSnapshotsBefore),
-              reason: 'Non-balance wallet data should be preserved after migration');
+          expect(
+            walletSnapshotsAfter,
+            equals(walletSnapshotsBefore),
+            reason:
+                'Non-balance wallet data should be preserved after migration',
+          );
 
           // --- Step 8: Verify all transaction data is unchanged ---
           final txAfter = await db.select(db.transactions).get();
-          final txSnapshotsAfter = txAfter
-              .map((t) => TransactionSnapshot(
-                    id: t.id,
-                    userId: t.userId,
-                    walletId: t.walletId,
-                    fromWalletId: t.fromWalletId,
-                    toWalletId: t.toWalletId,
-                    categoryId: t.categoryId,
-                    amount: t.amount,
-                    notes: t.notes,
-                    date: t.date,
-                    type: t.type,
-                    badge: t.badge,
-                  ))
-              .toList()
-            ..sort((a, b) => a.id.compareTo(b.id));
+          final txSnapshotsAfter =
+              txAfter
+                  .map(
+                    (t) => TransactionSnapshot(
+                      id: t.id,
+                      userId: t.userId,
+                      walletId: t.walletId,
+                      fromWalletId: t.fromWalletId,
+                      toWalletId: t.toWalletId,
+                      categoryId: t.categoryId,
+                      amount: t.amount,
+                      notes: t.notes,
+                      date: t.date,
+                      type: t.type,
+                      badge: t.badge,
+                    ),
+                  )
+                  .toList()
+                ..sort((a, b) => a.id.compareTo(b.id));
 
           // Same number of transactions
-          expect(txAfter.length, equals(txCountBefore),
-              reason: 'Transaction count should not change after migration');
+          expect(
+            txAfter.length,
+            equals(txCountBefore),
+            reason: 'Transaction count should not change after migration',
+          );
 
           // All transaction columns identical
-          expect(txSnapshotsAfter, equals(txSnapshotsBefore),
-              reason: 'Transaction data should be preserved after migration');
+          expect(
+            txSnapshotsAfter,
+            equals(txSnapshotsBefore),
+            reason: 'Transaction data should be preserved after migration',
+          );
         } finally {
           await db.close();
         }
@@ -410,26 +478,38 @@ void main() {
             final wrongBalance = rng.nextDouble() * 50000 - 25000;
             originalBalances[walletId] = wrongBalance;
 
-            await db.into(db.wallets).insert(WalletsCompanion.insert(
-                  id: walletId,
-                  userId: 'test-user',
-                  name: _randomWalletName(rng),
-                  type: _randomWalletType(rng),
-                  balance: Value(wrongBalance),
-                  icon: _randomIcon(rng),
-                  color: _randomColor(rng),
-                  createdAt: DateTime(2023, rng.nextInt(12) + 1, rng.nextInt(28) + 1),
-                ));
+            await db
+                .into(db.wallets)
+                .insert(
+                  WalletsCompanion.insert(
+                    id: walletId,
+                    userId: 'test-user',
+                    name: _randomWalletName(rng),
+                    type: _randomWalletType(rng),
+                    balance: Value(wrongBalance),
+                    icon: _randomIcon(rng),
+                    color: _randomColor(rng),
+                    createdAt: DateTime(
+                      2023,
+                      rng.nextInt(12) + 1,
+                      rng.nextInt(28) + 1,
+                    ),
+                  ),
+                );
           }
 
           // Insert category
-          await db.into(db.categories).insert(CategoriesCompanion.insert(
-                id: 'cat-$seed',
-                userId: 'test-user',
-                name: 'Category',
-                type: 'expense',
-                createdAt: DateTime(2023, 1, 1),
-              ));
+          await db
+              .into(db.categories)
+              .insert(
+                CategoriesCompanion.insert(
+                  id: 'cat-$seed',
+                  userId: 'test-user',
+                  name: 'Category',
+                  type: 'expense',
+                  createdAt: DateTime(2023, 1, 1),
+                ),
+              );
 
           // Insert some transactions
           final txCount = rng.nextInt(8) + 2;
@@ -438,14 +518,22 @@ void main() {
             final amount = (rng.nextInt(50000) + 1) / 100.0;
             final type = rng.nextBool() ? 'income' : 'expense';
 
-            await db.into(db.transactions).insert(TransactionsCompanion.insert(
-                  userId: 'test-user',
-                  walletId: Value(walletId),
-                  categoryId: Value('cat-$seed'),
-                  amount: amount,
-                  date: DateTime(2023, rng.nextInt(12) + 1, rng.nextInt(28) + 1),
-                  type: type,
-                ));
+            await db
+                .into(db.transactions)
+                .insert(
+                  TransactionsCompanion.insert(
+                    userId: 'test-user',
+                    walletId: Value(walletId),
+                    categoryId: Value('cat-$seed'),
+                    amount: amount,
+                    date: DateTime(
+                      2023,
+                      rng.nextInt(12) + 1,
+                      rng.nextInt(28) + 1,
+                    ),
+                    type: type,
+                  ),
+                );
           }
 
           // Snapshot categories before
@@ -474,12 +562,18 @@ void main() {
 
           // Verify categories are unchanged
           final categoriesAfter = await db.select(db.categories).get();
-          expect(categoriesAfter.length, equals(categoriesBefore.length),
-              reason: 'Category count should not change');
+          expect(
+            categoriesAfter.length,
+            equals(categoriesBefore.length),
+            reason: 'Category count should not change',
+          );
           for (var i = 0; i < categoriesBefore.length; i++) {
             expect(categoriesAfter[i].id, equals(categoriesBefore[i].id));
             expect(categoriesAfter[i].name, equals(categoriesBefore[i].name));
-            expect(categoriesAfter[i].userId, equals(categoriesBefore[i].userId));
+            expect(
+              categoriesAfter[i].userId,
+              equals(categoriesBefore[i].userId),
+            );
             expect(categoriesAfter[i].type, equals(categoriesBefore[i].type));
           }
 

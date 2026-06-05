@@ -124,24 +124,24 @@ class RecurringTransactionModel {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        userId,
-        walletId,
-        categoryId,
-        amount,
-        type,
-        frequency,
-        customInterval,
-        startDate,
-        endDate,
-        nextExecutionDate,
-        status,
-        notes,
-        retryCount,
-        notifyBefore,
-        reminderTiming,
-        createdAt,
-      );
+    id,
+    userId,
+    walletId,
+    categoryId,
+    amount,
+    type,
+    frequency,
+    customInterval,
+    startDate,
+    endDate,
+    nextExecutionDate,
+    status,
+    notes,
+    retryCount,
+    notifyBefore,
+    reminderTiming,
+    createdAt,
+  );
 
   @override
   String toString() =>

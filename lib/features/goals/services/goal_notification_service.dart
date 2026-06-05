@@ -29,7 +29,10 @@ class GoalNotificationService {
   /// for checking `notifiedMilestones` before calling this, but this service
   /// is defensive and will still send the notification regardless.
   Future<void> notifyMilestone(GoalModel goal, int milestonePercent) async {
-    final notificationId = _generateNotificationId(goal.id, 'milestone_$milestonePercent');
+    final notificationId = _generateNotificationId(
+      goal.id,
+      'milestone_$milestonePercent',
+    );
 
     final payload = _buildPayload(goal.id);
 
@@ -38,7 +41,8 @@ class GoalNotificationService {
     await _notifications.show(
       id: notificationId,
       title: '$emoji ${goal.name} - $milestonePercent% tercapai!',
-      body: 'Kamu sudah mencapai $milestonePercent% dari target tabungan "${goal.name}". Terus semangat!',
+      body:
+          'Kamu sudah mencapai $milestonePercent% dari target tabungan "${goal.name}". Terus semangat!',
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );
@@ -175,10 +179,7 @@ class GoalNotificationService {
       presentSound: true,
     );
 
-    return const NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Get an appropriate emoji for the milestone percentage.

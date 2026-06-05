@@ -17,9 +17,11 @@ import 'package:duasaku_app/core/background/recurring_executor.dart';
 /// Creates a fresh in-memory database for testing.
 AppDatabase _createTestDb() {
   return AppDatabase.forTesting(
-    NativeDatabase.memory(setup: (db) {
-      db.execute('PRAGMA foreign_keys = ON;');
-    }),
+    NativeDatabase.memory(
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    ),
   );
 }
 
@@ -29,16 +31,20 @@ Future<String> _seedWallet(
   required String walletId,
   required double initialBalance,
 }) async {
-  await db.into(db.wallets).insert(WalletsCompanion.insert(
-        id: walletId,
-        userId: 'test-user',
-        name: 'Test Wallet',
-        type: 'Cash',
-        balance: Value(initialBalance),
-        icon: 'wallet',
-        color: '#000000',
-        createdAt: DateTime(2024, 1, 1),
-      ));
+  await db
+      .into(db.wallets)
+      .insert(
+        WalletsCompanion.insert(
+          id: walletId,
+          userId: 'test-user',
+          name: 'Test Wallet',
+          type: 'Cash',
+          balance: Value(initialBalance),
+          icon: 'wallet',
+          color: '#000000',
+          createdAt: DateTime(2024, 1, 1),
+        ),
+      );
   return walletId;
 }
 
@@ -48,13 +54,17 @@ Future<String> _seedCategory(
   required String categoryId,
   required String type,
 }) async {
-  await db.into(db.categories).insert(CategoriesCompanion.insert(
-        id: categoryId,
-        userId: 'test-user',
-        name: 'Test Category',
-        type: type,
-        createdAt: DateTime(2024, 1, 1),
-      ));
+  await db
+      .into(db.categories)
+      .insert(
+        CategoriesCompanion.insert(
+          id: categoryId,
+          userId: 'test-user',
+          name: 'Test Category',
+          type: type,
+          createdAt: DateTime(2024, 1, 1),
+        ),
+      );
   return categoryId;
 }
 
@@ -74,13 +84,14 @@ void main() {
   // (or `+ (N × amount)` for income), AND exactly N transaction rows
   // SHALL exist in the database for that recurring transaction.
   // ──────────────────────────────────────────────────────────────────────────
-  group(
-      'Property 2: Catch-up executions produce individual balance adjustments',
-      () {
+  group('Property 2: Catch-up executions produce individual balance adjustments', () {
     // --- Expense catch-up: balance = initialBalance - (N × amount) ---
     Glados2(
       any.intInRange(1, 90), // N missed executions
-      any.intInRange(100, 500000), // amount in cents (to avoid floating point issues)
+      any.intInRange(
+        100,
+        500000,
+      ), // amount in cents (to avoid floating point issues)
     ).test(
       'expense catch-up: wallet balance = initialBalance - (N × amount) and exactly N rows created',
       (missedCount, amountCents) async {
@@ -90,19 +101,28 @@ void main() {
           // Initial balance large enough to cover all deductions
           final initialBalance = amount * missedCount + 10000.0;
 
-          final walletId = await _seedWallet(db,
-              walletId: 'wallet-catchup-expense',
-              initialBalance: initialBalance);
-          final categoryId = await _seedCategory(db,
-              categoryId: 'cat-catchup-expense', type: 'expense');
+          final walletId = await _seedWallet(
+            db,
+            walletId: 'wallet-catchup-expense',
+            initialBalance: initialBalance,
+          );
+          final categoryId = await _seedCategory(
+            db,
+            categoryId: 'cat-catchup-expense',
+            type: 'expense',
+          );
 
           // Set nextExecutionDate N daily intervals in the past so the executor
           // will compute N missed executions when it runs "now".
           // Using daily frequency with customInterval=1 for simplicity.
           final now = DateTime(2024, 6, 15, 12, 0, 0);
-          final nextExecutionDate = now.subtract(Duration(days: missedCount - 1));
+          final nextExecutionDate = now.subtract(
+            Duration(days: missedCount - 1),
+          );
 
-          await db.into(db.recurringTransactions).insert(
+          await db
+              .into(db.recurringTransactions)
+              .insert(
                 RecurringTransactionsCompanion.insert(
                   id: 'recurring-expense-catchup',
                   userId: 'test-user',
@@ -124,16 +144,18 @@ void main() {
           // Strategy: Set nextExecutionDate relative to actual DateTime.now()
           // so the executor's internal DateTime.now() call finds them due.
           final actualNow = DateTime.now();
-          final actualNextExecDate =
-              actualNow.subtract(Duration(days: missedCount - 1));
+          final actualNextExecDate = actualNow.subtract(
+            Duration(days: missedCount - 1),
+          );
 
           // Re-create with actual dates
-          await (db.delete(db.recurringTransactions)
-                ..where(
-                    (t) => t.id.equals('recurring-expense-catchup')))
-              .go();
+          await (db.delete(
+            db.recurringTransactions,
+          )..where((t) => t.id.equals('recurring-expense-catchup'))).go();
 
-          await db.into(db.recurringTransactions).insert(
+          await db
+              .into(db.recurringTransactions)
+              .insert(
                 RecurringTransactionsCompanion.insert(
                   id: 'recurring-expense-catchup',
                   userId: 'test-user',
@@ -151,9 +173,9 @@ void main() {
           await executor.execute();
 
           // Verify wallet balance = initialBalance - (N × amount)
-          final wallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(walletId)))
-              .getSingle();
+          final wallet = await (db.select(
+            db.wallets,
+          )..where((w) => w.id.equals(walletId))).getSingle();
 
           final expectedBalance = initialBalance - (missedCount * amount);
           expect(
@@ -165,11 +187,13 @@ void main() {
           );
 
           // Verify exactly N transaction rows exist for this recurring transaction
-          final transactions = await (db.select(db.transactions)
-                ..where((t) =>
-                    t.walletId.equals(walletId) &
-                    t.badge.equals('recurring')))
-              .get();
+          final transactions =
+              await (db.select(db.transactions)..where(
+                    (t) =>
+                        t.walletId.equals(walletId) &
+                        t.badge.equals('recurring'),
+                  ))
+                  .get();
 
           expect(
             transactions.length,
@@ -196,19 +220,27 @@ void main() {
           final amount = amountCents / 100.0;
           const initialBalance = 5000.0;
 
-          final walletId = await _seedWallet(db,
-              walletId: 'wallet-catchup-income',
-              initialBalance: initialBalance);
-          final categoryId = await _seedCategory(db,
-              categoryId: 'cat-catchup-income', type: 'income');
+          final walletId = await _seedWallet(
+            db,
+            walletId: 'wallet-catchup-income',
+            initialBalance: initialBalance,
+          );
+          final categoryId = await _seedCategory(
+            db,
+            categoryId: 'cat-catchup-income',
+            type: 'income',
+          );
 
           // Set nextExecutionDate N daily intervals in the past relative to
           // actual DateTime.now() so the executor finds them due.
           final actualNow = DateTime.now();
-          final actualNextExecDate =
-              actualNow.subtract(Duration(days: missedCount - 1));
+          final actualNextExecDate = actualNow.subtract(
+            Duration(days: missedCount - 1),
+          );
 
-          await db.into(db.recurringTransactions).insert(
+          await db
+              .into(db.recurringTransactions)
+              .insert(
                 RecurringTransactionsCompanion.insert(
                   id: 'recurring-income-catchup',
                   userId: 'test-user',
@@ -226,9 +258,9 @@ void main() {
           await executor.execute();
 
           // Verify wallet balance = initialBalance + (N × amount)
-          final wallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(walletId)))
-              .getSingle();
+          final wallet = await (db.select(
+            db.wallets,
+          )..where((w) => w.id.equals(walletId))).getSingle();
 
           final expectedBalance = initialBalance + (missedCount * amount);
           expect(
@@ -240,11 +272,13 @@ void main() {
           );
 
           // Verify exactly N transaction rows exist
-          final transactions = await (db.select(db.transactions)
-                ..where((t) =>
-                    t.walletId.equals(walletId) &
-                    t.badge.equals('recurring')))
-              .get();
+          final transactions =
+              await (db.select(db.transactions)..where(
+                    (t) =>
+                        t.walletId.equals(walletId) &
+                        t.badge.equals('recurring'),
+                  ))
+                  .get();
 
           expect(
             transactions.length,

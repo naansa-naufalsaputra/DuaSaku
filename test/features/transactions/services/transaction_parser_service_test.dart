@@ -4,7 +4,8 @@
 // **Validates: Requirements 13.1**
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glados/glados.dart' hide expect, group, test, setUp, setUpAll, tearDown, tearDownAll;
+import 'package:glados/glados.dart'
+    hide expect, group, test, setUp, setUpAll, tearDown, tearDownAll;
 
 import 'package:duasaku_app/services/transaction_parser_service.dart';
 import 'package:duasaku_app/services/models/wallet_info.dart';

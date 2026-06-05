@@ -18,10 +18,7 @@ const Curve _kDefaultCurve = Curves.easeOutCubic;
 /// A wrapper that reads [LiquidGlassTheme] from context and passes resolved
 /// duration/curve to the animation builder. Respects "Reduce Motion" setting.
 class _LiquidAnimationWrapper extends StatelessWidget {
-  const _LiquidAnimationWrapper({
-    required this.child,
-    required this.builder,
-  });
+  const _LiquidAnimationWrapper({required this.child, required this.builder});
 
   final Widget child;
   final Widget Function(
@@ -29,7 +26,8 @@ class _LiquidAnimationWrapper extends StatelessWidget {
     Widget child,
     Duration duration,
     Curve curve,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget build(BuildContext context) {
@@ -61,13 +59,11 @@ extension LiquidAnimateExtensions on Widget {
     return _LiquidAnimationWrapper(
       child: target,
       builder: (context, child, duration, curve) {
-        return child
-            .animate()
-            .fadeIn(
-              duration: duration,
-              curve: curve,
-              delay: delay ?? Duration.zero,
-            );
+        return child.animate().fadeIn(
+          duration: duration,
+          curve: curve,
+          delay: delay ?? Duration.zero,
+        );
       },
     );
   }
@@ -126,13 +122,11 @@ extension LiquidAnimateExtensions on Widget {
     return _LiquidAnimationWrapper(
       child: target,
       builder: (context, child, duration, curve) {
-        return child
-            .animate()
-            .shimmer(
-              duration: duration,
-              curve: curve,
-              delay: delay ?? Duration.zero,
-            );
+        return child.animate().shimmer(
+          duration: duration,
+          curve: curve,
+          delay: delay ?? Duration.zero,
+        );
       },
     );
   }
@@ -162,11 +156,7 @@ extension LiquidListAnimations on Widget {
       builder: (context, child, duration, curve) {
         return child
             .animate()
-            .fadeIn(
-              duration: duration,
-              curve: curve,
-              delay: computedDelay,
-            )
+            .fadeIn(duration: duration, curve: curve, delay: computedDelay)
             .slideY(
               begin: 0.15,
               end: 0.0,
@@ -211,10 +201,7 @@ Page<T> liquidPageRoute<T>(Widget page) {
         return child;
       }
 
-      final curvedAnimation = CurvedAnimation(
-        parent: animation,
-        curve: curve,
-      );
+      final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
 
       return FadeTransition(
         opacity: curvedAnimation,

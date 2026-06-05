@@ -37,11 +37,7 @@ class WalletModel {
     };
   }
 
-  WalletModel copyWith({
-    String? name,
-    String? type,
-    double? balance,
-  }) {
+  WalletModel copyWith({String? name, String? type, double? balance}) {
     return WalletModel(
       id: id,
       userId: userId,

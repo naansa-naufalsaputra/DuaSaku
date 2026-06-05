@@ -57,13 +57,13 @@ class AlertThresholdStatusModel {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        userId,
-        categoryId,
-        budgetMonth,
-        thresholdValue,
-        triggeredAt,
-      );
+    id,
+    userId,
+    categoryId,
+    budgetMonth,
+    thresholdValue,
+    triggeredAt,
+  );
 
   @override
   String toString() =>

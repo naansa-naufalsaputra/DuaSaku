@@ -28,7 +28,8 @@ class BudgetAlertEvaluator {
   final AlertThresholdStatusRepository _statusRepo;
 
   /// SharedPreferences key for tracking the last evaluated budget month.
-  static const String _lastEvaluatedMonthKey = 'budget_alert_last_evaluated_month';
+  static const String _lastEvaluatedMonthKey =
+      'budget_alert_last_evaluated_month';
 
   BudgetAlertEvaluator({
     required this._alertEngine,

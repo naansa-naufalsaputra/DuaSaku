@@ -117,10 +117,13 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
       surfaceOpacity: surfaceOpacity ?? this.surfaceOpacity,
       borderGlowColor: borderGlowColor ?? this.borderGlowColor,
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
-      innerHighlightOpacity: innerHighlightOpacity ?? this.innerHighlightOpacity,
+      innerHighlightOpacity:
+          innerHighlightOpacity ?? this.innerHighlightOpacity,
       animationDuration: animationDuration ?? this.animationDuration,
-      animationDurationFast: animationDurationFast ?? this.animationDurationFast,
-      animationDurationSlow: animationDurationSlow ?? this.animationDurationSlow,
+      animationDurationFast:
+          animationDurationFast ?? this.animationDurationFast,
+      animationDurationSlow:
+          animationDurationSlow ?? this.animationDurationSlow,
       animationCurve: animationCurve ?? this.animationCurve,
     );
   }
@@ -134,20 +137,21 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
           lerpDouble(surfaceOpacity, other.surfaceOpacity, t) ?? surfaceOpacity,
       borderGlowColor:
           Color.lerp(borderGlowColor, other.borderGlowColor, t) ??
-              borderGlowColor,
+          borderGlowColor,
       surfaceTintColor:
           Color.lerp(surfaceTintColor, other.surfaceTintColor, t) ??
-              surfaceTintColor,
+          surfaceTintColor,
       innerHighlightOpacity:
           lerpDouble(innerHighlightOpacity, other.innerHighlightOpacity, t) ??
-              innerHighlightOpacity,
+          innerHighlightOpacity,
       // Durations and curves don't lerp — snap to target at t >= 0.5.
-      animationDuration:
-          t < 0.5 ? animationDuration : other.animationDuration,
-      animationDurationFast:
-          t < 0.5 ? animationDurationFast : other.animationDurationFast,
-      animationDurationSlow:
-          t < 0.5 ? animationDurationSlow : other.animationDurationSlow,
+      animationDuration: t < 0.5 ? animationDuration : other.animationDuration,
+      animationDurationFast: t < 0.5
+          ? animationDurationFast
+          : other.animationDurationFast,
+      animationDurationSlow: t < 0.5
+          ? animationDurationSlow
+          : other.animationDurationSlow,
       animationCurve: t < 0.5 ? animationCurve : other.animationCurve,
     );
   }
@@ -169,16 +173,14 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
 
   @override
   int get hashCode => Object.hash(
-        blurSigma,
-        surfaceOpacity,
-        borderGlowColor,
-        surfaceTintColor,
-        innerHighlightOpacity,
-        animationDuration,
-        animationDurationFast,
-        animationDurationSlow,
-        animationCurve,
-      );
+    blurSigma,
+    surfaceOpacity,
+    borderGlowColor,
+    surfaceTintColor,
+    innerHighlightOpacity,
+    animationDuration,
+    animationDurationFast,
+    animationDurationSlow,
+    animationCurve,
+  );
 }
-
-

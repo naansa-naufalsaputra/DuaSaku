@@ -36,7 +36,7 @@ class AlertEngineService {
     required this._db,
     required this._notificationService,
     Uuid? uuid,
-  })  : _uuid = uuid ?? const Uuid();
+  }) : _uuid = uuid ?? const Uuid();
 
   /// Evaluates all thresholds for a given category after a transaction change.
   ///
@@ -73,8 +73,10 @@ class AlertEngineService {
     }
 
     // 3. Check per-category preferences
-    final categoryPrefsResult =
-        await _prefsRepo.getCategoryPreferences(userId, categoryId);
+    final categoryPrefsResult = await _prefsRepo.getCategoryPreferences(
+      userId,
+      categoryId,
+    );
     AlertPreferenceModel? categoryPrefs;
     switch (categoryPrefsResult) {
       case Success(:final value):
@@ -89,8 +91,11 @@ class AlertEngineService {
     }
 
     // 4. Get total spending for category+month
-    final totalSpent =
-        await _getTotalSpendingForCategory(userId, categoryId, budgetMonth);
+    final totalSpent = await _getTotalSpendingForCategory(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
 
     // 5. Calculate percentage
     final budgetLimit = budget.amount;
@@ -100,12 +105,15 @@ class AlertEngineService {
     final percentage = (totalSpent / budgetLimit) * 100;
 
     // 6. Get configured thresholds from preferences
-    final thresholds = categoryPrefs?.thresholds ??
-        await _getGlobalThresholds(userId);
+    final thresholds =
+        categoryPrefs?.thresholds ?? await _getGlobalThresholds(userId);
 
     // 7. Get already-triggered thresholds
-    final triggeredResult =
-        await _statusRepo.getTriggeredThresholds(userId, categoryId, budgetMonth);
+    final triggeredResult = await _statusRepo.getTriggeredThresholds(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
     final Set<int> triggeredThresholds;
     switch (triggeredResult) {
       case Success(:final value):
@@ -123,12 +131,15 @@ class AlertEngineService {
       if (triggeredThresholds.contains(threshold)) continue;
 
       // Threshold crossed and not yet triggered
-      final alertType =
-          percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
-      final remainingBudget =
-          budgetLimit - totalSpent > 0 ? budgetLimit - totalSpent : 0.0;
-      final overAmount =
-          alertType == AlertType.overBudget ? totalSpent - budgetLimit : null;
+      final alertType = percentage >= 100
+          ? AlertType.overBudget
+          : AlertType.threshold;
+      final remainingBudget = budgetLimit - totalSpent > 0
+          ? budgetLimit - totalSpent
+          : 0.0;
+      final overAmount = alertType == AlertType.overBudget
+          ? totalSpent - budgetLimit
+          : null;
 
       final message = _buildAlertMessage(
         alertType: alertType,
@@ -224,15 +235,19 @@ class AlertEngineService {
     }
 
     // 2. Get overall budget (sum of all category budgets for the month)
-    final overallBudgetLimit =
-        await _getOverallBudgetLimit(userId, budgetMonth);
+    final overallBudgetLimit = await _getOverallBudgetLimit(
+      userId,
+      budgetMonth,
+    );
     if (overallBudgetLimit == null || overallBudgetLimit <= 0) {
       return const Success([]);
     }
 
     // 3. Get total spending across all categories
-    final totalSpent =
-        await _getTotalSpendingAllCategories(userId, budgetMonth);
+    final totalSpent = await _getTotalSpendingAllCategories(
+      userId,
+      budgetMonth,
+    );
 
     // 4. Calculate percentage
     final percentage = (totalSpent / overallBudgetLimit) * 100;
@@ -263,16 +278,15 @@ class AlertEngineService {
       if (percentage < threshold) continue;
       if (triggeredThresholds.contains(threshold)) continue;
 
-      final alertType =
-          percentage >= 100 ? AlertType.overBudget : AlertType.threshold;
-      final remainingBudget =
-          overallBudgetLimit - totalSpent > 0
-              ? overallBudgetLimit - totalSpent
-              : 0.0;
-      final overAmount =
-          alertType == AlertType.overBudget
-              ? totalSpent - overallBudgetLimit
-              : null;
+      final alertType = percentage >= 100
+          ? AlertType.overBudget
+          : AlertType.threshold;
+      final remainingBudget = overallBudgetLimit - totalSpent > 0
+          ? overallBudgetLimit - totalSpent
+          : 0.0;
+      final overAmount = alertType == AlertType.overBudget
+          ? totalSpent - overallBudgetLimit
+          : null;
 
       final message = _buildOverallAlertMessage(
         alertType: alertType,
@@ -364,13 +378,19 @@ class AlertEngineService {
     }
 
     // 2. Recalculate total spending
-    final totalSpent =
-        await _getTotalSpendingForCategory(userId, categoryId, budgetMonth);
+    final totalSpent = await _getTotalSpendingForCategory(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
     final percentage = (totalSpent / budgetLimit) * 100;
 
     // 3. Get all triggered thresholds for this category+month
-    final triggeredResult =
-        await _statusRepo.getTriggeredThresholds(userId, categoryId, budgetMonth);
+    final triggeredResult = await _statusRepo.getTriggeredThresholds(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
     final List<AlertThresholdStatusModel> triggeredStatuses;
     switch (triggeredResult) {
       case Success(:final value):

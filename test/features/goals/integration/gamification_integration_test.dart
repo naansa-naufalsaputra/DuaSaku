@@ -68,9 +68,7 @@ void main() {
     setUp(() {
       fakeGamification = FakeGamificationNotifier();
       container = ProviderContainer(
-        overrides: [
-          gamificationProvider.overrideWith(() => fakeGamification),
-        ],
+        overrides: [gamificationProvider.overrideWith(() => fakeGamification)],
       );
     });
 
@@ -220,9 +218,7 @@ void main() {
     setUp(() {
       fakeGamification = FakeGamificationNotifier();
       container = ProviderContainer(
-        overrides: [
-          gamificationProvider.overrideWith(() => fakeGamification),
-        ],
+        overrides: [gamificationProvider.overrideWith(() => fakeGamification)],
       );
     });
 
@@ -311,19 +307,22 @@ void main() {
       expect(secondAward, isEmpty);
     });
 
-    test('awards quarter_saver and half_way but not goal_achieved at 50%', () async {
-      final goal = _buildGoal(
-        targetAmount: 1000.0,
-        currentAmount: 500.0, // 50%
-      );
+    test(
+      'awards quarter_saver and half_way but not goal_achieved at 50%',
+      () async {
+        final goal = _buildGoal(
+          targetAmount: 1000.0,
+          currentAmount: 500.0, // 50%
+        );
 
-      final service = container.read(goalGamificationProvider);
-      final awarded = await service.checkMilestoneBadges(goal);
+        final service = container.read(goalGamificationProvider);
+        final awarded = await service.checkMilestoneBadges(goal);
 
-      expect(awarded, contains('quarter_saver'));
-      expect(awarded, contains('half_way'));
-      expect(awarded, isNot(contains('goal_achieved')));
-    });
+        expect(awarded, contains('quarter_saver'));
+        expect(awarded, contains('half_way'));
+        expect(awarded, isNot(contains('goal_achieved')));
+      },
+    );
   });
 
   group('GoalGamificationService - completion count badges', () {
@@ -333,9 +332,7 @@ void main() {
     setUp(() {
       fakeGamification = FakeGamificationNotifier();
       container = ProviderContainer(
-        overrides: [
-          gamificationProvider.overrideWith(() => fakeGamification),
-        ],
+        overrides: [gamificationProvider.overrideWith(() => fakeGamification)],
       );
     });
 
@@ -351,28 +348,37 @@ void main() {
       expect(fakeGamification.awardedBadges, contains('triple_saver'));
     });
 
-    test('awards both triple_saver and savings_master when 5 goals completed', () async {
-      final service = container.read(goalGamificationProvider);
-      final awarded = await service.checkCompletionBadges(5);
+    test(
+      'awards both triple_saver and savings_master when 5 goals completed',
+      () async {
+        final service = container.read(goalGamificationProvider);
+        final awarded = await service.checkCompletionBadges(5);
 
-      expect(awarded, contains('triple_saver'));
-      expect(awarded, contains('savings_master'));
-    });
+        expect(awarded, contains('triple_saver'));
+        expect(awarded, contains('savings_master'));
+      },
+    );
 
-    test('does not award triple_saver when fewer than 3 goals completed', () async {
-      final service = container.read(goalGamificationProvider);
-      final awarded = await service.checkCompletionBadges(2);
+    test(
+      'does not award triple_saver when fewer than 3 goals completed',
+      () async {
+        final service = container.read(goalGamificationProvider);
+        final awarded = await service.checkCompletionBadges(2);
 
-      expect(awarded, isEmpty);
-    });
+        expect(awarded, isEmpty);
+      },
+    );
 
-    test('does not award savings_master when fewer than 5 goals completed', () async {
-      final service = container.read(goalGamificationProvider);
-      final awarded = await service.checkCompletionBadges(4);
+    test(
+      'does not award savings_master when fewer than 5 goals completed',
+      () async {
+        final service = container.read(goalGamificationProvider);
+        final awarded = await service.checkCompletionBadges(4);
 
-      expect(awarded, contains('triple_saver'));
-      expect(awarded, isNot(contains('savings_master')));
-    });
+        expect(awarded, contains('triple_saver'));
+        expect(awarded, isNot(contains('savings_master')));
+      },
+    );
 
     test('does not duplicate badges on repeated calls', () async {
       final service = container.read(goalGamificationProvider);

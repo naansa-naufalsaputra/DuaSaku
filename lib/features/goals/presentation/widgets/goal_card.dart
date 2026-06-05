@@ -15,11 +15,7 @@ import 'goal_progress_bar.dart';
 ///
 /// Requirements: 2.2, 5.1, 5.2, 5.3
 class GoalCard extends ConsumerWidget {
-  const GoalCard({
-    super.key,
-    required this.goal,
-    this.onTap,
-  });
+  const GoalCard({super.key, required this.goal, this.onTap});
 
   /// The goal model to display.
   final GoalModel goal;

@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/goals/domain/models/goal_model.dart';
 import 'package:duasaku_app/features/goals/domain/models/goal_status.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,58 +79,57 @@ Set<String> _determineMilestoneBadges(double progressPercentage) {
 // ---------------------------------------------------------------------------
 
 void main() {
-
   // Feature: financial-goals, Property 1: Goal creation round-trip
   // **Validates: Requirements 1.1, 1.8, 11.5**
   group('Property 1: Goal creation round-trip', () {
     Glados2(
       any.intInRange(1, 100), // name length
       any.intInRange(1, 999999999), // target amount (as int cents)
-    ).test(
-      'GoalModel → toJson → fromJson preserves all fields',
-      (nameLength, targetCents) {
-        final name = String.fromCharCodes(
-          List.generate(nameLength, (i) => 65 + (i % 26)), // A-Z cycling
-        );
-        final targetAmount = targetCents / 100.0;
-        final deadline = DateTime(2030, 6, 15, 10, 30);
-        final createdAt = DateTime(2024, 3, 1, 8, 0);
+    ).test('GoalModel → toJson → fromJson preserves all fields', (
+      nameLength,
+      targetCents,
+    ) {
+      final name = String.fromCharCodes(
+        List.generate(nameLength, (i) => 65 + (i % 26)), // A-Z cycling
+      );
+      final targetAmount = targetCents / 100.0;
+      final deadline = DateTime(2030, 6, 15, 10, 30);
+      final createdAt = DateTime(2024, 3, 1, 8, 0);
 
-        final original = GoalModel(
-          id: 'test-id-123',
-          userId: 'user-456',
-          name: name,
-          targetAmount: targetAmount,
-          currentAmount: targetAmount * 0.5,
-          deadline: deadline,
-          icon: '🎯',
-          color: '#FF5733',
-          linkedWalletId: 'wallet-789',
-          trackingMode: TrackingMode.wallet,
-          status: GoalStatus.active,
-          completedAt: null,
-          notifiedMilestones: {25, 50},
-          createdAt: createdAt,
-        );
+      final original = GoalModel(
+        id: 'test-id-123',
+        userId: 'user-456',
+        name: name,
+        targetAmount: targetAmount,
+        currentAmount: targetAmount * 0.5,
+        deadline: deadline,
+        icon: '🎯',
+        color: '#FF5733',
+        linkedWalletId: 'wallet-789',
+        trackingMode: TrackingMode.wallet,
+        status: GoalStatus.active,
+        completedAt: null,
+        notifiedMilestones: {25, 50},
+        createdAt: createdAt,
+      );
 
-        final json = original.toJson();
-        final restored = GoalModel.fromJson(json);
+      final json = original.toJson();
+      final restored = GoalModel.fromJson(json);
 
-        expect(restored.id, equals(original.id));
-        expect(restored.userId, equals(original.userId));
-        expect(restored.name, equals(original.name));
-        expect(restored.targetAmount, equals(original.targetAmount));
-        expect(restored.currentAmount, equals(original.currentAmount));
-        expect(restored.deadline, equals(original.deadline));
-        expect(restored.icon, equals(original.icon));
-        expect(restored.color, equals(original.color));
-        expect(restored.linkedWalletId, equals(original.linkedWalletId));
-        expect(restored.trackingMode, equals(original.trackingMode));
-        expect(restored.status, equals(original.status));
-        expect(restored.notifiedMilestones, equals(original.notifiedMilestones));
-        expect(restored.createdAt, equals(original.createdAt));
-      },
-    );
+      expect(restored.id, equals(original.id));
+      expect(restored.userId, equals(original.userId));
+      expect(restored.name, equals(original.name));
+      expect(restored.targetAmount, equals(original.targetAmount));
+      expect(restored.currentAmount, equals(original.currentAmount));
+      expect(restored.deadline, equals(original.deadline));
+      expect(restored.icon, equals(original.icon));
+      expect(restored.color, equals(original.color));
+      expect(restored.linkedWalletId, equals(original.linkedWalletId));
+      expect(restored.trackingMode, equals(original.trackingMode));
+      expect(restored.status, equals(original.status));
+      expect(restored.notifiedMilestones, equals(original.notifiedMilestones));
+      expect(restored.createdAt, equals(original.createdAt));
+    });
   });
 
   // Feature: financial-goals, Property 2: Deposit sum invariant
@@ -194,35 +192,35 @@ void main() {
     Glados2(
       any.intInRange(100, 10000000), // target amount in cents
       any.intInRange(1, 20), // number of operations
-    ).test(
-      'currentAmount <= targetAmount after any sequence of deposits',
-      (targetCents, opCount) {
-        final targetAmount = targetCents / 100.0;
-        final localRng = Random(targetCents * 31 + opCount);
-        final deposits = List.generate(
-          opCount,
-          (_) => (localRng.nextDouble() * targetAmount * 2.0) + 0.01,
-        );
+    ).test('currentAmount <= targetAmount after any sequence of deposits', (
+      targetCents,
+      opCount,
+    ) {
+      final targetAmount = targetCents / 100.0;
+      final localRng = Random(targetCents * 31 + opCount);
+      final deposits = List.generate(
+        opCount,
+        (_) => (localRng.nextDouble() * targetAmount * 2.0) + 0.01,
+      );
 
-        final finalAmount = _simulateDeposits(targetAmount, deposits);
-        expect(finalAmount, lessThanOrEqualTo(targetAmount));
-      },
-    );
+      final finalAmount = _simulateDeposits(targetAmount, deposits);
+      expect(finalAmount, lessThanOrEqualTo(targetAmount));
+    });
 
     Glados2(
       any.intInRange(100, 10000000), // target amount in cents
       any.intInRange(0, 20000000), // wallet balance in cents
-    ).test(
-      'currentAmount <= targetAmount after wallet sync',
-      (targetCents, balanceCents) {
-        final targetAmount = targetCents / 100.0;
-        final walletBalance = balanceCents / 100.0;
+    ).test('currentAmount <= targetAmount after wallet sync', (
+      targetCents,
+      balanceCents,
+    ) {
+      final targetAmount = targetCents / 100.0;
+      final walletBalance = balanceCents / 100.0;
 
-        final synced = _simulateWalletSync(walletBalance, targetAmount);
-        expect(synced, lessThanOrEqualTo(targetAmount));
-        expect(synced, greaterThanOrEqualTo(0.0));
-      },
-    );
+      final synced = _simulateWalletSync(walletBalance, targetAmount);
+      expect(synced, lessThanOrEqualTo(targetAmount));
+      expect(synced, greaterThanOrEqualTo(0.0));
+    });
   });
 
   // Feature: financial-goals, Property 5: Wallet-linked goal synchronization
@@ -247,8 +245,9 @@ void main() {
           trackingMode: TrackingMode.wallet,
         );
 
-        final expectedAmount =
-            walletBalance < targetAmount ? walletBalance.clamp(0.0, targetAmount) : targetAmount;
+        final expectedAmount = walletBalance < targetAmount
+            ? walletBalance.clamp(0.0, targetAmount)
+            : targetAmount;
         expect(goal.currentAmount, closeTo(expectedAmount, 1e-10));
       },
     );
@@ -260,31 +259,31 @@ void main() {
     Glados2(
       any.intInRange(1, 999999999), // target amount in cents
       any.intInRange(0, 999999999), // current amount in cents
-    ).test(
-      'currentMilestone computed N times produces same result as once',
-      (targetCents, currentCents) {
-        final targetAmount = targetCents / 100.0;
-        final currentAmount = currentCents / 100.0;
+    ).test('currentMilestone computed N times produces same result as once', (
+      targetCents,
+      currentCents,
+    ) {
+      final targetAmount = targetCents / 100.0;
+      final currentAmount = currentCents / 100.0;
 
-        final goal = _buildGoal(
-          targetAmount: targetAmount,
-          currentAmount: currentAmount,
-        );
+      final goal = _buildGoal(
+        targetAmount: targetAmount,
+        currentAmount: currentAmount,
+      );
 
-        // Compute milestone once
-        final milestone1 = goal.currentMilestone;
+      // Compute milestone once
+      final milestone1 = goal.currentMilestone;
 
-        // Compute milestone again (idempotent — same input, same output)
-        final milestone2 = goal.currentMilestone;
-        final milestone3 = goal.currentMilestone;
+      // Compute milestone again (idempotent — same input, same output)
+      final milestone2 = goal.currentMilestone;
+      final milestone3 = goal.currentMilestone;
 
-        expect(milestone1, equals(milestone2));
-        expect(milestone2, equals(milestone3));
+      expect(milestone1, equals(milestone2));
+      expect(milestone2, equals(milestone3));
 
-        // Also verify milestone is one of the valid values
-        expect(milestone1, isIn([0, 25, 50, 75, 100]));
-      },
-    );
+      // Also verify milestone is one of the valid values
+      expect(milestone1, isIn([0, 25, 50, 75, 100]));
+    });
   });
 
   // Feature: financial-goals, Property 7: Completed goal invariant
@@ -320,25 +319,23 @@ void main() {
         deadline == null || deadline.isAfter(DateTime.now());
     bool isValidDepositAmount(double amount) => amount > 0;
 
-    Glados(any.intInRange(101, 500)).test(
-      'goal name > 100 chars is rejected',
-      (length) {
-        final name = 'A' * length;
-        expect(isValidGoalName(name), isFalse);
-      },
-    );
+    Glados(any.intInRange(101, 500)).test('goal name > 100 chars is rejected', (
+      length,
+    ) {
+      final name = 'A' * length;
+      expect(isValidGoalName(name), isFalse);
+    });
 
     test('empty goal name is rejected', () {
       expect(isValidGoalName(''), isFalse);
     });
 
-    Glados(any.intInRange(-1000000, 0)).test(
-      'target amount <= 0 is rejected',
-      (amountCents) {
-        final amount = amountCents / 100.0;
-        expect(isValidTargetAmount(amount), isFalse);
-      },
-    );
+    Glados(any.intInRange(-1000000, 0)).test('target amount <= 0 is rejected', (
+      amountCents,
+    ) {
+      final amount = amountCents / 100.0;
+      expect(isValidTargetAmount(amount), isFalse);
+    });
 
     test('deadline in the past is rejected', () {
       final pastDeadline = DateTime.now().subtract(const Duration(days: 1));
@@ -388,7 +385,10 @@ void main() {
   group('Property 10: Completion permanence', () {
     Glados2(
       any.intInRange(100, 10000000), // target amount in cents
-      any.intInRange(0, 10000000), // new wallet balance in cents (possibly lower)
+      any.intInRange(
+        0,
+        10000000,
+      ), // new wallet balance in cents (possibly lower)
     ).test(
       'completed goal status never reverts to active regardless of wallet balance changes',
       (targetCents, newBalanceCents) {
@@ -406,7 +406,8 @@ void main() {
 
         // Simulate: syncWalletBalance respects completion permanence
         // The actual logic: if (goal.isCompleted) return; — no change
-        final goalAfterSync = completedGoal; // No modification for completed goals
+        final goalAfterSync =
+            completedGoal; // No modification for completed goals
 
         expect(goalAfterSync.status, equals(GoalStatus.completed));
         expect(goalAfterSync.isCompleted, isTrue);
@@ -435,8 +436,9 @@ void main() {
         });
 
         // Calculate expected S_goal using the same formula as the service
-        final activeGoals =
-            goals.where((g) => g.status == GoalStatus.active).toList();
+        final activeGoals = goals
+            .where((g) => g.status == GoalStatus.active)
+            .toList();
 
         final double expectedSGoal;
         if (activeGoals.isEmpty) {
@@ -456,7 +458,9 @@ void main() {
           actualSGoal = 0.0;
         } else {
           final tp = activeGoals.fold<double>(
-            0.0, (sum, g) => sum + g.progressPercentage);
+            0.0,
+            (sum, g) => sum + g.progressPercentage,
+          );
           final ap = tp / activeGoals.length;
           actualSGoal = (ap * 5.0).clamp(0.0, 5.0);
         }
@@ -469,21 +473,31 @@ void main() {
 
     test('S_goal is 0 when no active goals exist', () {
       final goals = <GoalModel>[
-        _buildGoal(status: GoalStatus.completed, currentAmount: 100, targetAmount: 100),
-        _buildGoal(id: 'g2', status: GoalStatus.archived, currentAmount: 50, targetAmount: 100),
+        _buildGoal(
+          status: GoalStatus.completed,
+          currentAmount: 100,
+          targetAmount: 100,
+        ),
+        _buildGoal(
+          id: 'g2',
+          status: GoalStatus.archived,
+          currentAmount: 50,
+          targetAmount: 100,
+        ),
       ];
 
-      final activeGoals =
-          goals.where((g) => g.status == GoalStatus.active).toList();
+      final activeGoals = goals
+          .where((g) => g.status == GoalStatus.active)
+          .toList();
       expect(activeGoals.isEmpty, isTrue);
 
       // S_goal should be 0
       final sGoal = activeGoals.isEmpty
           ? 0.0
           : (activeGoals.fold<double>(0.0, (s, g) => s + g.progressPercentage) /
-                  activeGoals.length *
-                  5.0)
-              .clamp(0.0, 5.0);
+                    activeGoals.length *
+                    5.0)
+                .clamp(0.0, 5.0);
       expect(sGoal, equals(0.0));
     });
   });
@@ -494,44 +508,44 @@ void main() {
     Glados2(
       any.intInRange(1, 999999999), // target amount in cents
       any.intInRange(0, 999999999), // current amount in cents
-    ).test(
-      'crossing milestone threshold adds badge without duplicates',
-      (targetCents, currentCents) {
-        final targetAmount = targetCents / 100.0;
-        final currentAmount = currentCents / 100.0;
+    ).test('crossing milestone threshold adds badge without duplicates', (
+      targetCents,
+      currentCents,
+    ) {
+      final targetAmount = targetCents / 100.0;
+      final currentAmount = currentCents / 100.0;
 
-        final goal = _buildGoal(
-          targetAmount: targetAmount,
-          currentAmount: currentAmount,
-        );
+      final goal = _buildGoal(
+        targetAmount: targetAmount,
+        currentAmount: currentAmount,
+      );
 
-        final progress = goal.progressPercentage;
-        final badges = _determineMilestoneBadges(progress);
+      final progress = goal.progressPercentage;
+      final badges = _determineMilestoneBadges(progress);
 
-        // Verify no duplicates (Set guarantees this, but verify explicitly)
-        expect(badges.length, equals(badges.toSet().length));
+      // Verify no duplicates (Set guarantees this, but verify explicitly)
+      expect(badges.length, equals(badges.toSet().length));
 
-        // Verify correct badges based on progress
-        if (progress >= 1.0) {
-          expect(badges, contains('goal_achieved'));
-          expect(badges, contains('half_way'));
-          expect(badges, contains('quarter_saver'));
-        } else if (progress >= 0.50) {
-          expect(badges, contains('half_way'));
-          expect(badges, contains('quarter_saver'));
-          expect(badges.contains('goal_achieved'), isFalse);
-        } else if (progress >= 0.25) {
-          expect(badges, contains('quarter_saver'));
-          expect(badges.contains('half_way'), isFalse);
-          expect(badges.contains('goal_achieved'), isFalse);
-        } else {
-          expect(badges.isEmpty, isTrue);
-        }
+      // Verify correct badges based on progress
+      if (progress >= 1.0) {
+        expect(badges, contains('goal_achieved'));
+        expect(badges, contains('half_way'));
+        expect(badges, contains('quarter_saver'));
+      } else if (progress >= 0.50) {
+        expect(badges, contains('half_way'));
+        expect(badges, contains('quarter_saver'));
+        expect(badges.contains('goal_achieved'), isFalse);
+      } else if (progress >= 0.25) {
+        expect(badges, contains('quarter_saver'));
+        expect(badges.contains('half_way'), isFalse);
+        expect(badges.contains('goal_achieved'), isFalse);
+      } else {
+        expect(badges.isEmpty, isTrue);
+      }
 
-        // Applying badge determination again produces same result (idempotent)
-        final badges2 = _determineMilestoneBadges(progress);
-        expect(badges, equals(badges2));
-      },
-    );
+      // Applying badge determination again produces same result (idempotent)
+      final badges2 = _determineMilestoneBadges(progress);
+      expect(badges, equals(badges2));
+    });
   });
 }

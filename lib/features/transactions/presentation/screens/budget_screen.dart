@@ -34,7 +34,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16, right: 16, top: 24,
+            left: 16,
+            right: 16,
+            top: 24,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -69,7 +71,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   final amount = ThousandsFormatter.parse(amountCtrl.text);
                   if (catCtrl.text.isNotEmpty && amount > 0) {
                     HapticFeedback.mediumImpact();
-                    ref.read(budgetNotifierProvider.notifier).setBudget(catCtrl.text.trim(), amount);
+                    ref
+                        .read(budgetNotifierProvider.notifier)
+                        .setBudget(catCtrl.text.trim(), amount);
                     Navigator.pop(context);
                   }
                 },
@@ -86,15 +90,17 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final budgetState = ref.watch(budgetNotifierProvider);
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: const GlassAppBar(
-        title: Text('Monthly Budgets'),
-      ),
+      appBar: const GlassAppBar(title: Text('Monthly Budgets')),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -105,7 +111,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   return Center(
                     child: Text(
                       'No budgets set for this month.',
-                      style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   );
                 }
@@ -130,19 +138,30 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                                 Text(
                                   bp.budget.category,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold, 
+                                    fontWeight: FontWeight.bold,
                                     fontSize: 16,
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Colors.grey, size: 20),
-                                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
                                   padding: const EdgeInsets.all(12),
                                   onPressed: () {
                                     if (bp.budget.id != null) {
                                       HapticFeedback.vibrate();
-                                      ref.read(budgetNotifierProvider.notifier).deleteBudget(bp.budget.id!);
+                                      ref
+                                          .read(budgetNotifierProvider.notifier)
+                                          .deleteBudget(bp.budget.id!);
                                     }
                                   },
                                 ),
@@ -156,27 +175,45 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                                   formatter.format(bp.spent),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: isOver ? Colors.red : (isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87),
+                                    color: isOver
+                                        ? Colors.red
+                                        : (isDark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.9,
+                                                )
+                                              : Colors.black87),
                                   ),
                                 ),
                                 Text(
                                   'of ${formatter.format(bp.budget.amountLimit)}',
-                                  style: TextStyle(color: isDark ? Colors.white60 : Colors.grey[600]),
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white60
+                                        : Colors.grey[600],
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             LinearProgressIndicator(
                               value: bp.percentage,
-                              backgroundColor: progressColor.withValues(alpha: 0.1),
+                              backgroundColor: progressColor.withValues(
+                                alpha: 0.1,
+                              ),
                               color: progressColor,
                               minHeight: 8,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             if (isOver) ...[
                               const SizedBox(height: 4),
-                              const Text('Budget exceeded!', style: TextStyle(color: Colors.red, fontSize: 12)),
-                            ]
+                              const Text(
+                                'Budget exceeded!',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

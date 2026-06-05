@@ -122,8 +122,7 @@ class _GlassInputFieldState extends State<GlassInputField>
     final textTheme = Theme.of(context).textTheme;
 
     // Resolve theme tokens.
-    final baseBlurSigma =
-        (glassTheme?.blurSigma ?? _kDefaultBlurSigma) * 0.5;
+    final baseBlurSigma = (glassTheme?.blurSigma ?? _kDefaultBlurSigma) * 0.5;
     final surfaceOpacity =
         glassTheme?.surfaceOpacity ?? _kDefaultSurfaceOpacity;
     final surfaceTintColor =
@@ -142,8 +141,9 @@ class _GlassInputFieldState extends State<GlassInputField>
     // Accessibility adjustments.
     final bool isBoldText = MediaQuery.boldTextOf(context);
     final bool isHighContrast = MediaQuery.highContrastOf(context);
-    final bool accessibleNavigation =
-        MediaQuery.of(context).accessibleNavigation;
+    final bool accessibleNavigation = MediaQuery.of(
+      context,
+    ).accessibleNavigation;
 
     var resolvedSurfaceOpacity = surfaceOpacity;
     var effectiveEnableBlur = true;
@@ -153,8 +153,7 @@ class _GlassInputFieldState extends State<GlassInputField>
       effectiveEnableBlur = false;
     }
     if (isBoldText) {
-      resolvedSurfaceOpacity =
-          (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
+      resolvedSurfaceOpacity = (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
     }
     if (accessibleNavigation) {
       resolvedSurfaceOpacity = 0.92;
@@ -234,10 +233,7 @@ class _GlassInputFieldState extends State<GlassInputField>
     final decoration = BoxDecoration(
       color: surfaceTintColor.withValues(alpha: surfaceOpacity),
       borderRadius: borderRadius,
-      border: Border.all(
-        color: borderColor,
-        width: 1.0,
-      ),
+      border: Border.all(color: borderColor, width: 1.0),
     );
 
     final innerHighlight = Container(
@@ -280,10 +276,7 @@ class _GlassInputFieldState extends State<GlassInputField>
       surface = ClipRRect(
         borderRadius: borderRadius,
         child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blurSigma,
-            sigmaY: blurSigma,
-          ),
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
           child: surface,
         ),
       );
@@ -305,9 +298,7 @@ class _GlassInputFieldState extends State<GlassInputField>
       inputFormatters: widget.inputFormatters,
       onChanged: widget.onChanged,
       onEditingComplete: widget.onEditingComplete,
-      style: textTheme.bodyLarge?.copyWith(
-        color: colorScheme.onSurface,
-      ),
+      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: textTheme.bodyLarge?.copyWith(
@@ -320,10 +311,7 @@ class _GlassInputFieldState extends State<GlassInputField>
         focusedBorder: InputBorder.none,
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 14,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
         isDense: true,
       ),
     );

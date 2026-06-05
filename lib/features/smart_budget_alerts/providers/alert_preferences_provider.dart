@@ -63,9 +63,7 @@ class AlertPreferencesNotifier extends AsyncNotifier<AlertPreferenceModel> {
   /// Each value must be in {10, 15, 20, 25, ..., 95, 100}.
   /// If any value is invalid, the entire update is rejected and a
   /// [ValidationError] is returned.
-  Future<Result<void, AppError>> updateThresholds(
-    List<int> thresholds,
-  ) async {
+  Future<Result<void, AppError>> updateThresholds(List<int> thresholds) async {
     final validationError = validateThresholds(thresholds);
     if (validationError != null) {
       return Failure(validationError);
@@ -118,8 +116,10 @@ class AlertPreferencesNotifier extends AsyncNotifier<AlertPreferenceModel> {
     final repository = ref.read(alertPreferencesRepositoryProvider);
 
     // Check if category-specific preferences already exist.
-    final existingResult =
-        await repository.getCategoryPreferences(user.id, categoryId);
+    final existingResult = await repository.getCategoryPreferences(
+      user.id,
+      categoryId,
+    );
 
     AlertPreferenceModel categoryPrefs;
     switch (existingResult) {
@@ -250,5 +250,5 @@ class AlertPreferencesNotifier extends AsyncNotifier<AlertPreferenceModel> {
 /// Provider for the alert preferences notifier.
 final alertPreferencesProvider =
     AsyncNotifierProvider<AlertPreferencesNotifier, AlertPreferenceModel>(
-  AlertPreferencesNotifier.new,
-);
+      AlertPreferencesNotifier.new,
+    );

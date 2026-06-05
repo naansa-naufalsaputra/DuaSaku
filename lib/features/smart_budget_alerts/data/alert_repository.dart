@@ -49,9 +49,7 @@ class AlertRepository implements AlertRepositoryInterface {
     try {
       final query = _db.select(_db.budgetAlerts)
         ..where((tbl) => tbl.userId.equals(userId))
-        ..orderBy([
-          (tbl) => OrderingTerm.desc(tbl.createdAt),
-        ]);
+        ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
       if (limit != null) {
         query.limit(limit, offset: offset);
@@ -69,13 +67,9 @@ class AlertRepository implements AlertRepositoryInterface {
   Stream<List<BudgetAlertModel>> watchAlerts(String userId) {
     final query = _db.select(_db.budgetAlerts)
       ..where((tbl) => tbl.userId.equals(userId))
-      ..orderBy([
-        (tbl) => OrderingTerm.desc(tbl.createdAt),
-      ]);
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
-    return query.watch().map(
-      (rows) => rows.map(_mapRowToModel).toList(),
-    );
+    return query.watch().map((rows) => rows.map(_mapRowToModel).toList());
   }
 
   @override
@@ -118,19 +112,23 @@ class AlertRepository implements AlertRepositoryInterface {
   @override
   Future<Result<void, AppError>> insertAlert(BudgetAlertModel alert) async {
     try {
-      await _db.into(_db.budgetAlerts).insert(
-        BudgetAlertsCompanion.insert(
-          id: alert.id,
-          userId: alert.userId,
-          categoryId: Value(alert.categoryId.isEmpty ? null : alert.categoryId),
-          alertType: alert.alertType.toJson(),
-          thresholdValue: Value(alert.thresholdValue),
-          actualPercentage: alert.actualPercentage,
-          message: alert.message,
-          isRead: Value(alert.isRead),
-          createdAt: alert.createdAt,
-        ),
-      );
+      await _db
+          .into(_db.budgetAlerts)
+          .insert(
+            BudgetAlertsCompanion.insert(
+              id: alert.id,
+              userId: alert.userId,
+              categoryId: Value(
+                alert.categoryId.isEmpty ? null : alert.categoryId,
+              ),
+              alertType: alert.alertType.toJson(),
+              thresholdValue: Value(alert.thresholdValue),
+              actualPercentage: alert.actualPercentage,
+              message: alert.message,
+              isRead: Value(alert.isRead),
+              createdAt: alert.createdAt,
+            ),
+          );
       return const Success(null);
     } on Exception catch (e, stack) {
       developer.log('Error inserting alert into Drift', error: e);
@@ -154,11 +152,9 @@ class AlertRepository implements AlertRepositoryInterface {
   @override
   Future<Result<void, AppError>> markAllVisibleAsRead(String userId) async {
     try {
-      await (_db.update(_db.budgetAlerts)
-            ..where(
-              (tbl) =>
-                  tbl.userId.equals(userId) & tbl.isRead.equals(false),
-            ))
+      await (_db.update(_db.budgetAlerts)..where(
+            (tbl) => tbl.userId.equals(userId) & tbl.isRead.equals(false),
+          ))
           .write(const BudgetAlertsCompanion(isRead: Value(true)));
       return const Success(null);
     } on Exception catch (e, stack) {
@@ -170,9 +166,9 @@ class AlertRepository implements AlertRepositoryInterface {
   @override
   Future<Result<void, AppError>> deleteAlert(String alertId) async {
     try {
-      await (_db.delete(_db.budgetAlerts)
-            ..where((tbl) => tbl.id.equals(alertId)))
-          .go();
+      await (_db.delete(
+        _db.budgetAlerts,
+      )..where((tbl) => tbl.id.equals(alertId))).go();
       return const Success(null);
     } on Exception catch (e, stack) {
       developer.log('Error deleting alert from Drift', error: e);
@@ -183,11 +179,9 @@ class AlertRepository implements AlertRepositoryInterface {
   @override
   Future<Result<void, AppError>> deleteAllRead(String userId) async {
     try {
-      await (_db.delete(_db.budgetAlerts)
-            ..where(
-              (tbl) =>
-                  tbl.userId.equals(userId) & tbl.isRead.equals(true),
-            ))
+      await (_db.delete(_db.budgetAlerts)..where(
+            (tbl) => tbl.userId.equals(userId) & tbl.isRead.equals(true),
+          ))
           .go();
       return const Success(null);
     } on Exception catch (e, stack) {

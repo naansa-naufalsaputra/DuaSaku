@@ -55,7 +55,8 @@ class PinAuthState {
       confirmPin: confirmPin ?? this.confirmPin,
       hasError: hasError ?? this.hasError,
       message: message ?? this.message,
-      isBiometricsSupported: isBiometricsSupported ?? this.isBiometricsSupported,
+      isBiometricsSupported:
+          isBiometricsSupported ?? this.isBiometricsSupported,
       isSuccess: isSuccess ?? this.isSuccess,
     );
   }
@@ -81,7 +82,7 @@ class PinAuthNotifier extends AutoDisposeFamilyNotifier<PinAuthState, bool> {
     final localAuth = LocalAuthentication();
     final canCheck = await localAuth.canCheckBiometrics;
     final isSupported = await localAuth.isDeviceSupported();
-    
+
     final prefs = await SharedPreferences.getInstance();
     final biometricEnabled = prefs.getBool('biometric_lock_enabled') ?? false;
     final isBiometricsSupported = canCheck && isSupported && biometricEnabled;
@@ -119,9 +120,9 @@ class PinAuthNotifier extends AutoDisposeFamilyNotifier<PinAuthState, bool> {
   void appendDigit(String digit) {
     if (state.pin.length >= 4) return;
     final newPin = state.pin + digit;
-    
+
     state = state.copyWith(pin: newPin, hasError: false);
-    
+
     if (newPin.length == 4) {
       _handlePinCompletion(newPin);
     }
@@ -220,8 +221,8 @@ class PinAuthNotifier extends AutoDisposeFamilyNotifier<PinAuthState, bool> {
 
 final pinAuthNotifierProvider = NotifierProvider.family
     .autoDispose<PinAuthNotifier, PinAuthState, bool>(() {
-  return PinAuthNotifier();
-});
+      return PinAuthNotifier();
+    });
 
 class PinAuthScreen extends ConsumerWidget {
   final bool isChangePinMode;
@@ -230,11 +231,16 @@ class PinAuthScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pinAuthNotifierProvider(isChangePinMode));
-    final notifier = ref.read(pinAuthNotifierProvider(isChangePinMode).notifier);
+    final notifier = ref.read(
+      pinAuthNotifierProvider(isChangePinMode).notifier,
+    );
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    ref.listen<PinAuthState>(pinAuthNotifierProvider(isChangePinMode), (prev, next) {
+    ref.listen<PinAuthState>(pinAuthNotifierProvider(isChangePinMode), (
+      prev,
+      next,
+    ) {
       if (next.isSuccess && isChangePinMode) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -250,9 +256,7 @@ class PinAuthScreen extends ConsumerWidget {
       return const Scaffold(
         backgroundColor: Color(0xFF0D0E12),
         body: Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF06B6D4),
-          ),
+          child: CircularProgressIndicator(color: Color(0xFF06B6D4)),
         ),
       );
     }
@@ -268,7 +272,10 @@ class PinAuthScreen extends ConsumerWidget {
               left: 16,
               child: SafeArea(
                 child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     context.pop();
@@ -284,10 +291,14 @@ class PinAuthScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(24.0),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.white.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.05),
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -300,16 +311,14 @@ class PinAuthScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Center(
-                          child: AiMascot(size: 80),
-                        ),
+                        const Center(child: AiMascot(size: 80)),
                         const SizedBox(height: 16),
                         Text(
-                          isChangePinMode 
+                          isChangePinMode
                               ? 'pin_auth.change_pin_title'.tr()
-                              : (state.mode == PinMode.unlock 
-                                  ? 'pin_auth.welcome_back'.tr() 
-                                  : 'pin_auth.app_security'.tr()),
+                              : (state.mode == PinMode.unlock
+                                    ? 'pin_auth.welcome_back'.tr()
+                                    : 'pin_auth.app_security'.tr()),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -322,10 +331,12 @@ class PinAuthScreen extends ConsumerWidget {
                           state.message.isEmpty ? '' : state.message.tr(),
                           style: TextStyle(
                             fontSize: 14,
-                            color: state.hasError 
-                                ? Colors.redAccent 
+                            color: state.hasError
+                                ? Colors.redAccent
                                 : (isDark ? Colors.white70 : Colors.black54),
-                            fontWeight: state.hasError ? FontWeight.w600 : FontWeight.normal,
+                            fontWeight: state.hasError
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -366,11 +377,11 @@ class PinAuthScreen extends ConsumerWidget {
             height: 16,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isFilled
-                  ? const Color(0xFF06B6D4)
-                  : Colors.transparent,
+              color: isFilled ? const Color(0xFF06B6D4) : Colors.transparent,
               border: Border.all(
-                color: isFilled ? const Color(0xFF06B6D4) : Colors.grey.withValues(alpha: 0.5),
+                color: isFilled
+                    ? const Color(0xFF06B6D4)
+                    : Colors.grey.withValues(alpha: 0.5),
                 width: 2,
               ),
             ),
@@ -380,33 +391,74 @@ class PinAuthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNumpad(BuildContext context, WidgetRef ref, PinAuthState state, PinAuthNotifier notifier) {
+  Widget _buildNumpad(
+    BuildContext context,
+    WidgetRef ref,
+    PinAuthState state,
+    PinAuthNotifier notifier,
+  ) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildKeypadButton(context, '1', onTap: () => notifier.appendDigit('1')),
-            _buildKeypadButton(context, '2', onTap: () => notifier.appendDigit('2')),
-            _buildKeypadButton(context, '3', onTap: () => notifier.appendDigit('3')),
+            _buildKeypadButton(
+              context,
+              '1',
+              onTap: () => notifier.appendDigit('1'),
+            ),
+            _buildKeypadButton(
+              context,
+              '2',
+              onTap: () => notifier.appendDigit('2'),
+            ),
+            _buildKeypadButton(
+              context,
+              '3',
+              onTap: () => notifier.appendDigit('3'),
+            ),
           ],
         ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildKeypadButton(context, '4', onTap: () => notifier.appendDigit('4')),
-            _buildKeypadButton(context, '5', onTap: () => notifier.appendDigit('5')),
-            _buildKeypadButton(context, '6', onTap: () => notifier.appendDigit('6')),
+            _buildKeypadButton(
+              context,
+              '4',
+              onTap: () => notifier.appendDigit('4'),
+            ),
+            _buildKeypadButton(
+              context,
+              '5',
+              onTap: () => notifier.appendDigit('5'),
+            ),
+            _buildKeypadButton(
+              context,
+              '6',
+              onTap: () => notifier.appendDigit('6'),
+            ),
           ],
         ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildKeypadButton(context, '7', onTap: () => notifier.appendDigit('7')),
-            _buildKeypadButton(context, '8', onTap: () => notifier.appendDigit('8')),
-            _buildKeypadButton(context, '9', onTap: () => notifier.appendDigit('9')),
+            _buildKeypadButton(
+              context,
+              '7',
+              onTap: () => notifier.appendDigit('7'),
+            ),
+            _buildKeypadButton(
+              context,
+              '8',
+              onTap: () => notifier.appendDigit('8'),
+            ),
+            _buildKeypadButton(
+              context,
+              '9',
+              onTap: () => notifier.appendDigit('9'),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -415,28 +467,47 @@ class PinAuthScreen extends ConsumerWidget {
           children: [
             // Left button: Biometric or empty
             state.mode == PinMode.unlock && state.isBiometricsSupported
-                ? _buildKeypadButton(context, '', icon: Icons.fingerprint, onTap: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(securityProvider.notifier).authenticate();
-                  })
+                ? _buildKeypadButton(
+                    context,
+                    '',
+                    icon: Icons.fingerprint,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      ref.read(securityProvider.notifier).authenticate();
+                    },
+                  )
                 : const SizedBox(width: 72, height: 72),
-            _buildKeypadButton(context, '0', onTap: () => notifier.appendDigit('0')),
+            _buildKeypadButton(
+              context,
+              '0',
+              onTap: () => notifier.appendDigit('0'),
+            ),
             // Right button: Backspace
-            _buildKeypadButton(context, '', icon: Icons.backspace_outlined, onTap: () => notifier.removeDigit()),
+            _buildKeypadButton(
+              context,
+              '',
+              icon: Icons.backspace_outlined,
+              onTap: () => notifier.removeDigit(),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildKeypadButton(BuildContext context, String text, {VoidCallback? onTap, IconData? icon}) {
+  Widget _buildKeypadButton(
+    BuildContext context,
+    String text, {
+    VoidCallback? onTap,
+    IconData? icon,
+  }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap != null 
+        onTap: onTap != null
             ? () {
                 HapticFeedback.lightImpact();
                 onTap();
@@ -450,13 +521,21 @@ class PinAuthScreen extends ConsumerWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.05),
               width: 1.5,
             ),
-            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.03)
+                : Colors.black.withValues(alpha: 0.02),
           ),
           child: icon != null
-              ? Icon(icon, size: 28, color: isDark ? Colors.white : Colors.black87)
+              ? Icon(
+                  icon,
+                  size: 28,
+                  color: isDark ? Colors.white : Colors.black87,
+                )
               : Text(
                   text,
                   style: TextStyle(

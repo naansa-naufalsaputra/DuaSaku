@@ -38,8 +38,9 @@ class ExecutionTimelineWidget extends StatelessWidget {
     final displayedPast = pastExecutions.length > 5
         ? pastExecutions.sublist(pastExecutions.length - 5)
         : pastExecutions;
-    final displayedUpcoming =
-        upcomingDates.length > 5 ? upcomingDates.sublist(0, 5) : upcomingDates;
+    final displayedUpcoming = upcomingDates.length > 5
+        ? upcomingDates.sublist(0, 5)
+        : upcomingDates;
 
     final hasEntries = displayedPast.isNotEmpty || displayedUpcoming.isNotEmpty;
 
@@ -81,12 +82,7 @@ class ExecutionTimelineWidget extends StatelessWidget {
               ),
             )
           else
-            _buildTimeline(
-              context,
-              displayedPast,
-              displayedUpcoming,
-              isDark,
-            ),
+            _buildTimeline(context, displayedPast, displayedUpcoming, isDark),
         ],
       ),
     );
@@ -102,21 +98,20 @@ class ExecutionTimelineWidget extends StatelessWidget {
 
     // Add past executions (oldest first)
     for (final log in past) {
-      items.add(_TimelineEntry(
-        date: log.executedAt,
-        type: log.isSuccess
-            ? _TimelineEntryType.success
-            : _TimelineEntryType.failed,
-        errorMessage: log.errorMessage,
-      ));
+      items.add(
+        _TimelineEntry(
+          date: log.executedAt,
+          type: log.isSuccess
+              ? _TimelineEntryType.success
+              : _TimelineEntryType.failed,
+          errorMessage: log.errorMessage,
+        ),
+      );
     }
 
     // Add upcoming dates
     for (final date in upcoming) {
-      items.add(_TimelineEntry(
-        date: date,
-        type: _TimelineEntryType.upcoming,
-      ));
+      items.add(_TimelineEntry(date: date, type: _TimelineEntryType.upcoming));
     }
 
     return ConstrainedBox(
@@ -129,10 +124,10 @@ class ExecutionTimelineWidget extends StatelessWidget {
             final isLast = index == items.length - 1;
 
             return _TimelineItemWidget(
-              entry: entry,
-              isLast: isLast,
-              isDark: isDark,
-            )
+                  entry: entry,
+                  isLast: isLast,
+                  isDark: isDark,
+                )
                 .animate()
                 .fadeIn(
                   duration: 300.ms,
@@ -191,7 +186,9 @@ class _TimelineItemWidget extends StatelessWidget {
     final dotColor = switch (entry.type) {
       _TimelineEntryType.success => Colors.green,
       _TimelineEntryType.failed => colorScheme.error,
-      _TimelineEntryType.upcoming => colorScheme.onSurface.withValues(alpha: 0.3),
+      _TimelineEntryType.upcoming => colorScheme.onSurface.withValues(
+        alpha: 0.3,
+      ),
     };
 
     final lineColor = colorScheme.onSurface.withValues(alpha: 0.1);
@@ -285,17 +282,17 @@ class _TimelineItemWidget extends StatelessWidget {
 
     final (label, color) = switch (entry.type) {
       _TimelineEntryType.success => (
-          'recurring.status_success'.tr(),
-          Colors.green,
-        ),
+        'recurring.status_success'.tr(),
+        Colors.green,
+      ),
       _TimelineEntryType.failed => (
-          'recurring.status_failed'.tr(),
-          colorScheme.error,
-        ),
+        'recurring.status_failed'.tr(),
+        colorScheme.error,
+      ),
       _TimelineEntryType.upcoming => (
-          'recurring.status_scheduled'.tr(),
-          colorScheme.onSurface.withValues(alpha: 0.5),
-        ),
+        'recurring.status_scheduled'.tr(),
+        colorScheme.onSurface.withValues(alpha: 0.5),
+      ),
     };
 
     return Container(

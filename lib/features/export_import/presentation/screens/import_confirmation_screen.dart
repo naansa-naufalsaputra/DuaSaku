@@ -58,9 +58,7 @@ class _ImportConfirmationScreenState
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('export_import.import.title'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('export_import.import.title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -69,8 +67,9 @@ class _ImportConfirmationScreenState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -92,9 +91,7 @@ class _ImportConfirmationScreenState
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('export_import.import.title'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('export_import.import.title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -125,8 +122,7 @@ class _ImportConfirmationScreenState
                       Text(
                         error.toString(),
                         style: TextStyle(
-                          color:
-                              colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                         textAlign: TextAlign.center,
@@ -222,18 +218,12 @@ class _DestructiveWarning extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.error.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.error.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: colorScheme.error,
-            size: 24,
-          ),
+          Icon(Icons.warning_amber_rounded, color: colorScheme.error, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -303,9 +293,7 @@ class _DestructiveRestoreButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.error.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: colorScheme.error.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: colorScheme.error.withValues(alpha: 0.5)),
         ),
         child: Center(
           child: Padding(

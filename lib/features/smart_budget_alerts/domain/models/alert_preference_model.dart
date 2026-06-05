@@ -44,8 +44,7 @@ class AlertPreferenceModel {
   }
 
   /// Whether quiet hours are configured.
-  bool get hasQuietHours =>
-      quietHoursStart != null && quietHoursEnd != null;
+  bool get hasQuietHours => quietHoursStart != null && quietHoursEnd != null;
 
   /// Whether this is a global (non-category-specific) preference.
   bool get isGlobal => categoryId == null;
@@ -97,10 +96,12 @@ class AlertPreferenceModel {
       isEnabled: isEnabled ?? this.isEnabled,
       thresholds: thresholds ?? this.thresholds,
       predictionsEnabled: predictionsEnabled ?? this.predictionsEnabled,
-      quietHoursStart:
-          quietHoursStart != null ? quietHoursStart() : this.quietHoursStart,
-      quietHoursEnd:
-          quietHoursEnd != null ? quietHoursEnd() : this.quietHoursEnd,
+      quietHoursStart: quietHoursStart != null
+          ? quietHoursStart()
+          : this.quietHoursStart,
+      quietHoursEnd: quietHoursEnd != null
+          ? quietHoursEnd()
+          : this.quietHoursEnd,
     );
   }
 
@@ -120,15 +121,15 @@ class AlertPreferenceModel {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        userId,
-        categoryId,
-        isEnabled,
-        Object.hashAll(thresholds),
-        predictionsEnabled,
-        quietHoursStart,
-        quietHoursEnd,
-      );
+    id,
+    userId,
+    categoryId,
+    isEnabled,
+    Object.hashAll(thresholds),
+    predictionsEnabled,
+    quietHoursStart,
+    quietHoursEnd,
+  );
 
   @override
   String toString() =>

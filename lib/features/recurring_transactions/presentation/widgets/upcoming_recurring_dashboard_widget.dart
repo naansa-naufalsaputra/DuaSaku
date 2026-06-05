@@ -76,10 +76,7 @@ class _UpcomingSection extends StatelessWidget {
         ...transactions.asMap().entries.map((entry) {
           final index = entry.key;
           final transaction = entry.value;
-          return _UpcomingItem(
-            transaction: transaction,
-            isDark: isDark,
-          )
+          return _UpcomingItem(transaction: transaction, isDark: isDark)
               .animate()
               .fadeIn(
                 delay: Duration(milliseconds: index * 50),
@@ -102,10 +99,7 @@ class _UpcomingSection extends StatelessWidget {
 // ─── Upcoming Item Card ───────────────────────────────────────────────────────
 
 class _UpcomingItem extends StatelessWidget {
-  const _UpcomingItem({
-    required this.transaction,
-    required this.isDark,
-  });
+  const _UpcomingItem({required this.transaction, required this.isDark});
 
   final RecurringTransactionModel transaction;
   final bool isDark;

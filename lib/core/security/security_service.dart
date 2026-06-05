@@ -45,7 +45,8 @@ final securityProvider = NotifierProvider<SecurityNotifier, SecurityState>(() {
   return SecurityNotifier();
 });
 
-class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserver {
+class SecurityNotifier extends Notifier<SecurityState>
+    with WidgetsBindingObserver {
   DateTime? _lastBackgroundTime;
   final LocalAuthentication _auth = LocalAuthentication();
   static const String _biometricPrefKey = 'biometric_lock_enabled';
@@ -64,7 +65,8 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
     final bool isEnabled = prefs.getBool(_biometricPrefKey) ?? false;
-    final bool isSecurityEnabled = prefs.getBool(_securityEnabledPrefKey) ?? false;
+    final bool isSecurityEnabled =
+        prefs.getBool(_securityEnabledPrefKey) ?? false;
 
     state = state.copyWith(
       isBiometricEnabled: isEnabled,
@@ -91,10 +93,13 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
     try {
       final DateTime localTime = DateTime.now();
       // Fetch current NTP network time with a fallback timeout of 4 seconds
-      final DateTime ntpTime = await NTP.now(timeout: const Duration(seconds: 4));
-      
+      final DateTime ntpTime = await NTP.now(
+        timeout: const Duration(seconds: 4),
+      );
+
       final int driftSeconds = ntpTime.difference(localTime).inSeconds.abs();
-      if (driftSeconds > 300) { // 5 minutes drift limit
+      if (driftSeconds > 300) {
+        // 5 minutes drift limit
         state = state.copyWith(isTimeTampered: true);
       } else {
         state = state.copyWith(isTimeTampered: false);
@@ -108,18 +113,21 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
 
   Future<bool> setBiometricEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     if (enabled) {
       try {
         final bool canCheck = await _auth.canCheckBiometrics;
         final bool isDeviceSupported = await _auth.isDeviceSupported();
-        final List<BiometricType> available = await _auth.getAvailableBiometrics();
-        
+        final List<BiometricType> available = await _auth
+            .getAvailableBiometrics();
+
         if (!canCheck || !isDeviceSupported || available.isEmpty) {
-          debugPrint('[SecurityService] Biometrics not supported or none enrolled');
+          debugPrint(
+            '[SecurityService] Biometrics not supported or none enrolled',
+          );
           return false;
         }
-        
+
         final bool didAuthenticate = await _auth.authenticate(
           localizedReason: 'Konfirmasi biometrik untuk mengaktifkan kunci',
           options: const AuthenticationOptions(
@@ -127,16 +135,18 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
             biometricOnly: true,
           ),
         );
-        
+
         if (!didAuthenticate) {
           return false;
         }
       } catch (e) {
-        debugPrint('[SecurityService] Failed to verify biometric on toggle: $e');
+        debugPrint(
+          '[SecurityService] Failed to verify biometric on toggle: $e',
+        );
         return false;
       }
     }
-    
+
     await prefs.setBool(_biometricPrefKey, enabled);
     state = state.copyWith(isBiometricEnabled: enabled);
     return true;
@@ -152,7 +162,7 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
 
     try {
       state = state.copyWith(isAuthenticating: true);
-      
+
       final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
       final bool isDeviceSupported = await _auth.isDeviceSupported();
 
@@ -212,7 +222,9 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
       _lastBackgroundTime = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       if (_lastBackgroundTime != null) {
-        final durationInBackground = DateTime.now().difference(_lastBackgroundTime!);
+        final durationInBackground = DateTime.now().difference(
+          _lastBackgroundTime!,
+        );
         if (durationInBackground >= const Duration(seconds: 30)) {
           this.state = this.state.copyWith(isLocked: true);
           authenticate();

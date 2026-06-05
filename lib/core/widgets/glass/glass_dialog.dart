@@ -37,7 +37,8 @@ class GlassDialog extends StatelessWidget {
         children: [
           if (title != null) ...[
             DefaultTextStyle(
-              style: Theme.of(context).textTheme.titleLarge ??
+              style:
+                  Theme.of(context).textTheme.titleLarge ??
                   const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
               child: title!,
@@ -46,7 +47,8 @@ class GlassDialog extends StatelessWidget {
           ],
           if (content != null) ...[
             DefaultTextStyle(
-              style: Theme.of(context).textTheme.bodyMedium ??
+              style:
+                  Theme.of(context).textTheme.bodyMedium ??
                   const TextStyle(fontSize: 14),
               child: content!,
             ),
@@ -87,28 +89,21 @@ Future<T?> showGlassDialog<T>(
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel:
+        barrierLabel ??
+        MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     transitionDuration: dialogDuration,
     pageBuilder: (context, animation, secondaryAnimation) {
       return Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 340,
-            minWidth: 280,
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: dialog,
-          ),
+          constraints: const BoxConstraints(maxWidth: 340, minWidth: 280),
+          child: Material(type: MaterialType.transparency, child: dialog),
         ),
       );
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
-      final curvedAnimation = CurvedAnimation(
-        parent: animation,
-        curve: curve,
-      );
+      final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
 
       return FadeTransition(
         opacity: curvedAnimation,

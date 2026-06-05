@@ -14,11 +14,7 @@ abstract class AlertThresholdStatusRepositoryInterface {
   /// Retrieves all triggered threshold statuses for a given user,
   /// category, and budget month.
   Future<Result<List<AlertThresholdStatusModel>, AppError>>
-      getTriggeredThresholds(
-    String userId,
-    String categoryId,
-    String budgetMonth,
-  );
+  getTriggeredThresholds(String userId, String categoryId, String budgetMonth);
 
   /// Records that a threshold has been triggered.
   Future<Result<void, AppError>> markThresholdTriggered(

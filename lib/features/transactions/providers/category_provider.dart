@@ -4,7 +4,10 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/category_repository.dart';
 import '../domain/models/category_model.dart';
 
-final categoryNotifierProvider = AsyncNotifierProvider<CategoryNotifier, List<CategoryModel>>(CategoryNotifier.new);
+final categoryNotifierProvider =
+    AsyncNotifierProvider<CategoryNotifier, List<CategoryModel>>(
+      CategoryNotifier.new,
+    );
 
 class CategoryNotifier extends AsyncNotifier<List<CategoryModel>> {
   @override
@@ -31,7 +34,12 @@ class CategoryNotifier extends AsyncNotifier<List<CategoryModel>> {
     state = await AsyncValue.guard(() => _fetchCategories(user.id));
   }
 
-  Future<void> addCategory(String name, String type, {String? icon, String? color}) async {
+  Future<void> addCategory(
+    String name,
+    String type, {
+    String? icon,
+    String? color,
+  }) async {
     final repo = ref.read(categoryRepositoryProvider);
     final user = ref.read(userProvider);
     if (user == null) return;
@@ -54,7 +62,13 @@ class CategoryNotifier extends AsyncNotifier<List<CategoryModel>> {
     }
   }
 
-  Future<void> updateCategory(String id, String name, String type, {String? icon, String? color}) async {
+  Future<void> updateCategory(
+    String id,
+    String name,
+    String type, {
+    String? icon,
+    String? color,
+  }) async {
     final repo = ref.read(categoryRepositoryProvider);
     final user = ref.read(userProvider);
     if (user == null) return;
@@ -72,7 +86,9 @@ class CategoryNotifier extends AsyncNotifier<List<CategoryModel>> {
     try {
       await repo.updateCategory(updatedCat);
       final currentList = state.value ?? [];
-      state = AsyncValue.data(currentList.map((c) => c.id == id ? updatedCat : c).toList());
+      state = AsyncValue.data(
+        currentList.map((c) => c.id == id ? updatedCat : c).toList(),
+      );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }

@@ -47,8 +47,9 @@ Future<bool> _handleRecurringSync() async {
     RecurringNotificationService? notificationService;
     try {
       final notificationsPlugin = FlutterLocalNotificationsPlugin();
-      const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
       const iosSettings = DarwinInitializationSettings();
       const initSettings = InitializationSettings(
         android: androidSettings,
@@ -58,9 +59,7 @@ Future<bool> _handleRecurringSync() async {
       notificationService = RecurringNotificationService(notificationsPlugin);
     } catch (e) {
       // If notification initialization fails, continue without notifications.
-      debugPrint(
-        '[BackgroundTask] Notification init failed (non-fatal): $e',
-      );
+      debugPrint('[BackgroundTask] Notification init failed (non-fatal): $e');
     }
 
     final executor = RecurringExecutor(
@@ -99,8 +98,9 @@ Future<bool> _handleBudgetAlertQueueProcessing() async {
     // Initialize flutter_local_notifications in background isolate.
     try {
       final notificationsPlugin = FlutterLocalNotificationsPlugin();
-      const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
       const iosSettings = DarwinInitializationSettings();
       const initSettings = InitializationSettings(
         android: androidSettings,
@@ -110,9 +110,7 @@ Future<bool> _handleBudgetAlertQueueProcessing() async {
     } catch (e) {
       // If notification initialization fails, continue anyway.
       // processQueuedNotifications will handle missing plugin gracefully.
-      debugPrint(
-        '[BackgroundTask] Notification init failed (non-fatal): $e',
-      );
+      debugPrint('[BackgroundTask] Notification init failed (non-fatal): $e');
     }
 
     final notificationService = BudgetNotificationService();
@@ -138,7 +136,10 @@ Future<bool> _handleGeofenceSync() async {
   AppDatabase? db;
   try {
     db = AppDatabase();
-    await GeofenceSyncHelper.syncGeofenceHotspots(db, AppConstants.defaultUserId);
+    await GeofenceSyncHelper.syncGeofenceHotspots(
+      db,
+      AppConstants.defaultUserId,
+    );
     debugPrint('[BackgroundTask] Geofence sync task completed successfully');
     return true;
   } catch (e) {
@@ -151,9 +152,7 @@ Future<bool> _handleGeofenceSync() async {
 
 class BackgroundTaskHelper {
   static Future<void> initialize() async {
-    await Workmanager().initialize(
-      callbackDispatcher,
-    );
+    await Workmanager().initialize(callbackDispatcher);
 
     // Register recurring task to run periodically (every 15 minutes is minimum Android constraint)
     await Workmanager().registerPeriodicTask(
@@ -161,9 +160,7 @@ class BackgroundTaskHelper {
       recurringTaskName,
       frequency: const Duration(minutes: 15),
       existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-      constraints: Constraints(
-        requiresBatteryNotLow: true,
-      ),
+      constraints: Constraints(requiresBatteryNotLow: true),
     );
 
     // Register budget alert queue processing task.
@@ -176,9 +173,7 @@ class BackgroundTaskHelper {
       budgetAlertQueueTaskName,
       frequency: const Duration(minutes: 15),
       existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-      constraints: Constraints(
-        requiresBatteryNotLow: true,
-      ),
+      constraints: Constraints(requiresBatteryNotLow: true),
     );
 
     // Register geofence sync task. Runs every 24 hours.
@@ -187,9 +182,7 @@ class BackgroundTaskHelper {
       geofenceSyncTaskName,
       frequency: const Duration(hours: 24),
       existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-      constraints: Constraints(
-        requiresBatteryNotLow: true,
-      ),
+      constraints: Constraints(requiresBatteryNotLow: true),
     );
   }
 }

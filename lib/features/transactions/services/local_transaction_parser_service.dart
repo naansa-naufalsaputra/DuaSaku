@@ -11,7 +11,8 @@ import '../domain/transaction_parser_service_interface.dart';
 /// Parses transaction details locally using Regex for amounts,
 /// keyword-based intent classification, and fuzzy Levenshtein distance
 /// with a synonym dictionary for category matching.
-class LocalTransactionParserService implements TransactionParserServiceInterface {
+class LocalTransactionParserService
+    implements TransactionParserServiceInterface {
   /// Parses transaction text locally (asynchronous version).
   @override
   Future<ParsedTransaction> parseTransaction({
@@ -114,7 +115,9 @@ class LocalTransactionParserService implements TransactionParserServiceInterface
     List<CategoryInfo> categories,
   ) {
     // 1. Try CategorySynonymDictionary mapping
-    final mappedCategoryName = TextSanitizer.mapToCategorySynonym(sanitizedText);
+    final mappedCategoryName = TextSanitizer.mapToCategorySynonym(
+      sanitizedText,
+    );
     if (mappedCategoryName != null) {
       final targetKey = mappedCategoryName.toLowerCase();
       final Set<String> equivalents = {targetKey};
@@ -128,8 +131,10 @@ class LocalTransactionParserService implements TransactionParserServiceInterface
 
       for (final cat in categories) {
         final catName = cat.name.toLowerCase();
-        if (equivalents.contains(catName) || 
-            equivalents.any((eq) => catName.contains(eq) || eq.contains(catName))) {
+        if (equivalents.contains(catName) ||
+            equivalents.any(
+              (eq) => catName.contains(eq) || eq.contains(catName),
+            )) {
           return cat.name;
         }
       }

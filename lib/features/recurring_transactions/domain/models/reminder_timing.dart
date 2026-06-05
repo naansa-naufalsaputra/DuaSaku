@@ -8,14 +8,14 @@ enum ReminderTiming {
 
   /// Parse from stored string value.
   static ReminderTiming fromString(String value) => switch (value) {
-        'day_before' => ReminderTiming.dayBefore,
-        'same_day' => ReminderTiming.sameDay,
-        _ => ReminderTiming.sameDay,
-      };
+    'day_before' => ReminderTiming.dayBefore,
+    'same_day' => ReminderTiming.sameDay,
+    _ => ReminderTiming.sameDay,
+  };
 
   /// Convert to string for database storage.
   String toStorageString() => switch (this) {
-        ReminderTiming.dayBefore => 'day_before',
-        ReminderTiming.sameDay => 'same_day',
-      };
+    ReminderTiming.dayBefore => 'day_before',
+    ReminderTiming.sameDay => 'same_day',
+  };
 }

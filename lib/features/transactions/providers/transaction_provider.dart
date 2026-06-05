@@ -22,7 +22,9 @@ import '../../smart_budget_alerts/providers/alert_center_provider.dart';
 import '../../smart_budget_alerts/services/budget_alert_evaluator.dart';
 import 'category_provider.dart';
 
-final transactionRepositoryProvider = Provider<TransactionRepositoryInterface>((ref) {
+final transactionRepositoryProvider = Provider<TransactionRepositoryInterface>((
+  ref,
+) {
   final db = ref.watch(appDatabaseProvider);
   return TransactionRepository(db);
 });
@@ -41,13 +43,15 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     if (user == null) {
       return [];
     }
-    
+
     // Background sync on init
     // ignore: deprecated_member_use
     _repository.syncPendingTransactions();
 
     _connectivitySubscription?.cancel();
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
       if (!results.contains(ConnectivityResult.none)) {
         // ignore: deprecated_member_use
         _repository.syncPendingTransactions();
@@ -64,20 +68,25 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     bool isFirst = true;
 
     _subscription?.cancel();
-    _subscription = _repository.fetchTransactions(user.id).listen((data) {
-      if (isFirst) {
-        completer.complete(data);
-        isFirst = false;
-      } else {
-        state = AsyncValue.data(data);
-      }
-    }, onError: (e, stack) {
-      if (isFirst) {
-        completer.completeError(e, stack);
-      } else {
-        state = AsyncValue.error(e, stack);
-      }
-    });
+    _subscription = _repository
+        .fetchTransactions(user.id)
+        .listen(
+          (data) {
+            if (isFirst) {
+              completer.complete(data);
+              isFirst = false;
+            } else {
+              state = AsyncValue.data(data);
+            }
+          },
+          onError: (e, stack) {
+            if (isFirst) {
+              completer.completeError(e, stack);
+            } else {
+              state = AsyncValue.error(e, stack);
+            }
+          },
+        );
 
     return completer.future;
   }
@@ -167,7 +176,6 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     );
   }
 
-
   Future<void> createTransaction({
     required double amount,
     required String category,
@@ -236,7 +244,11 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       if (user == null) return;
 
       final db = ref.read(appDatabaseProvider);
-      final categoryId = await _resolveCategoryId(db, user.id, transaction.category);
+      final categoryId = await _resolveCategoryId(
+        db,
+        user.id,
+        transaction.category,
+      );
       if (categoryId == null) return;
 
       final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
@@ -262,7 +274,11 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       if (user == null) return;
 
       final db = ref.read(appDatabaseProvider);
-      final categoryId = await _resolveCategoryId(db, user.id, transaction.category);
+      final categoryId = await _resolveCategoryId(
+        db,
+        user.id,
+        transaction.category,
+      );
       if (categoryId == null) return;
 
       final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
@@ -285,14 +301,16 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     String userId,
     String categoryName,
   ) async {
-    final cat = await (db.select(db.categories)
-          ..where((c) => c.name.equals(categoryName) & c.userId.equals(userId)))
-        .getSingleOrNull();
+    final cat =
+        await (db.select(db.categories)..where(
+              (c) => c.name.equals(categoryName) & c.userId.equals(userId),
+            ))
+            .getSingleOrNull();
     return cat?.id;
   }
 }
 
 final transactionNotifierProvider =
     AsyncNotifierProvider<TransactionNotifier, List<TransactionModel>>(() {
-  return TransactionNotifier();
-});
+      return TransactionNotifier();
+    });

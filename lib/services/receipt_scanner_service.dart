@@ -23,13 +23,19 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
   Future<ParsedTransaction> scanReceipt(String imagePath) async {
     final File imageFile = File(imagePath);
     if (!await imageFile.exists()) {
-      throw ArgumentError('Receipt image file does not exist at path: $imagePath');
+      throw ArgumentError(
+        'Receipt image file does not exist at path: $imagePath',
+      );
     }
 
-    final TextRecognizer recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    final TextRecognizer recognizer = TextRecognizer(
+      script: TextRecognitionScript.latin,
+    );
     try {
       final InputImage inputImage = InputImage.fromFilePath(imagePath);
-      final RecognizedText recognizedText = await recognizer.processImage(inputImage);
+      final RecognizedText recognizedText = await recognizer.processImage(
+        inputImage,
+      );
 
       // 1. Reconstruct lines from OCR blocks
       final List<String> rawLines = [];
@@ -61,7 +67,9 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
       final DateTime date = extractDate(rawLines);
 
       // 4. Extract Total Amount and check confidence
-      final (double amount, bool scanConfidenceLow) = extractTotalAmount(rawLines);
+      final (double amount, bool scanConfidenceLow) = extractTotalAmount(
+        rawLines,
+      );
 
       // 5. Predict category using existing TFLite transaction parser
       String category = 'Food';
@@ -75,7 +83,9 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
         category = parsedResult.category;
         intentType = parsedResult.type;
       } catch (e) {
-        debugPrint('[ReceiptScannerService] Failed to predict category via TFLite: $e');
+        debugPrint(
+          '[ReceiptScannerService] Failed to predict category via TFLite: $e',
+        );
         // Fallback: match via local text sanitizer keywords if TFLite fails
         final sanitized = TextSanitizer.sanitize(merchantName);
         category = TextSanitizer.mapToCategorySynonym(sanitized) ?? 'Food';
@@ -134,7 +144,9 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
       // Check if it has letters (we don't want a purely numeric line like an invoice number)
       if (RegExp(r'[a-zA-Z]').hasMatch(line)) {
         // Strip out trailing punctuation typical of headings
-        return line.replaceAll(RegExp(r'^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$'), '').trim();
+        return line
+            .replaceAll(RegExp(r'^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$'), '')
+            .trim();
       }
     }
 
@@ -145,7 +157,9 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
   @visibleForTesting
   DateTime extractDate(List<String> lines) {
     // Regex 1: DD/MM/YYYY or DD-MM-YYYY (supporting 2 or 4 digit years)
-    final dateNumericRegex = RegExp(r'\b(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})\b');
+    final dateNumericRegex = RegExp(
+      r'\b(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})\b',
+    );
 
     // Regex 2: DD Month YYYY (e.g. 12 Jan 2026, 12 Januari 2026)
     final dateWordRegex = RegExp(
@@ -193,19 +207,32 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
 
   int _mapMonthWordToNumber(String monthStr) {
     switch (monthStr) {
-      case 'jan': return 1;
-      case 'feb': return 2;
-      case 'mar': return 3;
-      case 'apr': return 4;
-      case 'mei': return 5;
-      case 'jun': return 6;
-      case 'jul': return 7;
-      case 'agu': return 8;
-      case 'sep': return 9;
-      case 'okt': return 10;
-      case 'nov': return 11;
-      case 'des': return 12;
-      default: return 0;
+      case 'jan':
+        return 1;
+      case 'feb':
+        return 2;
+      case 'mar':
+        return 3;
+      case 'apr':
+        return 4;
+      case 'mei':
+        return 5;
+      case 'jun':
+        return 6;
+      case 'jul':
+        return 7;
+      case 'agu':
+        return 8;
+      case 'sep':
+        return 9;
+      case 'okt':
+        return 10;
+      case 'nov':
+        return 11;
+      case 'des':
+        return 12;
+      default:
+        return 0;
     }
   }
 
@@ -238,14 +265,16 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
       if (primaryKeywordRegex.hasMatch(line)) {
         if (numbersInLine.isNotEmpty) {
           final candidate = numbersInLine.last;
-          if (primaryKeywordAmount == null || candidate > primaryKeywordAmount) {
+          if (primaryKeywordAmount == null ||
+              candidate > primaryKeywordAmount) {
             primaryKeywordAmount = candidate;
           }
         } else if (i + 1 < lines.length) {
           final nextLineNumbers = _extractPricesFromLine(lines[i + 1]);
           if (nextLineNumbers.isNotEmpty) {
             final candidate = nextLineNumbers.first;
-            if (primaryKeywordAmount == null || candidate > primaryKeywordAmount) {
+            if (primaryKeywordAmount == null ||
+                candidate > primaryKeywordAmount) {
               primaryKeywordAmount = candidate;
             }
           }
@@ -256,14 +285,16 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
       if (secondaryKeywordRegex.hasMatch(line)) {
         if (numbersInLine.isNotEmpty) {
           final candidate = numbersInLine.last;
-          if (secondaryKeywordAmount == null || candidate > secondaryKeywordAmount) {
+          if (secondaryKeywordAmount == null ||
+              candidate > secondaryKeywordAmount) {
             secondaryKeywordAmount = candidate;
           }
         } else if (i + 1 < lines.length) {
           final nextLineNumbers = _extractPricesFromLine(lines[i + 1]);
           if (nextLineNumbers.isNotEmpty) {
             final candidate = nextLineNumbers.first;
-            if (secondaryKeywordAmount == null || candidate > secondaryKeywordAmount) {
+            if (secondaryKeywordAmount == null ||
+                candidate > secondaryKeywordAmount) {
               secondaryKeywordAmount = candidate;
             }
           }
@@ -275,7 +306,9 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
     // A valid transaction candidate should filter out years (e.g. 2026) or telephone/invoice IDs.
     final validCandidates = allNumbersFound.where((val) {
       // Exclude values that match common years
-      if (val == 2023.0 || val == 2024.0 || val == 2025.0 || val == 2026.0) return false;
+      if (val == 2023.0 || val == 2024.0 || val == 2025.0 || val == 2026.0) {
+        return false;
+      }
       // Exclude numbers that are extremely large (e.g. barcode IDs, serial numbers > 10,000,000)
       if (val > 10000000.0) return false;
       // Exclude numbers that are too small
@@ -298,7 +331,10 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
     // 3. Fallback to the largest valid candidate in the entire document
     if (validCandidates.isNotEmpty) {
       final largestCandidate = validCandidates.last;
-      return (largestCandidate, true); // Low confidence: took largest number but no keyword match
+      return (
+        largestCandidate,
+        true,
+      ); // Low confidence: took largest number but no keyword match
     }
 
     return (0.0, true); // Failed to find any amount
@@ -321,7 +357,10 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
 
     // Regex to match prices (e.g. 50.000, 12,500, Rp 150000, 25000)
     // Matches digits optionally followed by dot/comma decimal separators.
-    final priceRegex = RegExp(r'\b(rp|idr)?\s*([\d\.,]+)\b', caseSensitive: false);
+    final priceRegex = RegExp(
+      r'\b(rp|idr)?\s*([\d\.,]+)\b',
+      caseSensitive: false,
+    );
 
     for (final match in priceRegex.allMatches(sanitizedLine)) {
       final String numString = match.group(2) ?? '';

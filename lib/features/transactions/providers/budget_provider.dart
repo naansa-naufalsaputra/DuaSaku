@@ -9,9 +9,9 @@ import 'transaction_provider.dart';
 class BudgetProgress {
   final BudgetModel budget;
   final double spent;
-  
+
   BudgetProgress({required this.budget, required this.spent});
-  
+
   double get percentage {
     if (budget.amountLimit == 0) return 1.0;
     final p = spent / budget.amountLimit;
@@ -24,7 +24,10 @@ final currentMonthProvider = Provider<String>((ref) {
   return DateFormat('yyyy-MM').format(now);
 });
 
-final budgetNotifierProvider = AsyncNotifierProvider<BudgetNotifier, List<BudgetProgress>>(BudgetNotifier.new);
+final budgetNotifierProvider =
+    AsyncNotifierProvider<BudgetNotifier, List<BudgetProgress>>(
+      BudgetNotifier.new,
+    );
 
 class BudgetNotifier extends AsyncNotifier<List<BudgetProgress>> {
   @override
@@ -37,18 +40,23 @@ class BudgetNotifier extends AsyncNotifier<List<BudgetProgress>> {
     // Watch transactions so budget progress updates automatically when a transaction is added/deleted!
     final transactionsAsync = ref.watch(transactionNotifierProvider);
     final transactions = transactionsAsync.value ?? [];
-    
+
     final repo = ref.read(budgetRepositoryProvider);
     final month = ref.watch(currentMonthProvider);
     final budgets = await repo.getBudgets(user.id, month);
-    
+
     return budgets.map((b) {
       final categoryTxs = transactions.where((tx) {
         final txMonth = DateFormat('yyyy-MM').format(tx.createdAt);
-        return tx.category == b.category && tx.type.toLowerCase() == 'expense' && txMonth == month;
+        return tx.category == b.category &&
+            tx.type.toLowerCase() == 'expense' &&
+            txMonth == month;
       });
-      
-      final totalSpent = categoryTxs.fold<double>(0.0, (sum, tx) => sum + tx.amount);
+
+      final totalSpent = categoryTxs.fold<double>(
+        0.0,
+        (sum, tx) => sum + tx.amount,
+      );
       return BudgetProgress(budget: b, spent: totalSpent);
     }).toList();
   }
@@ -62,7 +70,7 @@ class BudgetNotifier extends AsyncNotifier<List<BudgetProgress>> {
     final repo = ref.read(budgetRepositoryProvider);
     final user = ref.read(userProvider);
     final month = ref.read(currentMonthProvider);
-    
+
     if (user == null) return;
 
     final newBudget = BudgetModel(

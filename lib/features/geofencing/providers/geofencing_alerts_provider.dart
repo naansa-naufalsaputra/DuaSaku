@@ -16,11 +16,12 @@ class GeofencingAlertsNotifier extends Notifier<bool> {
     try {
       final prefs = await SharedPreferences.getInstance();
       state = prefs.getBool(_prefKey) ?? false;
-      
+
       // If enabled, make sure monitoring is active
       if (state) {
         final permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+        if (permission == LocationPermission.always ||
+            permission == LocationPermission.whileInUse) {
           await GeofenceService.instance.startMonitoring();
         } else {
           // Revert since permission isn't available
@@ -41,8 +42,9 @@ class GeofencingAlertsNotifier extends Notifier<bool> {
         if (permission == LocationPermission.denied) {
           permission = await Geolocator.requestPermission();
         }
-        
-        if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {
+
+        if (permission == LocationPermission.deniedForever ||
+            permission == LocationPermission.denied) {
           state = false;
           await prefs.setBool(_prefKey, false);
           return false;
@@ -65,6 +67,7 @@ class GeofencingAlertsNotifier extends Notifier<bool> {
   }
 }
 
-final geofencingAlertsProvider = NotifierProvider<GeofencingAlertsNotifier, bool>(() {
-  return GeofencingAlertsNotifier();
-});
+final geofencingAlertsProvider =
+    NotifierProvider<GeofencingAlertsNotifier, bool>(() {
+      return GeofencingAlertsNotifier();
+    });

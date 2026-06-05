@@ -54,26 +54,20 @@ class BackupMetadata {
 
     for (final field in requiredFields) {
       if (!json.containsKey(field) || json[field] == null) {
-        throw FormatException(
-          'Missing required field: $field',
-        );
+        throw FormatException('Missing required field: $field');
       }
     }
 
     // Validate exportedBy
     final exportedBy = json['exportedBy'];
     if (exportedBy is! String || exportedBy != 'duasaku') {
-      throw const FormatException(
-        'Invalid exportedBy: must be "duasaku"',
-      );
+      throw const FormatException('Invalid exportedBy: must be "duasaku"');
     }
 
     // Validate exportedAt is valid ISO 8601
     final exportedAt = json['exportedAt'];
     if (exportedAt is! String) {
-      throw const FormatException(
-        'Invalid exportedAt: must be a string',
-      );
+      throw const FormatException('Invalid exportedAt: must be a string');
     }
     final parsedDate = DateTime.tryParse(exportedAt);
     if (parsedDate == null) {
@@ -93,17 +87,13 @@ class BackupMetadata {
     // Validate appVersion is a string
     final appVersion = json['appVersion'];
     if (appVersion is! String) {
-      throw const FormatException(
-        'Invalid appVersion: must be a string',
-      );
+      throw const FormatException('Invalid appVersion: must be a string');
     }
 
     // Validate deviceId is a string
     final deviceId = json['deviceId'];
     if (deviceId is! String) {
-      throw const FormatException(
-        'Invalid deviceId: must be a string',
-      );
+      throw const FormatException('Invalid deviceId: must be a string');
     }
 
     return BackupMetadata(

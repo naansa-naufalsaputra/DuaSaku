@@ -12,10 +12,7 @@ class BudgetDetailExtra {
   final BudgetAlertModel alert;
   final bool showProjection;
 
-  const BudgetDetailExtra({
-    required this.alert,
-    this.showProjection = false,
-  });
+  const BudgetDetailExtra({required this.alert, this.showProjection = false});
 }
 
 /// Budget detail screen navigated to from Alert Center.
@@ -23,11 +20,7 @@ class BudgetDetailExtra {
 /// Shows budget progress for a specific category with optional
 /// projection information for prediction-type alerts.
 class BudgetDetailScreen extends ConsumerWidget {
-  const BudgetDetailScreen({
-    super.key,
-    required this.categoryId,
-    this.extra,
-  });
+  const BudgetDetailScreen({super.key, required this.categoryId, this.extra});
 
   final String categoryId;
   final BudgetDetailExtra? extra;
@@ -46,9 +39,7 @@ class BudgetDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('alert.budget_detail_title'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('alert.budget_detail_title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -120,7 +111,8 @@ class BudgetDetailScreen extends ConsumerWidget {
     final alertCategoryName = extra?.alert.categoryName;
     if (alertCategoryName != null) {
       final match = budgets.where(
-        (bp) => bp.budget.category.toLowerCase() == alertCategoryName.toLowerCase(),
+        (bp) =>
+            bp.budget.category.toLowerCase() == alertCategoryName.toLowerCase(),
       );
       if (match.isNotEmpty) return match.first;
     }
@@ -244,9 +236,7 @@ class BudgetDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'alert.budget_percentage'.tr(
-              args: [percentage.toStringAsFixed(1)],
-            ),
+            'alert.budget_percentage'.tr(args: [percentage.toStringAsFixed(1)]),
             style: TextStyle(
               fontSize: 13,
               color: isDark ? Colors.white60 : Colors.black54,
@@ -360,9 +350,7 @@ class BudgetDetailScreen extends ConsumerWidget {
             ? Colors.orange.withValues(alpha: 0.08)
             : Colors.orange.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -17,7 +17,6 @@ import 'features/auth/presentation/screens/pin_auth_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'services/service_providers.dart';
 
-
 // StateProvider to track whether the app was opened from a home screen widget click
 final widgetLaunchProvider = StateProvider<bool>((ref) => false);
 
@@ -66,7 +65,7 @@ void main() async {
   };
 
   await EasyLocalization.ensureInitialized();
-  
+
   // Load environment variables
   await Env.init();
 
@@ -88,12 +87,12 @@ void main() async {
   );
 
   // Check if app was launched from a notification tap
-  final launchDetails =
-      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+  final launchDetails = await flutterLocalNotificationsPlugin
+      .getNotificationAppLaunchDetails();
   final initialNotificationPayload =
       launchDetails?.didNotificationLaunchApp == true
-          ? launchDetails?.notificationResponse?.payload
-          : null;
+      ? launchDetails?.notificationResponse?.payload
+      : null;
 
   // Initialize background tasks
   await BackgroundTaskHelper.initialize();
@@ -152,7 +151,7 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
   void _initHomeWidget() {
     // Listen for widget clicks when the app is already in memory
     _widgetSubscription = HomeWidget.widgetClicked.listen(_handleWidgetClick);
-    
+
     // Check if the app was initially launched by tapping the widget
     HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetClick);
   }
@@ -160,7 +159,8 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
   void _handleWidgetClick(Uri? uri) {
     if (uri == null) return;
 
-    if (uri.host == 'new_transaction' || uri.toString() == 'duasaku://new_transaction') {
+    if (uri.host == 'new_transaction' ||
+        uri.toString() == 'duasaku://new_transaction') {
       ref.read(widgetLaunchProvider.notifier).state = true;
       ref.read(routerProvider).go('/home');
     } else if (uri.host == 'recurring_transactions') {
@@ -195,11 +195,13 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
 
   void _initNotificationTapListener() {
     // Listen for notification taps while the app is running
-    _notificationTapSubscription =
-        _notificationTapController.stream.listen(_handleNotificationPayload);
+    _notificationTapSubscription = _notificationTapController.stream.listen(
+      _handleNotificationPayload,
+    );
 
     // Handle the initial notification payload if the app was launched from a notification
-    if (widget.initialNotificationPayload != null && !_initialNotificationHandled) {
+    if (widget.initialNotificationPayload != null &&
+        !_initialNotificationHandled) {
       _initialNotificationHandled = true;
       // Delay to ensure router is ready after app initialization
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -224,7 +226,7 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
     final themeState = ref.watch(themeNotifierProvider);
     final lightDetails = ThemePresets.getDetails(themeState.preset, false);
     final darkDetails = ThemePresets.getDetails(themeState.preset, true);
-    
+
     // Initialize Notification Parser Service to listen to Native Events
     ref.watch(notificationParserProvider);
 
@@ -264,7 +266,9 @@ class SecurityWrapper extends ConsumerWidget {
       );
     }
 
-    if (securityState.isSecurityEnabled && securityState.isLocked && authRepo.isOnboardingCompleted) {
+    if (securityState.isSecurityEnabled &&
+        securityState.isLocked &&
+        authRepo.isOnboardingCompleted) {
       return const PinAuthScreen();
     }
 
@@ -296,7 +300,9 @@ class SecurityWrapper extends ConsumerWidget {
                   'security.time_tamper_message'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontSize: 14,
                     height: 1.5,
                   ),
@@ -306,7 +312,10 @@ class SecurityWrapper extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.error,
                     minimumSize: const Size(88, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -316,7 +325,10 @@ class SecurityWrapper extends ConsumerWidget {
                   },
                   child: Text(
                     'security.recheck_button'.tr(),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -339,16 +351,26 @@ void _logGlobalError({
   if (!kDebugMode) return; // Silent in release modes to prevent console clutter
 
   final buffer = StringBuffer();
-  buffer.writeln('======================================================================');
+  buffer.writeln(
+    '======================================================================',
+  );
   buffer.writeln('$emoji $title');
-  buffer.writeln('----------------------------------------------------------------------');
+  buffer.writeln(
+    '----------------------------------------------------------------------',
+  );
   buffer.writeln('Error: $error');
   if (stackTrace != null) {
-    buffer.writeln('----------------------------------------------------------------------');
+    buffer.writeln(
+      '----------------------------------------------------------------------',
+    );
     buffer.writeln('Stack Trace:');
-    buffer.writeln(stackTrace.toString().split('\n').take(12).join('\n')); // Show top 12 frames for clarity
+    buffer.writeln(
+      stackTrace.toString().split('\n').take(12).join('\n'),
+    ); // Show top 12 frames for clarity
   }
-  buffer.writeln('======================================================================');
+  buffer.writeln(
+    '======================================================================',
+  );
 
   developer.log(
     buffer.toString(),
@@ -402,7 +424,9 @@ class FriendlyErrorWidget extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
+                      color: theme.colorScheme.errorContainer.withValues(
+                        alpha: 0.1,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: theme.colorScheme.error.withValues(alpha: 0.2),

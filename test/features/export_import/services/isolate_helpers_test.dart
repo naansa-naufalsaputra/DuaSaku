@@ -7,7 +7,9 @@ void main() {
   group('IsolateHelpers.generateCsvContent', () {
     test('starts with UTF-8 BOM character', () {
       final result = IsolateHelpers.generateCsvContent(
-        [{'id': '1', 'name': 'Test'}],
+        [
+          {'id': '1', 'name': 'Test'},
+        ],
         ['id', 'name'],
       );
 
@@ -16,7 +18,9 @@ void main() {
 
     test('includes header row after BOM', () {
       final result = IsolateHelpers.generateCsvContent(
-        [{'id': '1', 'name': 'Test'}],
+        [
+          {'id': '1', 'name': 'Test'},
+        ],
         ['id', 'name'],
       );
 
@@ -42,7 +46,9 @@ void main() {
 
     test('quotes values containing commas', () {
       final result = IsolateHelpers.generateCsvContent(
-        [{'id': '1', 'desc': 'Food, Drink'}],
+        [
+          {'id': '1', 'desc': 'Food, Drink'},
+        ],
         ['id', 'desc'],
       );
 
@@ -52,7 +58,9 @@ void main() {
 
     test('quotes values containing double-quotes and escapes them', () {
       final result = IsolateHelpers.generateCsvContent(
-        [{'id': '1', 'desc': 'He said "hello"'}],
+        [
+          {'id': '1', 'desc': 'He said "hello"'},
+        ],
         ['id', 'desc'],
       );
 
@@ -62,7 +70,9 @@ void main() {
 
     test('quotes values containing newlines', () {
       final result = IsolateHelpers.generateCsvContent(
-        [{'id': '1', 'desc': 'Line1\nLine2'}],
+        [
+          {'id': '1', 'desc': 'Line1\nLine2'},
+        ],
         ['id', 'desc'],
       );
 
@@ -88,19 +98,22 @@ void main() {
       expect(lines[2], contains('Bank BCA'));
     });
 
-    test('resolves categoryName from categoryId when categoryNames provided', () {
-      final result = IsolateHelpers.generateCsvContent(
-        [
-          {'id': '1', 'categoryId': 'c1', 'amount': '50'},
-        ],
-        ['id', 'categoryId', 'amount'],
-        categoryNames: {'c1': 'Makanan'},
-      );
+    test(
+      'resolves categoryName from categoryId when categoryNames provided',
+      () {
+        final result = IsolateHelpers.generateCsvContent(
+          [
+            {'id': '1', 'categoryId': 'c1', 'amount': '50'},
+          ],
+          ['id', 'categoryId', 'amount'],
+          categoryNames: {'c1': 'Makanan'},
+        );
 
-      final lines = result.trim().split('\n');
-      expect(lines[0], contains('categoryName'));
-      expect(lines[1], contains('Makanan'));
-    });
+        final lines = result.trim().split('\n');
+        expect(lines[0], contains('categoryName'));
+        expect(lines[1], contains('Makanan'));
+      },
+    );
 
     test('handles missing FK references gracefully (empty string)', () {
       final result = IsolateHelpers.generateCsvContent(
@@ -154,7 +167,7 @@ void main() {
         },
         'data': {
           'wallets': [
-            {'id': '1', 'name': 'Cash', 'balance': 1000.50}
+            {'id': '1', 'name': 'Cash', 'balance': 1000.50},
           ],
         },
       };
@@ -169,49 +182,49 @@ void main() {
 
   group('IsolateHelpers.parseAndValidateBackupJson', () {
     Map<String, dynamic> validBackup() => {
-          'metadata': {
-            'appVersion': '1.0.0',
-            'schemaVersion': 7,
-            'exportedAt': '2024-01-15T10:30:00.000Z',
-            'deviceId': 'abc123',
-            'exportedBy': 'duasaku',
-          },
-          'data': {
-            'wallets': [
-              {'id': 'w1', 'name': 'Cash'}
-            ],
-            'categories': [
-              {'id': 'c1', 'name': 'Food'}
-            ],
-            'transactions': [
-              {'id': 't1', 'walletId': 'w1', 'categoryId': 'c1'}
-            ],
-            'budgets': [
-              {'id': 'b1', 'categoryId': 'c1'}
-            ],
-            'recurringTransactions': [
-              {'id': 'rt1', 'walletId': 'w1', 'categoryId': 'c1'}
-            ],
-            'recurringExecutionLogs': [
-              {'id': 'rel1', 'recurringTransactionId': 'rt1'}
-            ],
-            'goals': [
-              {'id': 'g1', 'walletId': 'w1'}
-            ],
-            'goalDeposits': [
-              {'id': 'gd1', 'goalId': 'g1'}
-            ],
-            'budgetAlerts': [
-              {'id': 'ba1'}
-            ],
-            'budgetAlertPreferences': [
-              {'id': 'bap1'}
-            ],
-            'budgetAlertThresholdStatus': [
-              {'id': 'bats1'}
-            ],
-          },
-        };
+      'metadata': {
+        'appVersion': '1.0.0',
+        'schemaVersion': 7,
+        'exportedAt': '2024-01-15T10:30:00.000Z',
+        'deviceId': 'abc123',
+        'exportedBy': 'duasaku',
+      },
+      'data': {
+        'wallets': [
+          {'id': 'w1', 'name': 'Cash'},
+        ],
+        'categories': [
+          {'id': 'c1', 'name': 'Food'},
+        ],
+        'transactions': [
+          {'id': 't1', 'walletId': 'w1', 'categoryId': 'c1'},
+        ],
+        'budgets': [
+          {'id': 'b1', 'categoryId': 'c1'},
+        ],
+        'recurringTransactions': [
+          {'id': 'rt1', 'walletId': 'w1', 'categoryId': 'c1'},
+        ],
+        'recurringExecutionLogs': [
+          {'id': 'rel1', 'recurringTransactionId': 'rt1'},
+        ],
+        'goals': [
+          {'id': 'g1', 'walletId': 'w1'},
+        ],
+        'goalDeposits': [
+          {'id': 'gd1', 'goalId': 'g1'},
+        ],
+        'budgetAlerts': [
+          {'id': 'ba1'},
+        ],
+        'budgetAlertPreferences': [
+          {'id': 'bap1'},
+        ],
+        'budgetAlertThresholdStatus': [
+          {'id': 'bats1'},
+        ],
+      },
+    };
 
     test('returns parsed map for valid backup', () {
       final json = jsonEncode(validBackup());
@@ -259,39 +272,45 @@ void main() {
       );
     });
 
-    test('throws FormatException when backup schema > current (update app)', () {
-      final backup = validBackup();
-      backup['metadata']['schemaVersion'] = 10;
-      final json = jsonEncode(backup);
+    test(
+      'throws FormatException when backup schema > current (update app)',
+      () {
+        final backup = validBackup();
+        backup['metadata']['schemaVersion'] = 10;
+        final json = jsonEncode(backup);
 
-      expect(
-        () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
-        throwsA(
-          isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('update'),
+        expect(
+          () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('update'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
 
-    test('throws FormatException when backup schema < current (older version)', () {
-      final backup = validBackup();
-      backup['metadata']['schemaVersion'] = 5;
-      final json = jsonEncode(backup);
+    test(
+      'throws FormatException when backup schema < current (older version)',
+      () {
+        final backup = validBackup();
+        backup['metadata']['schemaVersion'] = 5;
+        final json = jsonEncode(backup);
 
-      expect(
-        () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
-        throwsA(
-          isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('lebih lama'),
+        expect(
+          () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('lebih lama'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
 
     test('throws FormatException when required table key is missing', () {
       final backup = validBackup();
@@ -389,25 +408,31 @@ void main() {
       );
     });
 
-    test('throws FormatException for broken FK: recurringExecutionLogs → recurringTransactions', () {
-      final backup = validBackup();
-      (backup['data']['recurringExecutionLogs'] as List).add({
-        'id': 'rel2',
-        'recurringTransactionId': 'nonexistent',
-      });
-      final json = jsonEncode(backup);
+    test(
+      'throws FormatException for broken FK: recurringExecutionLogs → recurringTransactions',
+      () {
+        final backup = validBackup();
+        (backup['data']['recurringExecutionLogs'] as List).add({
+          'id': 'rel2',
+          'recurringTransactionId': 'nonexistent',
+        });
+        final json = jsonEncode(backup);
 
-      expect(
-        () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
-        throwsA(
-          isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            allOf(contains('recurringExecutionLogs'), contains('recurringTransactionId')),
+        expect(
+          () => IsolateHelpers.parseAndValidateBackupJson(json, 7),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              allOf(
+                contains('recurringExecutionLogs'),
+                contains('recurringTransactionId'),
+              ),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
 
     test('allows records with null FK fields (nullable references)', () {
       final backup = validBackup();

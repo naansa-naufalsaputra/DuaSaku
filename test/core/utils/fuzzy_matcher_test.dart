@@ -9,23 +9,29 @@ void main() {
     });
 
     test('case insensitive and trimmed matching works', () {
-      expect(FuzzyMatcher.computeLevenshtein('  Makanan  ', 'makanan'), equals(0));
+      expect(
+        FuzzyMatcher.computeLevenshtein('  Makanan  ', 'makanan'),
+        equals(0),
+      );
       expect(FuzzyMatcher.similarity('  Makanan  ', 'makanan'), equals(1.0));
     });
 
-    test('calculates correct distance for insertion, deletion, and substitution', () {
-      // substitution: 'a' -> 'u'
-      expect(FuzzyMatcher.computeLevenshtein('kopi', 'kopu'), equals(1));
-      expect(FuzzyMatcher.similarity('kopi', 'kopu'), equals(0.75));
+    test(
+      'calculates correct distance for insertion, deletion, and substitution',
+      () {
+        // substitution: 'a' -> 'u'
+        expect(FuzzyMatcher.computeLevenshtein('kopi', 'kopu'), equals(1));
+        expect(FuzzyMatcher.similarity('kopi', 'kopu'), equals(0.75));
 
-      // insertion: adding 's'
-      expect(FuzzyMatcher.computeLevenshtein('kopi', 'kopis'), equals(1));
-      expect(FuzzyMatcher.similarity('kopi', 'kopis'), equals(0.8));
+        // insertion: adding 's'
+        expect(FuzzyMatcher.computeLevenshtein('kopi', 'kopis'), equals(1));
+        expect(FuzzyMatcher.similarity('kopi', 'kopis'), equals(0.8));
 
-      // deletion: removing 'i'
-      expect(FuzzyMatcher.computeLevenshtein('kopi', 'kop'), equals(1));
-      expect(FuzzyMatcher.similarity('kopi', 'kop'), equals(0.75));
-    });
+        // deletion: removing 'i'
+        expect(FuzzyMatcher.computeLevenshtein('kopi', 'kop'), equals(1));
+        expect(FuzzyMatcher.similarity('kopi', 'kop'), equals(0.75));
+      },
+    );
 
     test('completely different strings have low similarity', () {
       final similarityScore = FuzzyMatcher.similarity('bensin', 'Transportasi');

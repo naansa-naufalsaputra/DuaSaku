@@ -30,9 +30,7 @@ class SecurityWarningDialog extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'export_import.security_warning.title'.tr(),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           ],
         ),
@@ -40,8 +38,9 @@ class SecurityWarningDialog extends StatelessWidget {
           'export_import.security_warning.message'.tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
         actions: [
@@ -68,11 +67,7 @@ class SecurityWarningDialog extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: colorScheme.error,
-            size: 28,
-          ),
+          Icon(Icons.warning_amber_rounded, color: colorScheme.error, size: 28),
           const SizedBox(width: 8),
           Text(
             'export_import.security_warning.title'.tr(),
@@ -83,9 +78,7 @@ class SecurityWarningDialog extends StatelessWidget {
       content: Text(
         'export_import.security_warning.message'.tr(),
         textAlign: TextAlign.center,
-        style: TextStyle(
-          color: colorScheme.onSurface.withValues(alpha: 0.8),
-        ),
+        style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.8)),
       ),
       actions: [
         GlassButton(

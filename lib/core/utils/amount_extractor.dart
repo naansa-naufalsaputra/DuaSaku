@@ -13,7 +13,9 @@ class AmountExtractor {
   /// - `amount`: the parsed numeric value (defaulting to 0.0 if not found).
   /// - `textWithoutAmount`: the input string with the matched amount substring removed
   ///   and whitespace normalized.
-  static ({double amount, String textWithoutAmount}) extractAmount(String input) {
+  static ({double amount, String textWithoutAmount}) extractAmount(
+    String input,
+  ) {
     if (input.trim().isEmpty) {
       return (amount: 0.0, textWithoutAmount: '');
     }

@@ -48,9 +48,7 @@ class AlertPreferencesScreen extends ConsumerWidget {
           const PremiumBackground(),
           SafeArea(
             child: prefsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Text(
                   'alert_preferences.error_loading'.tr(),
@@ -187,10 +185,7 @@ class _PreferencesBody extends ConsumerWidget {
 // ─── Section Card Wrapper ─────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.child,
-    this.enabled = true,
-  });
+  const _SectionCard({required this.child, this.enabled = true});
 
   final Widget child;
   final bool enabled;
@@ -225,8 +220,25 @@ class _ThresholdSection extends ConsumerWidget {
 
   /// All valid threshold values: multiples of 5 from 10 to 100.
   static const List<int> _allThresholds = [
-    10, 15, 20, 25, 30, 35, 40, 45, 50,
-    55, 60, 65, 70, 75, 80, 85, 90, 95, 100,
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
   ];
 
   @override
@@ -284,19 +296,22 @@ class _ThresholdSection extends ConsumerWidget {
                 onSelected: enabled
                     ? (selected) {
                         HapticFeedback.selectionClick();
-                        _onThresholdToggled(ref, selectedThresholds, value,
-                            selected, context);
+                        _onThresholdToggled(
+                          ref,
+                          selectedThresholds,
+                          value,
+                          selected,
+                          context,
+                        );
                       }
                     : null,
-                selectedColor:
-                    colorScheme.primary.withValues(alpha: 0.15),
+                selectedColor: colorScheme.primary.withValues(alpha: 0.15),
                 checkmarkColor: colorScheme.primary,
                 labelStyle: TextStyle(
                   color: isSelected
                       ? colorScheme.primary
                       : colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -329,20 +344,20 @@ class _ThresholdSection extends ConsumerWidget {
     }
     updated.sort();
 
-    ref.read(alertPreferencesProvider.notifier).updateThresholds(updated).then(
-      (result) {
-        if (result case Failure(:final error)) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(error.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
+    ref.read(alertPreferencesProvider.notifier).updateThresholds(updated).then((
+      result,
+    ) {
+      if (result case Failure(:final error)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.message),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
         }
-      },
-    );
+      }
+    });
   }
 }
 
@@ -407,8 +422,9 @@ class _CategoryAlertsSection extends ConsumerWidget {
             ),
             data: (categories) {
               // Only show expense categories (alerts are for spending)
-              final expenseCategories =
-                  categories.where((c) => c.type == 'expense').toList();
+              final expenseCategories = categories
+                  .where((c) => c.type == 'expense')
+                  .toList();
 
               if (expenseCategories.isEmpty) {
                 return Padding(
@@ -652,10 +668,7 @@ class _TimePickerTile extends StatelessWidget {
 
   TimeOfDay _parseTime(String timeStr) {
     final parts = timeStr.split(':');
-    return TimeOfDay(
-      hour: int.parse(parts[0]),
-      minute: int.parse(parts[1]),
-    );
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
 
   String _formatTimeOfDay(TimeOfDay tod) {
@@ -674,10 +687,7 @@ class _TimePickerTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
         HapticFeedback.lightImpact();
-        final picked = await showTimePicker(
-          context: context,
-          initialTime: tod,
-        );
+        final picked = await showTimePicker(context: context, initialTime: tod);
         if (picked != null) {
           onTimePicked(_formatTimeOfDay(picked));
         }

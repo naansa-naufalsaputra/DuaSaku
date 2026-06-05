@@ -13,10 +13,11 @@ class PremiumBackground extends ConsumerStatefulWidget {
   ConsumerState<PremiumBackground> createState() => _PremiumBackgroundState();
 }
 
-class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with SingleTickerProviderStateMixin {
+class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
+    with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
-  
+
   // Smoothed sensor readings for low-pass filter
   double _smoothedX = 0.0;
   double _smoothedY = 0.0;
@@ -24,7 +25,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
   @override
   void initState() {
     super.initState();
-    
+
     // Slow continuous float animation (20 seconds cycle)
     _floatController = AnimationController(
       duration: const Duration(seconds: 20),
@@ -59,7 +60,9 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
     final themeState = ref.watch(themeNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeDetails = ThemePresets.getDetails(themeState.preset, isDark);
-    final disableBlur = MediaQuery.highContrastOf(context) || MediaQuery.accessibleNavigationOf(context);
+    final disableBlur =
+        MediaQuery.highContrastOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
 
     if (disableBlur) {
       return RepaintBoundary(
@@ -69,8 +72,14 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
               colors: [
-                Color.alphaBlend(themeDetails.glowColor1, themeDetails.baseBackgroundColor),
-                Color.alphaBlend(themeDetails.glowColor2, themeDetails.baseBackgroundColor),
+                Color.alphaBlend(
+                  themeDetails.glowColor1,
+                  themeDetails.baseBackgroundColor,
+                ),
+                Color.alphaBlend(
+                  themeDetails.glowColor2,
+                  themeDetails.baseBackgroundColor,
+                ),
               ],
             ),
           ),
@@ -79,7 +88,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
     }
 
     // Custom Cyan/Teal accent color for Blob 3 to enrich the darkmatter neon visual blend
-    final Color cyberCyanGlow = isDark 
+    final Color cyberCyanGlow = isDark
         ? const Color(0x1506B6D4) // Subtle cyber cyan in dark mode
         : const Color(0x0F06B6D4); // Even subtler in light mode
 
@@ -89,13 +98,13 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
         builder: (context, child) {
           // Compute float coordinates using trigonometric functions
           final double time = _floatController.value * 2 * math.pi;
-          
+
           final double floatX1 = math.sin(time) * 25.0;
           final double floatY1 = math.cos(time) * 20.0;
-          
+
           final double floatX2 = math.cos(time + 1.5) * 30.0;
           final double floatY2 = math.sin(time + 1.5) * 25.0;
-          
+
           final double floatX3 = math.sin(time + 3.0) * 20.0;
           final double floatY3 = math.cos(time + 3.0) * 25.0;
 
@@ -117,7 +126,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground> with Sing
                 duration: const Duration(milliseconds: 500),
                 color: themeDetails.baseBackgroundColor,
               ),
-              
+
               // Top right glow (Blob 1 - Theme Purple)
               Positioned(
                 top: -100 + dy1,

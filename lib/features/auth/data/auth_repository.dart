@@ -102,10 +102,10 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
 
   @override
   AuthState get currentAuthState => AuthState(
-        session: _isAuthenticated && _currentUser != null
-            ? Session(user: _currentUser!, accessToken: 'local_access_token')
-            : null,
-      );
+    session: _isAuthenticated && _currentUser != null
+        ? Session(user: _currentUser!, accessToken: 'local_access_token')
+        : null,
+  );
 
   @override
   User? get currentUser => _isAuthenticated ? _currentUser : null;
@@ -135,11 +135,16 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('biometric_lock_enabled', true);
     } catch (e) {
-      debugPrint('[AuthRepository] Failed to set default security lock preference: $e');
+      debugPrint(
+        '[AuthRepository] Failed to set default security lock preference: $e',
+      );
     }
 
     _isAuthenticated = true;
-    _currentUser = User(id: AppConstants.defaultUserId, email: AppConstants.defaultUserEmail);
+    _currentUser = User(
+      id: AppConstants.defaultUserId,
+      email: AppConstants.defaultUserEmail,
+    );
     notifyListeners();
   }
 
@@ -152,7 +157,10 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
     final hashedInput = _hashPin(pin);
     if (storedHash == hashedInput) {
       _isAuthenticated = true;
-      _currentUser = User(id: AppConstants.defaultUserId, email: AppConstants.defaultUserEmail);
+      _currentUser = User(
+        id: AppConstants.defaultUserId,
+        email: AppConstants.defaultUserEmail,
+      );
       notifyListeners();
       return true;
     }
@@ -173,8 +181,8 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
 
       if (!canCheck && !isSupported) return false;
 
-      final List<BiometricType> availableBiometrics =
-          await _localAuth.getAvailableBiometrics();
+      final List<BiometricType> availableBiometrics = await _localAuth
+          .getAvailableBiometrics();
       if (availableBiometrics.isEmpty) return false;
 
       final bool didAuthenticate = await _localAuth.authenticate(
@@ -187,7 +195,10 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
 
       if (didAuthenticate) {
         _isAuthenticated = true;
-        _currentUser = User(id: AppConstants.defaultUserId, email: AppConstants.defaultUserEmail);
+        _currentUser = User(
+          id: AppConstants.defaultUserId,
+          email: AppConstants.defaultUserEmail,
+        );
         notifyListeners();
         return true;
       }
@@ -209,7 +220,10 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
   @override
   void authenticateLocally() {
     _isAuthenticated = true;
-    _currentUser = User(id: AppConstants.defaultUserId, email: AppConstants.defaultUserEmail);
+    _currentUser = User(
+      id: AppConstants.defaultUserId,
+      email: AppConstants.defaultUserEmail,
+    );
     notifyListeners();
   }
 

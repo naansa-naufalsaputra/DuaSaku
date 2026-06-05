@@ -8,9 +8,11 @@ import 'package:duasaku_app/features/goals/data/goal_dao.dart';
 /// Creates a fresh in-memory database with foreign keys enabled.
 AppDatabase _createTestDb() {
   return AppDatabase.forTesting(
-    NativeDatabase.memory(setup: (db) {
-      db.execute('PRAGMA foreign_keys = ON;');
-    }),
+    NativeDatabase.memory(
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    ),
   );
 }
 
@@ -22,16 +24,20 @@ Future<void> _insertWallet(
   String name = 'Test Wallet',
   double balance = 0.0,
 }) async {
-  await db.into(db.wallets).insert(WalletsCompanion.insert(
-        id: id,
-        userId: userId,
-        name: name,
-        type: 'Cash',
-        balance: Value(balance),
-        icon: 'wallet',
-        color: '#000000',
-        createdAt: DateTime(2024, 1, 1),
-      ));
+  await db
+      .into(db.wallets)
+      .insert(
+        WalletsCompanion.insert(
+          id: id,
+          userId: userId,
+          name: name,
+          type: 'Cash',
+          balance: Value(balance),
+          icon: 'wallet',
+          color: '#000000',
+          createdAt: DateTime(2024, 1, 1),
+        ),
+      );
 }
 
 /// Helper to insert a goal.
@@ -47,19 +53,21 @@ Future<void> _insertGoal(
   String status = 'active',
   DateTime? createdAt,
 }) async {
-  await dao.insertGoal(GoalsCompanion.insert(
-    id: id,
-    userId: userId,
-    name: name,
-    targetAmount: targetAmount,
-    currentAmount: Value(currentAmount),
-    icon: 'savings',
-    color: '#4CAF50',
-    linkedWalletId: Value(linkedWalletId),
-    trackingMode: trackingMode,
-    status: Value(status),
-    createdAt: createdAt ?? DateTime(2024, 1, 1),
-  ));
+  await dao.insertGoal(
+    GoalsCompanion.insert(
+      id: id,
+      userId: userId,
+      name: name,
+      targetAmount: targetAmount,
+      currentAmount: Value(currentAmount),
+      icon: 'savings',
+      color: '#4CAF50',
+      linkedWalletId: Value(linkedWalletId),
+      trackingMode: trackingMode,
+      status: Value(status),
+      createdAt: createdAt ?? DateTime(2024, 1, 1),
+    ),
+  );
 }
 
 /// Helper to insert a deposit.
@@ -71,13 +79,15 @@ Future<void> _insertDeposit(
   String? note,
   DateTime? createdAt,
 }) async {
-  await dao.insertDeposit(GoalDepositsCompanion.insert(
-    id: id,
-    goalId: goalId,
-    amount: amount,
-    note: Value(note),
-    createdAt: createdAt ?? DateTime(2024, 1, 15),
-  ));
+  await dao.insertDeposit(
+    GoalDepositsCompanion.insert(
+      id: id,
+      goalId: goalId,
+      amount: amount,
+      note: Value(note),
+      createdAt: createdAt ?? DateTime(2024, 1, 15),
+    ),
+  );
 }
 
 void main() {
@@ -120,11 +130,13 @@ void main() {
     test('updateGoal modifies the goal fields', () async {
       await _insertGoal(dao, id: 'goal-1', name: 'Old Name');
 
-      await dao.updateGoal(const GoalsCompanion(
-        id: Value('goal-1'),
-        name: Value('New Name'),
-        currentAmount: Value(500.0),
-      ));
+      await dao.updateGoal(
+        const GoalsCompanion(
+          id: Value('goal-1'),
+          name: Value('New Name'),
+          currentAmount: Value(500.0),
+        ),
+      );
 
       final goal = await dao.getGoalById('goal-1');
       expect(goal!.name, equals('New Name'));
@@ -152,24 +164,18 @@ void main() {
       expect(goalsB.length, equals(1));
     });
 
-    test('getGoalsByUser returns goals ordered by createdAt descending',
-        () async {
-      await _insertGoal(
-        dao,
-        id: 'goal-old',
-        createdAt: DateTime(2024, 1, 1),
-      );
-      await _insertGoal(
-        dao,
-        id: 'goal-new',
-        createdAt: DateTime(2024, 6, 1),
-      );
+    test(
+      'getGoalsByUser returns goals ordered by createdAt descending',
+      () async {
+        await _insertGoal(dao, id: 'goal-old', createdAt: DateTime(2024, 1, 1));
+        await _insertGoal(dao, id: 'goal-new', createdAt: DateTime(2024, 6, 1));
 
-      final goals = await dao.getGoalsByUser('test-user');
+        final goals = await dao.getGoalsByUser('test-user');
 
-      expect(goals.first.id, equals('goal-new'));
-      expect(goals.last.id, equals('goal-old'));
-    });
+        expect(goals.first.id, equals('goal-new'));
+        expect(goals.last.id, equals('goal-old'));
+      },
+    );
 
     test('insertDeposit and getDepositsByGoal returns deposits', () async {
       await _insertGoal(dao, id: 'goal-1');
@@ -246,62 +252,68 @@ void main() {
   // _Requirements: 9.4_
   // ──────────────────────────────────────────────────────────────────────────
   group('FK Set-Null on Wallet Deletion', () {
-    test('deleting a wallet sets linkedWalletId to null on linked goals',
-        () async {
-      // Insert a wallet first
-      await _insertWallet(db, id: 'wallet-1');
+    test(
+      'deleting a wallet sets linkedWalletId to null on linked goals',
+      () async {
+        // Insert a wallet first
+        await _insertWallet(db, id: 'wallet-1');
 
-      // Create a goal linked to that wallet
-      await _insertGoal(
-        dao,
-        id: 'goal-1',
-        linkedWalletId: 'wallet-1',
-        trackingMode: 'wallet',
-      );
+        // Create a goal linked to that wallet
+        await _insertGoal(
+          dao,
+          id: 'goal-1',
+          linkedWalletId: 'wallet-1',
+          trackingMode: 'wallet',
+        );
 
-      // Verify the link exists
-      final goalBefore = await dao.getGoalById('goal-1');
-      expect(goalBefore!.linkedWalletId, equals('wallet-1'));
+        // Verify the link exists
+        final goalBefore = await dao.getGoalById('goal-1');
+        expect(goalBefore!.linkedWalletId, equals('wallet-1'));
 
-      // Delete the wallet
-      await (db.delete(db.wallets)..where((t) => t.id.equals('wallet-1')))
-          .go();
+        // Delete the wallet
+        await (db.delete(
+          db.wallets,
+        )..where((t) => t.id.equals('wallet-1'))).go();
 
-      // Verify linkedWalletId is now null
-      final goalAfter = await dao.getGoalById('goal-1');
-      expect(goalAfter!.linkedWalletId, isNull);
-    });
+        // Verify linkedWalletId is now null
+        final goalAfter = await dao.getGoalById('goal-1');
+        expect(goalAfter!.linkedWalletId, isNull);
+      },
+    );
 
-    test('deleting a wallet does not affect goals linked to other wallets',
-        () async {
-      await _insertWallet(db, id: 'wallet-1');
-      await _insertWallet(db, id: 'wallet-2');
+    test(
+      'deleting a wallet does not affect goals linked to other wallets',
+      () async {
+        await _insertWallet(db, id: 'wallet-1');
+        await _insertWallet(db, id: 'wallet-2');
 
-      await _insertGoal(
-        dao,
-        id: 'goal-1',
-        linkedWalletId: 'wallet-1',
-        trackingMode: 'wallet',
-      );
-      await _insertGoal(
-        dao,
-        id: 'goal-2',
-        linkedWalletId: 'wallet-2',
-        trackingMode: 'wallet',
-      );
+        await _insertGoal(
+          dao,
+          id: 'goal-1',
+          linkedWalletId: 'wallet-1',
+          trackingMode: 'wallet',
+        );
+        await _insertGoal(
+          dao,
+          id: 'goal-2',
+          linkedWalletId: 'wallet-2',
+          trackingMode: 'wallet',
+        );
 
-      // Delete wallet-1
-      await (db.delete(db.wallets)..where((t) => t.id.equals('wallet-1')))
-          .go();
+        // Delete wallet-1
+        await (db.delete(
+          db.wallets,
+        )..where((t) => t.id.equals('wallet-1'))).go();
 
-      // goal-1 should have null linkedWalletId
-      final goal1 = await dao.getGoalById('goal-1');
-      expect(goal1!.linkedWalletId, isNull);
+        // goal-1 should have null linkedWalletId
+        final goal1 = await dao.getGoalById('goal-1');
+        expect(goal1!.linkedWalletId, isNull);
 
-      // goal-2 should still be linked to wallet-2
-      final goal2 = await dao.getGoalById('goal-2');
-      expect(goal2!.linkedWalletId, equals('wallet-2'));
-    });
+        // goal-2 should still be linked to wallet-2
+        final goal2 = await dao.getGoalById('goal-2');
+        expect(goal2!.linkedWalletId, equals('wallet-2'));
+      },
+    );
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -309,49 +321,53 @@ void main() {
   // _Requirements: 9.5_
   // ──────────────────────────────────────────────────────────────────────────
   group('Stream Reactivity', () {
-    test('watchGoalsByUser emits updated list when a goal is inserted',
-        () async {
-      // Start listening to the stream
-      final stream = dao.watchGoalsByUser('test-user');
+    test(
+      'watchGoalsByUser emits updated list when a goal is inserted',
+      () async {
+        // Start listening to the stream
+        final stream = dao.watchGoalsByUser('test-user');
 
-      // Expect the stream to emit: first empty, then with the new goal
-      final expectation = expectLater(
-        stream,
-        emitsInOrder([
-          isEmpty, // Initial empty state
-          hasLength(1), // After insert
-        ]),
-      );
+        // Expect the stream to emit: first empty, then with the new goal
+        final expectation = expectLater(
+          stream,
+          emitsInOrder([
+            isEmpty, // Initial empty state
+            hasLength(1), // After insert
+          ]),
+        );
 
-      // Give the stream time to emit the initial value
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+        // Give the stream time to emit the initial value
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      // Insert a goal
-      await _insertGoal(dao, id: 'goal-1');
+        // Insert a goal
+        await _insertGoal(dao, id: 'goal-1');
 
-      await expectation;
-    });
+        await expectation;
+      },
+    );
 
-    test('watchDepositsByGoal emits updated list when a deposit is added',
-        () async {
-      await _insertGoal(dao, id: 'goal-1');
+    test(
+      'watchDepositsByGoal emits updated list when a deposit is added',
+      () async {
+        await _insertGoal(dao, id: 'goal-1');
 
-      final stream = dao.watchDepositsByGoal('goal-1');
+        final stream = dao.watchDepositsByGoal('goal-1');
 
-      final expectation = expectLater(
-        stream,
-        emitsInOrder([
-          isEmpty, // Initial empty state
-          hasLength(1), // After deposit insert
-        ]),
-      );
+        final expectation = expectLater(
+          stream,
+          emitsInOrder([
+            isEmpty, // Initial empty state
+            hasLength(1), // After deposit insert
+          ]),
+        );
 
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      await _insertDeposit(dao, id: 'dep-1', goalId: 'goal-1');
+        await _insertDeposit(dao, id: 'dep-1', goalId: 'goal-1');
 
-      await expectation;
-    });
+        await expectation;
+      },
+    );
 
     test('watchGoalsByUser emits update when a goal is deleted', () async {
       await _insertGoal(dao, id: 'goal-1');
@@ -379,25 +395,29 @@ void main() {
   // _Requirements: 9.6_
   // ──────────────────────────────────────────────────────────────────────────
   group('Status Filtering', () {
-    test('watchGoalsByUser with status filter returns only matching goals',
-        () async {
-      await _insertGoal(dao, id: 'goal-active-1', status: 'active');
-      await _insertGoal(dao, id: 'goal-active-2', status: 'active');
-      await _insertGoal(dao, id: 'goal-completed', status: 'completed');
-      await _insertGoal(dao, id: 'goal-archived', status: 'archived');
+    test(
+      'watchGoalsByUser with status filter returns only matching goals',
+      () async {
+        await _insertGoal(dao, id: 'goal-active-1', status: 'active');
+        await _insertGoal(dao, id: 'goal-active-2', status: 'active');
+        await _insertGoal(dao, id: 'goal-completed', status: 'completed');
+        await _insertGoal(dao, id: 'goal-archived', status: 'archived');
 
-      final stream = dao.watchGoalsByUser('test-user', status: 'active');
+        final stream = dao.watchGoalsByUser('test-user', status: 'active');
 
-      await expectLater(
-        stream,
-        emits(allOf(
-          hasLength(2),
-          everyElement(
-            isA<Goal>().having((g) => g.status, 'status', equals('active')),
+        await expectLater(
+          stream,
+          emits(
+            allOf(
+              hasLength(2),
+              everyElement(
+                isA<Goal>().having((g) => g.status, 'status', equals('active')),
+              ),
+            ),
           ),
-        )),
-      );
-    });
+        );
+      },
+    );
 
     test('watchGoalsByUser without status filter returns all goals', () async {
       await _insertGoal(dao, id: 'goal-active', status: 'active');
@@ -406,63 +426,74 @@ void main() {
 
       final stream = dao.watchGoalsByUser('test-user');
 
-      await expectLater(
-        stream,
-        emits(hasLength(3)),
-      );
+      await expectLater(stream, emits(hasLength(3)));
     });
 
-    test('getGoalsByUser with status filter returns only matching goals',
-        () async {
-      await _insertGoal(dao, id: 'goal-active', status: 'active');
-      await _insertGoal(dao, id: 'goal-completed', status: 'completed');
-      await _insertGoal(dao, id: 'goal-archived', status: 'archived');
+    test(
+      'getGoalsByUser with status filter returns only matching goals',
+      () async {
+        await _insertGoal(dao, id: 'goal-active', status: 'active');
+        await _insertGoal(dao, id: 'goal-completed', status: 'completed');
+        await _insertGoal(dao, id: 'goal-archived', status: 'archived');
 
-      final activeGoals =
-          await dao.getGoalsByUser('test-user', status: 'active');
-      final completedGoals =
-          await dao.getGoalsByUser('test-user', status: 'completed');
-      final archivedGoals =
-          await dao.getGoalsByUser('test-user', status: 'archived');
+        final activeGoals = await dao.getGoalsByUser(
+          'test-user',
+          status: 'active',
+        );
+        final completedGoals = await dao.getGoalsByUser(
+          'test-user',
+          status: 'completed',
+        );
+        final archivedGoals = await dao.getGoalsByUser(
+          'test-user',
+          status: 'archived',
+        );
 
-      expect(activeGoals.length, equals(1));
-      expect(activeGoals.first.status, equals('active'));
-      expect(completedGoals.length, equals(1));
-      expect(completedGoals.first.status, equals('completed'));
-      expect(archivedGoals.length, equals(1));
-      expect(archivedGoals.first.status, equals('archived'));
-    });
+        expect(activeGoals.length, equals(1));
+        expect(activeGoals.first.status, equals('active'));
+        expect(completedGoals.length, equals(1));
+        expect(completedGoals.first.status, equals('completed'));
+        expect(archivedGoals.length, equals(1));
+        expect(archivedGoals.first.status, equals('archived'));
+      },
+    );
 
-    test('getGoalsByUser with status filter for empty result returns empty',
-        () async {
-      await _insertGoal(dao, id: 'goal-active', status: 'active');
+    test(
+      'getGoalsByUser with status filter for empty result returns empty',
+      () async {
+        await _insertGoal(dao, id: 'goal-active', status: 'active');
 
-      final completedGoals =
-          await dao.getGoalsByUser('test-user', status: 'completed');
+        final completedGoals = await dao.getGoalsByUser(
+          'test-user',
+          status: 'completed',
+        );
 
-      expect(completedGoals, isEmpty);
-    });
+        expect(completedGoals, isEmpty);
+      },
+    );
   });
 
   // ──────────────────────────────────────────────────────────────────────────
   // Wallet Linking Queries
   // ──────────────────────────────────────────────────────────────────────────
   group('Wallet Linking Queries', () {
-    test('getGoalByLinkedWallet returns active goal linked to wallet',
-        () async {
-      await _insertWallet(db, id: 'wallet-1');
-      await _insertGoal(
-        dao,
-        id: 'goal-1',
-        linkedWalletId: 'wallet-1',
-        trackingMode: 'wallet',
-        status: 'active',
-      );
+    test(
+      'getGoalByLinkedWallet returns active goal linked to wallet',
+      () async {
+        await _insertWallet(db, id: 'wallet-1');
+        await _insertGoal(
+          dao,
+          id: 'goal-1',
+          linkedWalletId: 'wallet-1',
+          trackingMode: 'wallet',
+          status: 'active',
+        );
 
-      final goal = await dao.getGoalByLinkedWallet('wallet-1');
-      expect(goal, isNotNull);
-      expect(goal!.id, equals('goal-1'));
-    });
+        final goal = await dao.getGoalByLinkedWallet('wallet-1');
+        expect(goal, isNotNull);
+        expect(goal!.id, equals('goal-1'));
+      },
+    );
 
     test('getGoalByLinkedWallet returns null for completed goal', () async {
       await _insertWallet(db, id: 'wallet-1');
@@ -478,20 +509,22 @@ void main() {
       expect(goal, isNull);
     });
 
-    test('isWalletLinked returns true when wallet is linked to active goal',
-        () async {
-      await _insertWallet(db, id: 'wallet-1');
-      await _insertGoal(
-        dao,
-        id: 'goal-1',
-        linkedWalletId: 'wallet-1',
-        trackingMode: 'wallet',
-        status: 'active',
-      );
+    test(
+      'isWalletLinked returns true when wallet is linked to active goal',
+      () async {
+        await _insertWallet(db, id: 'wallet-1');
+        await _insertGoal(
+          dao,
+          id: 'goal-1',
+          linkedWalletId: 'wallet-1',
+          trackingMode: 'wallet',
+          status: 'active',
+        );
 
-      final isLinked = await dao.isWalletLinked('wallet-1');
-      expect(isLinked, isTrue);
-    });
+        final isLinked = await dao.isWalletLinked('wallet-1');
+        expect(isLinked, isTrue);
+      },
+    );
 
     test('isWalletLinked returns false when wallet is not linked', () async {
       await _insertWallet(db, id: 'wallet-1');

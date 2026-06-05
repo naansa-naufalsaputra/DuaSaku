@@ -22,22 +22,30 @@ Future<(AppDatabase, RecurringTransactionDao)> _createTestDb() async {
   final dao = db.recurringTransactionDao;
 
   // Seed required wallet and category for foreign key constraints
-  await db.into(db.wallets).insert(WalletsCompanion.insert(
-        id: 'test-wallet',
-        userId: 'test-user',
-        name: 'Test Wallet',
-        type: 'Cash',
-        icon: 'wallet',
-        color: '#000000',
-        createdAt: DateTime(2023, 1, 1),
-      ));
-  await db.into(db.categories).insert(CategoriesCompanion.insert(
-        id: 'test-category',
-        userId: 'test-user',
-        name: 'Test Category',
-        type: 'expense',
-        createdAt: DateTime(2023, 1, 1),
-      ));
+  await db
+      .into(db.wallets)
+      .insert(
+        WalletsCompanion.insert(
+          id: 'test-wallet',
+          userId: 'test-user',
+          name: 'Test Wallet',
+          type: 'Cash',
+          icon: 'wallet',
+          color: '#000000',
+          createdAt: DateTime(2023, 1, 1),
+        ),
+      );
+  await db
+      .into(db.categories)
+      .insert(
+        CategoriesCompanion.insert(
+          id: 'test-category',
+          userId: 'test-user',
+          name: 'Test Category',
+          type: 'expense',
+          createdAt: DateTime(2023, 1, 1),
+        ),
+      );
 
   return (db, dao);
 }
@@ -49,18 +57,20 @@ Future<void> _insertRecurring(
   required DateTime nextExecutionDate,
   String status = 'active',
 }) async {
-  await dao.insertRecurring(RecurringTransactionsCompanion.insert(
-    id: id,
-    userId: 'test-user',
-    walletId: 'test-wallet',
-    categoryId: 'test-category',
-    amount: 100.0,
-    type: 'expense',
-    frequency: 'monthly',
-    startDate: DateTime(2023, 1, 1),
-    nextExecutionDate: nextExecutionDate,
-    status: Value(status),
-  ));
+  await dao.insertRecurring(
+    RecurringTransactionsCompanion.insert(
+      id: id,
+      userId: 'test-user',
+      walletId: 'test-wallet',
+      categoryId: 'test-category',
+      amount: 100.0,
+      type: 'expense',
+      frequency: 'monthly',
+      startDate: DateTime(2023, 1, 1),
+      nextExecutionDate: nextExecutionDate,
+      status: Value(status),
+    ),
+  );
 }
 
 void main() {
@@ -87,10 +97,12 @@ void main() {
           // The DAO uses DateTime.now() internally, so results will have
           // nextExecutionDate >= DAO's now and <= DAO's now + 7 days.
           // We use a generous tolerance window for assertions.
-          final toleranceBefore =
-              referenceNow.subtract(const Duration(seconds: 5));
-          final toleranceAfter =
-              referenceNow.add(const Duration(days: 7, seconds: 5));
+          final toleranceBefore = referenceNow.subtract(
+            const Duration(seconds: 5),
+          );
+          final toleranceAfter = referenceNow.add(
+            const Duration(days: 7, seconds: 5),
+          );
 
           // Generate day offsets: mix of within-range and out-of-range dates.
           // Use hour-level offsets to avoid boundary issues with seconds.
@@ -132,9 +144,11 @@ void main() {
           for (var i = 1; i < results.length; i++) {
             expect(
               results[i].nextExecutionDate.isAfter(
-                      results[i - 1].nextExecutionDate) ||
+                    results[i - 1].nextExecutionDate,
+                  ) ||
                   results[i].nextExecutionDate.isAtSameMomentAs(
-                      results[i - 1].nextExecutionDate),
+                    results[i - 1].nextExecutionDate,
+                  ),
               isTrue,
               reason:
                   'Results should be sorted ascending: ${results[i - 1].nextExecutionDate} <= ${results[i].nextExecutionDate}',
@@ -180,26 +194,28 @@ void main() {
     );
 
     // Edge case: when more than 5 valid results exist, only 5 are returned
-    test('returns exactly 5 when more than 5 active transactions within range',
-        () async {
-      final (db, dao) = await _createTestDb();
-      try {
-        final now = DateTime.now();
+    test(
+      'returns exactly 5 when more than 5 active transactions within range',
+      () async {
+        final (db, dao) = await _createTestDb();
+        try {
+          final now = DateTime.now();
 
-        for (var i = 0; i < 10; i++) {
-          await _insertRecurring(
-            dao,
-            id: 'recurring-$i',
-            nextExecutionDate: now.add(Duration(hours: i + 1)),
-          );
+          for (var i = 0; i < 10; i++) {
+            await _insertRecurring(
+              dao,
+              id: 'recurring-$i',
+              nextExecutionDate: now.add(Duration(hours: i + 1)),
+            );
+          }
+
+          final results = await dao.getUpcoming('test-user', 7, 5);
+          expect(results.length, equals(5));
+        } finally {
+          await db.close();
         }
-
-        final results = await dao.getUpcoming('test-user', 7, 5);
-        expect(results.length, equals(5));
-      } finally {
-        await db.close();
-      }
-    });
+      },
+    );
 
     // Edge case: returns empty when no transactions within range
     test('returns empty when no transactions within 7 days', () async {
@@ -233,10 +249,12 @@ void main() {
   // Property 6: Catch-Up Executes Missed Transactions Chronologically (placeholder)
   // **Validates: Requirements 2.2**
   // ──────────────────────────────────────────────────────────────────────────
-  group('Property 6: Catch-Up Executes Missed Transactions Chronologically',
-      () {
-    // Placeholder for Property 6
-  });
+  group(
+    'Property 6: Catch-Up Executes Missed Transactions Chronologically',
+    () {
+      // Placeholder for Property 6
+    },
+  );
 
   // ──────────────────────────────────────────────────────────────────────────
   // Property 7: Paused Transactions Are Never Executed (placeholder)

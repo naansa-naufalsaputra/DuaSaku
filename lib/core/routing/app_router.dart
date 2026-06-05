@@ -67,15 +67,21 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // 2. If onboarding is completed and we're on /onboarding, go to home or pin-auth
       if (isGoingToOnboarding) {
-        return (isAuthenticated || !securityState.isSecurityEnabled) ? '/home' : '/pin-auth';
+        return (isAuthenticated || !securityState.isSecurityEnabled)
+            ? '/home'
+            : '/pin-auth';
       }
 
       // 3. Standard auth check
-      if (!isAuthenticated && !isGoingToPinAuth && securityState.isSecurityEnabled) {
+      if (!isAuthenticated &&
+          !isGoingToPinAuth &&
+          securityState.isSecurityEnabled) {
         return '/pin-auth';
       }
 
-      if ((isAuthenticated || !securityState.isSecurityEnabled) && isGoingToPinAuth && !isChangingPin) {
+      if ((isAuthenticated || !securityState.isSecurityEnabled) &&
+          isGoingToPinAuth &&
+          !isChangingPin) {
         return '/home';
       }
 
@@ -217,10 +223,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final categoryId = state.pathParameters['categoryId']!;
           final extra = state.extra as BudgetDetailExtra?;
-          return BudgetDetailScreen(
-            categoryId: categoryId,
-            extra: extra,
-          );
+          return BudgetDetailScreen(categoryId: categoryId, extra: extra);
         },
       ),
       GoRoute(

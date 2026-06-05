@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/alert_preference_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glados/glados.dart'
@@ -67,17 +66,15 @@ bool isQuietHoursActive({
 /// Overload that works with AlertPreferenceModel and a given current time.
 /// This mirrors how BudgetNotificationService.isQuietHoursActive() would work.
 bool isQuietHoursActiveFromPrefs(
-    AlertPreferenceModel prefs, TimeOfDayValue currentTime) {
+  AlertPreferenceModel prefs,
+  TimeOfDayValue currentTime,
+) {
   if (!prefs.hasQuietHours) return false;
 
   final start = TimeOfDayValue.parse(prefs.quietHoursStart!);
   final end = TimeOfDayValue.parse(prefs.quietHoursEnd!);
 
-  return isQuietHoursActive(
-    currentTime: currentTime,
-    start: start,
-    end: end,
-  );
+  return isQuietHoursActive(currentTime: currentTime, start: start, end: end);
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +94,7 @@ String _randomTimeString(Random rng) {
 /// Generates a tuple of (currentTime, start, end) for same-day range testing.
 /// Ensures start < end (same-day range).
 ({TimeOfDayValue currentTime, TimeOfDayValue start, TimeOfDayValue end})
-    _generateSameDayScenario(int seed) {
+_generateSameDayScenario(int seed) {
   final rng = Random(seed);
 
   // Generate start and end ensuring start < end (in total minutes)
@@ -115,7 +112,7 @@ String _randomTimeString(Random rng) {
 /// Generates a tuple for midnight-spanning range testing.
 /// Ensures start > end (spans midnight).
 ({TimeOfDayValue currentTime, TimeOfDayValue start, TimeOfDayValue end})
-    _generateMidnightSpanScenario(int seed) {
+_generateMidnightSpanScenario(int seed) {
   final rng = Random(seed);
 
   // Generate start and end ensuring start > end (midnight span)
@@ -169,7 +166,8 @@ void main() {
         expect(
           result,
           equals(expectedActive),
-          reason: 'For same-day range $start-$end, '
+          reason:
+              'For same-day range $start-$end, '
               'currentTime=$currentTime (${currentTime.totalMinutes} min), '
               'expected active=$expectedActive but got $result',
         );
@@ -206,7 +204,8 @@ void main() {
         expect(
           result,
           equals(expectedActive),
-          reason: 'For midnight-spanning range $start-$end, '
+          reason:
+              'For midnight-spanning range $start-$end, '
               'currentTime=$currentTime (${currentTime.totalMinutes} min), '
               'expected active=$expectedActive but got $result',
         );
@@ -232,7 +231,8 @@ void main() {
         expect(
           result,
           isFalse,
-          reason: 'When start == end ($startEnd), quiet hours should never be '
+          reason:
+              'When start == end ($startEnd), quiet hours should never be '
               'active regardless of currentTime ($time)',
         );
       },
@@ -259,7 +259,8 @@ void main() {
         expect(
           result,
           isFalse,
-          reason: 'When quiet hours are not configured, '
+          reason:
+              'When quiet hours are not configured, '
               'isQuietHoursActive should always return false',
         );
       },
@@ -297,7 +298,8 @@ void main() {
         expect(
           result,
           equals(expectedResult),
-          reason: 'isQuietHoursActiveFromPrefs should produce same result as '
+          reason:
+              'isQuietHoursActiveFromPrefs should produce same result as '
               'direct isQuietHoursActive call for start=$startStr, end=$endStr, '
               'currentTime=$currentTime',
         );
@@ -332,7 +334,8 @@ void main() {
         expect(
           result,
           isTrue,
-          reason: 'currentTime at start ($start) should always be within '
+          reason:
+              'currentTime at start ($start) should always be within '
               'quiet hours for range $start-$end',
         );
       },
@@ -363,7 +366,8 @@ void main() {
         expect(
           result,
           isFalse,
-          reason: 'currentTime at end ($end) should NOT be within '
+          reason:
+              'currentTime at end ($end) should NOT be within '
               'quiet hours for same-day range $start-$end (end is exclusive)',
         );
       },

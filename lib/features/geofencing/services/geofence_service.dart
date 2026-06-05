@@ -7,8 +7,9 @@ import '../domain/geofence_hotspot.dart';
 
 class GeofenceService implements GeofenceServiceInterface {
   static final GeofenceService instance = GeofenceService._init();
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
-  
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   // Default fallback hotspot: Simpang Lima Semarang
   static const GeofenceHotspot _defaultHotspot = GeofenceHotspot(
     id: 'default_simpang_lima',
@@ -19,7 +20,7 @@ class GeofenceService implements GeofenceServiceInterface {
 
   List<GeofenceHotspot> _activeHotspots = [_defaultHotspot];
   final Map<String, DateTime> _lastHotspotNotificationTimes = {};
-  
+
   StreamSubscription<Position>? _positionStreamSubscription;
 
   GeofenceService._init();
@@ -27,9 +28,11 @@ class GeofenceService implements GeofenceServiceInterface {
   @override
   Future<void> initialize() async {
     // 1. Initialize local notifications
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-    
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
@@ -59,7 +62,7 @@ class GeofenceService implements GeofenceServiceInterface {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
-    
+
     if (permission == LocationPermission.deniedForever) return;
 
     // Start location tracking stream
@@ -69,14 +72,15 @@ class GeofenceService implements GeofenceServiceInterface {
     );
 
     _positionStreamSubscription?.cancel();
-    _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-      (Position position) {
-        _checkGeofence(position);
-      },
-      onError: (e) {
-        // Handle location stream error silently
-      },
-    );
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position position) {
+            _checkGeofence(position);
+          },
+          onError: (e) {
+            // Handle location stream error silently
+          },
+        );
   }
 
   @override
@@ -97,7 +101,8 @@ class GeofenceService implements GeofenceServiceInterface {
         hotspot.longitude,
       );
 
-      if (distance <= 150.0) { // 150 meters geofence radius
+      if (distance <= 150.0) {
+        // 150 meters geofence radius
         _triggerGeofenceNotification(hotspot);
       }
     }
@@ -106,24 +111,27 @@ class GeofenceService implements GeofenceServiceInterface {
   Future<void> _triggerGeofenceNotification(GeofenceHotspot hotspot) async {
     final now = DateTime.now();
     final lastNotificationTime = _lastHotspotNotificationTimes[hotspot.id];
-    
+
     // Cooldown logic to prevent notification spamming (6 hours per hotspot)
-    if (lastNotificationTime != null && 
+    if (lastNotificationTime != null &&
         now.difference(lastNotificationTime) < const Duration(hours: 6)) {
       return;
     }
 
     _lastHotspotNotificationTimes[hotspot.id] = now;
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'geofence_channel',
-      'Geofencing Alerts',
-      channelDescription: 'Alerts when entering frequent spending areas',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'geofence_channel',
+          'Geofencing Alerts',
+          channelDescription: 'Alerts when entering frequent spending areas',
+          importance: Importance.max,
+          priority: Priority.high,
+          ticker: 'ticker',
+        );
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
     );
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _notificationsPlugin.show(
       id: hotspot.id.hashCode,

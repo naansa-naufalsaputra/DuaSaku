@@ -265,7 +265,9 @@ Map<String, List<Map<String, dynamic>>> _buildValidDatabaseState(
     return {
       'id': 'rel_${rng.nextInt(999999)}_$i',
       'recurringTransactionId':
-          recurringTransactions[rng.nextInt(recurringTransactions.length)]['id'],
+          recurringTransactions[rng.nextInt(
+            recurringTransactions.length,
+          )]['id'],
       'createdAt': randomIso8601(rng),
     };
   });
@@ -332,14 +334,17 @@ Map<String, List<Map<String, dynamic>>> _buildValidDatabaseState(
 /// Checks FK consistency of a database state map.
 bool _isFkConsistent(Map<String, List<Map<String, dynamic>>> state) {
   final walletIds = state['wallets']!.map((r) => r['id'].toString()).toSet();
-  final categoryIds =
-      state['categories']!.map((r) => r['id'].toString()).toSet();
-  final rtIds =
-      state['recurringTransactions']!.map((r) => r['id'].toString()).toSet();
+  final categoryIds = state['categories']!
+      .map((r) => r['id'].toString())
+      .toSet();
+  final rtIds = state['recurringTransactions']!
+      .map((r) => r['id'].toString())
+      .toSet();
   final goalIds = state['goals']!.map((r) => r['id'].toString()).toSet();
 
   for (final t in state['transactions']!) {
-    if (t['walletId'] != null && !walletIds.contains(t['walletId'].toString())) {
+    if (t['walletId'] != null &&
+        !walletIds.contains(t['walletId'].toString())) {
       return false;
     }
     if (t['categoryId'] != null &&
@@ -370,7 +375,8 @@ bool _isFkConsistent(Map<String, List<Map<String, dynamic>>> state) {
     }
   }
   for (final g in state['goals']!) {
-    if (g['walletId'] != null && !walletIds.contains(g['walletId'].toString())) {
+    if (g['walletId'] != null &&
+        !walletIds.contains(g['walletId'].toString())) {
       return false;
     }
   }
@@ -460,7 +466,7 @@ Map<String, dynamic> _buildBrokenFkBackup(Random rng, int size) {
         'name': 'Fallback',
         'balance': '0',
         'createdAt': randomIso8601(rng),
-      }
+      },
     ];
   }
   if (dbState['categories']!.isEmpty) {
@@ -470,7 +476,7 @@ Map<String, dynamic> _buildBrokenFkBackup(Random rng, int size) {
         'name': 'Fallback',
         'type': 'expense',
         'createdAt': randomIso8601(rng),
-      }
+      },
     ];
   }
 
@@ -526,7 +532,7 @@ Map<String, dynamic> _buildBrokenFkBackup(Random rng, int size) {
             'id': 'g_fallback_${rng.nextInt(99999)}',
             'walletId': walletId,
             'createdAt': randomIso8601(rng),
-          }
+          },
         ];
       }
       dbState['goalDeposits'] = [
@@ -540,8 +546,5 @@ Map<String, dynamic> _buildBrokenFkBackup(Random rng, int size) {
       break;
   }
 
-  return {
-    'metadata': metadata,
-    'data': dbState,
-  };
+  return {'metadata': metadata, 'data': dbState};
 }

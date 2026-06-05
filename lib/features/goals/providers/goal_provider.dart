@@ -32,16 +32,15 @@ final goalRepositoryProvider = Provider<GoalRepositoryInterface>((ref) {
 
 /// Provides the GoalNotificationService for milestone, completion, and
 /// deadline reminder notifications.
-final goalNotificationServiceProvider =
-    Provider<GoalNotificationService>((ref) {
+final goalNotificationServiceProvider = Provider<GoalNotificationService>((
+  ref,
+) {
   final plugin = FlutterLocalNotificationsPlugin();
   return GoalNotificationService(plugin);
 });
 
 final goalNotifierProvider =
-    AsyncNotifierProvider<GoalNotifier, List<GoalModel>>(
-  GoalNotifier.new,
-);
+    AsyncNotifierProvider<GoalNotifier, List<GoalModel>>(GoalNotifier.new);
 
 // ---------------------------------------------------------------------------
 // GoalNotifier
@@ -84,26 +83,28 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
     final completer = Completer<List<GoalModel>>();
     bool isFirst = true;
 
-    _subscription = _repository.watchGoals(user!.id).listen(
-      (goals) {
-        if (isFirst) {
-          completer.complete(goals);
-          isFirst = false;
-        } else {
-          state = AsyncData(goals);
-        }
-        // Update S_goal score whenever goals list changes
-        _updateGoalScore();
-      },
-      onError: (e, stack) {
-        if (isFirst) {
-          completer.completeError(e, stack);
-          isFirst = false;
-        } else {
-          state = AsyncError(e, stack);
-        }
-      },
-    );
+    _subscription = _repository
+        .watchGoals(user!.id)
+        .listen(
+          (goals) {
+            if (isFirst) {
+              completer.complete(goals);
+              isFirst = false;
+            } else {
+              state = AsyncData(goals);
+            }
+            // Update S_goal score whenever goals list changes
+            _updateGoalScore();
+          },
+          onError: (e, stack) {
+            if (isFirst) {
+              completer.completeError(e, stack);
+              isFirst = false;
+            } else {
+              state = AsyncError(e, stack);
+            }
+          },
+        );
 
     return completer.future;
   }
@@ -126,9 +127,7 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
   }) async {
     // Validation
     if (name.isEmpty || name.length > 100) {
-      return Failure(
-        AppError.validation('Goal name must be 1-100 characters'),
-      );
+      return Failure(AppError.validation('Goal name must be 1-100 characters'));
     }
     if (targetAmount <= 0) {
       return Failure(
@@ -136,9 +135,7 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
       );
     }
     if (deadline != null && deadline.isBefore(DateTime.now())) {
-      return Failure(
-        AppError.validation('Deadline cannot be in the past'),
-      );
+      return Failure(AppError.validation('Deadline cannot be in the past'));
     }
 
     final user = ref.read(userProvider);
@@ -238,15 +235,12 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
     }
 
     // Calculate effective amount (cap at targetAmount)
-    final effectiveAmount =
-        (goal.currentAmount + amount > goal.targetAmount)
-            ? goal.targetAmount - goal.currentAmount
-            : amount;
+    final effectiveAmount = (goal.currentAmount + amount > goal.targetAmount)
+        ? goal.targetAmount - goal.currentAmount
+        : amount;
 
     if (effectiveAmount <= 0) {
-      return Failure(
-        AppError.validation('Goal is already fully funded'),
-      );
+      return Failure(AppError.validation('Goal is already fully funded'));
     }
 
     // Persist deposit
@@ -287,9 +281,7 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
   Future<Result<void, AppError>> updateGoal(GoalModel goal) async {
     // Validate
     if (goal.name.isEmpty || goal.name.length > 100) {
-      return Failure(
-        AppError.validation('Goal name must be 1-100 characters'),
-      );
+      return Failure(AppError.validation('Goal name must be 1-100 characters'));
     }
     if (goal.targetAmount <= 0) {
       return Failure(
@@ -297,9 +289,7 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
       );
     }
     if (goal.deadline != null && goal.deadline!.isBefore(DateTime.now())) {
-      return Failure(
-        AppError.validation('Deadline cannot be in the past'),
-      );
+      return Failure(AppError.validation('Deadline cannot be in the past'));
     }
 
     // Cap enforcement: if target reduced below current amount
@@ -388,7 +378,7 @@ class GoalNotifier extends AsyncNotifier<List<GoalModel>> {
           final allGoals = state.valueOrNull ?? [];
           final completedCount =
               allGoals.where((g) => g.status == GoalStatus.completed).length +
-                  1;
+              1;
           await gamificationService.checkCompletionBadges(completedCount);
         }
       case Failure():

@@ -37,10 +37,7 @@ class RecurringExecutor {
   /// recurring transaction within this isolate.
   final Set<String> _activeLocks = {};
 
-  RecurringExecutor(
-    this._db, {
-    this._notificationService,
-  }) {
+  RecurringExecutor(this._db, {this._notificationService}) {
     _dao = _db.recurringTransactionDao;
     _alertEvaluator = BudgetAlertEvaluator.fromDatabase(_db);
   }
@@ -99,14 +96,10 @@ class RecurringExecutor {
       );
       await _handleFailure(recurring, 'other_error', e.message);
     } on SqliteException catch (e) {
-      debugPrint(
-        '[RecurringExecutor] Database error for ${recurring.id}: $e',
-      );
+      debugPrint('[RecurringExecutor] Database error for ${recurring.id}: $e');
       await _handleFailure(recurring, 'database_error', e.message);
     } catch (e) {
-      debugPrint(
-        '[RecurringExecutor] Non-DB error for ${recurring.id}: $e',
-      );
+      debugPrint('[RecurringExecutor] Non-DB error for ${recurring.id}: $e');
       await _handleFailure(recurring, 'other_error', e.toString());
     }
   }
@@ -166,8 +159,10 @@ class RecurringExecutor {
         continue;
       }
 
-      final transactionId =
-          await _createTransactionWithBalanceUpdate(recurring, executionDate);
+      final transactionId = await _createTransactionWithBalanceUpdate(
+        recurring,
+        executionDate,
+      );
       await _logExecution(
         recurringId: recurring.id,
         transactionId: transactionId,
@@ -182,9 +177,7 @@ class RecurringExecutor {
     // Reset retry count on success
     await (_db.update(_db.recurringTransactions)
           ..where((t) => t.id.equals(recurring.id)))
-        .write(const RecurringTransactionsCompanion(
-      retryCount: Value(0),
-    ));
+        .write(const RecurringTransactionsCompanion(retryCount: Value(0)));
 
     // Trigger budget alert evaluation for expense recurring transactions
     if (recurring.type == 'expense') {
@@ -215,7 +208,9 @@ class RecurringExecutor {
   ) async {
     return await _db.transaction(() async {
       // 1. Insert transaction
-      final id = await _db.into(_db.transactions).insert(
+      final id = await _db
+          .into(_db.transactions)
+          .insert(
             TransactionsCompanion.insert(
               userId: recurring.userId,
               walletId: Value(recurring.walletId),
@@ -286,18 +281,20 @@ class RecurringExecutor {
       debugPrint(
         '[RecurringExecutor] ${recurring.id} completed — end date reached',
       );
-      await (_db.update(_db.recurringTransactions)
-            ..where((t) => t.id.equals(recurring.id)))
-          .write(RecurringTransactionsCompanion(
-        status: const Value('completed'),
-        nextExecutionDate: Value(lastExecutedDate),
-      ));
+      await (_db.update(
+        _db.recurringTransactions,
+      )..where((t) => t.id.equals(recurring.id))).write(
+        RecurringTransactionsCompanion(
+          status: const Value('completed'),
+          nextExecutionDate: Value(lastExecutedDate),
+        ),
+      );
     } else {
-      await (_db.update(_db.recurringTransactions)
-            ..where((t) => t.id.equals(recurring.id)))
-          .write(RecurringTransactionsCompanion(
-        nextExecutionDate: Value(nextDate),
-      ));
+      await (_db.update(
+        _db.recurringTransactions,
+      )..where((t) => t.id.equals(recurring.id))).write(
+        RecurringTransactionsCompanion(nextExecutionDate: Value(nextDate)),
+      );
     }
   }
 
@@ -326,22 +323,24 @@ class RecurringExecutor {
         debugPrint(
           '[RecurringExecutor] ${recurring.id} paused — max retries reached',
         );
-        await (_db.update(_db.recurringTransactions)
-              ..where((t) => t.id.equals(recurring.id)))
-            .write(const RecurringTransactionsCompanion(
-          status: Value('paused'),
-          retryCount: Value(3),
-        ));
+        await (_db.update(
+          _db.recurringTransactions,
+        )..where((t) => t.id.equals(recurring.id))).write(
+          const RecurringTransactionsCompanion(
+            status: Value('paused'),
+            retryCount: Value(3),
+          ),
+        );
 
         // Notify failure when paused due to max retries
         await _notifyExecutionFailure(recurring, 'Max retries exceeded');
       } else {
         // Increment retry count
-        await (_db.update(_db.recurringTransactions)
-              ..where((t) => t.id.equals(recurring.id)))
-            .write(RecurringTransactionsCompanion(
-          retryCount: Value(newRetryCount),
-        ));
+        await (_db.update(
+          _db.recurringTransactions,
+        )..where((t) => t.id.equals(recurring.id))).write(
+          RecurringTransactionsCompanion(retryCount: Value(newRetryCount)),
+        );
       }
     } else {
       // Non-database errors: pause immediately
@@ -351,9 +350,7 @@ class RecurringExecutor {
       );
       await (_db.update(_db.recurringTransactions)
             ..where((t) => t.id.equals(recurring.id)))
-          .write(const RecurringTransactionsCompanion(
-        status: Value('paused'),
-      ));
+          .write(const RecurringTransactionsCompanion(status: Value('paused')));
 
       // Notify failure for non-retryable errors
       await _notifyExecutionFailure(recurring, errorType);
@@ -366,12 +363,14 @@ class RecurringExecutor {
     String recurringId,
     DateTime executionDate,
   ) async {
-    final logs = await ((_db.select(_db.recurringExecutionLogs)
-          ..where((l) =>
-              l.recurringTransactionId.equals(recurringId) &
-              l.executedAt.equals(executionDate) &
-              l.status.equals('success')))
-        .get());
+    final logs =
+        await ((_db.select(_db.recurringExecutionLogs)..where(
+              (l) =>
+                  l.recurringTransactionId.equals(recurringId) &
+                  l.executedAt.equals(executionDate) &
+                  l.status.equals('success'),
+            ))
+            .get());
     return logs.isNotEmpty;
   }
 
@@ -419,9 +418,7 @@ class RecurringExecutor {
       );
     } catch (e) {
       // Notification failure should not break execution flow
-      debugPrint(
-        '[RecurringExecutor] Failed to send success notification: $e',
-      );
+      debugPrint('[RecurringExecutor] Failed to send success notification: $e');
     }
   }
 
@@ -442,9 +439,7 @@ class RecurringExecutor {
       );
     } catch (e) {
       // Notification failure should not break execution flow
-      debugPrint(
-        '[RecurringExecutor] Failed to send failure notification: $e',
-      );
+      debugPrint('[RecurringExecutor] Failed to send failure notification: $e');
     }
   }
 
@@ -461,9 +456,9 @@ class RecurringExecutor {
     required double amount,
     required String type,
   }) async {
-    final wallet = await (_db.select(_db.wallets)
-          ..where((w) => w.id.equals(walletId)))
-        .getSingleOrNull();
+    final wallet = await (_db.select(
+      _db.wallets,
+    )..where((w) => w.id.equals(walletId))).getSingleOrNull();
 
     if (wallet == null) {
       throw StateError('Wallet $walletId not found');
@@ -473,8 +468,9 @@ class RecurringExecutor {
         ? wallet.balance + amount
         : wallet.balance - amount;
 
-    await (_db.update(_db.wallets)..where((w) => w.id.equals(walletId)))
-        .write(WalletsCompanion(balance: Value(newBalance)));
+    await (_db.update(_db.wallets)..where((w) => w.id.equals(walletId))).write(
+      WalletsCompanion(balance: Value(newBalance)),
+    );
   }
 
   /// Adjusts wallet balances for transfer-type recurring transactions.
@@ -486,18 +482,19 @@ class RecurringExecutor {
   /// Must be called within a `_db.transaction()` block to ensure atomicity.
   Future<void> _adjustTransferBalances(RecurringTransaction recurring) async {
     // Decrease source wallet (walletId serves as fromWalletId for recurring transfers)
-    final sourceWallet = await (_db.select(_db.wallets)
-          ..where((w) => w.id.equals(recurring.walletId)))
-        .getSingleOrNull();
+    final sourceWallet = await (_db.select(
+      _db.wallets,
+    )..where((w) => w.id.equals(recurring.walletId))).getSingleOrNull();
 
     if (sourceWallet == null) {
       throw StateError('Source wallet ${recurring.walletId} not found');
     }
 
-    await (_db.update(_db.wallets)
-          ..where((w) => w.id.equals(recurring.walletId)))
-        .write(WalletsCompanion(
-            balance: Value(sourceWallet.balance - recurring.amount)));
+    await (_db.update(
+      _db.wallets,
+    )..where((w) => w.id.equals(recurring.walletId))).write(
+      WalletsCompanion(balance: Value(sourceWallet.balance - recurring.amount)),
+    );
 
     // Increase destination wallet
     // Note: RecurringTransactions table currently does not have a toWalletId
@@ -515,9 +512,9 @@ class RecurringExecutor {
 
   /// Look up the wallet name from the Wallets table.
   Future<String> _getWalletName(String walletId) async {
-    final wallet = await (_db.select(_db.wallets)
-          ..where((w) => w.id.equals(walletId)))
-        .getSingleOrNull();
+    final wallet = await (_db.select(
+      _db.wallets,
+    )..where((w) => w.id.equals(walletId))).getSingleOrNull();
     return wallet?.name ?? 'Unknown Wallet';
   }
 

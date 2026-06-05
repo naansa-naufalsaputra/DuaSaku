@@ -89,7 +89,7 @@ class LocationClusteringService {
     for (final tx in locTransactions) {
       final txLat = tx.latitude!;
       final txLon = tx.longitude!;
-      
+
       TransactionCluster? bestCluster;
       double minDistance = double.maxFinite;
 
@@ -122,8 +122,10 @@ class LocationClusteringService {
     // 3. Filter clusters (hotspots)
     // Criteria: contains >= 3 transactions OR spending in last 30 days >= Rp 500.000
     final hotspots = clusters.where((cluster) {
-      final isHighFrequency = cluster.transactions.length >= minTransactionCount;
-      final isHighSpending = cluster.totalSpentLast30Days >= minSpendAmountLast30Days;
+      final isHighFrequency =
+          cluster.transactions.length >= minTransactionCount;
+      final isHighSpending =
+          cluster.totalSpentLast30Days >= minSpendAmountLast30Days;
       return isHighFrequency || isHighSpending;
     }).toList();
 

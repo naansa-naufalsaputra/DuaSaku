@@ -7,9 +7,5 @@ class WalletInfo {
   final String name;
   final String type;
 
-  const WalletInfo({
-    required this.id,
-    required this.name,
-    required this.type,
-  });
+  const WalletInfo({required this.id, required this.name, required this.type});
 }

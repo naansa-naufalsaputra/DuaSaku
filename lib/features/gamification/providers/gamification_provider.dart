@@ -50,11 +50,13 @@ class GamificationState {
   }
 }
 
-final gamificationProvider = NotifierProvider<GamificationNotifier, GamificationState>(() {
-  return GamificationNotifier();
-});
+final gamificationProvider =
+    NotifierProvider<GamificationNotifier, GamificationState>(() {
+      return GamificationNotifier();
+    });
 
-class GamificationNotifier extends Notifier<GamificationState> implements GamificationServiceInterface {
+class GamificationNotifier extends Notifier<GamificationState>
+    implements GamificationServiceInterface {
   static const String _streakKey = 'user_streak_days';
   static const String _lastActiveKey = 'user_last_active_date';
   static const String _badgesKey = 'user_unlocked_badges';
@@ -86,15 +88,17 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
     int streak = prefs.getInt(_streakKey) ?? 0;
     final String? lastActiveStr = prefs.getString(_lastActiveKey);
     final List<String> badges = prefs.getStringList(_badgesKey) ?? [];
-    
+
     final today = DateTime.now();
-    
+
     if (lastActiveStr != null) {
       final lastActive = DateTime.parse(lastActiveStr);
       final difference = DateTime(today.year, today.month, today.day)
-          .difference(DateTime(lastActive.year, lastActive.month, lastActive.day))
+          .difference(
+            DateTime(lastActive.year, lastActive.month, lastActive.day),
+          )
           .inDays;
-      
+
       if (difference == 1) {
         // Logged in next day, streak continues (but wait for action to increment)
       } else if (difference > 1) {
@@ -113,13 +117,15 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
     final prefs = await SharedPreferences.getInstance();
     final today = DateTime.now();
     final String? lastActiveStr = prefs.getString(_lastActiveKey);
-    
+
     if (lastActiveStr != null) {
       final lastActive = DateTime.parse(lastActiveStr);
       final difference = DateTime(today.year, today.month, today.day)
-          .difference(DateTime(lastActive.year, lastActive.month, lastActive.day))
+          .difference(
+            DateTime(lastActive.year, lastActive.month, lastActive.day),
+          )
           .inDays;
-      
+
       if (difference == 1) {
         // Increment streak
         final int newStreak = state.currentStreak + 1;
@@ -147,7 +153,10 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
     final budgets = budgetsAsync.value ?? [];
     double sBudget = 40.0;
     if (budgets.isNotEmpty) {
-      final double totalLimit = budgets.fold(0.0, (sum, b) => sum + b.budget.amountLimit);
+      final double totalLimit = budgets.fold(
+        0.0,
+        (sum, b) => sum + b.budget.amountLimit,
+      );
       final double totalSpent = budgets.fold(0.0, (sum, b) => sum + b.spent);
       if (totalLimit > 0) {
         double ratio = totalSpent / totalLimit;
@@ -181,13 +190,15 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
     // 4. S_wallet (5 points max)
     final walletsAsync = ref.read(walletProvider);
     final wallets = walletsAsync.value ?? [];
-    final double sWallet = wallets.length >= 2 ? 5.0 : (wallets.length == 1 ? 2.5 : 0.0);
+    final double sWallet = wallets.length >= 2
+        ? 5.0
+        : (wallets.length == 1 ? 2.5 : 0.0);
 
     // 5. S_goal (5 points max) — provided by GoalGamificationService
     final double sGoal = state.scoreGoal.toDouble();
 
     int totalScore = (sBudget + sSaving + sStreak + sWallet + sGoal).round();
-    
+
     // Safety cap
     if (totalScore > 100) totalScore = 100;
     if (totalScore < 0) totalScore = 0;
@@ -200,7 +211,7 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
       scoreWallet: sWallet.round(),
       scoreGoal: sGoal.round(),
     );
-    
+
     _checkBadges();
   }
 
@@ -233,11 +244,13 @@ class GamificationNotifier extends Notifier<GamificationState> implements Gamifi
       newBadges.add('healthy_80');
       changed = true;
     }
-    
+
     // Saver Master
     final transactionsAsync = ref.read(transactionNotifierProvider);
     final transactions = transactionsAsync.value ?? [];
-    final int expenseCount = transactions.where((t) => t.type == 'expense').length;
+    final int expenseCount = transactions
+        .where((t) => t.type == 'expense')
+        .length;
     if (expenseCount >= 50 && !newBadges.contains('saver_master')) {
       newBadges.add('saver_master');
       changed = true;

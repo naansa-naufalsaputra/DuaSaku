@@ -16,19 +16,18 @@ import '../../providers/category_provider.dart';
 class TransactionDraftBottomSheet extends ConsumerStatefulWidget {
   final ParsedTransaction draftData;
 
-  const TransactionDraftBottomSheet({
-    super.key,
-    required this.draftData,
-  });
+  const TransactionDraftBottomSheet({super.key, required this.draftData});
 
   @override
-  ConsumerState<TransactionDraftBottomSheet> createState() => _TransactionDraftBottomSheetState();
+  ConsumerState<TransactionDraftBottomSheet> createState() =>
+      _TransactionDraftBottomSheetState();
 }
 
-class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBottomSheet> {
+class _TransactionDraftBottomSheetState
+    extends ConsumerState<TransactionDraftBottomSheet> {
   late TextEditingController _amountController;
   late TextEditingController _notesController;
-  
+
   late String _type; // 'expense' or 'income'
   String? _selectedWalletId;
   String? _selectedCategoryName;
@@ -40,11 +39,13 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
     // Initialize parsed states
     final double amount = widget.draftData.amount;
     _amountController = TextEditingController(
-      text: amount > 0 ? NumberFormat.decimalPattern('id_ID').format(amount.toInt()) : '',
+      text: amount > 0
+          ? NumberFormat.decimalPattern('id_ID').format(amount.toInt())
+          : '',
     );
     _notesController = TextEditingController(text: widget.draftData.notes);
     _type = widget.draftData.type;
-    
+
     _selectedWalletId = widget.draftData.walletId;
     _selectedCategoryName = widget.draftData.category;
     _selectedDate = widget.draftData.date ?? DateTime.now();
@@ -62,7 +63,9 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
     if (text.isEmpty) return;
     final result = MathParser.eval(text);
     if (result != null && result > 0) {
-      final formatted = NumberFormat.decimalPattern('id_ID').format(result.toInt());
+      final formatted = NumberFormat.decimalPattern(
+        'id_ID',
+      ).format(result.toInt());
       setState(() {
         _amountController.text = formatted;
       });
@@ -78,9 +81,9 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
     final double amount = ThousandsFormatter.parse(_amountController.text);
     if (amount <= 0) {
       HapticFeedback.vibrate();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('amount_positive_warning'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('amount_positive_warning'.tr())));
       return;
     }
 
@@ -94,14 +97,16 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
 
     try {
       HapticFeedback.mediumImpact();
-      await ref.read(transactionNotifierProvider.notifier).createTransaction(
-        amount: amount,
-        category: _selectedCategoryName ?? 'Food',
-        type: _type,
-        notes: _notesController.text.trim(),
-        walletId: _selectedWalletId,
-        createdAt: _selectedDate,
-      );
+      await ref
+          .read(transactionNotifierProvider.notifier)
+          .createTransaction(
+            amount: amount,
+            category: _selectedCategoryName ?? 'Food',
+            type: _type,
+            notes: _notesController.text.trim(),
+            walletId: _selectedWalletId,
+            createdAt: _selectedDate,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,9 +117,9 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
     } catch (e) {
       if (mounted) {
         HapticFeedback.vibrate();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -122,7 +127,7 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     final walletsAsync = ref.watch(walletProvider);
     final categoriesAsync = ref.watch(categoryNotifierProvider);
 
@@ -144,384 +149,455 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
         ),
         padding: const EdgeInsets.all(24.0),
         child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Top Handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Title
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      color: Colors.deepPurpleAccent,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'bottom_sheet.review_ai_transaction'.tr(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Transaction Type Switcher
-                Container(
-                  padding: const EdgeInsets.all(4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Top Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() => _type = 'expense');
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome,
+                    color: Colors.deepPurpleAccent,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'bottom_sheet.review_ai_transaction'.tr(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Transaction Type Switcher
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _type = 'expense');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _type == 'expense'
+                                ? Colors.redAccent.withValues(alpha: 0.2)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'bottom_sheet.expense'.tr().toUpperCase(),
+                            style: TextStyle(
                               color: _type == 'expense'
-                                  ? Colors.redAccent.withValues(alpha: 0.2)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'bottom_sheet.expense'.tr().toUpperCase(),
-                              style: TextStyle(
-                                color: _type == 'expense' ? Colors.redAccent : Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
+                                  ? Colors.redAccent
+                                  : Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() => _type = 'income');
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _type = 'income');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _type == 'income'
+                                ? Colors.green.withValues(alpha: 0.2)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'bottom_sheet.income'.tr().toUpperCase(),
+                            style: TextStyle(
                               color: _type == 'income'
-                                  ? Colors.green.withValues(alpha: 0.2)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
+                                  ? Colors.green
+                                  : Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'bottom_sheet.income'.tr().toUpperCase(),
-                              style: TextStyle(
-                                color: _type == 'income' ? Colors.green : Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Amount Text Field
+              Focus(
+                onFocusChange: (hasFocus) {
+                  if (!hasFocus) {
+                    _evaluateAmountField();
+                  }
+                },
+                child: GlassInputField(
+                  controller: _amountController,
+                  labelText: 'bottom_sheet.amount'.tr(),
+                  keyboardType: TextInputType.text,
+                  inputFormatters: [ThousandsFormatter()],
+                  onEditingComplete: _evaluateAmountField,
+                ),
+              ),
+              if (widget.draftData.isReceiptScan &&
+                  widget.draftData.scanConfidenceLow) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.amber.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'bottom_sheet.ocr_low_confidence_warning'.tr(),
+                          style: const TextStyle(
+                            color: Colors.amber,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+              ],
+              const SizedBox(height: 16),
 
-                // Amount Text Field
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) {
-                      _evaluateAmountField();
-                    }
-                  },
-                  child: GlassInputField(
-                    controller: _amountController,
-                    labelText: 'bottom_sheet.amount'.tr(),
-                    keyboardType: TextInputType.text,
-                    inputFormatters: [ThousandsFormatter()],
-                    onEditingComplete: _evaluateAmountField,
+              // Notes Text Field
+              GlassInputField(
+                controller: _notesController,
+                labelText: 'bottom_sheet.notes'.tr(),
+                prefixIcon: const Icon(Icons.edit, size: 20),
+              ),
+              const SizedBox(height: 16),
+
+              // Wallet Selection Dropdown
+              walletsAsync.when(
+                data: (wallets) {
+                  if (wallets.isEmpty) {
+                    return _buildNoWalletAlert(isDark);
+                  }
+
+                  // Preselect logic
+                  final walletIds = wallets.map((w) => w.id).toList();
+                  if (_selectedWalletId == null ||
+                      !walletIds.contains(_selectedWalletId)) {
+                    _selectedWalletId = walletIds.first;
+                  }
+
+                  return DropdownButtonFormField<String>(
+                    initialValue: _selectedWalletId,
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'bottom_sheet.wallet'.tr(),
+                      prefixIcon: const Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : Colors.grey[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: isDark
+                            ? BorderSide(
+                                color: Colors.white.withValues(alpha: 0.1),
+                              )
+                            : const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    items: wallets.map((w) {
+                      return DropdownMenuItem<String>(
+                        value: w.id,
+                        child: Text(
+                          '${w.name} (${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(w.balance)})',
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      HapticFeedback.lightImpact();
+                      setState(() => _selectedWalletId = val);
+                    },
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
                   ),
                 ),
-                if (widget.draftData.isReceiptScan && widget.draftData.scanConfidenceLow) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.amber.withValues(alpha: 0.25)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'bottom_sheet.ocr_low_confidence_warning'.tr(),
-                            style: const TextStyle(
-                              color: Colors.amber,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                error: (err, stack) => Text('Failed to load wallets: $err'),
+              ),
+              const SizedBox(height: 16),
+
+              // Date & Time Picker
+              _buildDatePicker(context, isDark),
+              const SizedBox(height: 16),
+
+              // Category Selection Grid
+              categoriesAsync.when(
+                data: (categories) {
+                  final filteredCategories = categories
+                      .where((c) => c.type == _type)
+                      .toList();
+                  if (filteredCategories.isEmpty) {
+                    return const Text(
+                      'No categories available for this type. Please create one in settings.',
+                      style: TextStyle(color: Colors.redAccent, fontSize: 12),
+                    );
+                  }
+
+                  // Matching logic
+                  final matchedCat = filteredCategories.firstWhere(
+                    (c) =>
+                        c.name.toLowerCase() ==
+                        _selectedCategoryName?.toLowerCase(),
+                    orElse: () {
+                      // Fallback to closest match
+                      final closest = filteredCategories.firstWhere(
+                        (c) =>
+                            c.name.toLowerCase().contains(
+                              _selectedCategoryName?.toLowerCase() ?? 'food',
+                            ) ||
+                            (_selectedCategoryName?.toLowerCase() ?? 'food')
+                                .contains(c.name.toLowerCase()),
+                        orElse: () => filteredCategories.firstWhere(
+                          (c) =>
+                              c.name.toLowerCase() ==
+                              (_type == 'income' ? 'salary' : 'food'),
+                          orElse: () => filteredCategories.first,
                         ),
-                      ],
+                      );
+                      return closest;
+                    },
+                  );
+                  _selectedCategoryName = matchedCat.name;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'bottom_sheet.category'.tr(),
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.black54,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 150),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 2.3,
+                              ),
+                          itemCount: filteredCategories.length,
+                          itemBuilder: (context, index) {
+                            final cat = filteredCategories[index];
+                            final isSelected =
+                                _selectedCategoryName?.toLowerCase() ==
+                                cat.name.toLowerCase();
+                            final catColor = _getCategoryColor(
+                              cat.color,
+                              cat.type,
+                            );
+
+                            return GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                setState(
+                                  () => _selectedCategoryName = cat.name,
+                                );
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? catColor.withValues(alpha: 0.12)
+                                      : (isDark
+                                            ? Colors.white.withValues(
+                                                alpha: 0.03,
+                                              )
+                                            : Colors.black.withValues(
+                                                alpha: 0.02,
+                                              )),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? catColor
+                                        : (isDark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.08,
+                                                )
+                                              : Colors.black.withValues(
+                                                  alpha: 0.05,
+                                                )),
+                                    width: isSelected ? 2.0 : 1.0,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: catColor.withValues(
+                                              alpha: 0.4,
+                                            ),
+                                            blurRadius: 8,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: catColor.withValues(alpha: 0.15),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        _getIconData(cat.icon),
+                                        color: catColor,
+                                        size: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        cat.name,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? (isDark
+                                                    ? Colors.white
+                                                    : Colors.black87)
+                                              : (isDark
+                                                    ? Colors.white54
+                                                    : Colors.black54),
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          fontSize: 11,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (err, stack) => Text('Failed to load categories: $err'),
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: GlassButton(
+                      variant: GlassButtonVariant.secondary,
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.pop();
+                      },
+                      child: Text(
+                        'cancel'.tr(),
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GlassButton(
+                      onPressed: _saveTransaction,
+                      child: Text(
+                        'bottom_sheet.save_transaction'.tr(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-
-                // Notes Text Field
-                GlassInputField(
-                  controller: _notesController,
-                  labelText: 'bottom_sheet.notes'.tr(),
-                  prefixIcon: const Icon(Icons.edit, size: 20),
-                ),
-                const SizedBox(height: 16),
-
-                // Wallet Selection Dropdown
-                walletsAsync.when(
-                  data: (wallets) {
-                    if (wallets.isEmpty) {
-                      return _buildNoWalletAlert(isDark);
-                    }
-                    
-                    // Preselect logic
-                    final walletIds = wallets.map((w) => w.id).toList();
-                    if (_selectedWalletId == null || !walletIds.contains(_selectedWalletId)) {
-                      _selectedWalletId = walletIds.first;
-                    }
-
-                    return DropdownButtonFormField<String>(
-                      initialValue: _selectedWalletId,
-                      dropdownColor: Theme.of(context).colorScheme.surface,
-                      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                      decoration: InputDecoration(
-                        labelText: 'bottom_sheet.wallet'.tr(),
-                        prefixIcon: const Icon(Icons.account_balance_wallet, size: 20),
-                        filled: true,
-                        fillColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey[50],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: isDark ? BorderSide(color: Colors.white.withValues(alpha: 0.1)) : const BorderSide(color: Colors.grey),
-                        ),
-                      ),
-                      items: wallets.map((w) {
-                        return DropdownMenuItem<String>(
-                          value: w.id,
-                          child: Text('${w.name} (${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(w.balance)})'),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        HapticFeedback.lightImpact();
-                        setState(() => _selectedWalletId = val);
-                      },
-                    );
-                  },
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  error: (err, stack) => Text('Failed to load wallets: $err'),
-                ),
-                const SizedBox(height: 16),
-
-                // Date & Time Picker
-                _buildDatePicker(context, isDark),
-                const SizedBox(height: 16),
-
-                // Category Selection Grid
-                categoriesAsync.when(
-                  data: (categories) {
-                    final filteredCategories = categories.where((c) => c.type == _type).toList();
-                    if (filteredCategories.isEmpty) {
-                      return const Text(
-                        'No categories available for this type. Please create one in settings.',
-                        style: TextStyle(color: Colors.redAccent, fontSize: 12),
-                      );
-                    }
-
-                    // Matching logic
-                    final matchedCat = filteredCategories.firstWhere(
-                      (c) => c.name.toLowerCase() == _selectedCategoryName?.toLowerCase(),
-                      orElse: () {
-                        // Fallback to closest match
-                        final closest = filteredCategories.firstWhere(
-                          (c) => c.name.toLowerCase().contains(_selectedCategoryName?.toLowerCase() ?? 'food') ||
-                                 (_selectedCategoryName?.toLowerCase() ?? 'food').contains(c.name.toLowerCase()),
-                          orElse: () => filteredCategories.firstWhere(
-                            (c) => c.name.toLowerCase() == (_type == 'income' ? 'salary' : 'food'),
-                            orElse: () => filteredCategories.first,
-                          ),
-                        );
-                        return closest;
-                      },
-                    );
-                    _selectedCategoryName = matchedCat.name;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'bottom_sheet.category'.tr(),
-                          style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black54,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          constraints: const BoxConstraints(maxHeight: 150),
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            physics: const BouncingScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 2.3,
-                            ),
-                            itemCount: filteredCategories.length,
-                            itemBuilder: (context, index) {
-                              final cat = filteredCategories[index];
-                              final isSelected = _selectedCategoryName?.toLowerCase() == cat.name.toLowerCase();
-                              final catColor = _getCategoryColor(cat.color, cat.type);
-
-                              return GestureDetector(
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  setState(() => _selectedCategoryName = cat.name);
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? catColor.withValues(alpha: 0.12)
-                                        : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02)),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: isSelected ? catColor : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05)),
-                                      width: isSelected ? 2.0 : 1.0,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: catColor.withValues(alpha: 0.4),
-                                              blurRadius: 8,
-                                              spreadRadius: 1,
-                                            )
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: catColor.withValues(alpha: 0.15),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          _getIconData(cat.icon),
-                                          color: catColor,
-                                          size: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          cat.name,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? (isDark ? Colors.white : Colors.black87)
-                                                : (isDark ? Colors.white54 : Colors.black54),
-                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                            fontSize: 11,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  error: (err, stack) => Text('Failed to load categories: $err'),
-                ),
-                const SizedBox(height: 24),
-
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: GlassButton(
-                        variant: GlassButtonVariant.secondary,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          context.pop();
-                        },
-                        child: Text(
-                          'cancel'.tr(),
-                          style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GlassButton(
-                        onPressed: _saveTransaction,
-                        child: Text(
-                          'bottom_sheet.save_transaction'.tr(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -617,10 +693,14 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey[50],
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.grey,
               ),
             ),
             child: Row(
@@ -655,45 +735,76 @@ class _TransactionDraftBottomSheetState extends ConsumerState<TransactionDraftBo
 
   IconData _getIconData(String? name) {
     switch (name) {
-      case 'restaurant': return Icons.restaurant_rounded;
-      case 'local_cafe': return Icons.local_cafe_rounded;
-      case 'attach_money': return Icons.attach_money_rounded;
-      case 'receipt': return Icons.receipt_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'local_gas_station': return Icons.local_gas_station_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'electrical_services': return Icons.electrical_services_rounded;
-      case 'water_drop': return Icons.water_drop_rounded;
-      case 'wifi': return Icons.wifi_rounded;
-      case 'medical_services': return Icons.medical_services_rounded;
-      case 'sports_esports': return Icons.sports_esports_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'flight': return Icons.flight_rounded;
-      case 'school': return Icons.school_rounded;
-      case 'fitness_center': return Icons.fitness_center_rounded;
-      case 'pets': return Icons.pets_rounded;
-      case 'card_giftcard': return Icons.card_giftcard_rounded;
-      case 'work': return Icons.work_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      case 'savings': return Icons.savings_rounded;
-      case 'account_balance': return Icons.account_balance_rounded;
-      case 'build': return Icons.build_rounded;
-      case 'spa': return Icons.spa_rounded;
-      case 'payments': return Icons.payments_rounded;
-      default: return Icons.category_rounded;
+      case 'restaurant':
+        return Icons.restaurant_rounded;
+      case 'local_cafe':
+        return Icons.local_cafe_rounded;
+      case 'attach_money':
+        return Icons.attach_money_rounded;
+      case 'receipt':
+        return Icons.receipt_rounded;
+      case 'shopping_bag':
+        return Icons.shopping_bag_rounded;
+      case 'directions_car':
+        return Icons.directions_car_rounded;
+      case 'local_gas_station':
+        return Icons.local_gas_station_rounded;
+      case 'home':
+        return Icons.home_rounded;
+      case 'electrical_services':
+        return Icons.electrical_services_rounded;
+      case 'water_drop':
+        return Icons.water_drop_rounded;
+      case 'wifi':
+        return Icons.wifi_rounded;
+      case 'medical_services':
+        return Icons.medical_services_rounded;
+      case 'sports_esports':
+        return Icons.sports_esports_rounded;
+      case 'movie':
+        return Icons.movie_rounded;
+      case 'flight':
+        return Icons.flight_rounded;
+      case 'school':
+        return Icons.school_rounded;
+      case 'fitness_center':
+        return Icons.fitness_center_rounded;
+      case 'pets':
+        return Icons.pets_rounded;
+      case 'card_giftcard':
+        return Icons.card_giftcard_rounded;
+      case 'work':
+        return Icons.work_rounded;
+      case 'trending_up':
+        return Icons.trending_up_rounded;
+      case 'savings':
+        return Icons.savings_rounded;
+      case 'account_balance':
+        return Icons.account_balance_rounded;
+      case 'build':
+        return Icons.build_rounded;
+      case 'spa':
+        return Icons.spa_rounded;
+      case 'payments':
+        return Icons.payments_rounded;
+      default:
+        return Icons.category_rounded;
     }
   }
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
     try {
       final hex = colorHex.replaceAll('#', '');
       return Color(int.parse('0xFF$hex'));
     } catch (_) {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
   }
 }

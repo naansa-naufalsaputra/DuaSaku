@@ -12,10 +12,7 @@ class ExportProgressCard extends StatelessWidget {
   /// The current export progress state.
   final ExportProgress progress;
 
-  const ExportProgressCard({
-    super.key,
-    required this.progress,
-  });
+  const ExportProgressCard({super.key, required this.progress});
 
   @override
   Widget build(BuildContext context) {

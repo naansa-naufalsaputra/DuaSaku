@@ -27,7 +27,6 @@ void main() {
         expect(theme.animationDurationSlow, const Duration(milliseconds: 500));
         expect(theme.borderGlowColor.a, closeTo(0.2, 0.01));
       });
-
     });
 
     group('copyWith', () {
@@ -58,7 +57,10 @@ void main() {
 
       test('interpolates numeric values at t=0.5', () {
         final a = LiquidGlassTheme.defaultPurpleDark();
-        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(blurSigma: 15.0, surfaceOpacity: 0.55);
+        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(
+          blurSigma: 15.0,
+          surfaceOpacity: 0.55,
+        );
         final mid = a.lerp(b, 0.5);
         expect(mid.blurSigma, closeTo((12.0 + 15.0) / 2, 0.01));
         expect(mid.surfaceOpacity, closeTo((0.65 + 0.55) / 2, 0.01));
@@ -66,7 +68,9 @@ void main() {
 
       test('snaps duration at t=0.5 boundary', () {
         final a = LiquidGlassTheme.defaultPurpleDark();
-        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(animationDuration: const Duration(milliseconds: 250));
+        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(
+          animationDuration: const Duration(milliseconds: 250),
+        );
         // t < 0.5 → keeps a's duration
         final before = a.lerp(b, 0.49);
         expect(before.animationDuration, a.animationDuration);
@@ -77,7 +81,10 @@ void main() {
 
       test('at t=0 returns values equal to this', () {
         final a = LiquidGlassTheme.defaultPurpleDark();
-        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(blurSigma: 15.0, surfaceOpacity: 0.55);
+        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(
+          blurSigma: 15.0,
+          surfaceOpacity: 0.55,
+        );
         final result = a.lerp(b, 0.0);
         expect(result.blurSigma, a.blurSigma);
         expect(result.surfaceOpacity, a.surfaceOpacity);
@@ -85,7 +92,11 @@ void main() {
 
       test('at t=1 returns values equal to other', () {
         final a = LiquidGlassTheme.defaultPurpleDark();
-        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(blurSigma: 15.0, surfaceOpacity: 0.55, animationDuration: const Duration(milliseconds: 250));
+        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(
+          blurSigma: 15.0,
+          surfaceOpacity: 0.55,
+          animationDuration: const Duration(milliseconds: 250),
+        );
         final result = a.lerp(b, 1.0);
         expect(result.blurSigma, b.blurSigma);
         expect(result.surfaceOpacity, b.surfaceOpacity);
@@ -100,9 +111,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData.dark().copyWith(
-              extensions: [glassTheme],
-            ),
+            theme: ThemeData.dark().copyWith(extensions: [glassTheme]),
             home: Builder(
               builder: (context) {
                 result = LiquidGlassTheme.of(context);
@@ -146,7 +155,9 @@ void main() {
 
       test('instances with different values are not equal', () {
         final a = LiquidGlassTheme.defaultPurpleDark();
-        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(blurSigma: 15.0);
+        final b = LiquidGlassTheme.defaultPurpleDark().copyWith(
+          blurSigma: 15.0,
+        );
         expect(a, isNot(equals(b)));
       });
     });

@@ -26,10 +26,7 @@ import '../../providers/recurring_transaction_provider.dart';
 class EditRecurringBottomSheet extends ConsumerStatefulWidget {
   final RecurringTransactionModel transaction;
 
-  const EditRecurringBottomSheet({
-    super.key,
-    required this.transaction,
-  });
+  const EditRecurringBottomSheet({super.key, required this.transaction});
 
   @override
   ConsumerState<EditRecurringBottomSheet> createState() =>
@@ -138,9 +135,7 @@ class _EditRecurringBottomSheetState
     // Pre-select wallet
     final walletsAsync = ref.read(walletProvider);
     final wallets = walletsAsync.valueOrNull ?? [];
-    final matchingWallet = wallets
-        .where((w) => w.id == tx.walletId)
-        .toList();
+    final matchingWallet = wallets.where((w) => w.id == tx.walletId).toList();
     if (matchingWallet.isNotEmpty) {
       _selectedWallet = matchingWallet.first;
     }
@@ -272,8 +267,7 @@ class _EditRecurringBottomSheetState
 
     // Recalculate nextExecutionDate on frequency/start date change
     DateTime newNextExecutionDate = widget.transaction.nextExecutionDate;
-    final frequencyChanged =
-        _selectedFrequency != widget.transaction.frequency;
+    final frequencyChanged = _selectedFrequency != widget.transaction.frequency;
     final intervalChanged =
         _customInterval != widget.transaction.customInterval;
     final startDateChanged = _startDate != widget.transaction.startDate;
@@ -391,9 +385,9 @@ class _EditRecurringBottomSheetState
             const SizedBox(height: 16),
             Text(
               'recurring.success_updated'.tr(),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
             ),
           ],
         ),
@@ -429,9 +423,9 @@ class _EditRecurringBottomSheetState
             child: Text(
               'recurring.edit_title'.tr(),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -482,16 +476,16 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.amount_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'recurring.step.amount_subtitle'.tr(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           GlassInputField(
@@ -538,9 +532,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.type_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 24),
           _buildTypeOption(
@@ -596,14 +590,12 @@ class _EditRecurringBottomSheetState
             Text(
               label,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
+                color: colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
             ),
             const Spacer(),
-            if (isSelected)
-              Icon(Icons.check_circle_rounded, color: color),
+            if (isSelected) Icon(Icons.check_circle_rounded, color: color),
           ],
         ),
       ),
@@ -630,9 +622,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.category_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           if (_categoryError != null)
@@ -640,9 +632,9 @@ class _EditRecurringBottomSheetState
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 _categoryError!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
               ),
             ),
           const SizedBox(height: 16),
@@ -651,8 +643,8 @@ class _EditRecurringBottomSheetState
               child: Text(
                 'recurring.error.no_categories'.tr(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
             )
           else
@@ -670,8 +662,7 @@ class _EditRecurringBottomSheetState
                       _categoryError = null;
                     });
                   },
-                  selectedColor:
-                      colorScheme.primary.withValues(alpha: 0.2),
+                  selectedColor: colorScheme.primary.withValues(alpha: 0.2),
                   backgroundColor: colorScheme.surface,
                   side: BorderSide(
                     color: isSelected
@@ -714,9 +705,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.wallet_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           if (_walletError != null)
@@ -724,9 +715,9 @@ class _EditRecurringBottomSheetState
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 _walletError!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
               ),
             ),
           const SizedBox(height: 16),
@@ -735,8 +726,8 @@ class _EditRecurringBottomSheetState
               child: Text(
                 'recurring.error.no_wallets'.tr(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
             )
           else
@@ -759,8 +750,7 @@ class _EditRecurringBottomSheetState
                       border: Border.all(
                         color: isSelected
                             ? colorScheme.primary
-                            : colorScheme.onSurface
-                                .withValues(alpha: 0.08),
+                            : colorScheme.onSurface.withValues(alpha: 0.08),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -773,14 +763,11 @@ class _EditRecurringBottomSheetState
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 wallet.name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
+                                style: Theme.of(context).textTheme.bodyLarge
                                     ?.copyWith(
                                       color: colorScheme.onSurface,
                                       fontWeight: FontWeight.w500,
@@ -788,12 +775,11 @@ class _EditRecurringBottomSheetState
                               ),
                               Text(
                                 wallet.type,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.5),
+                                      color: colorScheme.onSurface.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                               ),
                             ],
@@ -846,16 +832,16 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.frequency_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'recurring.step.frequency_subtitle'.tr(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           // Animated wheel picker for frequency
@@ -869,8 +855,7 @@ class _EditRecurringBottomSheetState
               onSelectedItemChanged: (index) {
                 setState(() {
                   _selectedFrequency = Frequency.values[index];
-                  if (_customInterval >
-                      _selectedFrequency.maxInterval) {
+                  if (_customInterval > _selectedFrequency.maxInterval) {
                     _customInterval = 1;
                   }
                 });
@@ -884,19 +869,15 @@ class _EditRecurringBottomSheetState
                   return Center(
                     child: Text(
                       freq.label.tr(),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(
-                            color: isSelected
-                                ? colorScheme.primary
-                                : colorScheme.onSurface
-                                    .withValues(alpha: 0.4),
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: isSelected ? 22 : 16,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurface.withValues(alpha: 0.4),
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        fontSize: isSelected ? 22 : 16,
+                      ),
                     ),
                   );
                 },
@@ -908,9 +889,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.field.interval'.tr(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -919,8 +900,7 @@ class _EditRecurringBottomSheetState
                 onPressed: _customInterval > 1
                     ? () => setState(() => _customInterval--)
                     : null,
-                icon:
-                    const Icon(Icons.remove_circle_outline_rounded),
+                icon: const Icon(Icons.remove_circle_outline_rounded),
               ),
               Expanded(
                 child: Container(
@@ -928,16 +908,13 @@ class _EditRecurringBottomSheetState
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: colorScheme.onSurface
-                          .withValues(alpha: 0.08),
+                      color: colorScheme.onSurface.withValues(alpha: 0.08),
                     ),
                   ),
                   child: Center(
                     child: Text(
                       '$_customInterval',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
+                      style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
@@ -947,8 +924,7 @@ class _EditRecurringBottomSheetState
                 ),
               ),
               IconButton(
-                onPressed: _customInterval <
-                        _selectedFrequency.maxInterval
+                onPressed: _customInterval < _selectedFrequency.maxInterval
                     ? () => setState(() => _customInterval++)
                     : null,
                 icon: const Icon(Icons.add_circle_outline_rounded),
@@ -958,14 +934,15 @@ class _EditRecurringBottomSheetState
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'recurring.interval_description'.tr(args: [
-                '$_customInterval',
-                _selectedFrequency.label.toLowerCase(),
-              ]),
+              'recurring.interval_description'.tr(
+                args: [
+                  '$_customInterval',
+                  _selectedFrequency.label.toLowerCase(),
+                ],
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface
-                        .withValues(alpha: 0.5),
-                  ),
+                color: colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -990,9 +967,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.dates_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           if (_dateError != null)
@@ -1000,9 +977,9 @@ class _EditRecurringBottomSheetState
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 _dateError!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
               ),
             ),
           const SizedBox(height: 24),
@@ -1016,8 +993,7 @@ class _EditRecurringBottomSheetState
                 context: context,
                 initialDate: _startDate,
                 firstDate: DateTime(2000),
-                lastDate:
-                    DateTime.now().add(const Duration(days: 3650)),
+                lastDate: DateTime.now().add(const Duration(days: 3650)),
               );
               if (picked != null) {
                 setState(() {
@@ -1037,11 +1013,10 @@ class _EditRecurringBottomSheetState
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: _endDate ??
-                    _startDate.add(const Duration(days: 30)),
+                initialDate:
+                    _endDate ?? _startDate.add(const Duration(days: 30)),
                 firstDate: DateTime(2000),
-                lastDate:
-                    DateTime.now().add(const Duration(days: 3650)),
+                lastDate: DateTime.now().add(const Duration(days: 3650)),
               );
               if (picked != null) {
                 setState(() {
@@ -1071,18 +1046,14 @@ class _EditRecurringBottomSheetState
                     Expanded(
                       child: Text(
                         'recurring.field.notify_before'.tr(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(
-                              color: colorScheme.onSurface,
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     Switch.adaptive(
                       value: _notifyBefore,
-                      onChanged: (v) =>
-                          setState(() => _notifyBefore = v),
+                      onChanged: (v) => setState(() => _notifyBefore = v),
                     ),
                   ],
                 ),
@@ -1101,8 +1072,7 @@ class _EditRecurringBottomSheetState
                       Expanded(
                         child: _buildReminderChip(
                           colorScheme,
-                          label:
-                              'recurring.reminder.day_before'.tr(),
+                          label: 'recurring.reminder.day_before'.tr(),
                           value: ReminderTiming.dayBefore,
                         ),
                       ),
@@ -1159,21 +1129,16 @@ class _EditRecurringBottomSheetState
                 children: [
                   Text(
                     label,
-                    style:
-                        Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface
-                                  .withValues(alpha: 0.5),
-                            ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    date != null
-                        ? _formatDate(date)
-                        : (placeholder ?? '-'),
-                    style:
-                        Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurface,
-                            ),
+                    date != null ? _formatDate(date) : (placeholder ?? '-'),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -1182,8 +1147,7 @@ class _EditRecurringBottomSheetState
               IconButton(
                 icon: Icon(
                   Icons.clear_rounded,
-                  color:
-                      colorScheme.onSurface.withValues(alpha: 0.4),
+                  color: colorScheme.onSurface.withValues(alpha: 0.4),
                   size: 20,
                 ),
                 onPressed: onClear,
@@ -1203,8 +1167,7 @@ class _EditRecurringBottomSheetState
     return GestureDetector(
       onTap: () => setState(() => _reminderTiming = value),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected
               ? colorScheme.primary.withValues(alpha: 0.1)
@@ -1220,12 +1183,9 @@ class _EditRecurringBottomSheetState
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
+              color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ),
       ),
@@ -1247,27 +1207,25 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.preview_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'recurring.step.preview_subtitle'.tr(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 24),
           if (_previewDates.isEmpty)
             Center(
               child: Text(
                 'recurring.preview.no_dates'.tr(),
-                style:
-                    Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface
-                              .withValues(alpha: 0.5),
-                        ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
             )
           else
@@ -1275,55 +1233,51 @@ class _EditRecurringBottomSheetState
               final date = _previewDates[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: colorScheme.onSurface
-                          .withValues(alpha: 0.08),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary
-                              .withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        _formatDate(date),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(
-                              color: colorScheme.onSurface,
+                child:
+                    Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.08,
+                              ),
                             ),
-                      ),
-                    ],
-                  ),
-                )
-                    .animate()
-                    .fadeIn(
-                        delay: Duration(milliseconds: index * 80))
-                    .slideX(begin: 0.05, end: 0),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                _formatDate(date),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: colorScheme.onSurface),
+                              ),
+                            ],
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(delay: Duration(milliseconds: index * 80))
+                        .slideX(begin: 0.05, end: 0),
               );
             }),
           const SizedBox(height: 32),
@@ -1339,10 +1293,8 @@ class _EditRecurringBottomSheetState
     ColorScheme colorScheme,
     ScrollController scrollController,
   ) {
-    final amount = double.tryParse(
-          _amountController.text.replaceAll(',', '.'),
-        ) ??
-        0;
+    final amount =
+        double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0;
     final isExpense = _transactionType == 'expense';
 
     return SingleChildScrollView(
@@ -1354,9 +1306,9 @@ class _EditRecurringBottomSheetState
           Text(
             'recurring.step.confirm_title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 24),
           // Summary card
@@ -1423,10 +1375,9 @@ class _EditRecurringBottomSheetState
                   _buildSummaryRow(
                     colorScheme,
                     label: 'recurring.summary.reminder'.tr(),
-                    value:
-                        _reminderTiming == ReminderTiming.dayBefore
-                            ? 'recurring.reminder.day_before'.tr()
-                            : 'recurring.reminder.same_day'.tr(),
+                    value: _reminderTiming == ReminderTiming.dayBefore
+                        ? 'recurring.reminder.day_before'.tr()
+                        : 'recurring.reminder.same_day'.tr(),
                   ),
                 ],
                 if (_notes != null && _notes!.isNotEmpty) ...[
@@ -1478,16 +1429,16 @@ class _EditRecurringBottomSheetState
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
+            color: colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
         ),
         Flexible(
           child: Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: valueColor ?? colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: valueColor ?? colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.end,
           ),
         ),
@@ -1513,10 +1464,7 @@ class _EditRecurringBottomSheetState
         ),
         child: Text(
           'recurring.action.next'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

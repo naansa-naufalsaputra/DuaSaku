@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/alert_preference_model.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/alert_type.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/budget_alert_model.dart';
@@ -52,18 +51,20 @@ BudgetAlertModel _generateBudgetAlertModel(int seed) {
   final createdAt = _randomDateTime(rng);
 
   // Computed fields: randomly include or exclude
-  final String? categoryName =
-      rng.nextBool() ? _randomString(rng, 5 + rng.nextInt(10)) : null;
-  final double? remainingBudget =
-      rng.nextBool() ? rng.nextDouble() * 1000000.0 : null;
+  final String? categoryName = rng.nextBool()
+      ? _randomString(rng, 5 + rng.nextInt(10))
+      : null;
+  final double? remainingBudget = rng.nextBool()
+      ? rng.nextDouble() * 1000000.0
+      : null;
   final double? overAmount =
       (alertType == AlertType.overBudget && rng.nextBool())
-          ? rng.nextDouble() * 500000.0
-          : null;
+      ? rng.nextDouble() * 500000.0
+      : null;
   final DateTime? projectedOverspendDate =
       (alertType == AlertType.prediction && rng.nextBool())
-          ? _randomDateTime(rng)
-          : null;
+      ? _randomDateTime(rng)
+      : null;
 
   return BudgetAlertModel(
     id: _randomString(rng, 10 + rng.nextInt(10)),
@@ -140,14 +141,18 @@ void main() {
         expect(restored.alertType, equals(original.alertType));
         expect(restored.thresholdValue, equals(original.thresholdValue));
         expect(
-            restored.actualPercentage, closeTo(original.actualPercentage, 1e-10));
+          restored.actualPercentage,
+          closeTo(original.actualPercentage, 1e-10),
+        );
         expect(restored.message, equals(original.message));
         expect(restored.isRead, equals(original.isRead));
         expect(restored.createdAt, equals(original.createdAt));
         expect(restored.categoryName, equals(original.categoryName));
         if (original.remainingBudget != null) {
-          expect(restored.remainingBudget,
-              closeTo(original.remainingBudget!, 1e-10));
+          expect(
+            restored.remainingBudget,
+            closeTo(original.remainingBudget!, 1e-10),
+          );
         } else {
           expect(restored.remainingBudget, isNull);
         }
@@ -156,8 +161,10 @@ void main() {
         } else {
           expect(restored.overAmount, isNull);
         }
-        expect(restored.projectedOverspendDate,
-            equals(original.projectedOverspendDate));
+        expect(
+          restored.projectedOverspendDate,
+          equals(original.projectedOverspendDate),
+        );
 
         // Also verify full equality via == operator
         expect(restored, equals(original));
@@ -181,7 +188,9 @@ void main() {
         expect(restored.isEnabled, equals(original.isEnabled));
         expect(restored.thresholds, equals(original.thresholds));
         expect(
-            restored.predictionsEnabled, equals(original.predictionsEnabled));
+          restored.predictionsEnabled,
+          equals(original.predictionsEnabled),
+        );
         expect(restored.quietHoursStart, equals(original.quietHoursStart));
         expect(restored.quietHoursEnd, equals(original.quietHoursEnd));
 

@@ -13,11 +13,7 @@ class MockTfliteParser extends TfliteTransactionParserService {
   final Duration? delay;
   final ParsedTransaction? mockResult;
 
-  MockTfliteParser({
-    this.shouldThrow = false,
-    this.delay,
-    this.mockResult,
-  });
+  MockTfliteParser({this.shouldThrow = false, this.delay, this.mockResult});
 
   @override
   Future<ParsedTransaction> parseTransaction({
@@ -50,7 +46,10 @@ class MockMlService implements SmartInputMlService {
   Future<void> initializeSilently() async {}
 
   @override
-  Future<DateTime?> extractDateTime(String text, {DateTime? referenceDate}) async {
+  Future<DateTime?> extractDateTime(
+    String text, {
+    DateTime? referenceDate,
+  }) async {
     return mockDate;
   }
 
@@ -73,12 +72,13 @@ class MockLightweightMlParser extends LightweightMlParser {
     if (shouldThrow) {
       throw Exception('Lightweight ML failure simulation');
     }
-    return mockResult ?? const ParsedTransaction(
-      amount: 888.0,
-      category: 'Makanan',
-      type: 'expense',
-      notes: 'parsed_by_lightweight_ml',
-    );
+    return mockResult ??
+        const ParsedTransaction(
+          amount: 888.0,
+          category: 'Makanan',
+          type: 'expense',
+          notes: 'parsed_by_lightweight_ml',
+        );
   }
 }
 
@@ -87,9 +87,7 @@ void main() {
     final wallets = [
       const WalletInfo(id: 'w-cash', name: 'Cash', type: 'cash'),
     ];
-    final categories = [
-      const CategoryInfo(name: 'Makanan', type: 'expense'),
-    ];
+    final categories = [const CategoryInfo(name: 'Makanan', type: 'expense')];
 
     test('should return TFLite result when TFLite succeeds', () async {
       final mockTflite = MockTfliteParser(
@@ -118,27 +116,30 @@ void main() {
       expect(result.notes, equals('nasi goreng'));
     });
 
-    test('should fallback to Local Regex parser when TFLite throws exception', () async {
-      final mockTflite = MockTfliteParser(shouldThrow: true);
-      final localService = LocalTransactionParserService();
-      final mockMl = MockMlService();
-      final orchestrator = SmartParserOrchestrator(
-        tfliteService: mockTflite,
-        localService: localService,
-        mlService: mockMl,
-      );
+    test(
+      'should fallback to Local Regex parser when TFLite throws exception',
+      () async {
+        final mockTflite = MockTfliteParser(shouldThrow: true);
+        final localService = LocalTransactionParserService();
+        final mockMl = MockMlService();
+        final orchestrator = SmartParserOrchestrator(
+          tfliteService: mockTflite,
+          localService: localService,
+          mlService: mockMl,
+        );
 
-      // We expect this not to throw, but to successfully fallback to local
-      final result = await orchestrator.parseTransaction(
-        inputText: 'nasi goreng 50k',
-        wallets: wallets,
-        categories: categories,
-      );
+        // We expect this not to throw, but to successfully fallback to local
+        final result = await orchestrator.parseTransaction(
+          inputText: 'nasi goreng 50k',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      // Local parser should parse 50k as 50000.0
-      expect(result.amount, equals(50000.0));
-      expect(result.category, equals('Makanan'));
-    });
+        // Local parser should parse 50k as 50000.0
+        expect(result.amount, equals(50000.0));
+        expect(result.category, equals('Makanan'));
+      },
+    );
 
     test('should fallback to Local Regex parser when TFLite times out', () async {
       // Delay is 1.5 seconds, but timeout threshold is 500ms
@@ -165,57 +166,63 @@ void main() {
       expect(result.category, equals('Makanan'));
     });
 
-    test('should fallback to Lightweight ML parser when TFLite throws exception', () async {
-      final mockTflite = MockTfliteParser(shouldThrow: true);
-      const mockLwMl = MockLightweightMlParser(
-        mockResult: ParsedTransaction(
-          amount: 75000.0,
-          category: 'Makanan',
-          type: 'expense',
-          notes: 'parsed_by_lightweight_ml',
-        ),
-      );
-      final localService = LocalTransactionParserService();
-      final mockMl = MockMlService();
-      final orchestrator = SmartParserOrchestrator(
-        tfliteService: mockTflite,
-        localService: localService,
-        lightweightMlService: mockLwMl,
-        mlService: mockMl,
-      );
+    test(
+      'should fallback to Lightweight ML parser when TFLite throws exception',
+      () async {
+        final mockTflite = MockTfliteParser(shouldThrow: true);
+        const mockLwMl = MockLightweightMlParser(
+          mockResult: ParsedTransaction(
+            amount: 75000.0,
+            category: 'Makanan',
+            type: 'expense',
+            notes: 'parsed_by_lightweight_ml',
+          ),
+        );
+        final localService = LocalTransactionParserService();
+        final mockMl = MockMlService();
+        final orchestrator = SmartParserOrchestrator(
+          tfliteService: mockTflite,
+          localService: localService,
+          lightweightMlService: mockLwMl,
+          mlService: mockMl,
+        );
 
-      final result = await orchestrator.parseTransaction(
-        inputText: 'makan bakso 75k',
-        wallets: wallets,
-        categories: categories,
-      );
+        final result = await orchestrator.parseTransaction(
+          inputText: 'makan bakso 75k',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      expect(result.amount, equals(75000.0));
-      expect(result.category, equals('Makanan'));
-      expect(result.notes, equals('parsed_by_lightweight_ml'));
-    });
+        expect(result.amount, equals(75000.0));
+        expect(result.category, equals('Makanan'));
+        expect(result.notes, equals('parsed_by_lightweight_ml'));
+      },
+    );
 
-    test('should fallback to Local Regex parser when both TFLite and Lightweight ML throw exceptions', () async {
-      final mockTflite = MockTfliteParser(shouldThrow: true);
-      const mockLwMl = MockLightweightMlParser(shouldThrow: true);
-      final localService = LocalTransactionParserService();
-      final mockMl = MockMlService();
-      final orchestrator = SmartParserOrchestrator(
-        tfliteService: mockTflite,
-        localService: localService,
-        lightweightMlService: mockLwMl,
-        mlService: mockMl,
-      );
+    test(
+      'should fallback to Local Regex parser when both TFLite and Lightweight ML throw exceptions',
+      () async {
+        final mockTflite = MockTfliteParser(shouldThrow: true);
+        const mockLwMl = MockLightweightMlParser(shouldThrow: true);
+        final localService = LocalTransactionParserService();
+        final mockMl = MockMlService();
+        final orchestrator = SmartParserOrchestrator(
+          tfliteService: mockTflite,
+          localService: localService,
+          lightweightMlService: mockLwMl,
+          mlService: mockMl,
+        );
 
-      final result = await orchestrator.parseTransaction(
-        inputText: 'makan bakso 75k',
-        wallets: wallets,
-        categories: categories,
-      );
+        final result = await orchestrator.parseTransaction(
+          inputText: 'makan bakso 75k',
+          wallets: wallets,
+          categories: categories,
+        );
 
-      // Both failed, so local parser should resolve it (75k -> 75000.0)
-      expect(result.amount, equals(75000.0));
-      expect(result.category, equals('Makanan'));
-    });
+        // Both failed, so local parser should resolve it (75k -> 75000.0)
+        expect(result.amount, equals(75000.0));
+        expect(result.category, equals('Makanan'));
+      },
+    );
   });
 }

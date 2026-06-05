@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glados/glados.dart' hide expect, group, test, setUp, setUpAll, tearDown, tearDownAll;
+import 'package:glados/glados.dart'
+    hide expect, group, test, setUp, setUpAll, tearDown, tearDownAll;
 
 /// A helper class that encapsulates the wallet balance calculation logic
 /// extracted from TransactionRepository.insertTransaction.
@@ -212,29 +213,30 @@ void main() {
       any.intInRange(0, 10000000),
       any.intInRange(0, 10000000),
       any.intInRange(1, 5000000),
-    ).test(
-      'total money across wallets is preserved for any transfer',
-      (fromInitialInt, toInitialInt, amountInt) {
-        final calculator = WalletBalanceCalculator();
-        final fromInitialBalance = fromInitialInt.toDouble();
-        final toInitialBalance = toInitialInt.toDouble();
-        final amount = amountInt.toDouble();
+    ).test('total money across wallets is preserved for any transfer', (
+      fromInitialInt,
+      toInitialInt,
+      amountInt,
+    ) {
+      final calculator = WalletBalanceCalculator();
+      final fromInitialBalance = fromInitialInt.toDouble();
+      final toInitialBalance = toInitialInt.toDouble();
+      final amount = amountInt.toDouble();
 
-        final result = calculator.calculateTransferBalances(
-          fromWalletCurrentBalance: fromInitialBalance,
-          toWalletCurrentBalance: toInitialBalance,
-          amount: amount,
-        );
+      final result = calculator.calculateTransferBalances(
+        fromWalletCurrentBalance: fromInitialBalance,
+        toWalletCurrentBalance: toInitialBalance,
+        amount: amount,
+      );
 
-        // Total money before transfer
-        final totalBefore = fromInitialBalance + toInitialBalance;
-        // Total money after transfer
-        final totalAfter = result.fromBalance + result.toBalance;
+      // Total money before transfer
+      final totalBefore = fromInitialBalance + toInitialBalance;
+      // Total money after transfer
+      final totalAfter = result.fromBalance + result.toBalance;
 
-        // Conservation property: total money is neither created nor destroyed
-        expect(totalAfter, equals(totalBefore));
-      },
-    );
+      // Conservation property: total money is neither created nor destroyed
+      expect(totalAfter, equals(totalBefore));
+    });
 
     Glados(any.intInRange(1, 10000000)).test(
       'fromWallet change equals negative amount for any transfer',

@@ -18,10 +18,12 @@ class TransactionTypeBottomSheet extends ConsumerStatefulWidget {
   const TransactionTypeBottomSheet({super.key});
 
   @override
-  ConsumerState<TransactionTypeBottomSheet> createState() => _TransactionTypeBottomSheetState();
+  ConsumerState<TransactionTypeBottomSheet> createState() =>
+      _TransactionTypeBottomSheetState();
 }
 
-class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBottomSheet> {
+class _TransactionTypeBottomSheetState
+    extends ConsumerState<TransactionTypeBottomSheet> {
   bool _isTransferMode = false;
 
   // Location State
@@ -61,7 +63,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
     if (text.isEmpty) return;
     final result = MathParser.eval(text);
     if (result != null && result > 0) {
-      final formatted = NumberFormat.decimalPattern('id_ID').format(result.toInt());
+      final formatted = NumberFormat.decimalPattern(
+        'id_ID',
+      ).format(result.toInt());
       setState(() {
         _manualAmountController.text = formatted;
       });
@@ -73,7 +77,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
     if (text.isEmpty) return;
     final result = MathParser.eval(text);
     if (result != null && result > 0) {
-      final formatted = NumberFormat.decimalPattern('id_ID').format(result.toInt());
+      final formatted = NumberFormat.decimalPattern(
+        'id_ID',
+      ).format(result.toInt());
       setState(() {
         _transferAmountController.text = formatted;
       });
@@ -89,7 +95,8 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
         final permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
           final requested = await Geolocator.requestPermission();
-          if (requested == LocationPermission.denied || requested == LocationPermission.deniedForever) {
+          if (requested == LocationPermission.denied ||
+              requested == LocationPermission.deniedForever) {
             setState(() {
               _recordLocation = false;
               _isFetchingLocation = false;
@@ -97,14 +104,14 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
             return;
           }
         }
-        
+
         final position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
             timeLimit: Duration(seconds: 5),
           ),
         );
-        
+
         setState(() {
           _recordLocation = true;
           _latitude = position.latitude;
@@ -133,45 +140,76 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
 
   IconData _getIconData(String? name) {
     switch (name) {
-      case 'restaurant': return Icons.restaurant_rounded;
-      case 'local_cafe': return Icons.local_cafe_rounded;
-      case 'attach_money': return Icons.attach_money_rounded;
-      case 'receipt': return Icons.receipt_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'local_gas_station': return Icons.local_gas_station_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'electrical_services': return Icons.electrical_services_rounded;
-      case 'water_drop': return Icons.water_drop_rounded;
-      case 'wifi': return Icons.wifi_rounded;
-      case 'medical_services': return Icons.medical_services_rounded;
-      case 'sports_esports': return Icons.sports_esports_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'flight': return Icons.flight_rounded;
-      case 'school': return Icons.school_rounded;
-      case 'fitness_center': return Icons.fitness_center_rounded;
-      case 'pets': return Icons.pets_rounded;
-      case 'card_giftcard': return Icons.card_giftcard_rounded;
-      case 'work': return Icons.work_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      case 'savings': return Icons.savings_rounded;
-      case 'account_balance': return Icons.account_balance_rounded;
-      case 'build': return Icons.build_rounded;
-      case 'spa': return Icons.spa_rounded;
-      case 'payments': return Icons.payments_rounded;
-      default: return Icons.category_rounded;
+      case 'restaurant':
+        return Icons.restaurant_rounded;
+      case 'local_cafe':
+        return Icons.local_cafe_rounded;
+      case 'attach_money':
+        return Icons.attach_money_rounded;
+      case 'receipt':
+        return Icons.receipt_rounded;
+      case 'shopping_bag':
+        return Icons.shopping_bag_rounded;
+      case 'directions_car':
+        return Icons.directions_car_rounded;
+      case 'local_gas_station':
+        return Icons.local_gas_station_rounded;
+      case 'home':
+        return Icons.home_rounded;
+      case 'electrical_services':
+        return Icons.electrical_services_rounded;
+      case 'water_drop':
+        return Icons.water_drop_rounded;
+      case 'wifi':
+        return Icons.wifi_rounded;
+      case 'medical_services':
+        return Icons.medical_services_rounded;
+      case 'sports_esports':
+        return Icons.sports_esports_rounded;
+      case 'movie':
+        return Icons.movie_rounded;
+      case 'flight':
+        return Icons.flight_rounded;
+      case 'school':
+        return Icons.school_rounded;
+      case 'fitness_center':
+        return Icons.fitness_center_rounded;
+      case 'pets':
+        return Icons.pets_rounded;
+      case 'card_giftcard':
+        return Icons.card_giftcard_rounded;
+      case 'work':
+        return Icons.work_rounded;
+      case 'trending_up':
+        return Icons.trending_up_rounded;
+      case 'savings':
+        return Icons.savings_rounded;
+      case 'account_balance':
+        return Icons.account_balance_rounded;
+      case 'build':
+        return Icons.build_rounded;
+      case 'spa':
+        return Icons.spa_rounded;
+      case 'payments':
+        return Icons.payments_rounded;
+      default:
+        return Icons.category_rounded;
     }
   }
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
     try {
       final hex = colorHex.replaceAll('#', '');
       return Color(int.parse('0xFF$hex'));
     } catch (_) {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
   }
 
@@ -191,8 +229,12 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
   Future<void> _submitManual() async {
     bool hasError = false;
     setState(() {
-      _manualAmountError = _manualAmountController.text.isEmpty ? 'Required' : null;
-      _manualCategoryError = _manualCategoryController.text.isEmpty ? 'Required' : null;
+      _manualAmountError = _manualAmountController.text.isEmpty
+          ? 'Required'
+          : null;
+      _manualCategoryError = _manualCategoryController.text.isEmpty
+          ? 'Required'
+          : null;
       hasError = _manualAmountError != null || _manualCategoryError != null;
     });
 
@@ -201,24 +243,30 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
       final category = _manualCategoryController.text;
       final notes = _manualNotesController.text;
       try {
-        await ref.read(transactionNotifierProvider.notifier).createTransaction(
-          amount: amount,
-          category: category,
-          type: _manualType,
-          notes: notes,
-          walletId: _manualWalletId,
-          latitude: _latitude,
-          longitude: _longitude,
-        );
+        await ref
+            .read(transactionNotifierProvider.notifier)
+            .createTransaction(
+              amount: amount,
+              category: category,
+              type: _manualType,
+              notes: notes,
+              walletId: _manualWalletId,
+              latitude: _latitude,
+              longitude: _longitude,
+            );
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Transaction Saved')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Transaction Saved')));
           context.pop();
         }
       } catch (e) {
         if (mounted) {
           HapticFeedback.vibrate();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
         }
       }
     } else {
@@ -229,7 +277,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
   Future<void> _submitTransfer() async {
     bool hasError = false;
     setState(() {
-      _transferAmountError = _transferAmountController.text.isEmpty ? 'Required' : null;
+      _transferAmountError = _transferAmountController.text.isEmpty
+          ? 'Required'
+          : null;
       hasError = _transferAmountError != null;
     });
 
@@ -237,7 +287,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
       final amount = ThousandsFormatter.parse(_transferAmountController.text);
       if (_transferFromWalletId == _transferToWalletId) {
         HapticFeedback.vibrate();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot transfer to same wallet')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cannot transfer to same wallet')),
+        );
         return;
       }
       if (_transferFromWalletId == null || _transferToWalletId == null) {
@@ -245,23 +297,29 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
         return;
       }
       try {
-        await ref.read(transactionNotifierProvider.notifier).createTransfer(
-          amount: amount,
-          fromWalletId: _transferFromWalletId!,
-          toWalletId: _transferToWalletId!,
-          notes: _transferNotesController.text,
-          latitude: _latitude,
-          longitude: _longitude,
-        );
+        await ref
+            .read(transactionNotifierProvider.notifier)
+            .createTransfer(
+              amount: amount,
+              fromWalletId: _transferFromWalletId!,
+              toWalletId: _transferToWalletId!,
+              notes: _transferNotesController.text,
+              latitude: _latitude,
+              longitude: _longitude,
+            );
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Transfer Saved')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Transfer Saved')));
           context.pop();
         }
       } catch (e) {
         if (mounted) {
           HapticFeedback.vibrate();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
         }
       }
     } else {
@@ -275,7 +333,11 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
     final walletsAsync = ref.watch(walletProvider);
     final walletsList = walletsAsync.valueOrNull ?? [];
     final hasEnoughWalletsForTransfer = walletsList.length >= 2;
-    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final formatCurrency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Padding(
       padding: EdgeInsets.only(
@@ -319,13 +381,13 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: !_isTransferMode 
-                              ? Colors.deepPurpleAccent.withValues(alpha: 0.15) 
+                          color: !_isTransferMode
+                              ? Colors.deepPurpleAccent.withValues(alpha: 0.15)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: !_isTransferMode 
-                                ? Colors.deepPurpleAccent 
+                            color: !_isTransferMode
+                                ? Colors.deepPurpleAccent
                                 : Colors.grey.withValues(alpha: 0.2),
                             width: !_isTransferMode ? 2 : 1,
                           ),
@@ -334,8 +396,8 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                           'bottom_sheet.tab_manual'.tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: !_isTransferMode 
-                                ? Colors.deepPurpleAccent 
+                            color: !_isTransferMode
+                                ? Colors.deepPurpleAccent
                                 : (isDark ? Colors.white70 : Colors.black87),
                             fontWeight: FontWeight.bold,
                           ),
@@ -353,13 +415,13 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: _isTransferMode 
-                              ? Colors.deepPurpleAccent.withValues(alpha: 0.15) 
+                          color: _isTransferMode
+                              ? Colors.deepPurpleAccent.withValues(alpha: 0.15)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: _isTransferMode 
-                                ? Colors.deepPurpleAccent 
+                            color: _isTransferMode
+                                ? Colors.deepPurpleAccent
                                 : Colors.grey.withValues(alpha: 0.2),
                             width: _isTransferMode ? 2 : 1,
                           ),
@@ -368,8 +430,8 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                           'bottom_sheet.tab_transfer'.tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: _isTransferMode 
-                                ? Colors.deepPurpleAccent 
+                            color: _isTransferMode
+                                ? Colors.deepPurpleAccent
                                 : (isDark ? Colors.white70 : Colors.black87),
                             fontWeight: FontWeight.bold,
                           ),
@@ -385,7 +447,12 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
               if (!_isTransferMode)
                 _buildManualLayout(isDark, walletsAsync, formatCurrency)
               else
-                _buildTransferLayout(isDark, walletsAsync, hasEnoughWalletsForTransfer, formatCurrency),
+                _buildTransferLayout(
+                  isDark,
+                  walletsAsync,
+                  hasEnoughWalletsForTransfer,
+                  formatCurrency,
+                ),
             ],
           ),
         ),
@@ -393,7 +460,11 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
     );
   }
 
-  Widget _buildManualLayout(bool isDark, AsyncValue<List<WalletModel>> walletsAsync, NumberFormat formatCurrency) {
+  Widget _buildManualLayout(
+    bool isDark,
+    AsyncValue<List<WalletModel>> walletsAsync,
+    NumberFormat formatCurrency,
+  ) {
     final categoriesAsync = ref.watch(categoryNotifierProvider);
 
     return Column(
@@ -415,7 +486,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
               inputFormatters: [ThousandsFormatter()],
               errorText: _manualAmountError,
               onChanged: (_) {
-                if (_manualAmountError != null) setState(() => _manualAmountError = null);
+                if (_manualAmountError != null) {
+                  setState(() => _manualAmountError = null);
+                }
               },
               onEditingComplete: _evaluateManualAmountField,
             ),
@@ -440,23 +513,32 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: _manualType == 'expense' 
-                        ? const Color(0xFFF43F5E).withValues(alpha: 0.15) 
+                    color: _manualType == 'expense'
+                        ? const Color(0xFFF43F5E).withValues(alpha: 0.15)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _manualType == 'expense' ? const Color(0xFFF43F5E) : Colors.grey.withValues(alpha: 0.2),
+                      color: _manualType == 'expense'
+                          ? const Color(0xFFF43F5E)
+                          : Colors.grey.withValues(alpha: 0.2),
                       width: _manualType == 'expense' ? 2 : 1,
                     ),
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_downward, color: Color(0xFFF43F5E), size: 16),
+                      Icon(
+                        Icons.arrow_downward,
+                        color: Color(0xFFF43F5E),
+                        size: 16,
+                      ),
                       SizedBox(width: 6),
                       Text(
                         'EXPENSE',
-                        style: TextStyle(color: Color(0xFFF43F5E), fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Color(0xFFF43F5E),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -477,23 +559,32 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: _manualType == 'income' 
-                        ? const Color(0xFF10B981).withValues(alpha: 0.15) 
+                    color: _manualType == 'income'
+                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _manualType == 'income' ? const Color(0xFF10B981) : Colors.grey.withValues(alpha: 0.2),
+                      color: _manualType == 'income'
+                          ? const Color(0xFF10B981)
+                          : Colors.grey.withValues(alpha: 0.2),
                       width: _manualType == 'income' ? 2 : 1,
                     ),
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_upward, color: Color(0xFF10B981), size: 16),
+                      Icon(
+                        Icons.arrow_upward,
+                        color: Color(0xFF10B981),
+                        size: 16,
+                      ),
                       SizedBox(width: 6),
                       Text(
                         'INCOME',
-                        style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -507,7 +598,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
         // 3. Category Selector (Horizontal chips)
         categoriesAsync.when(
           data: (categories) {
-            final filtered = categories.where((c) => c.type == _manualType).toList();
+            final filtered = categories
+                .where((c) => c.type == _manualType)
+                .toList();
             if (filtered.isEmpty) return const SizedBox.shrink();
 
             return Column(
@@ -526,7 +619,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                   spacing: 8.0,
                   runSpacing: 8.0,
                   children: filtered.map((cat) {
-                    final isSelected = _manualCategoryController.text.toLowerCase() == cat.name.toLowerCase();
+                    final isSelected =
+                        _manualCategoryController.text.toLowerCase() ==
+                        cat.name.toLowerCase();
                     final catColor = _getCategoryColor(cat.color, cat.type);
 
                     return ChoiceChip(
@@ -539,15 +634,21 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                       selected: isSelected,
                       selectedColor: catColor,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? Colors.white70 : Colors.black87),
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       onSelected: (selected) {
                         if (selected) {
                           HapticFeedback.lightImpact();
                           setState(() {
                             _manualCategoryController.text = cat.name;
-                            if (_manualCategoryError != null) _manualCategoryError = null;
+                            if (_manualCategoryError != null) {
+                              _manualCategoryError = null;
+                            }
                           });
                         }
                       },
@@ -614,12 +715,16 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             ),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isSelected ? Colors.white : Colors.transparent,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: gradient.first.withValues(alpha: isSelected ? 0.4 : 0.15),
+                                color: gradient.first.withValues(
+                                  alpha: isSelected ? 0.4 : 0.15,
+                                ),
                                 blurRadius: isSelected ? 8 : 4,
                                 offset: const Offset(0, 4),
                               ),
@@ -631,13 +736,20 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             children: [
                               Text(
                                 wallet.name,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 formatCurrency.format(wallet.balance),
-                                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -676,8 +788,8 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                 _isFetchingLocation
                     ? 'Mencari lokasi...'
                     : _recordLocation
-                        ? 'Lokasi disimpan (${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)})'
-                        : 'Simpan lokasi transaksi',
+                    ? 'Lokasi disimpan (${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)})'
+                    : 'Simpan lokasi transaksi',
                 style: TextStyle(
                   color: isDark ? Colors.white70 : Colors.black87,
                   fontSize: 14,
@@ -729,7 +841,9 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
             inputFormatters: [ThousandsFormatter()],
             errorText: _transferAmountError,
             onChanged: (_) {
-              if (_transferAmountError != null) setState(() => _transferAmountError = null);
+              if (_transferAmountError != null) {
+                setState(() => _transferAmountError = null);
+              }
             },
             onEditingComplete: _evaluateTransferAmountField,
           ),
@@ -746,14 +860,19 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                 decoration: BoxDecoration(
                   color: Colors.amber.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: Colors.amber.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'bottom_sheet.transfer_requires_wallets'.tr(),
-                      style: TextStyle(color: isDark ? Colors.amber[200] : Colors.amber[800], fontSize: 13),
+                      style: TextStyle(
+                        color: isDark ? Colors.amber[200] : Colors.amber[800],
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -830,12 +949,16 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             ),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isSelected ? Colors.white : Colors.transparent,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: gradient.first.withValues(alpha: isSelected ? 0.4 : 0.15),
+                                color: gradient.first.withValues(
+                                  alpha: isSelected ? 0.4 : 0.15,
+                                ),
                                 blurRadius: isSelected ? 8 : 4,
                                 offset: const Offset(0, 4),
                               ),
@@ -847,13 +970,20 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             children: [
                               Text(
                                 wallet.name,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 formatCurrency.format(wallet.balance),
-                                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -904,12 +1034,16 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             ),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isSelected ? Colors.white : Colors.transparent,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
                               width: 2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: gradient.first.withValues(alpha: isSelected ? 0.4 : 0.15),
+                                color: gradient.first.withValues(
+                                  alpha: isSelected ? 0.4 : 0.15,
+                                ),
                                 blurRadius: isSelected ? 8 : 4,
                                 offset: const Offset(0, 4),
                               ),
@@ -921,13 +1055,20 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                             children: [
                               Text(
                                 wallet.name,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 formatCurrency.format(wallet.balance),
-                                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -966,8 +1107,8 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
                 _isFetchingLocation
                     ? 'Mencari lokasi...'
                     : _recordLocation
-                        ? 'Lokasi disimpan (${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)})'
-                        : 'Simpan lokasi transfer',
+                    ? 'Lokasi disimpan (${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)})'
+                    : 'Simpan lokasi transfer',
                 style: TextStyle(
                   color: isDark ? Colors.white70 : Colors.black87,
                   fontSize: 14,
@@ -1007,7 +1148,11 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
         children: [
           Text(
             'bottom_sheet.no_wallet_warning'.tr(),
-            style: TextStyle(color: isDark ? Colors.amber[200] : Colors.amber[800], fontSize: 13, height: 1.4),
+            style: TextStyle(
+              color: isDark ? Colors.amber[200] : Colors.amber[800],
+              fontSize: 13,
+              height: 1.4,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -1049,7 +1194,12 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
         children: [
           Text(
             'Failed to load wallets: $errorText',
-            style: TextStyle(color: isDark ? Colors.red[200] : Colors.red[800], fontSize: 13, height: 1.4, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: isDark ? Colors.red[200] : Colors.red[800],
+              fontSize: 13,
+              height: 1.4,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -1077,4 +1227,3 @@ class _TransactionTypeBottomSheetState extends ConsumerState<TransactionTypeBott
     );
   }
 }
-

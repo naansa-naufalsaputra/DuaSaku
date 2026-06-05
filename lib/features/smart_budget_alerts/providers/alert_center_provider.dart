@@ -26,22 +26,23 @@ final alertRepositoryProvider = Provider<AlertRepositoryInterface>((ref) {
 /// Provides the alert preferences repository (abstract interface type).
 final alertPreferencesRepositoryProvider =
     Provider<AlertPreferencesRepositoryInterface>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return AlertPreferencesRepository(db);
-});
+      final db = ref.watch(appDatabaseProvider);
+      return AlertPreferencesRepository(db);
+    });
 
 /// Provides the alert threshold status repository (abstract interface type).
 final alertThresholdStatusRepositoryProvider =
     Provider<AlertThresholdStatusRepositoryInterface>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return AlertThresholdStatusRepository(db);
-});
+      final db = ref.watch(appDatabaseProvider);
+      return AlertThresholdStatusRepository(db);
+    });
 
 // ─── Service Providers ────────────────────────────────────────────────────────
 
 /// Provides the BudgetNotificationService for sending push notifications.
-final budgetNotificationServiceProvider =
-    Provider<BudgetNotificationService>((ref) {
+final budgetNotificationServiceProvider = Provider<BudgetNotificationService>((
+  ref,
+) {
   return BudgetNotificationService();
 });
 
@@ -76,8 +77,9 @@ final budgetAlertEvaluatorProvider = Provider<BudgetAlertEvaluator>((ref) {
   return BudgetAlertEvaluator(
     alertEngine: ref.watch(alertEngineProvider),
     predictionEngine: ref.watch(predictionEngineProvider),
-    statusRepo: ref.watch(alertThresholdStatusRepositoryProvider)
-        as AlertThresholdStatusRepository,
+    statusRepo:
+        ref.watch(alertThresholdStatusRepositoryProvider)
+            as AlertThresholdStatusRepository,
   );
 });
 
@@ -86,8 +88,9 @@ final budgetAlertEvaluatorProvider = Provider<BudgetAlertEvaluator>((ref) {
 /// Returns an empty list if no user is logged in.
 /// Auto-disposes when no longer watched (e.g., navigating away from
 /// Alert Center screen).
-final alertCenterProvider =
-    StreamProvider.autoDispose<List<BudgetAlertModel>>((ref) {
+final alertCenterProvider = StreamProvider.autoDispose<List<BudgetAlertModel>>((
+  ref,
+) {
   final user = ref.watch(userProvider);
   if (user == null) return Stream.value([]);
   final repo = ref.watch(alertRepositoryProvider);

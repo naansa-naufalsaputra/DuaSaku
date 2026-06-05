@@ -17,9 +17,11 @@ import 'package:duasaku_app/core/background/recurring_executor.dart';
 /// Creates a fresh in-memory database for testing.
 AppDatabase _createTestDb() {
   return AppDatabase.forTesting(
-    NativeDatabase.memory(setup: (db) {
-      db.execute('PRAGMA foreign_keys = ON;');
-    }),
+    NativeDatabase.memory(
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    ),
   );
 }
 
@@ -29,28 +31,39 @@ Future<String> _seedWallet(
   required String walletId,
   required double initialBalance,
 }) async {
-  await db.into(db.wallets).insert(WalletsCompanion.insert(
-        id: walletId,
-        userId: 'test-user',
-        name: 'Test Wallet',
-        type: 'Cash',
-        balance: Value(initialBalance),
-        icon: 'wallet',
-        color: '#000000',
-        createdAt: DateTime(2024, 1, 1),
-      ));
+  await db
+      .into(db.wallets)
+      .insert(
+        WalletsCompanion.insert(
+          id: walletId,
+          userId: 'test-user',
+          name: 'Test Wallet',
+          type: 'Cash',
+          balance: Value(initialBalance),
+          icon: 'wallet',
+          color: '#000000',
+          createdAt: DateTime(2024, 1, 1),
+        ),
+      );
   return walletId;
 }
 
 /// Seeds a category required for recurring transactions.
-Future<String> _seedCategory(AppDatabase db, {required String categoryId}) async {
-  await db.into(db.categories).insert(CategoriesCompanion.insert(
-        id: categoryId,
-        userId: 'test-user',
-        name: 'Test Category',
-        type: 'expense',
-        createdAt: DateTime(2024, 1, 1),
-      ));
+Future<String> _seedCategory(
+  AppDatabase db, {
+  required String categoryId,
+}) async {
+  await db
+      .into(db.categories)
+      .insert(
+        CategoriesCompanion.insert(
+          id: categoryId,
+          userId: 'test-user',
+          name: 'Test Category',
+          type: 'expense',
+          createdAt: DateTime(2024, 1, 1),
+        ),
+      );
   return categoryId;
 }
 
@@ -67,7 +80,9 @@ Future<String> _seedRecurringTransaction(
   // Use a date that is just barely in the past (today minus 1 minute)
   // with a yearly frequency so only one catch-up execution happens.
   final recentPast = DateTime.now().subtract(const Duration(minutes: 1));
-  await db.into(db.recurringTransactions).insert(
+  await db
+      .into(db.recurringTransactions)
+      .insert(
         RecurringTransactionsCompanion.insert(
           id: id,
           userId: 'test-user',
@@ -100,100 +115,102 @@ void main() {
   //   initialSourceBalance - amount AND the destination wallet balance SHALL
   //   equal initialDestBalance + amount
   // ──────────────────────────────────────────────────────────────────────────
-  group(
-      'Property 1: Balance adjustment correctness by transaction type',
-      () {
+  group('Property 1: Balance adjustment correctness by transaction type', () {
     // --- Expense: wallet balance = initialBalance - amount ---
     Glados2(
       any.doubleInRange(0, 100000), // initial balance
       any.doubleInRange(0.01, 50000), // positive transaction amount
-    ).test(
-      'expense transaction decreases wallet balance by exactly the amount',
-      (initialBalance, amount) async {
-        final db = _createTestDb();
-        try {
-          final walletId = await _seedWallet(db,
-              walletId: 'wallet-expense', initialBalance: initialBalance);
-          final categoryId =
-              await _seedCategory(db, categoryId: 'cat-expense');
+    ).test('expense transaction decreases wallet balance by exactly the amount', (
+      initialBalance,
+      amount,
+    ) async {
+      final db = _createTestDb();
+      try {
+        final walletId = await _seedWallet(
+          db,
+          walletId: 'wallet-expense',
+          initialBalance: initialBalance,
+        );
+        final categoryId = await _seedCategory(db, categoryId: 'cat-expense');
 
-          // Set up recurring transaction as expense
-          await _seedRecurringTransaction(
-            db,
-            id: 'recurring-expense',
-            walletId: walletId,
-            categoryId: categoryId,
-            amount: amount,
-            type: 'expense',
-          );
+        // Set up recurring transaction as expense
+        await _seedRecurringTransaction(
+          db,
+          id: 'recurring-expense',
+          walletId: walletId,
+          categoryId: categoryId,
+          amount: amount,
+          type: 'expense',
+        );
 
-          // Create executor and execute
-          final executor = RecurringExecutor(db);
-          await executor.execute();
+        // Create executor and execute
+        final executor = RecurringExecutor(db);
+        await executor.execute();
 
-          // Verify wallet balance
-          final wallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(walletId)))
-              .getSingle();
+        // Verify wallet balance
+        final wallet = await (db.select(
+          db.wallets,
+        )..where((w) => w.id.equals(walletId))).getSingle();
 
-          expect(
-            wallet.balance,
-            closeTo(initialBalance - amount, 0.001),
-            reason:
-                'Expense: expected ${initialBalance - amount} but got ${wallet.balance} '
-                '(initial=$initialBalance, amount=$amount)',
-          );
-        } finally {
-          await db.close();
-        }
-      },
-    );
+        expect(
+          wallet.balance,
+          closeTo(initialBalance - amount, 0.001),
+          reason:
+              'Expense: expected ${initialBalance - amount} but got ${wallet.balance} '
+              '(initial=$initialBalance, amount=$amount)',
+        );
+      } finally {
+        await db.close();
+      }
+    });
 
     // --- Income: wallet balance = initialBalance + amount ---
     Glados2(
       any.doubleInRange(0, 100000), // initial balance
       any.doubleInRange(0.01, 50000), // positive transaction amount
-    ).test(
-      'income transaction increases wallet balance by exactly the amount',
-      (initialBalance, amount) async {
-        final db = _createTestDb();
-        try {
-          final walletId = await _seedWallet(db,
-              walletId: 'wallet-income', initialBalance: initialBalance);
-          final categoryId =
-              await _seedCategory(db, categoryId: 'cat-income');
+    ).test('income transaction increases wallet balance by exactly the amount', (
+      initialBalance,
+      amount,
+    ) async {
+      final db = _createTestDb();
+      try {
+        final walletId = await _seedWallet(
+          db,
+          walletId: 'wallet-income',
+          initialBalance: initialBalance,
+        );
+        final categoryId = await _seedCategory(db, categoryId: 'cat-income');
 
-          // Set up recurring transaction as income
-          await _seedRecurringTransaction(
-            db,
-            id: 'recurring-income',
-            walletId: walletId,
-            categoryId: categoryId,
-            amount: amount,
-            type: 'income',
-          );
+        // Set up recurring transaction as income
+        await _seedRecurringTransaction(
+          db,
+          id: 'recurring-income',
+          walletId: walletId,
+          categoryId: categoryId,
+          amount: amount,
+          type: 'income',
+        );
 
-          // Create executor and execute
-          final executor = RecurringExecutor(db);
-          await executor.execute();
+        // Create executor and execute
+        final executor = RecurringExecutor(db);
+        await executor.execute();
 
-          // Verify wallet balance
-          final wallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(walletId)))
-              .getSingle();
+        // Verify wallet balance
+        final wallet = await (db.select(
+          db.wallets,
+        )..where((w) => w.id.equals(walletId))).getSingle();
 
-          expect(
-            wallet.balance,
-            closeTo(initialBalance + amount, 0.001),
-            reason:
-                'Income: expected ${initialBalance + amount} but got ${wallet.balance} '
-                '(initial=$initialBalance, amount=$amount)',
-          );
-        } finally {
-          await db.close();
-        }
-      },
-    );
+        expect(
+          wallet.balance,
+          closeTo(initialBalance + amount, 0.001),
+          reason:
+              'Income: expected ${initialBalance + amount} but got ${wallet.balance} '
+              '(initial=$initialBalance, amount=$amount)',
+        );
+      } finally {
+        await db.close();
+      }
+    });
 
     // --- Transfer: source balance = initialSource - amount,
     //               dest balance = initialDest + amount ---
@@ -214,16 +231,24 @@ void main() {
           final initialDestBalance = initialSourceBalance * 0.5;
           final amount = (initialSourceBalance * 0.1).clamp(0.01, 50000.0);
 
-          final sourceWalletId = await _seedWallet(db,
-              walletId: 'wallet-source', initialBalance: initialSourceBalance);
-          final destWalletId = await _seedWallet(db,
-              walletId: 'wallet-dest', initialBalance: initialDestBalance);
+          final sourceWalletId = await _seedWallet(
+            db,
+            walletId: 'wallet-source',
+            initialBalance: initialSourceBalance,
+          );
+          final destWalletId = await _seedWallet(
+            db,
+            walletId: 'wallet-dest',
+            initialBalance: initialDestBalance,
+          );
 
           // Replicate what the executor does for transfers at the DB level:
           // Insert transaction + adjust both wallets in a single transaction block
           await db.transaction(() async {
             // Insert the transfer transaction
-            await db.into(db.transactions).insert(
+            await db
+                .into(db.transactions)
+                .insert(
                   TransactionsCompanion.insert(
                     userId: 'test-user',
                     walletId: Value(sourceWalletId),
@@ -236,28 +261,30 @@ void main() {
                 );
 
             // Decrease source wallet
-            final sourceWallet = await (db.select(db.wallets)
-                  ..where((w) => w.id.equals(sourceWalletId)))
-                .getSingle();
-            await (db.update(db.wallets)
-                  ..where((w) => w.id.equals(sourceWalletId)))
-                .write(WalletsCompanion(
-                    balance: Value(sourceWallet.balance - amount)));
+            final sourceWallet = await (db.select(
+              db.wallets,
+            )..where((w) => w.id.equals(sourceWalletId))).getSingle();
+            await (db.update(
+              db.wallets,
+            )..where((w) => w.id.equals(sourceWalletId))).write(
+              WalletsCompanion(balance: Value(sourceWallet.balance - amount)),
+            );
 
             // Increase destination wallet
-            final destWallet = await (db.select(db.wallets)
-                  ..where((w) => w.id.equals(destWalletId)))
-                .getSingle();
-            await (db.update(db.wallets)
-                  ..where((w) => w.id.equals(destWalletId)))
-                .write(WalletsCompanion(
-                    balance: Value(destWallet.balance + amount)));
+            final destWallet = await (db.select(
+              db.wallets,
+            )..where((w) => w.id.equals(destWalletId))).getSingle();
+            await (db.update(
+              db.wallets,
+            )..where((w) => w.id.equals(destWalletId))).write(
+              WalletsCompanion(balance: Value(destWallet.balance + amount)),
+            );
           });
 
           // Verify source wallet balance
-          final sourceWallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(sourceWalletId)))
-              .getSingle();
+          final sourceWallet = await (db.select(
+            db.wallets,
+          )..where((w) => w.id.equals(sourceWalletId))).getSingle();
           expect(
             sourceWallet.balance,
             closeTo(initialSourceBalance - amount, 0.001),
@@ -267,9 +294,9 @@ void main() {
           );
 
           // Verify destination wallet balance
-          final destWallet = await (db.select(db.wallets)
-                ..where((w) => w.id.equals(destWalletId)))
-              .getSingle();
+          final destWallet = await (db.select(
+            db.wallets,
+          )..where((w) => w.id.equals(destWalletId))).getSingle();
           expect(
             destWallet.balance,
             closeTo(initialDestBalance + amount, 0.001),

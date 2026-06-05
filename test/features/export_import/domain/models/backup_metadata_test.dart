@@ -112,16 +112,17 @@ void main() {
       });
 
       test('throws FormatException when appVersion is missing', () {
-        final json = Map<String, dynamic>.from(validJson)
-          ..remove('appVersion');
+        final json = Map<String, dynamic>.from(validJson)..remove('appVersion');
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('appVersion'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('appVersion'),
+            ),
+          ),
         );
       });
 
@@ -131,53 +132,58 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('schemaVersion'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('schemaVersion'),
+            ),
+          ),
         );
       });
 
       test('throws FormatException when exportedAt is missing', () {
-        final json = Map<String, dynamic>.from(validJson)
-          ..remove('exportedAt');
+        final json = Map<String, dynamic>.from(validJson)..remove('exportedAt');
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('exportedAt'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('exportedAt'),
+            ),
+          ),
         );
       });
 
       test('throws FormatException when deviceId is missing', () {
-        final json = Map<String, dynamic>.from(validJson)
-          ..remove('deviceId');
+        final json = Map<String, dynamic>.from(validJson)..remove('deviceId');
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('deviceId'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('deviceId'),
+            ),
+          ),
         );
       });
 
       test('throws FormatException when exportedBy is missing', () {
-        final json = Map<String, dynamic>.from(validJson)
-          ..remove('exportedBy');
+        final json = Map<String, dynamic>.from(validJson)..remove('exportedBy');
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('exportedBy'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('exportedBy'),
+            ),
+          ),
         );
       });
 
@@ -187,11 +193,13 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('duasaku'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('duasaku'),
+            ),
+          ),
         );
       });
 
@@ -201,11 +209,13 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('ISO 8601'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('ISO 8601'),
+            ),
+          ),
         );
       });
 
@@ -215,11 +225,13 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('positive integer'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('positive integer'),
+            ),
+          ),
         );
       });
 
@@ -229,11 +241,13 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('positive integer'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('positive integer'),
+            ),
+          ),
         );
       });
 
@@ -243,17 +257,18 @@ void main() {
 
         expect(
           () => BackupMetadata.fromJson(json),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            contains('positive integer'),
-          )),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('positive integer'),
+            ),
+          ),
         );
       });
 
       test('throws FormatException when a field is null', () {
-        final json = Map<String, dynamic>.from(validJson)
-          ..['deviceId'] = null;
+        final json = Map<String, dynamic>.from(validJson)..['deviceId'] = null;
 
         expect(
           () => BackupMetadata.fromJson(json),

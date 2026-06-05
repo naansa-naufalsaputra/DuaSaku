@@ -8,15 +8,12 @@ import '../widgets/glass/glass_navigation_bar.dart';
 class MainScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainScaffold({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainScaffold({super.key, required this.navigationShell});
 
   void _onItemTapped(int index) {
     // Memberikan haptic feedback setiap pindah tab sesuai instruksi Plan
     HapticFeedback.lightImpact();
-    
+
     // Berpindah stateful branch
     navigationShell.goBranch(
       index,

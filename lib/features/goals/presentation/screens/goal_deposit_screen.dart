@@ -173,7 +173,9 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
                     labelText: 'goals.deposit_amount'.tr(),
                     errorText: _amountError,
                     onChanged: (_) {
-                      if (_amountError != null) setState(() => _amountError = null);
+                      if (_amountError != null) {
+                        setState(() => _amountError = null);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),

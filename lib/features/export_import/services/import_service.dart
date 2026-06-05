@@ -42,9 +42,7 @@ class ImportService implements ImportServiceInterface {
   Future<Result<ImportPreview, AppError>> previewBackup(String filePath) async {
     // 1. Check file extension
     if (!filePath.toLowerCase().endsWith('.json')) {
-      return Failure(
-        AppError.validation('export_import.error.not_json_file'),
-      );
+      return Failure(AppError.validation('export_import.error.not_json_file'));
     }
 
     // 2. Read file and check size
@@ -52,9 +50,7 @@ class ImportService implements ImportServiceInterface {
     final fileSizeBytes = await file.length();
 
     if (fileSizeBytes > _maxFileSizeBytes) {
-      return Failure(
-        AppError.validation('export_import.error.file_too_large'),
-      );
+      return Failure(AppError.validation('export_import.error.file_too_large'));
     }
 
     final content = await file.readAsString();
@@ -63,10 +59,7 @@ class ImportService implements ImportServiceInterface {
     try {
       final schemaVersion = currentSchemaVersion;
       final parsed = await Isolate.run(
-        () => IsolateHelpers.parseAndValidateBackupJson(
-          content,
-          schemaVersion,
-        ),
+        () => IsolateHelpers.parseAndValidateBackupJson(content, schemaVersion),
       );
 
       // 4. Build ImportPreview from parsed data
@@ -107,10 +100,7 @@ class ImportService implements ImportServiceInterface {
     try {
       final schemaVersion = currentSchemaVersion;
       parsed = await Isolate.run(
-        () => IsolateHelpers.parseAndValidateBackupJson(
-          content,
-          schemaVersion,
-        ),
+        () => IsolateHelpers.parseAndValidateBackupJson(content, schemaVersion),
       );
     } on FormatException catch (e) {
       return Failure(_mapFormatExceptionToAppError(e));

@@ -30,21 +30,68 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // Onboarding Data State
   int _walletCount = 1;
-  final List<TextEditingController> _walletNameControllers = [TextEditingController()];
-  final List<TextEditingController> _walletBalanceControllers = [TextEditingController()];
+  final List<TextEditingController> _walletNameControllers = [
+    TextEditingController(),
+  ];
+  final List<TextEditingController> _walletBalanceControllers = [
+    TextEditingController(),
+  ];
   final List<String> _walletTypes = ['Bank'];
   final List<String?> _walletNameErrors = [null];
   final List<String?> _walletBalanceErrors = [null];
 
   // Category Selection State
   final List<CategoryModel> _defaultCategories = [
-    CategoryModel(id: 'food', userId: AppConstants.defaultUserId, name: 'Food', type: 'expense', icon: 'restaurant', color: '#FF9800', createdAt: DateTime.now()),
-    CategoryModel(id: 'transport', userId: AppConstants.defaultUserId, name: 'Transport', type: 'expense', icon: 'directions_car', color: '#2196F3', createdAt: DateTime.now()),
-    CategoryModel(id: 'salary', userId: AppConstants.defaultUserId, name: 'Salary', type: 'income', icon: 'attach_money', color: '#4CAF50', createdAt: DateTime.now()),
-    CategoryModel(id: 'bills', userId: AppConstants.defaultUserId, name: 'Bills', type: 'expense', icon: 'receipt', color: '#F44336', createdAt: DateTime.now()),
-    CategoryModel(id: 'shopping', userId: AppConstants.defaultUserId, name: 'Shopping', type: 'expense', icon: 'shopping_bag', color: '#E91E63', createdAt: DateTime.now()),
+    CategoryModel(
+      id: 'food',
+      userId: AppConstants.defaultUserId,
+      name: 'Food',
+      type: 'expense',
+      icon: 'restaurant',
+      color: '#FF9800',
+      createdAt: DateTime.now(),
+    ),
+    CategoryModel(
+      id: 'transport',
+      userId: AppConstants.defaultUserId,
+      name: 'Transport',
+      type: 'expense',
+      icon: 'directions_car',
+      color: '#2196F3',
+      createdAt: DateTime.now(),
+    ),
+    CategoryModel(
+      id: 'salary',
+      userId: AppConstants.defaultUserId,
+      name: 'Salary',
+      type: 'income',
+      icon: 'attach_money',
+      color: '#4CAF50',
+      createdAt: DateTime.now(),
+    ),
+    CategoryModel(
+      id: 'bills',
+      userId: AppConstants.defaultUserId,
+      name: 'Bills',
+      type: 'expense',
+      icon: 'receipt',
+      color: '#F44336',
+      createdAt: DateTime.now(),
+    ),
+    CategoryModel(
+      id: 'shopping',
+      userId: AppConstants.defaultUserId,
+      name: 'Shopping',
+      type: 'expense',
+      icon: 'shopping_bag',
+      color: '#E91E63',
+      createdAt: DateTime.now(),
+    ),
   ];
-  late final List<bool> _selectedCategories = List.generate(_defaultCategories.length, (_) => true);
+  late final List<bool> _selectedCategories = List.generate(
+    _defaultCategories.length,
+    (_) => true,
+  );
 
   // Custom Categories
   final List<CategoryModel> _customCategories = [];
@@ -98,7 +145,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final walletRepo = ref.read(walletRepositoryProvider);
     for (int i = 0; i < _walletCount; i++) {
       final name = _walletNameControllers[i].text.trim();
-      final balance = ThousandsFormatter.parse(_walletBalanceControllers[i].text);
+      final balance = ThousandsFormatter.parse(
+        _walletBalanceControllers[i].text,
+      );
       final wallet = WalletModel(
         id: const Uuid().v4(),
         userId: AppConstants.defaultUserId,
@@ -112,7 +161,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     // 2. Save Selected Categories & Custom Categories
     final categoryRepo = ref.read(categoryRepositoryProvider);
-    
+
     // Default categories are seeded automatically by the Database onCreate,
     // so we only need to remove the unchecked ones.
     for (int i = 0; i < _defaultCategories.length; i++) {
@@ -167,8 +216,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     bool hasError = false;
     for (int i = 0; i < _walletCount; i++) {
       setState(() {
-        _walletNameErrors[i] = _walletNameControllers[i].text.trim().isEmpty ? 'onboarding.wallet_name_required'.tr() : null;
-        _walletBalanceErrors[i] = _walletBalanceControllers[i].text.trim().isEmpty ? 'onboarding.wallet_balance_required'.tr() : null;
+        _walletNameErrors[i] = _walletNameControllers[i].text.trim().isEmpty
+            ? 'onboarding.wallet_name_required'.tr()
+            : null;
+        _walletBalanceErrors[i] =
+            _walletBalanceControllers[i].text.trim().isEmpty
+            ? 'onboarding.wallet_balance_required'.tr()
+            : null;
       });
       if (_walletNameErrors[i] != null || _walletBalanceErrors[i] != null) {
         hasError = true;
@@ -189,82 +243,113 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     showDialog(
       context: context,
       builder: (ctx) {
-        return StatefulBuilder(builder: (context, setDialogState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          return AlertDialog(
-            backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text('onboarding.add_custom_category'.tr(), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GlassInputField(
-                  controller: catNameController,
-                  labelText: 'onboarding.category_name'.tr(),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'onboarding.add_custom_category'.tr(),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GlassInputField(
+                    controller: catNameController,
+                    labelText: 'onboarding.category_name'.tr(),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'onboarding.category_type'.tr(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: catType == 'expense'
+                                ? const Color(0xFFF44336)
+                                : (isDark ? Colors.white10 : Colors.black12),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () =>
+                              setDialogState(() => catType = 'expense'),
+                          child: Text('onboarding.expense'.tr()),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: catType == 'income'
+                                ? const Color(0xFF4CAF50)
+                                : (isDark ? Colors.white10 : Colors.black12),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () =>
+                              setDialogState(() => catType = 'income'),
+                          child: Text('onboarding.income'.tr()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'cancel'.tr(),
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text('onboarding.category_type'.tr(), style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black54)),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: catType == 'expense' ? const Color(0xFFF44336) : (isDark ? Colors.white10 : Colors.black12),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () => setDialogState(() => catType = 'expense'),
-                        child: Text('onboarding.expense'.tr()),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: catType == 'income' ? const Color(0xFF4CAF50) : (isDark ? Colors.white10 : Colors.black12),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () => setDialogState(() => catType = 'income'),
-                        child: Text('onboarding.income'.tr()),
-                      ),
-                    ),
-                  ],
+                TextButton(
+                  onPressed: () {
+                    final name = catNameController.text.trim();
+                    if (name.isNotEmpty) {
+                      final newCat = CategoryModel(
+                        id: const Uuid().v4(),
+                        userId: AppConstants.defaultUserId,
+                        name: name,
+                        type: catType,
+                        icon: catType == 'income'
+                            ? 'attach_money'
+                            : 'shopping_bag',
+                        color: catType == 'income' ? '#4CAF50' : '#E91E63',
+                        createdAt: DateTime.now(),
+                      );
+                      setState(() {
+                        _customCategories.add(newCat);
+                      });
+                      Navigator.pop(ctx);
+                      HapticFeedback.mediumImpact();
+                    }
+                  },
+                  child: Text(
+                    'onboarding.add'.tr(),
+                    style: const TextStyle(color: Color(0xFF06B6D4)),
+                  ),
                 ),
               ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text('cancel'.tr(), style: const TextStyle(color: Colors.grey)),
-              ),
-              TextButton(
-                onPressed: () {
-                  final name = catNameController.text.trim();
-                  if (name.isNotEmpty) {
-                    final newCat = CategoryModel(
-                      id: const Uuid().v4(),
-                      userId: AppConstants.defaultUserId,
-                      name: name,
-                      type: catType,
-                      icon: catType == 'income' ? 'attach_money' : 'shopping_bag',
-                      color: catType == 'income' ? '#4CAF50' : '#E91E63',
-                      createdAt: DateTime.now(),
-                    );
-                    setState(() {
-                      _customCategories.add(newCat);
-                    });
-                    Navigator.pop(ctx);
-                    HapticFeedback.mediumImpact();
-                  }
-                },
-                child: Text('onboarding.add'.tr(), style: const TextStyle(color: Color(0xFF06B6D4))),
-              ),
-            ],
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -336,7 +421,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               children: [
                 // Header & Stepper Indicator
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
                   child: Column(
                     children: [
                       Row(
@@ -366,7 +454,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             width: isActive ? 24 : 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: isActive ? const Color(0xFF06B6D4) : Colors.grey.withValues(alpha: 0.5),
+                              color: isActive
+                                  ? const Color(0xFF06B6D4)
+                                  : Colors.grey.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           );
@@ -408,10 +498,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Container(
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Column(
@@ -434,17 +528,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('onboarding.wallet_count'.tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(
+                  'onboarding.wallet_count'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline, size: 28),
-                      onPressed: _walletCount > 1 ? () => _adjustWalletFields(_walletCount - 1) : null,
+                      onPressed: _walletCount > 1
+                          ? () => _adjustWalletFields(_walletCount - 1)
+                          : null,
                     ),
-                    Text('$_walletCount', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(
+                      '$_walletCount',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline, size: 28),
-                      onPressed: _walletCount < 5 ? () => _adjustWalletFields(_walletCount + 1) : null,
+                      onPressed: _walletCount < 5
+                          ? () => _adjustWalletFields(_walletCount + 1)
+                          : null,
                     ),
                   ],
                 ),
@@ -465,7 +575,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       Text(
                         'Wallet #${index + 1}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF06B6D4)),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF06B6D4),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       GlassInputField(
@@ -486,7 +600,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           final isSelected = _walletTypes[index] == type;
                           return Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4.0,
+                              ),
                               child: ChoiceChip(
                                 label: Text(type),
                                 selected: isSelected,
@@ -539,10 +655,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Container(
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Column(
@@ -569,7 +689,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               itemBuilder: (context, index) {
                 final cat = _defaultCategories[index];
                 return SwitchListTile(
-                  title: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  title: Text(
+                    cat.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   subtitle: Text(cat.type.tr()),
                   value: _selectedCategories[index],
                   activeThumbColor: const Color(0xFF06B6D4),
@@ -586,7 +709,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             // Custom categories list
             if (_customCategories.isNotEmpty) ...[
               const Divider(height: 32),
-              const Text('Kategori Kustom Anda:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Kategori Kustom Anda:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               ListView.builder(
                 shrinkWrap: true,
@@ -598,7 +724,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     title: Text(cat.name),
                     subtitle: Text(cat.type.tr()),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                      ),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         setState(() {
@@ -616,10 +745,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFF06B6D4)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               icon: const Icon(Icons.add, color: Color(0xFF06B6D4)),
-              label: Text('onboarding.add_custom_category'.tr(), style: const TextStyle(color: Color(0xFF06B6D4), fontWeight: FontWeight.bold)),
+              label: Text(
+                'onboarding.add_custom_category'.tr(),
+                style: const TextStyle(
+                  color: Color(0xFF06B6D4),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onPressed: _addCustomCategoryDialog,
             ),
 
@@ -649,16 +786,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // STEP 3: Security Setup (PIN Entry)
   Widget _buildPinStep(ThemeData theme, bool isDark) {
-    final currentPinLength = _isConfirmingPin ? _confirmPin.length : _pin.length;
+    final currentPinLength = _isConfirmingPin
+        ? _confirmPin.length
+        : _pin.length;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Container(
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Column(
@@ -692,9 +835,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   height: 16,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isFilled ? const Color(0xFF06B6D4) : Colors.transparent,
+                    color: isFilled
+                        ? const Color(0xFF06B6D4)
+                        : Colors.transparent,
                     border: Border.all(
-                      color: isFilled ? const Color(0xFF06B6D4) : Colors.grey.withValues(alpha: 0.5),
+                      color: isFilled
+                          ? const Color(0xFF06B6D4)
+                          : Colors.grey.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
@@ -747,7 +894,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         },
                         child: Text(
                           'onboarding.skip_security'.tr(),
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),

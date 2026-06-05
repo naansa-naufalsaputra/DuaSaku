@@ -15,7 +15,8 @@ import '../domain/transaction_parser_service_interface.dart';
 /// Joint NLP model (Intent, Category, and NER) parser service using TensorFlow Lite.
 ///
 /// Executes 100% locally and offline on-device.
-class TfliteTransactionParserService implements TransactionParserServiceInterface {
+class TfliteTransactionParserService
+    implements TransactionParserServiceInterface {
   Interpreter? _interpreter;
   Map<String, dynamic>? _metadata;
   DartTokenizer? _tokenizer;
@@ -35,7 +36,7 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
         metadataString = await rootBundle.loadString('assets/ml/metadata.json');
       }
       _metadata = json.decode(metadataString) as Map<String, dynamic>;
-      
+
       // 2. Initialize pure DartTokenizer with loaded metadata
       _tokenizer = DartTokenizer.fromJson(_metadata!);
 
@@ -45,9 +46,13 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
       } else {
         _interpreter = await Interpreter.fromAsset('ml/duasaku_level3.tflite');
       }
-      debugPrint('[TfliteTransactionParserService] Successfully loaded model and metadata.');
+      debugPrint(
+        '[TfliteTransactionParserService] Successfully loaded model and metadata.',
+      );
     } catch (e) {
-      debugPrint('[TfliteTransactionParserService] Failed to initialize TFLite: $e');
+      debugPrint(
+        '[TfliteTransactionParserService] Failed to initialize TFLite: $e',
+      );
       rethrow;
     }
   }
@@ -62,7 +67,9 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
     await initialize();
 
     if (_interpreter == null || _tokenizer == null || _metadata == null) {
-      throw StateError('TfliteTransactionParserService was not initialized correctly.');
+      throw StateError(
+        'TfliteTransactionParserService was not initialized correctly.',
+      );
     }
 
     // 1. Preprocess & tokenize input text
@@ -80,7 +87,7 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
     for (int i = 0; i < outputTensors.length; i++) {
       final tensor = outputTensors[i];
       final shape = tensor.shape;
-      
+
       if (shape.length == 2 && shape[1] == 1) {
         // Intent output tensor [1, 1]
         outputs[i] = List.generate(1, (_) => List.filled(1, 0.0));
@@ -100,7 +107,9 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
     }
 
     if (intentIdx == null || categoryIdx == null || nerIdx == null) {
-      throw StateError('The loaded TFLite model output shapes do not match expected shapes (Intent, Category, NER).');
+      throw StateError(
+        'The loaded TFLite model output shapes do not match expected shapes (Intent, Category, NER).',
+      );
     }
 
     // 3. Run Inference
@@ -110,7 +119,9 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
     final intentProb = (outputs[intentIdx] as List<List<double>>)[0][0];
     final intentMap = _metadata!['intent_map'] as Map<String, dynamic>;
     final intentIdxStr = intentProb > 0.5 ? '1' : '0';
-    final type = intentMap[intentIdxStr] as String? ?? (intentProb > 0.5 ? 'income' : 'expense');
+    final type =
+        intentMap[intentIdxStr] as String? ??
+        (intentProb > 0.5 ? 'income' : 'expense');
 
     // 5. Decode Category (Softmax Argmax)
     final categoryProbs = (outputs[categoryIdx] as List<List<double>>)[0];
@@ -123,12 +134,19 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
       }
     }
     final categoryMap = _metadata!['category_map'] as Map<String, dynamic>;
-    final parsedCategory = categoryMap[bestCatIdx.toString()] as String? ?? 'Food';
+    final parsedCategory =
+        categoryMap[bestCatIdx.toString()] as String? ?? 'Food';
 
     // 6. Decode NER Slots
     // PENTING: Gunakan rawTokens untuk mempertahankan titik/koma pada angka
-    final rawTokens = inputText.toLowerCase().split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
-    final nerOutput = (outputs[nerIdx] as List<List<List<double>>>)[0]; // max_len x num_ner_tags
+    final rawTokens = inputText
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((s) => s.isNotEmpty)
+        .toList();
+    final nerOutput =
+        (outputs[nerIdx]
+            as List<List<List<double>>>)[0]; // max_len x num_ner_tags
     final nerMap = _metadata!['ner_map'] as Map<String, dynamic>;
 
     final amountTokens = <String>[];
@@ -188,7 +206,7 @@ class TfliteTransactionParserService implements TransactionParserServiceInterfac
   double parseExtractedAmount(String str) {
     // Lowercase and remove spaces
     final String cleaned = str.replaceAll(' ', '').toLowerCase();
-    
+
     // Find numbers and optional suffixes (k, rb, ribu, jt, juta)
     final match = RegExp(r'([\d\.,]+)(k|rb|ribu|jt|juta)?').firstMatch(cleaned);
     if (match == null) {

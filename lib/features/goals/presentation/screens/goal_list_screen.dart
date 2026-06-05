@@ -93,8 +93,9 @@ class _GoalListScreenState extends ConsumerState<GoalListScreen>
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     labelColor: Colors.white,
-                    unselectedLabelColor:
-                        isDark ? Colors.white70 : Colors.black54,
+                    unselectedLabelColor: isDark
+                        ? Colors.white70
+                        : Colors.black54,
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -122,8 +123,7 @@ class _GoalListScreenState extends ConsumerState<GoalListScreen>
                         children: [
                           _GoalTabContent(
                             goals: goals
-                                .where(
-                                    (g) => g.status == GoalStatus.active)
+                                .where((g) => g.status == GoalStatus.active)
                                 .toList(),
                             isDark: isDark,
                             theme: theme,
@@ -131,8 +131,7 @@ class _GoalListScreenState extends ConsumerState<GoalListScreen>
                           ),
                           _GoalTabContent(
                             goals: goals
-                                .where(
-                                    (g) => g.status == GoalStatus.completed)
+                                .where((g) => g.status == GoalStatus.completed)
                                 .toList(),
                             isDark: isDark,
                             theme: theme,
@@ -141,10 +140,8 @@ class _GoalListScreenState extends ConsumerState<GoalListScreen>
                         ],
                       );
                     },
-                    loading: () => _ShimmerLoading(
-                      isDark: isDark,
-                      theme: theme,
-                    ),
+                    loading: () =>
+                        _ShimmerLoading(isDark: isDark, theme: theme),
                     error: (error, stack) => _ErrorState(
                       isDark: isDark,
                       theme: theme,

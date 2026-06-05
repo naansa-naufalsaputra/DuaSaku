@@ -55,12 +55,8 @@ Color _alphaBlend(Color foreground, Color background) {
 Widget _wrapWithTheme(Widget child, LiquidGlassTheme glassTheme) {
   return MaterialApp(
     home: Theme(
-      data: ThemeData.dark().copyWith(
-        extensions: [glassTheme],
-      ),
-      child: Scaffold(
-        body: child,
-      ),
+      data: ThemeData.dark().copyWith(extensions: [glassTheme]),
+      child: Scaffold(body: child),
     ),
   );
 }
@@ -240,7 +236,8 @@ void main() {
         // Verify monotonically non-decreasing:
         // For any offset n, opacity(n) <= opacity(n+1)
         if (scrollOffset < 1000) {
-          final nextExpected = ((scrollOffset + 1) / 50.0).clamp(0.0, 1.0) *
+          final nextExpected =
+              ((scrollOffset + 1) / 50.0).clamp(0.0, 1.0) *
               standardSurfaceOpacity;
           expect(nextExpected, greaterThanOrEqualTo(expected));
         }
@@ -398,25 +395,24 @@ void main() {
       },
     );
 
-    testWidgets(
-      'GlassSurface with enableBlur: true contains BackdropFilter',
-      (WidgetTester tester) async {
-        final glassTheme = LiquidGlassTheme.defaultPurpleDark();
+    testWidgets('GlassSurface with enableBlur: true contains BackdropFilter', (
+      WidgetTester tester,
+    ) async {
+      final glassTheme = LiquidGlassTheme.defaultPurpleDark();
 
-        await tester.pumpWidget(
-          _wrapWithTheme(
-            const GlassSurface(
-              enableBlur: true,
-              child: SizedBox(width: 100, height: 100),
-            ),
-            glassTheme,
+      await tester.pumpWidget(
+        _wrapWithTheme(
+          const GlassSurface(
+            enableBlur: true,
+            child: SizedBox(width: 100, height: 100),
           ),
-        );
+          glassTheme,
+        ),
+      );
 
-        // Verify BackdropFilter IS present when blur is enabled
-        expect(find.byType(BackdropFilter), findsOneWidget);
-      },
-    );
+      // Verify BackdropFilter IS present when blur is enabled
+      expect(find.byType(BackdropFilter), findsOneWidget);
+    });
 
     // Property-based: for any preset, enableBlur: false → no BackdropFilter
     final presets = [
@@ -508,8 +504,7 @@ void main() {
           final glassCardFinder = find.byType(GlassCard);
           expect(glassCardFinder, findsOneWidget);
 
-          final renderBox =
-              tester.renderObject<RenderBox>(glassCardFinder);
+          final renderBox = tester.renderObject<RenderBox>(glassCardFinder);
           final size = renderBox.size;
 
           expect(

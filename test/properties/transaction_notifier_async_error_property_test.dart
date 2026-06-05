@@ -21,7 +21,8 @@ import 'package:duasaku_app/services/transaction_parser_service.dart';
 // Fake repository that returns configurable Failure results.
 // ---------------------------------------------------------------------------
 
-class FakeFailingTransactionRepository implements TransactionRepositoryInterface {
+class FakeFailingTransactionRepository
+    implements TransactionRepositoryInterface {
   final AppError errorToReturn;
 
   FakeFailingTransactionRepository(this.errorToReturn);
@@ -32,7 +33,9 @@ class FakeFailingTransactionRepository implements TransactionRepositoryInterface
   }
 
   @override
-  Future<Result<void, AppError>> insertTransaction(TransactionModel transaction) async {
+  Future<Result<void, AppError>> insertTransaction(
+    TransactionModel transaction,
+  ) async {
     return Failure(errorToReturn);
   }
 
@@ -111,7 +114,8 @@ Future<void> _waitForInitialization(ProviderContainer container) async {
 TransactionModel _createTransaction(int seed) {
   final types = ['income', 'expense', 'transfer'];
   final type = types[seed.abs() % 3];
-  final amount = (seed.abs() % 9999 + 1).toDouble() + (seed.abs() % 100) / 100.0;
+  final amount =
+      (seed.abs() % 9999 + 1).toDouble() + (seed.abs() % 100) / 100.0;
 
   return TransactionModel(
     id: seed.abs() + 1,
@@ -141,7 +145,10 @@ void main() {
       // Property 7a: addTransaction sets AsyncError state without throwing
       // for any AppError type
       Glados2(
-        any.intInRange(0, 3), // error type index: notFound, database, validation, unknown
+        any.intInRange(
+          0,
+          3,
+        ), // error type index: notFound, database, validation, unknown
         any.intInRange(0, 99), // message seed for variety
         ExploreConfig(numRuns: 100),
       ).test(
@@ -154,12 +161,17 @@ void main() {
             // Wait for the notifier to fully initialize
             await _waitForInitialization(container);
 
-            final notifier = container.read(transactionNotifierProvider.notifier);
+            final notifier = container.read(
+              transactionNotifierProvider.notifier,
+            );
 
             // Verify initial state is loaded (AsyncData)
             final initialState = container.read(transactionNotifierProvider);
-            expect(initialState.hasValue, isTrue,
-                reason: 'Initial state should be AsyncData');
+            expect(
+              initialState.hasValue,
+              isTrue,
+              reason: 'Initial state should be AsyncData',
+            );
 
             // Create a test transaction
             final transaction = _createTransaction(messageSeed);
@@ -173,17 +185,26 @@ void main() {
             }
 
             // Verify: no exception was thrown
-            expect(caughtError, isNull,
-                reason: 'addTransaction should not throw on Failure');
+            expect(
+              caughtError,
+              isNull,
+              reason: 'addTransaction should not throw on Failure',
+            );
 
             // Verify: state is AsyncError
             final resultState = container.read(transactionNotifierProvider);
-            expect(resultState, isA<AsyncError<List<TransactionModel>>>(),
-                reason: 'State should be AsyncError after Failure');
+            expect(
+              resultState,
+              isA<AsyncError<List<TransactionModel>>>(),
+              reason: 'State should be AsyncError after Failure',
+            );
 
             // Verify: the error in state matches the generated AppError
-            expect(resultState.error, same(appError),
-                reason: 'Error in state should be the same AppError instance');
+            expect(
+              resultState.error,
+              same(appError),
+              reason: 'Error in state should be the same AppError instance',
+            );
           } finally {
             container.dispose();
           }
@@ -206,12 +227,17 @@ void main() {
             // Wait for the notifier to fully initialize
             await _waitForInitialization(container);
 
-            final notifier = container.read(transactionNotifierProvider.notifier);
+            final notifier = container.read(
+              transactionNotifierProvider.notifier,
+            );
 
             // Verify initial state is loaded
             final initialState = container.read(transactionNotifierProvider);
-            expect(initialState.hasValue, isTrue,
-                reason: 'Initial state should be AsyncData');
+            expect(
+              initialState.hasValue,
+              isTrue,
+              reason: 'Initial state should be AsyncData',
+            );
 
             // Call deleteTransaction — should NOT throw
             Object? caughtError;
@@ -222,17 +248,26 @@ void main() {
             }
 
             // Verify: no exception was thrown
-            expect(caughtError, isNull,
-                reason: 'deleteTransaction should not throw on Failure');
+            expect(
+              caughtError,
+              isNull,
+              reason: 'deleteTransaction should not throw on Failure',
+            );
 
             // Verify: state is AsyncError
             final resultState = container.read(transactionNotifierProvider);
-            expect(resultState, isA<AsyncError<List<TransactionModel>>>(),
-                reason: 'State should be AsyncError after Failure');
+            expect(
+              resultState,
+              isA<AsyncError<List<TransactionModel>>>(),
+              reason: 'State should be AsyncError after Failure',
+            );
 
             // Verify: the error in state matches the generated AppError
-            expect(resultState.error, same(appError),
-                reason: 'Error in state should be the same AppError instance');
+            expect(
+              resultState.error,
+              same(appError),
+              reason: 'Error in state should be the same AppError instance',
+            );
           } finally {
             container.dispose();
           }
@@ -258,8 +293,9 @@ void main() {
           try {
             await _waitForInitialization(addContainer);
 
-            final addNotifier =
-                addContainer.read(transactionNotifierProvider.notifier);
+            final addNotifier = addContainer.read(
+              transactionNotifierProvider.notifier,
+            );
 
             Object? addError;
             try {
@@ -268,13 +304,18 @@ void main() {
               addError = e;
             }
 
-            expect(addError, isNull,
-                reason: 'addTransaction must not throw');
+            expect(addError, isNull, reason: 'addTransaction must not throw');
             final addState = addContainer.read(transactionNotifierProvider);
-            expect(addState, isA<AsyncError<List<TransactionModel>>>(),
-                reason: 'addTransaction state should be AsyncError');
-            expect(addState.error, same(appError),
-                reason: 'addTransaction error should match');
+            expect(
+              addState,
+              isA<AsyncError<List<TransactionModel>>>(),
+              reason: 'addTransaction state should be AsyncError',
+            );
+            expect(
+              addState.error,
+              same(appError),
+              reason: 'addTransaction error should match',
+            );
           } finally {
             addContainer.dispose();
           }
@@ -284,8 +325,9 @@ void main() {
           try {
             await _waitForInitialization(delContainer);
 
-            final delNotifier =
-                delContainer.read(transactionNotifierProvider.notifier);
+            final delNotifier = delContainer.read(
+              transactionNotifierProvider.notifier,
+            );
 
             Object? delError;
             try {
@@ -294,13 +336,22 @@ void main() {
               delError = e;
             }
 
-            expect(delError, isNull,
-                reason: 'deleteTransaction must not throw');
+            expect(
+              delError,
+              isNull,
+              reason: 'deleteTransaction must not throw',
+            );
             final delState = delContainer.read(transactionNotifierProvider);
-            expect(delState, isA<AsyncError<List<TransactionModel>>>(),
-                reason: 'deleteTransaction state should be AsyncError');
-            expect(delState.error, same(appError),
-                reason: 'deleteTransaction error should match');
+            expect(
+              delState,
+              isA<AsyncError<List<TransactionModel>>>(),
+              reason: 'deleteTransaction state should be AsyncError',
+            );
+            expect(
+              delState.error,
+              same(appError),
+              reason: 'deleteTransaction error should match',
+            );
           } finally {
             delContainer.dispose();
           }

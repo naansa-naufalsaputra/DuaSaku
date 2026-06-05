@@ -52,7 +52,11 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
   Widget build(BuildContext context) {
     final walletsAsync = ref.watch(walletProvider);
     final transactionsAsync = ref.watch(transactionNotifierProvider);
-    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final formatCurrency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -79,7 +83,9 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                   return Center(
                     child: Text(
                       'Wallet not found',
-                      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                     ),
                   );
                 }
@@ -94,7 +100,10 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                       child: Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87),
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               context.pop();
@@ -139,17 +148,21 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: gradientColors[1].withValues(alpha: 0.35),
+                                        color: gradientColors[1].withValues(
+                                          alpha: 0.35,
+                                        ),
                                         blurRadius: 15,
                                         offset: const Offset(0, 8),
                                       ),
                                     ],
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             wallet.name,
@@ -160,14 +173,24 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                             ),
                                           ),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withValues(alpha: 0.2),
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Row(
                                               children: [
-                                                Icon(_getIconForType(wallet.type), color: Colors.white, size: 14),
+                                                Icon(
+                                                  _getIconForType(wallet.type),
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   wallet.type.toUpperCase(),
@@ -212,14 +235,20 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                           // Transaction Filters Header
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0,
+                                vertical: 8.0,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'history.title'.tr(),
                                     style: TextStyle(
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -233,13 +262,32 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                           SliverToBoxAdapter(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 8,
+                              ),
                               child: Row(
                                 children: [
-                                  _buildFilterChip(context, 'all', 'history.filter_all'.tr()),
-                                  _buildFilterChip(context, 'income', 'history.income'.tr()),
-                                  _buildFilterChip(context, 'expense', 'history.expense'.tr()),
-                                  _buildFilterChip(context, 'transfer', 'history.transfer'.tr()),
+                                  _buildFilterChip(
+                                    context,
+                                    'all',
+                                    'history.filter_all'.tr(),
+                                  ),
+                                  _buildFilterChip(
+                                    context,
+                                    'income',
+                                    'history.income'.tr(),
+                                  ),
+                                  _buildFilterChip(
+                                    context,
+                                    'expense',
+                                    'history.expense'.tr(),
+                                  ),
+                                  _buildFilterChip(
+                                    context,
+                                    'transfer',
+                                    'history.transfer'.tr(),
+                                  ),
                                 ],
                               ),
                             ),
@@ -249,17 +297,22 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                           transactionsAsync.when(
                             data: (allTransactions) {
                               // Filter transactions belonging to this wallet
-                              final walletTransactions = allTransactions.where((tx) {
+                              final walletTransactions = allTransactions.where((
+                                tx,
+                              ) {
                                 return tx.walletId == wallet.id ||
                                     tx.fromWalletId == wallet.id ||
                                     tx.toWalletId == wallet.id;
                               }).toList();
 
                               // Apply type filter
-                              final filteredTransactions = walletTransactions.where((tx) {
-                                if (_selectedFilter == 'all') return true;
-                                return tx.type.toLowerCase() == _selectedFilter.toLowerCase();
-                              }).toList();
+                              final filteredTransactions = walletTransactions
+                                  .where((tx) {
+                                    if (_selectedFilter == 'all') return true;
+                                    return tx.type.toLowerCase() ==
+                                        _selectedFilter.toLowerCase();
+                                  })
+                                  .toList();
 
                               if (filteredTransactions.isEmpty) {
                                 return SliverFillRemaining(
@@ -268,18 +321,23 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(32.0),
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.history_toggle_off_rounded,
                                             size: 48,
-                                            color: isDark ? Colors.white30 : Colors.black38,
+                                            color: isDark
+                                                ? Colors.white30
+                                                : Colors.black38,
                                           ),
                                           const SizedBox(height: 16),
                                           Text(
                                             'home.no_transactions'.tr(),
                                             style: TextStyle(
-                                              color: isDark ? Colors.white54 : Colors.black54,
+                                              color: isDark
+                                                  ? Colors.white54
+                                                  : Colors.black54,
                                             ),
                                           ),
                                         ],
@@ -290,143 +348,191 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                               }
 
                               return SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    final tx = filteredTransactions[index];
-                                    final isExpense = tx.type.toLowerCase() == 'expense';
-                                    final isTransfer = tx.type.toLowerCase() == 'transfer';
-                                    
-                                    Color iconBg;
-                                    Color iconColor;
-                                    IconData icon;
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
+                                  final tx = filteredTransactions[index];
+                                  final isExpense =
+                                      tx.type.toLowerCase() == 'expense';
+                                  final isTransfer =
+                                      tx.type.toLowerCase() == 'transfer';
 
-                                    if (isTransfer) {
-                                      iconBg = Colors.blue.withValues(alpha: 0.1);
-                                      iconColor = Colors.blueAccent;
-                                      icon = Icons.swap_horiz_rounded;
-                                    } else if (isExpense) {
-                                      iconBg = Colors.orange.withValues(alpha: 0.1);
-                                      iconColor = Colors.orangeAccent;
-                                      icon = Icons.shopping_bag_outlined;
-                                    } else {
-                                      iconBg = Colors.green.withValues(alpha: 0.1);
-                                      iconColor = Colors.greenAccent;
-                                      icon = Icons.account_balance_wallet_outlined;
-                                    }
+                                  Color iconBg;
+                                  Color iconColor;
+                                  IconData icon;
 
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                      child: GlassCard(
-                                        onTap: () {},
-                                        enableBlur: false,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-                                            borderRadius: BorderRadius.circular(24),
-                                            border: Border.all(
-                                              color: isDark
-                                                  ? Colors.white.withValues(alpha: 0.02)
-                                                  : Colors.grey.withValues(alpha: 0.1),
-                                            ),
-                                            boxShadow: isDark
-                                                ? null
-                                                : [
-                                                    BoxShadow(
-                                                      color: Colors.black.withValues(alpha: 0.05),
-                                                      blurRadius: 10,
-                                                      offset: const Offset(0, 4),
-                                                    ),
-                                                  ],
+                                  if (isTransfer) {
+                                    iconBg = Colors.blue.withValues(alpha: 0.1);
+                                    iconColor = Colors.blueAccent;
+                                    icon = Icons.swap_horiz_rounded;
+                                  } else if (isExpense) {
+                                    iconBg = Colors.orange.withValues(
+                                      alpha: 0.1,
+                                    );
+                                    iconColor = Colors.orangeAccent;
+                                    icon = Icons.shopping_bag_outlined;
+                                  } else {
+                                    iconBg = Colors.green.withValues(
+                                      alpha: 0.1,
+                                    );
+                                    iconColor = Colors.greenAccent;
+                                    icon =
+                                        Icons.account_balance_wallet_outlined;
+                                  }
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 8,
+                                    ),
+                                    child: GlassCard(
+                                      onTap: () {},
+                                      enableBlur: false,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.03,
+                                                )
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            24,
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 48,
-                                                height: 48,
-                                                decoration: BoxDecoration(
-                                                  color: iconBg,
-                                                  borderRadius: BorderRadius.circular(16),
-                                                ),
-                                                child: Icon(icon, color: iconColor),
+                                          border: Border.all(
+                                            color: isDark
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.02,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.1,
+                                                  ),
+                                          ),
+                                          boxShadow: isDark
+                                              ? null
+                                              : [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withValues(
+                                                          alpha: 0.05,
+                                                        ),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 48,
+                                              height: 48,
+                                              decoration: BoxDecoration(
+                                                color: iconBg,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
                                               ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      tx.notes.isNotEmpty ? tx.notes : tx.category,
-                                                      style: TextStyle(
-                                                        color: isDark ? Colors.white : Colors.black87,
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      tx.category.toUpperCase(),
-                                                      style: TextStyle(
-                                                        color: isDark ? Colors.white54 : Colors.black54,
-                                                        fontSize: 11,
-                                                        fontWeight: FontWeight.bold,
-                                                        letterSpacing: 1,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                                              child: Icon(
+                                                icon,
+                                                color: iconColor,
                                               ),
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    '${isExpense ? '-' : (isTransfer ? '' : '+')}${formatCurrency.format(tx.amount)}',
+                                                    tx.notes.isNotEmpty
+                                                        ? tx.notes
+                                                        : tx.category,
                                                     style: TextStyle(
-                                                      color: isTransfer
-                                                          ? (isDark ? Colors.white : Colors.black87)
-                                                          : (isExpense
-                                                              ? (isDark ? Colors.white : Colors.black87)
-                                                              : Colors.greenAccent),
+                                                      color: isDark
+                                                          ? Colors.white
+                                                          : Colors.black87,
                                                       fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    DateFormat('dd MMM yyyy').format(tx.createdAt),
+                                                    tx.category.toUpperCase(),
                                                     style: TextStyle(
-                                                      color: isDark ? Colors.white30 : Colors.black38,
-                                                      fontSize: 12,
+                                                      color: isDark
+                                                          ? Colors.white54
+                                                          : Colors.black54,
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      letterSpacing: 1,
                                                     ),
                                                   ),
                                                 ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  '${isExpense ? '-' : (isTransfer ? '' : '+')}${formatCurrency.format(tx.amount)}',
+                                                  style: TextStyle(
+                                                    color: isTransfer
+                                                        ? (isDark
+                                                              ? Colors.white
+                                                              : Colors.black87)
+                                                        : (isExpense
+                                                              ? (isDark
+                                                                    ? Colors
+                                                                          .white
+                                                                    : Colors
+                                                                          .black87)
+                                                              : Colors
+                                                                    .greenAccent),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  DateFormat(
+                                                    'dd MMM yyyy',
+                                                  ).format(tx.createdAt),
+                                                  style: TextStyle(
+                                                    color: isDark
+                                                        ? Colors.white30
+                                                        : Colors.black38,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ).liquidStagger(index);
-                                  },
-                                  childCount: filteredTransactions.length,
-                                ),
+                                    ),
+                                  ).liquidStagger(index);
+                                }, childCount: filteredTransactions.length),
                               );
                             },
                             loading: () => const SliverFillRemaining(
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              child: Center(child: CircularProgressIndicator()),
                             ),
                             error: (err, _) => SliverFillRemaining(
                               child: Center(
-                                child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+                                child: Text(
+                                  'Error: $err',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                               ),
                             ),
                           ),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 32),
-                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 32)),
                         ],
                       ),
                     ),
@@ -435,7 +541,10 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(
-                child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  'Error: $err',
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
             ),
           ),
@@ -444,7 +553,11 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
     );
   }
 
-  Widget _buildFilterChip(BuildContext context, String filterType, String label) {
+  Widget _buildFilterChip(
+    BuildContext context,
+    String filterType,
+    String label,
+  ) {
     final isSelected = _selectedFilter == filterType;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -464,11 +577,15 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
           decoration: BoxDecoration(
             color: isSelected
                 ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03)),
+                : (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.03)),
             border: Border.all(
               color: isSelected
                   ? theme.colorScheme.primary
-                  : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05)),
               width: 1.5,
             ),
             borderRadius: BorderRadius.circular(20),

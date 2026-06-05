@@ -20,10 +20,7 @@ import 'progress_ring_widget.dart';
 ///
 /// Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 3.10, 6.5, 6.6, 6.7
 class RecurringTransactionCard extends ConsumerWidget {
-  const RecurringTransactionCard({
-    super.key,
-    required this.transaction,
-  });
+  const RecurringTransactionCard({super.key, required this.transaction});
 
   final RecurringTransactionModel transaction;
 
@@ -86,21 +83,22 @@ class RecurringTransactionCard extends ConsumerWidget {
           HapticFeedback.lightImpact();
           // Navigate to detail view
         },
-        child: _CardContent(
-          transaction: transaction,
-          progress: progress,
-          daysRemaining: daysRemaining.clamp(0, 9999),
-          isDark: isDark,
-          colorScheme: colorScheme,
-          theme: theme,
-        )
-            .animate(onPlay: (controller) => controller.forward())
-            .scale(
-              begin: const Offset(1.0, 1.0),
-              end: const Offset(1.0, 1.0),
-              duration: 200.ms,
-              curve: Curves.easeOutCubic,
-            ),
+        child:
+            _CardContent(
+                  transaction: transaction,
+                  progress: progress,
+                  daysRemaining: daysRemaining.clamp(0, 9999),
+                  isDark: isDark,
+                  colorScheme: colorScheme,
+                  theme: theme,
+                )
+                .animate(onPlay: (controller) => controller.forward())
+                .scale(
+                  begin: const Offset(1.0, 1.0),
+                  end: const Offset(1.0, 1.0),
+                  duration: 200.ms,
+                  curve: Curves.easeOutCubic,
+                ),
       ),
     );
   }
@@ -108,8 +106,7 @@ class RecurringTransactionCard extends ConsumerWidget {
   /// Handle pause/resume swipe action with haptic feedback.
   Future<void> _handlePauseResume(BuildContext context, WidgetRef ref) async {
     HapticFeedback.lightImpact();
-    final notifier =
-        ref.read(recurringTransactionNotifierProvider.notifier);
+    final notifier = ref.read(recurringTransactionNotifierProvider.notifier);
 
     if (transaction.status == RecurringStatus.active) {
       await notifier.pause(transaction.id);
@@ -129,9 +126,7 @@ class RecurringTransactionCard extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: Text('recurring.delete_title'.tr()),
         content: Text('recurring.delete_message'.tr()),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           GlassButton(
             variant: GlassButtonVariant.text,
@@ -148,8 +143,7 @@ class RecurringTransactionCard extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      final notifier =
-          ref.read(recurringTransactionNotifierProvider.notifier);
+      final notifier = ref.read(recurringTransactionNotifierProvider.notifier);
       await notifier.delete(transaction.id);
       return true;
     }
@@ -179,9 +173,7 @@ class _CardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.isIncome;
-    final amountColor = isIncome
-        ? colorScheme.primary
-        : colorScheme.error;
+    final amountColor = isIncome ? colorScheme.primary : colorScheme.error;
     final statusColor = _getStatusColor(transaction.status);
     final formatCurrency = NumberFormat.currency(
       locale: 'id_ID',
@@ -231,9 +223,7 @@ class _CardContent extends StatelessWidget {
                 Text(
                   '${'recurring.next_execution'.tr()} ${dateFormat.format(transaction.nextExecutionDate)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? Colors.white60
-                        : Colors.black54,
+                    color: isDark ? Colors.white60 : Colors.black54,
                     fontSize: 12,
                   ),
                 ),
@@ -248,10 +238,7 @@ class _CardContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     // Status badge
-                    _Badge(
-                      label: transaction.status.name,
-                      color: statusColor,
-                    ),
+                    _Badge(label: transaction.status.name, color: statusColor),
                   ],
                 ),
               ],
@@ -283,10 +270,7 @@ class _CardContent extends StatelessWidget {
 // ─── Badge Widget ─────────────────────────────────────────────────────────────
 
 class _Badge extends StatelessWidget {
-  const _Badge({
-    required this.label,
-    required this.color,
-  });
+  const _Badge({required this.label, required this.color});
 
   final String label;
   final Color color;

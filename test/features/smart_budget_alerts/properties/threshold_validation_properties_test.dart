@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/core/utils/app_error.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/providers/alert_preferences_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,9 +15,7 @@ import 'package:glados/glados.dart'
 // ---------------------------------------------------------------------------
 
 /// The set of all valid threshold values.
-final Set<int> validThresholds = {
-  for (int v = 10; v <= 100; v += 5) v,
-};
+final Set<int> validThresholds = {for (int v = 10; v <= 100; v += 5) v};
 
 /// Checks if a value is a valid threshold per the specification.
 bool isValidThreshold(int value) {
@@ -41,13 +38,13 @@ void main() {
         final validList = validThresholds.toList();
         final value = validList[rng.nextInt(validList.length)];
 
-        final result =
-            AlertPreferencesNotifier.validateThresholds([value]);
+        final result = AlertPreferencesNotifier.validateThresholds([value]);
 
         expect(
           result,
           isNull,
-          reason: 'Threshold value $value is valid (multiple of 5, '
+          reason:
+              'Threshold value $value is valid (multiple of 5, '
               '10 <= $value <= 100) and should be accepted (return null)',
         );
       },
@@ -70,13 +67,13 @@ void main() {
           value = rng.nextInt(301) - 100; // -100 to 200
         } while (isValidThreshold(value));
 
-        final result =
-            AlertPreferencesNotifier.validateThresholds([value]);
+        final result = AlertPreferencesNotifier.validateThresholds([value]);
 
         expect(
           result,
           isNotNull,
-          reason: 'Threshold value $value is invalid and should be '
+          reason:
+              'Threshold value $value is invalid and should be '
               'rejected (return non-null AppError)',
         );
         expect(
@@ -93,21 +90,22 @@ void main() {
     Glados(any.intInRange(-200, 300)).test(
       'for any integer, validateThresholds returns null iff value is in {10, 15, ..., 95, 100}',
       (value) {
-        final result =
-            AlertPreferencesNotifier.validateThresholds([value]);
+        final result = AlertPreferencesNotifier.validateThresholds([value]);
 
         if (isValidThreshold(value)) {
           expect(
             result,
             isNull,
-            reason: 'Value $value is a valid threshold (multiple of 5, '
+            reason:
+                'Value $value is a valid threshold (multiple of 5, '
                 '10 <= $value <= 100) — validation should return null',
           );
         } else {
           expect(
             result,
             isNotNull,
-            reason: 'Value $value is NOT a valid threshold — '
+            reason:
+                'Value $value is NOT a valid threshold — '
                 'validation should return an AppError',
           );
           expect(
@@ -135,13 +133,13 @@ void main() {
           (_) => validList[rng.nextInt(validList.length)],
         );
 
-        final result =
-            AlertPreferencesNotifier.validateThresholds(thresholds);
+        final result = AlertPreferencesNotifier.validateThresholds(thresholds);
 
         expect(
           result,
           isNull,
-          reason: 'All values in $thresholds are valid thresholds — '
+          reason:
+              'All values in $thresholds are valid thresholds — '
               'validation should return null',
         );
       },
@@ -173,13 +171,13 @@ void main() {
         final insertIndex = rng.nextInt(thresholds.length + 1);
         thresholds.insert(insertIndex, invalidValue);
 
-        final result =
-            AlertPreferencesNotifier.validateThresholds(thresholds);
+        final result = AlertPreferencesNotifier.validateThresholds(thresholds);
 
         expect(
           result,
           isNotNull,
-          reason: 'List $thresholds contains invalid value $invalidValue — '
+          reason:
+              'List $thresholds contains invalid value $invalidValue — '
               'validation should return non-null AppError',
         );
         expect(
@@ -199,7 +197,8 @@ void main() {
       expect(
         result,
         isNull,
-        reason: 'An empty list has no invalid values, so validation '
+        reason:
+            'An empty list has no invalid values, so validation '
             'should return null',
       );
     });

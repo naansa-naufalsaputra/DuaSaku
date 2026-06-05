@@ -63,9 +63,10 @@ class _GlassCardState extends State<GlassCard>
       vsync: this,
       duration: _kFallbackDurationFast,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -73,7 +74,8 @@ class _GlassCardState extends State<GlassCard>
     super.didChangeDependencies();
     // Update animation duration from theme if available.
     final glassTheme = LiquidGlassTheme.of(context);
-    final duration = glassTheme?.animationDurationFast ?? _kFallbackDurationFast;
+    final duration =
+        glassTheme?.animationDurationFast ?? _kFallbackDurationFast;
     if (_controller.duration != duration) {
       _controller.duration = duration;
     }
@@ -106,10 +108,7 @@ class _GlassCardState extends State<GlassCard>
     // Non-interactive: render a plain GlassSurface with constraints.
     if (!isInteractive) {
       return ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: 48,
-          minHeight: 48,
-        ),
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
         child: GlassSurface(
           enableBlur: widget.enableBlur,
           padding: widget.padding,
@@ -120,10 +119,7 @@ class _GlassCardState extends State<GlassCard>
 
     // Interactive: wrap with gesture detection and press animation.
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 48,
-        minHeight: 48,
-      ),
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       child: GestureDetector(
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
@@ -191,8 +187,7 @@ class _AnimatedGlowGlassSurface extends StatelessWidget {
         glassTheme?.borderGlowColor ?? const Color(0x4D4D8DFE);
     final surfaceTintColor =
         glassTheme?.surfaceTintColor ?? const Color(0xFF161515);
-    final innerHighlightOpacity =
-        glassTheme?.innerHighlightOpacity ?? 0.08;
+    final innerHighlightOpacity = glassTheme?.innerHighlightOpacity ?? 0.08;
 
     // Accessibility adjustments
     final bool isBoldText = MediaQuery.boldTextOf(context);
@@ -205,12 +200,12 @@ class _AnimatedGlowGlassSurface extends StatelessWidget {
     }
 
     if (isBoldText) {
-      resolvedSurfaceOpacity =
-          (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
+      resolvedSurfaceOpacity = (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
     }
 
-    final bool accessibleNavigation =
-        MediaQuery.of(context).accessibleNavigation;
+    final bool accessibleNavigation = MediaQuery.of(
+      context,
+    ).accessibleNavigation;
     if (accessibleNavigation) {
       resolvedSurfaceOpacity = 0.92;
       effectiveEnableBlur = false;
@@ -219,8 +214,9 @@ class _AnimatedGlowGlassSurface extends StatelessWidget {
     // Intensify border glow: scale opacity from 1x to 2x based on animation.
     final intensifiedGlowOpacity =
         (baseBorderGlowColor.a * (1.0 + glowIntensity)).clamp(0.0, 1.0);
-    final intensifiedGlowColor =
-        baseBorderGlowColor.withValues(alpha: intensifiedGlowOpacity);
+    final intensifiedGlowColor = baseBorderGlowColor.withValues(
+      alpha: intensifiedGlowOpacity,
+    );
 
     // Build decoration
     const borderRadius = 16.0;
@@ -229,10 +225,7 @@ class _AnimatedGlowGlassSurface extends StatelessWidget {
     final decoration = BoxDecoration(
       color: surfaceTintColor.withValues(alpha: resolvedSurfaceOpacity),
       borderRadius: roundedRadius,
-      border: Border.all(
-        color: intensifiedGlowColor,
-        width: 1.0,
-      ),
+      border: Border.all(color: intensifiedGlowColor, width: 1.0),
     );
 
     // Inner highlight
@@ -263,10 +256,7 @@ class _AnimatedGlowGlassSurface extends StatelessWidget {
         children: [
           innerHighlight,
           Flexible(
-            child: Padding(
-              padding: padding,
-              child: child,
-            ),
+            child: Padding(padding: padding, child: child),
           ),
         ],
       ),

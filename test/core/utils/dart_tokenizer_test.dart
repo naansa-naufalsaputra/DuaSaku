@@ -8,7 +8,16 @@ void main() {
     setUp(() {
       final mockMetadata = {
         'max_len': 6,
-        'vocabulary': ['', '[UNK]', 'rp', 'beli', 'kopi', 'gajian', '1.5jt', '25k']
+        'vocabulary': [
+          '',
+          '[UNK]',
+          'rp',
+          'beli',
+          'kopi',
+          'gajian',
+          '1.5jt',
+          '25k',
+        ],
       };
       tokenizer = DartTokenizer.fromJson(mockMetadata);
     });
@@ -45,10 +54,13 @@ void main() {
       expect(result, equals([3, 4, 2, 5, 2, 5]));
     });
 
-    test('should preserve dots and commas in raw input text (checked via separate logic)', () {
-      // String split by whitespace before tokenizer logic should keep 1.5jt intact
-      final rawTokens = 'beli kopi 1.5jt'.toLowerCase().split(RegExp(r'\s+'));
-      expect(rawTokens, contains('1.5jt'));
-    });
+    test(
+      'should preserve dots and commas in raw input text (checked via separate logic)',
+      () {
+        // String split by whitespace before tokenizer logic should keep 1.5jt intact
+        final rawTokens = 'beli kopi 1.5jt'.toLowerCase().split(RegExp(r'\s+'));
+        expect(rawTokens, contains('1.5jt'));
+      },
+    );
   });
 }

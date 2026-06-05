@@ -98,10 +98,7 @@ Future<T?> showGlassBottomSheet<T>(
       return _GlassBottomSheetEntry(
         duration: duration,
         curve: curve,
-        child: GlassBottomSheet(
-          showDragHandle: showDragHandle,
-          child: child,
-        ),
+        child: GlassBottomSheet(showDragHandle: showDragHandle, child: child),
       );
     },
   );
@@ -121,8 +118,7 @@ class _GlassBottomSheetEntry extends StatefulWidget {
   });
 
   @override
-  State<_GlassBottomSheetEntry> createState() =>
-      _GlassBottomSheetEntryState();
+  State<_GlassBottomSheetEntry> createState() => _GlassBottomSheetEntryState();
 }
 
 class _GlassBottomSheetEntryState extends State<_GlassBottomSheetEntry>
@@ -135,22 +131,21 @@ class _GlassBottomSheetEntryState extends State<_GlassBottomSheetEntry>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     final curvedAnimation = CurvedAnimation(
       parent: _controller,
       curve: widget.curve,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      curvedAnimation,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      curvedAnimation,
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.0,
+    ).animate(curvedAnimation);
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(curvedAnimation);
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
@@ -175,10 +170,7 @@ class _GlassBottomSheetEntryState extends State<_GlassBottomSheetEntry>
           child: Transform.scale(
             scale: _scaleAnimation.value,
             alignment: Alignment.bottomCenter,
-            child: Opacity(
-              opacity: _fadeAnimation.value,
-              child: child,
-            ),
+            child: Opacity(opacity: _fadeAnimation.value, child: child),
           ),
         );
       },

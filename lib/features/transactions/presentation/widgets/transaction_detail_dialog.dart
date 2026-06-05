@@ -37,45 +37,76 @@ class TransactionDetailDialog extends StatelessWidget {
 
   IconData _getIconData(String? name) {
     switch (name) {
-      case 'restaurant': return Icons.restaurant_rounded;
-      case 'local_cafe': return Icons.local_cafe_rounded;
-      case 'attach_money': return Icons.attach_money_rounded;
-      case 'receipt': return Icons.receipt_rounded;
-      case 'shopping_bag': return Icons.shopping_bag_rounded;
-      case 'directions_car': return Icons.directions_car_rounded;
-      case 'local_gas_station': return Icons.local_gas_station_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'electrical_services': return Icons.electrical_services_rounded;
-      case 'water_drop': return Icons.water_drop_rounded;
-      case 'wifi': return Icons.wifi_rounded;
-      case 'medical_services': return Icons.medical_services_rounded;
-      case 'sports_esports': return Icons.sports_esports_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'flight': return Icons.flight_rounded;
-      case 'school': return Icons.school_rounded;
-      case 'fitness_center': return Icons.fitness_center_rounded;
-      case 'pets': return Icons.pets_rounded;
-      case 'card_giftcard': return Icons.card_giftcard_rounded;
-      case 'work': return Icons.work_rounded;
-      case 'trending_up': return Icons.trending_up_rounded;
-      case 'savings': return Icons.savings_rounded;
-      case 'account_balance': return Icons.account_balance_rounded;
-      case 'build': return Icons.build_rounded;
-      case 'spa': return Icons.spa_rounded;
-      case 'payments': return Icons.payments_rounded;
-      default: return Icons.category_rounded;
+      case 'restaurant':
+        return Icons.restaurant_rounded;
+      case 'local_cafe':
+        return Icons.local_cafe_rounded;
+      case 'attach_money':
+        return Icons.attach_money_rounded;
+      case 'receipt':
+        return Icons.receipt_rounded;
+      case 'shopping_bag':
+        return Icons.shopping_bag_rounded;
+      case 'directions_car':
+        return Icons.directions_car_rounded;
+      case 'local_gas_station':
+        return Icons.local_gas_station_rounded;
+      case 'home':
+        return Icons.home_rounded;
+      case 'electrical_services':
+        return Icons.electrical_services_rounded;
+      case 'water_drop':
+        return Icons.water_drop_rounded;
+      case 'wifi':
+        return Icons.wifi_rounded;
+      case 'medical_services':
+        return Icons.medical_services_rounded;
+      case 'sports_esports':
+        return Icons.sports_esports_rounded;
+      case 'movie':
+        return Icons.movie_rounded;
+      case 'flight':
+        return Icons.flight_rounded;
+      case 'school':
+        return Icons.school_rounded;
+      case 'fitness_center':
+        return Icons.fitness_center_rounded;
+      case 'pets':
+        return Icons.pets_rounded;
+      case 'card_giftcard':
+        return Icons.card_giftcard_rounded;
+      case 'work':
+        return Icons.work_rounded;
+      case 'trending_up':
+        return Icons.trending_up_rounded;
+      case 'savings':
+        return Icons.savings_rounded;
+      case 'account_balance':
+        return Icons.account_balance_rounded;
+      case 'build':
+        return Icons.build_rounded;
+      case 'spa':
+        return Icons.spa_rounded;
+      case 'payments':
+        return Icons.payments_rounded;
+      default:
+        return Icons.category_rounded;
     }
   }
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
     try {
       final hex = colorHex.replaceAll('#', '');
       return Color(int.parse('0xFF$hex'));
     } catch (_) {
-      return type == 'expense' ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
     }
   }
 
@@ -84,7 +115,7 @@ class TransactionDetailDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isExpense = transaction.type.toLowerCase() == 'expense';
-    
+
     // Find matching wallet name
     final matchedWallet = wallets.cast<WalletModel?>().firstWhere(
       (w) => w?.id == transaction.walletId,
@@ -169,7 +200,9 @@ class TransactionDetailDialog extends StatelessWidget {
                             Text(
                               transaction.type.toUpperCase(),
                               style: TextStyle(
-                                color: isExpense ? const Color(0xFFF43F5E) : const Color(0xFF10B981),
+                                color: isExpense
+                                    ? const Color(0xFFF43F5E)
+                                    : const Color(0xFF10B981),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1,
@@ -187,7 +220,9 @@ class TransactionDetailDialog extends StatelessWidget {
                     child: Text(
                       '${isExpense ? '-' : '+'}${currencyFormat.format(transaction.amount)}',
                       style: TextStyle(
-                        color: isExpense ? const Color(0xFFF43F5E) : const Color(0xFF10B981),
+                        color: isExpense
+                            ? const Color(0xFFF43F5E)
+                            : const Color(0xFF10B981),
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
@@ -203,7 +238,10 @@ class TransactionDetailDialog extends StatelessWidget {
                     context,
                     icon: Icons.calendar_month_rounded,
                     label: 'transaction.date'.tr(),
-                    value: DateFormat('EEEE, dd MMMM yyyy - HH:mm', EasyLocalization.of(context)?.locale.languageCode).format(transaction.createdAt),
+                    value: DateFormat(
+                      'EEEE, dd MMMM yyyy - HH:mm',
+                      EasyLocalization.of(context)?.locale.languageCode,
+                    ).format(transaction.createdAt),
                   ),
                   const SizedBox(height: 12),
                   _buildDetailRow(
@@ -217,18 +255,22 @@ class TransactionDetailDialog extends StatelessWidget {
                     context,
                     icon: Icons.notes_rounded,
                     label: 'transaction.notes'.tr(),
-                    value: transaction.notes.isNotEmpty ? transaction.notes : 'transaction.no_notes'.tr(),
+                    value: transaction.notes.isNotEmpty
+                        ? transaction.notes
+                        : 'transaction.no_notes'.tr(),
                     isItalic: transaction.notes.isEmpty,
                   ),
-                  
+
                   // Geofence Location (if present)
-                  if (transaction.latitude != null && transaction.longitude != null) ...[
+                  if (transaction.latitude != null &&
+                      transaction.longitude != null) ...[
                     const SizedBox(height: 12),
                     _buildDetailRow(
                       context,
                       icon: Icons.location_on_rounded,
                       label: 'transaction.location'.tr(),
-                      value: '${transaction.latitude!.toStringAsFixed(6)}, ${transaction.longitude!.toStringAsFixed(6)}',
+                      value:
+                          '${transaction.latitude!.toStringAsFixed(6)}, ${transaction.longitude!.toStringAsFixed(6)}',
                     ),
                   ],
                   const SizedBox(height: 24),

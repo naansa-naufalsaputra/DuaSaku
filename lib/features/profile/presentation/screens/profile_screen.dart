@@ -25,8 +25,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindingObserver {
-  static const _managerChannel = MethodChannel('com.duasaku.app/bank_notification_manager');
+class _ProfileScreenState extends ConsumerState<ProfileScreen>
+    with WidgetsBindingObserver {
+  static const _managerChannel = MethodChannel(
+    'com.duasaku.app/bank_notification_manager',
+  );
   bool _isInterceptorEnabled = false;
   bool _isLoading = false;
   bool _notificationsEnabled = true;
@@ -55,7 +58,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
 
   Future<void> _checkInterceptorStatus() async {
     try {
-      final isEnabled = await _managerChannel.invokeMethod<bool>('isPermissionGranted') ?? false;
+      final isEnabled =
+          await _managerChannel.invokeMethod<bool>('isPermissionGranted') ??
+          false;
       if (mounted) {
         setState(() {
           _isInterceptorEnabled = isEnabled;
@@ -110,7 +115,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
               const SizedBox(height: 16),
               ListTile(
                 leading: const Text('🇺🇸', style: TextStyle(fontSize: 28)),
-                title: Text('English', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                title: Text(
+                  'English',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
                 trailing: currentLang == 'en'
                     ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
                     : null,
@@ -122,7 +132,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
               ),
               ListTile(
                 leading: const Text('🇮🇩', style: TextStyle(fontSize: 28)),
-                title: Text('Bahasa Indonesia', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                title: Text(
+                  'Bahasa Indonesia',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
                 trailing: currentLang == 'id'
                     ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
                     : null,
@@ -183,14 +198,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                   ),
                   child: const Icon(Icons.bolt, color: Color(0xFF06B6D4)),
                 ),
-                title: Text('profile.parser_mode_auto'.tr(), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-                subtitle: Text('profile.parser_mode_auto_desc'.tr(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54)),
+                title: Text(
+                  'profile.parser_mode_auto'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  'profile.parser_mode_auto_desc'.tr(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                ),
                 trailing: currentMode == ParserMode.auto
                     ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  ref.read(parserModeProvider.notifier).setMode(ParserMode.auto);
+                  ref
+                      .read(parserModeProvider.notifier)
+                      .setMode(ParserMode.auto);
                   Navigator.of(ctx).pop();
                 },
               ),
@@ -203,14 +231,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                   ),
                   child: const Icon(Icons.model_training, color: Colors.blue),
                 ),
-                title: Text('profile.parser_mode_tflite'.tr(), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-                subtitle: Text('profile.parser_mode_tflite_desc'.tr(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54)),
+                title: Text(
+                  'profile.parser_mode_tflite'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  'profile.parser_mode_tflite_desc'.tr(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                ),
                 trailing: currentMode == ParserMode.tfliteOnly
                     ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  ref.read(parserModeProvider.notifier).setMode(ParserMode.tfliteOnly);
+                  ref
+                      .read(parserModeProvider.notifier)
+                      .setMode(ParserMode.tfliteOnly);
                   Navigator.of(ctx).pop();
                 },
               ),
@@ -223,14 +264,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                   ),
                   child: const Icon(Icons.code, color: Colors.orange),
                 ),
-                title: Text('profile.parser_mode_regex'.tr(), style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
-                subtitle: Text('profile.parser_mode_regex_desc'.tr(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54)),
+                title: Text(
+                  'profile.parser_mode_regex'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  'profile.parser_mode_regex_desc'.tr(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                ),
                 trailing: currentMode == ParserMode.regexOnly
                     ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  ref.read(parserModeProvider.notifier).setMode(ParserMode.regexOnly);
+                  ref
+                      .read(parserModeProvider.notifier)
+                      .setMode(ParserMode.regexOnly);
                   Navigator.of(ctx).pop();
                 },
               ),
@@ -247,63 +301,68 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
     await HapticFeedback.mediumImpact();
     if (!context.mounted) return false;
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 28),
-              const SizedBox(width: 8),
-              Text(
-                'profile.overwrite_warning_title'.tr(),
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext ctx) {
+            return AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'profile.overwrite_warning_title'.tr(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                'profile.overwrite_warning_content'.tr(),
                 style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
-          content: Text(
-            'profile.overwrite_warning_content'.tr(),
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-              fontSize: 14,
-            ),
-          ),
-          actions: [
-            GlassButton(
-              variant: GlassButtonVariant.text,
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(ctx).pop(false);
-              },
-              child: Text(
-                'profile.btn_cancel'.tr(),
-                style: TextStyle(
-                  color: isDark ? Colors.white60 : Colors.grey[600],
-                  fontWeight: FontWeight.w600,
+              actions: [
+                GlassButton(
+                  variant: GlassButtonVariant.text,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(ctx).pop(false);
+                  },
+                  child: Text(
+                    'profile.btn_cancel'.tr(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.grey[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            GlassButton(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                Navigator.of(ctx).pop(true);
-              },
-              child: Text(
-                'profile.btn_overwrite'.tr(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+                GlassButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(ctx).pop(true);
+                  },
+                  child: Text(
+                    'profile.btn_overwrite'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   void _showRestoreSummarySheet(BuildContext context, Map<String, int> counts) {
@@ -336,7 +395,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check_circle_outline, color: Color(0xFF06B6D4), size: 36),
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: Color(0xFF06B6D4),
+                      size: 36,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       'profile.restore_success_title'.tr(),
@@ -361,10 +424,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildSummaryItem(context, 'profile.stat_wallets'.tr(), counts['wallets'] ?? 0, Icons.account_balance_wallet),
-                    _buildSummaryItem(context, 'profile.stat_categories'.tr(), counts['categories'] ?? 0, Icons.category),
-                    _buildSummaryItem(context, 'profile.stat_transactions'.tr(), counts['transactions'] ?? 0, Icons.receipt_long),
-                    _buildSummaryItem(context, 'profile.stat_budgets'.tr(), counts['budgets'] ?? 0, Icons.pie_chart),
+                    _buildSummaryItem(
+                      context,
+                      'profile.stat_wallets'.tr(),
+                      counts['wallets'] ?? 0,
+                      Icons.account_balance_wallet,
+                    ),
+                    _buildSummaryItem(
+                      context,
+                      'profile.stat_categories'.tr(),
+                      counts['categories'] ?? 0,
+                      Icons.category,
+                    ),
+                    _buildSummaryItem(
+                      context,
+                      'profile.stat_transactions'.tr(),
+                      counts['transactions'] ?? 0,
+                      Icons.receipt_long,
+                    ),
+                    _buildSummaryItem(
+                      context,
+                      'profile.stat_budgets'.tr(),
+                      counts['budgets'] ?? 0,
+                      Icons.pie_chart,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -389,7 +472,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
     );
   }
 
-  Widget _buildSummaryItem(BuildContext context, String label, int count, IconData icon) {
+  Widget _buildSummaryItem(
+    BuildContext context,
+    String label,
+    int count,
+    IconData icon,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
@@ -490,7 +578,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
         AppThemePreset.defaultPurple,
         'Minimalist',
         Colors.deepPurple,
-        Colors.indigo
+        Colors.indigo,
       ),
     ];
 
@@ -516,7 +604,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? theme.colorScheme.primary.withValues(alpha: 0.15)
@@ -531,10 +622,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
-                            )
+                            ),
                           ]
                         : null,
                   ),
@@ -544,7 +637,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                         label,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           color: isSelected
                               ? theme.colorScheme.primary
                               : (isDark ? Colors.white70 : Colors.black87),
@@ -585,9 +680,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
     );
   }
 
-
   void _showDisplayNameDialog(BuildContext context) {
-    final controller = TextEditingController(text: ref.read(displayNameProvider));
+    final controller = TextEditingController(
+      text: ref.read(displayNameProvider),
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
@@ -595,7 +691,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
             'profile.display_name'.tr(),
             style: TextStyle(
@@ -609,8 +707,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
             style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               hintText: 'profile.display_name_desc'.tr(),
-              hintStyle: TextStyle(color: isDark ? Colors.white30 : Colors.black38),
-              counterStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+              hintStyle: TextStyle(
+                color: isDark ? Colors.white30 : Colors.black38,
+              ),
+              counterStyle: TextStyle(
+                color: isDark ? Colors.white54 : Colors.black54,
+              ),
             ),
           ),
           actions: [
@@ -627,10 +729,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
             GlassButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
-                ref.read(displayNameProvider.notifier).setDisplayName(controller.text.trim());
+                ref
+                    .read(displayNameProvider.notifier)
+                    .setDisplayName(controller.text.trim());
                 Navigator.of(ctx).pop();
               },
-              child: Text('goals.save'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                'goals.save'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
@@ -708,9 +815,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatItem(context, 'profile.achievements_health'.tr(), '${ref.watch(gamificationProvider).healthScore}', Icons.favorite, Colors.red),
-                        _buildStatItem(context, 'profile.achievements_streak'.tr(), '${ref.watch(gamificationProvider).currentStreak}', Icons.local_fire_department, Colors.orange),
-                        _buildStatItem(context, 'profile.achievements_badges'.tr(), '${ref.watch(gamificationProvider).unlockedBadges.length}', Icons.military_tech, Colors.blue),
+                        _buildStatItem(
+                          context,
+                          'profile.achievements_health'.tr(),
+                          '${ref.watch(gamificationProvider).healthScore}',
+                          Icons.favorite,
+                          Colors.red,
+                        ),
+                        _buildStatItem(
+                          context,
+                          'profile.achievements_streak'.tr(),
+                          '${ref.watch(gamificationProvider).currentStreak}',
+                          Icons.local_fire_department,
+                          Colors.orange,
+                        ),
+                        _buildStatItem(
+                          context,
+                          'profile.achievements_badges'.tr(),
+                          '${ref.watch(gamificationProvider).unlockedBadges.length}',
+                          Icons.military_tech,
+                          Colors.blue,
+                        ),
                       ],
                     ),
                   ),
@@ -731,11 +856,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               color: Colors.blue.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.blue),
+                            child: const Icon(
+                              Icons.account_balance_wallet_outlined,
+                              color: Colors.blue,
+                            ),
                           ),
                           title: Text('profile.manage_wallets'.tr()),
                           subtitle: Text('profile.manage_wallets_desc'.tr()),
-                          trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           onTap: () {
                             HapticFeedback.lightImpact();
                             context.push('/manage-wallets');
@@ -749,11 +881,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               color: Colors.purple.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.category_outlined, color: Colors.purple),
+                            child: const Icon(
+                              Icons.category_outlined,
+                              color: Colors.purple,
+                            ),
                           ),
                           title: Text('profile.manage_categories'.tr()),
                           subtitle: Text('profile.manage_categories_desc'.tr()),
-                          trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           onTap: () {
                             HapticFeedback.lightImpact();
                             context.push('/categories');
@@ -767,7 +906,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               color: Colors.teal.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.person_outline, color: Colors.teal),
+                            child: const Icon(
+                              Icons.person_outline,
+                              color: Colors.teal,
+                            ),
                           ),
                           title: Text('profile.display_name'.tr()),
                           subtitle: Text(
@@ -775,7 +917,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                                 ? ref.watch(displayNameProvider)
                                 : 'profile.display_name_desc'.tr(),
                           ),
-                          trailing: const Icon(Icons.edit_outlined, size: 20, color: Colors.grey),
+                          trailing: const Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           onTap: () {
                             HapticFeedback.lightImpact();
                             _showDisplayNameDialog(context);
@@ -802,7 +948,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                             value: securityState.isSecurityEnabled,
                             onChanged: (val) {
                               HapticFeedback.lightImpact();
-                              ref.read(securityProvider.notifier).setSecurityEnabled(val);
+                              ref
+                                  .read(securityProvider.notifier)
+                                  .setSecurityEnabled(val);
                             },
                           ),
                         ),
@@ -819,12 +967,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               onChanged: securityState.isSecurityEnabled
                                   ? (val) async {
                                       HapticFeedback.lightImpact();
-                                      final success = await ref.read(securityProvider.notifier).setBiometricEnabled(val);
+                                      final success = await ref
+                                          .read(securityProvider.notifier)
+                                          .setBiometricEnabled(val);
                                       if (val && !success) {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
-                                              content: Text('profile.biometric_setup_failed'.tr()),
+                                              content: Text(
+                                                'profile.biometric_setup_failed'
+                                                    .tr(),
+                                              ),
                                               backgroundColor: Colors.redAccent,
                                             ),
                                           );
@@ -843,7 +998,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                             leading: const Icon(Icons.lock_outline),
                             title: Text('profile.change_pin'.tr()),
                             subtitle: Text('profile.change_pin_desc'.tr()),
-                            trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                            trailing: const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
                             onTap: securityState.isSecurityEnabled
                                 ? () {
                                     HapticFeedback.lightImpact();
@@ -869,7 +1028,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                           leading: const Icon(Icons.cloud_download_outlined),
                           title: Text('profile.backup_data'.tr()),
                           subtitle: Text('profile.backup_desc'.tr()),
-                          trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           onTap: () {
                             HapticFeedback.lightImpact();
                             _handleBackup();
@@ -880,7 +1043,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                           leading: const Icon(Icons.cloud_upload_outlined),
                           title: Text('profile.restore_data'.tr()),
                           subtitle: Text('profile.restore_desc'.tr()),
-                          trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                           onTap: () {
                             HapticFeedback.lightImpact();
                             _handleRestore();
@@ -905,10 +1072,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                             leading: const Icon(Icons.dark_mode_outlined),
                             title: Text('profile.dark_mode'.tr()),
                             trailing: Switch(
-                              value: ref.watch(themeNotifierProvider).themeMode == ThemeMode.dark,
+                              value:
+                                  ref.watch(themeNotifierProvider).themeMode ==
+                                  ThemeMode.dark,
                               onChanged: (val) {
                                 HapticFeedback.lightImpact();
-                                ref.read(themeNotifierProvider.notifier).updateThemeMode(
+                                ref
+                                    .read(themeNotifierProvider.notifier)
+                                    .updateThemeMode(
                                       val ? ThemeMode.dark : ThemeMode.light,
                                     );
                               },
@@ -920,11 +1091,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                             title: Text('profile.aesthetic_presets'.tr()),
                             subtitle: Text(
                               'profile.aesthetic_desc'.tr(),
-                              style: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
+                              style: TextStyle(
+                                color: isDark ? Colors.white60 : Colors.black54,
+                              ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 12.0),
+                            padding: const EdgeInsets.only(
+                              left: 16.0,
+                              right: 16.0,
+                              bottom: 12.0,
+                            ),
                             child: _buildPresetSelector(context, ref),
                           ),
                         ],
@@ -946,19 +1123,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF06B6D4).withValues(alpha: 0.15),
+                              color: const Color(
+                                0xFF06B6D4,
+                              ).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.bolt, color: Color(0xFF06B6D4)),
+                            child: const Icon(
+                              Icons.bolt,
+                              color: Color(0xFF06B6D4),
+                            ),
                           ),
                           title: Text('profile.parser_engine'.tr()),
                           subtitle: Text(
                             parserMode == ParserMode.auto
                                 ? 'profile.parser_mode_auto'.tr()
                                 : parserMode == ParserMode.tfliteOnly
-                                    ? 'profile.parser_mode_tflite'.tr()
-                                    : 'profile.parser_mode_regex'.tr(),
-                            style: TextStyle(color: isDark ? Colors.white60 : Colors.grey[600]),
+                                ? 'profile.parser_mode_tflite'.tr()
+                                : 'profile.parser_mode_regex'.tr(),
+                            style: TextStyle(
+                              color: isDark ? Colors.white60 : Colors.grey[600],
+                            ),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -967,12 +1151,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                                 parserMode == ParserMode.auto
                                     ? 'Auto'
                                     : parserMode == ParserMode.tfliteOnly
-                                        ? 'AI'
-                                        : 'Regex',
-                                style: TextStyle(color: isDark ? Colors.white60 : Colors.grey[600]),
+                                    ? 'AI'
+                                    : 'Regex',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.white60
+                                      : Colors.grey[600],
+                                ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                           onTap: () {
@@ -989,7 +1181,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               color: Colors.red.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.location_on_outlined, color: Colors.red),
+                            child: const Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.red,
+                            ),
                           ),
                           title: Text('profile.geofencing_alerts'.tr()),
                           subtitle: Text('profile.geofencing_alerts_desc'.tr()),
@@ -1004,7 +1199,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('profile.location_permission_required'.tr()),
+                                      content: Text(
+                                        'profile.location_permission_required'
+                                            .tr(),
+                                      ),
                                       backgroundColor: Colors.redAccent,
                                     ),
                                   );
@@ -1047,11 +1245,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                context.locale.languageCode == 'id' ? 'Indonesia' : 'English',
-                                style: TextStyle(color: isDark ? Colors.white60 : Colors.grey[600]),
+                                context.locale.languageCode == 'id'
+                                    ? 'Indonesia'
+                                    : 'English',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.white60
+                                      : Colors.grey[600],
+                                ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
                             ],
                           ),
                           onTap: () {
@@ -1075,15 +1283,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
                               if (val && !_isInterceptorEnabled) {
                                 _requestInterceptorPermission();
                               } else if (!val && _isInterceptorEnabled) {
-                              _requestInterceptorPermission();
-                            }
+                                _requestInterceptorPermission();
+                              }
+                            },
+                          ),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _requestInterceptorPermission();
                           },
                         ),
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _requestInterceptorPermission();
-                        },
-                      ),
                       ],
                     ),
                   ),
@@ -1125,9 +1333,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
               child: Container(
                 color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF06B6D4),
-                  ),
+                  child: CircularProgressIndicator(color: Color(0xFF06B6D4)),
                 ),
               ),
             ),
@@ -1152,7 +1358,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with WidgetsBindi
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [

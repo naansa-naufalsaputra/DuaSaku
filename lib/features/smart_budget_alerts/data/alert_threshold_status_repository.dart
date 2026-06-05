@@ -19,7 +19,7 @@ class AlertThresholdStatusRepository
   final Uuid _uuid;
 
   AlertThresholdStatusRepository(this._db, {Uuid? uuid})
-      : _uuid = uuid ?? const Uuid();
+    : _uuid = uuid ?? const Uuid();
 
   // ---------------------------------------------------------------------------
   // Queries
@@ -27,7 +27,7 @@ class AlertThresholdStatusRepository
 
   @override
   Future<Result<List<AlertThresholdStatusModel>, AppError>>
-      getTriggeredThresholds(
+  getTriggeredThresholds(
     String userId,
     String categoryId,
     String budgetMonth,
@@ -108,9 +108,7 @@ class AlertThresholdStatusRepository
     try {
       final statement = _db.delete(_db.budgetAlertThresholdStatus)
         ..where(
-          (t) =>
-              t.userId.equals(userId) &
-              t.budgetMonth.equals(budgetMonth),
+          (t) => t.userId.equals(userId) & t.budgetMonth.equals(budgetMonth),
         );
       await statement.go();
       return const Success(null);

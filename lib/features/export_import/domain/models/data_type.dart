@@ -12,7 +12,7 @@ enum DataType {
   /// Column used for date filtering per type.
   /// Transactions use 'date', all others use 'createdAt'.
   String get dateColumn => switch (this) {
-        DataType.transactions => 'date',
-        _ => 'createdAt',
-      };
+    DataType.transactions => 'date',
+    _ => 'createdAt',
+  };
 }

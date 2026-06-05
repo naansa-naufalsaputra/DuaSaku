@@ -130,8 +130,7 @@ class GoalModel {
           : (linkedWalletId ?? this.linkedWalletId),
       trackingMode: trackingMode ?? this.trackingMode,
       status: status ?? this.status,
-      completedAt:
-          clearCompletedAt ? null : (completedAt ?? this.completedAt),
+      completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
       notifiedMilestones: notifiedMilestones ?? this.notifiedMilestones,
       createdAt: createdAt ?? this.createdAt,
     );

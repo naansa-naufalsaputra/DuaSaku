@@ -25,85 +25,86 @@ void main() {
   // **Validates: Requirements 3.2**
   // =========================================================================
   group(
-      'Preservation: parseSmartText field values match map and structured access',
-      () {
-    final parserService = TransactionParserService();
-    const wallets = [WalletInfo(id: 'w1', name: 'Cash', type: 'cash')];
-    const categories = [
-      CategoryInfo(name: 'Food', type: 'expense'),
-      CategoryInfo(name: 'Transport', type: 'expense'),
-      CategoryInfo(name: 'Salary', type: 'income'),
-    ];
+    'Preservation: parseSmartText field values match map and structured access',
+    () {
+      final parserService = TransactionParserService();
+      const wallets = [WalletInfo(id: 'w1', name: 'Cash', type: 'cash')];
+      const categories = [
+        CategoryInfo(name: 'Food', type: 'expense'),
+        CategoryInfo(name: 'Transport', type: 'expense'),
+        CategoryInfo(name: 'Salary', type: 'income'),
+      ];
 
-    /// Helper: simulates the current parseSmartText behavior (returns map)
-    /// by calling parseLocally and constructing the map the same way
-    /// TransactionNotifier.parseSmartText() does.
-    Map<String, dynamic> simulateMapAccess(ParsedTransaction parsed) {
-      return {
-        'amount': parsed.amount,
-        'category': parsed.category,
-        'type': parsed.type,
-        'walletId': parsed.walletId,
-        'notes': parsed.notes,
-      };
-    }
+      /// Helper: simulates the current parseSmartText behavior (returns map)
+      /// by calling parseLocally and constructing the map the same way
+      /// TransactionNotifier.parseSmartText() does.
+      Map<String, dynamic> simulateMapAccess(ParsedTransaction parsed) {
+        return {
+          'amount': parsed.amount,
+          'category': parsed.category,
+          'type': parsed.type,
+          'walletId': parsed.walletId,
+          'notes': parsed.notes,
+        };
+      }
 
-    // Generator for transaction text inputs with amounts
-    final transactionTexts = any.choose([
-      'beli kopi 25000',
-      'makan siang 50k',
-      'gaji bulan ini 10jt',
-      'bayar listrik 200rb',
-      'belanja baju 150ribu',
-      'bonus tahunan 5juta',
-      'parkir 3k',
-      'beli bensin 50000',
-      'nonton bioskop 75k',
-      'transfer masuk 2jt',
-    ]);
+      // Generator for transaction text inputs with amounts
+      final transactionTexts = any.choose([
+        'beli kopi 25000',
+        'makan siang 50k',
+        'gaji bulan ini 10jt',
+        'bayar listrik 200rb',
+        'belanja baju 150ribu',
+        'bonus tahunan 5juta',
+        'parkir 3k',
+        'beli bensin 50000',
+        'nonton bioskop 75k',
+        'transfer masuk 2jt',
+      ]);
 
-    Glados(transactionTexts).test(
-      'for all parseable inputs, map fields match ParsedTransaction fields',
-      (text) {
-        final parsed = parserService.parseLocally(
-          text: text,
-          wallets: wallets,
-          categories: categories,
-        );
+      Glados(transactionTexts).test(
+        'for all parseable inputs, map fields match ParsedTransaction fields',
+        (text) {
+          final parsed = parserService.parseLocally(
+            text: text,
+            wallets: wallets,
+            categories: categories,
+          );
 
-        final mapResult = simulateMapAccess(parsed);
+          final mapResult = simulateMapAccess(parsed);
 
-        // Verify map access produces identical values to structured access
-        expect(mapResult['amount'], equals(parsed.amount));
-        expect(mapResult['category'], equals(parsed.category));
-        expect(mapResult['type'], equals(parsed.type));
-        expect(mapResult['walletId'], equals(parsed.walletId));
-        expect(mapResult['notes'], equals(parsed.notes));
-      },
-    );
+          // Verify map access produces identical values to structured access
+          expect(mapResult['amount'], equals(parsed.amount));
+          expect(mapResult['category'], equals(parsed.category));
+          expect(mapResult['type'], equals(parsed.type));
+          expect(mapResult['walletId'], equals(parsed.walletId));
+          expect(mapResult['notes'], equals(parsed.notes));
+        },
+      );
 
-    Glados(any.intInRange(1, 100000)).test(
-      'for all numeric amounts, parseLocally returns consistent fields',
-      (amount) {
-        final text = 'beli makan $amount';
-        final parsed = parserService.parseLocally(
-          text: text,
-          wallets: wallets,
-          categories: categories,
-        );
+      Glados(any.intInRange(1, 100000)).test(
+        'for all numeric amounts, parseLocally returns consistent fields',
+        (amount) {
+          final text = 'beli makan $amount';
+          final parsed = parserService.parseLocally(
+            text: text,
+            wallets: wallets,
+            categories: categories,
+          );
 
-        final mapResult = simulateMapAccess(parsed);
+          final mapResult = simulateMapAccess(parsed);
 
-        // Amount should be the parsed numeric value
-        expect(mapResult['amount'], equals(parsed.amount));
-        expect(parsed.amount, equals(amount.toDouble()));
-        // Type should be expense (no income keywords)
-        expect(mapResult['type'], equals('expense'));
-        // Notes should have the amount stripped (as per the new requirements)
-        expect(mapResult['notes'], equals('Beli makan'));
-      },
-    );
-  });
+          // Amount should be the parsed numeric value
+          expect(mapResult['amount'], equals(parsed.amount));
+          expect(parsed.amount, equals(amount.toDouble()));
+          // Type should be expense (no income keywords)
+          expect(mapResult['type'], equals('expense'));
+          // Notes should have the amount stripped (as per the new requirements)
+          expect(mapResult['notes'], equals('Beli makan'));
+        },
+      );
+    },
+  );
 
   // =========================================================================
   // Preservation Property 2: Wallet CRUD state transitions produce
@@ -111,10 +112,7 @@ void main() {
   // **Validates: Requirements 3.1, 3.6**
   // =========================================================================
   group('Preservation: Wallet model state transitions are consistent', () {
-    Glados2(
-      any.intInRange(0, 10000000),
-      any.intInRange(0, 10000000),
-    ).test(
+    Glados2(any.intInRange(0, 10000000), any.intInRange(0, 10000000)).test(
       'for all valid wallet balances, copyWith preserves identity fields',
       (initialBalance, newBalance) {
         final wallet = WalletModel(
@@ -216,34 +214,51 @@ void main() {
       // This captures the priority: isInitialized check comes first
       expect(
         determineSecurityState(
-            isInitialized: false, isLocked: true, isTimeTampered: true),
+          isInitialized: false,
+          isLocked: true,
+          isTimeTampered: true,
+        ),
         equals('loading'),
       );
       expect(
         determineSecurityState(
-            isInitialized: false, isLocked: false, isTimeTampered: false),
+          isInitialized: false,
+          isLocked: false,
+          isTimeTampered: false,
+        ),
         equals('loading'),
       );
     });
 
-    test('initialized + locked shows PIN screen regardless of tamper state',
-        () {
-      expect(
-        determineSecurityState(
-            isInitialized: true, isLocked: true, isTimeTampered: true),
-        equals('pin_screen'),
-      );
-      expect(
-        determineSecurityState(
-            isInitialized: true, isLocked: true, isTimeTampered: false),
-        equals('pin_screen'),
-      );
-    });
+    test(
+      'initialized + locked shows PIN screen regardless of tamper state',
+      () {
+        expect(
+          determineSecurityState(
+            isInitialized: true,
+            isLocked: true,
+            isTimeTampered: true,
+          ),
+          equals('pin_screen'),
+        );
+        expect(
+          determineSecurityState(
+            isInitialized: true,
+            isLocked: true,
+            isTimeTampered: false,
+          ),
+          equals('pin_screen'),
+        );
+      },
+    );
 
     test('initialized + unlocked + tampered shows tamper warning', () {
       expect(
         determineSecurityState(
-            isInitialized: true, isLocked: false, isTimeTampered: true),
+          isInitialized: true,
+          isLocked: false,
+          isTimeTampered: true,
+        ),
         equals('tamper_warning'),
       );
     });
@@ -251,7 +266,10 @@ void main() {
     test('initialized + unlocked + not tampered shows child', () {
       expect(
         determineSecurityState(
-            isInitialized: true, isLocked: false, isTimeTampered: false),
+          isInitialized: true,
+          isLocked: false,
+          isTimeTampered: false,
+        ),
         equals('child'),
       );
     });
@@ -303,23 +321,18 @@ void main() {
       expect(user.email, equals(expectedEmail));
     });
 
-    Glados(any.choose([
-      'food',
-      'transport',
-      'salary',
-      'bills',
-      'shopping',
-    ])).test(
-      'for all seed category IDs, userId is always "local_user"',
-      (categoryId) {
-        // The seed data in app_database.dart uses 'local_user' for all categories
-        // This captures that the userId for seed data must remain 'local_user'
-        const seedUserId = 'local_user';
-        expect(seedUserId, equals('local_user'));
-        // The category IDs are seeded with this userId
-        expect(seedUserId.isNotEmpty, isTrue);
-      },
-    );
+    Glados(
+      any.choose(['food', 'transport', 'salary', 'bills', 'shopping']),
+    ).test('for all seed category IDs, userId is always "local_user"', (
+      categoryId,
+    ) {
+      // The seed data in app_database.dart uses 'local_user' for all categories
+      // This captures that the userId for seed data must remain 'local_user'
+      const seedUserId = 'local_user';
+      expect(seedUserId, equals('local_user'));
+      // The category IDs are seeded with this userId
+      expect(seedUserId.isNotEmpty, isTrue);
+    });
   });
 
   // =========================================================================
@@ -367,22 +380,20 @@ void main() {
   // =========================================================================
   group('Preservation: syncPendingTransactions is a graceful no-op', () {
     test(
-        'TransactionRepositoryInterface declares syncPendingTransactions method',
-        () {
-      // Verify the interface contract exists - this is a compile-time check
-      // that the method signature is preserved
-      // If this test compiles and runs, the interface contract is preserved
-      expect(true, isTrue);
-    });
+      'TransactionRepositoryInterface declares syncPendingTransactions method',
+      () {
+        // Verify the interface contract exists - this is a compile-time check
+        // that the method signature is preserved
+        // If this test compiles and runs, the interface contract is preserved
+        expect(true, isTrue);
+      },
+    );
 
     test('syncPendingTransactions method exists on TransactionRepository', () {
       // The method should exist and be callable without throwing
       // We can't instantiate TransactionRepository without a real DB,
       // but we verify the interface contract is intact
-      expect(
-        TransactionRepositoryInterface,
-        isNotNull,
-      );
+      expect(TransactionRepositoryInterface, isNotNull);
     });
   });
 

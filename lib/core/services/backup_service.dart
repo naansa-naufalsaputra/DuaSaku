@@ -16,22 +16,16 @@ import '../../features/transactions/providers/transaction_provider.dart';
 import '../../features/transactions/providers/budget_provider.dart';
 
 final backupServiceProvider = Provider<BackupService>((ref) {
-  return BackupService(
-    db: ref.watch(appDatabaseProvider),
-    ref: ref,
-  );
+  return BackupService(db: ref.watch(appDatabaseProvider), ref: ref);
 });
 
 class BackupService {
   final AppDatabase db;
   final Ref ref;
 
-  BackupService({
-    required this.db,
-    required this.ref,
-  });
+  BackupService({required this.db, required this.ref});
 
-  /// Exports all database tables (Wallets, Categories, Transactions, Budgets) 
+  /// Exports all database tables (Wallets, Categories, Transactions, Budgets)
   /// to a JSON file and opens the platform's native share sheet.
   Future<void> exportData() async {
     try {
@@ -59,16 +53,15 @@ class BackupService {
       // 3. Write JSON to a temporary file
       final tempDir = await getTemporaryDirectory();
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final tempFile = File(p.join(tempDir.path, 'duasaku_backup_$timestamp.json'));
+      final tempFile = File(
+        p.join(tempDir.path, 'duasaku_backup_$timestamp.json'),
+      );
       await tempFile.writeAsString(jsonString);
 
       // 4. Trigger Native Share sheet
       final xFile = XFile(tempFile.path);
       await SharePlus.instance.share(
-        ShareParams(
-          subject: 'DuaSaku Backup Data',
-          files: [xFile],
-        ),
+        ShareParams(subject: 'DuaSaku Backup Data', files: [xFile]),
       );
     } catch (e) {
       throw Exception('Failed to export backup: $e');
@@ -80,9 +73,7 @@ class BackupService {
   Future<Map<String, int>?> importData() async {
     try {
       // 1. Pick backup file using FilePicker
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-      );
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
 
       if (result == null || result.files.isEmpty) {
         // User canceled file selection
@@ -106,8 +97,9 @@ class BackupService {
       }
 
       // 2. Decode and validate structure
-      final Map<String, dynamic> backupMap = jsonDecode(jsonString) as Map<String, dynamic>;
-      
+      final Map<String, dynamic> backupMap =
+          jsonDecode(jsonString) as Map<String, dynamic>;
+
       final metadata = backupMap['metadata'];
       if (metadata == null || metadata is! Map<String, dynamic>) {
         throw const FormatException('Invalid backup format: missing metadata');
@@ -115,20 +107,26 @@ class BackupService {
 
       final backupSchemaVersion = metadata['schemaVersion'];
       if (backupSchemaVersion == null) {
-        throw const FormatException('Invalid backup format: missing schema version');
+        throw const FormatException(
+          'Invalid backup format: missing schema version',
+        );
       }
 
       if (backupSchemaVersion != db.schemaVersion) {
         throw FormatException(
-          'Incompatible schema version: expected version ${db.schemaVersion}, got $backupSchemaVersion'
+          'Incompatible schema version: expected version ${db.schemaVersion}, got $backupSchemaVersion',
         );
       }
 
       // 3. Extract JSON lists
-      final List<dynamic> walletsJson = backupMap['wallets'] as List<dynamic>? ?? [];
-      final List<dynamic> categoriesJson = backupMap['categories'] as List<dynamic>? ?? [];
-      final List<dynamic> transactionsJson = backupMap['transactions'] as List<dynamic>? ?? [];
-      final List<dynamic> budgetsJson = backupMap['budgets'] as List<dynamic>? ?? [];
+      final List<dynamic> walletsJson =
+          backupMap['wallets'] as List<dynamic>? ?? [];
+      final List<dynamic> categoriesJson =
+          backupMap['categories'] as List<dynamic>? ?? [];
+      final List<dynamic> transactionsJson =
+          backupMap['transactions'] as List<dynamic>? ?? [];
+      final List<dynamic> budgetsJson =
+          backupMap['budgets'] as List<dynamic>? ?? [];
 
       // 4. Perform atomic restore inside Drift transaction
       await db.transaction(() async {
@@ -146,25 +144,35 @@ class BackupService {
         // 1. Wallets
         for (final item in walletsJson) {
           final wallet = Wallet.fromJson(item as Map<String, dynamic>);
-          await db.into(db.wallets).insert(wallet, mode: InsertMode.insertOrReplace);
+          await db
+              .into(db.wallets)
+              .insert(wallet, mode: InsertMode.insertOrReplace);
         }
 
         // 2. Categories
         for (final item in categoriesJson) {
           final category = Category.fromJson(item as Map<String, dynamic>);
-          await db.into(db.categories).insert(category, mode: InsertMode.insertOrReplace);
+          await db
+              .into(db.categories)
+              .insert(category, mode: InsertMode.insertOrReplace);
         }
 
         // 3. Transactions
         for (final item in transactionsJson) {
-          final transaction = Transaction.fromJson(item as Map<String, dynamic>);
-          await db.into(db.transactions).insert(transaction, mode: InsertMode.insertOrReplace);
+          final transaction = Transaction.fromJson(
+            item as Map<String, dynamic>,
+          );
+          await db
+              .into(db.transactions)
+              .insert(transaction, mode: InsertMode.insertOrReplace);
         }
 
         // 4. Budgets
         for (final item in budgetsJson) {
           final budget = Budget.fromJson(item as Map<String, dynamic>);
-          await db.into(db.budgets).insert(budget, mode: InsertMode.insertOrReplace);
+          await db
+              .into(db.budgets)
+              .insert(budget, mode: InsertMode.insertOrReplace);
         }
       });
 

@@ -70,15 +70,17 @@ void main() {
             jsonString,
             currentSchemaVersion,
           ),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            anyOf(
-              contains('update'),
-              contains('lebih lama'),
-              contains('lebih baru'),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              anyOf(
+                contains('update'),
+                contains('lebih lama'),
+                contains('lebih baru'),
+              ),
             ),
-          )),
+          ),
           reason:
               'Schema version $differentSchema != $currentSchemaVersion should be rejected',
         );
@@ -99,22 +101,24 @@ void main() {
             jsonString,
             currentSchemaVersion,
           ),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            allOf(
-              contains('tidak konsisten'),
-              // Should mention the table or FK field
-              anyOf(
-                contains('transactions'),
-                contains('goals'),
-                contains('goalDeposits'),
-                contains('budgets'),
-                contains('recurringTransactions'),
-                contains('recurringExecutionLogs'),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              allOf(
+                contains('tidak konsisten'),
+                // Should mention the table or FK field
+                anyOf(
+                  contains('transactions'),
+                  contains('goals'),
+                  contains('goalDeposits'),
+                  contains('budgets'),
+                  contains('recurringTransactions'),
+                  contains('recurringExecutionLogs'),
+                ),
               ),
             ),
-          )),
+          ),
           reason: 'Broken FK references should be rejected',
         );
       },
@@ -144,8 +148,8 @@ void main() {
         final targetTable = tables[rng.nextInt(tables.length)];
 
         // Add a record missing the required 'id' field
-        final existingRecords =
-            (dbState[targetTable] as List).cast<Map<String, dynamic>>();
+        final existingRecords = (dbState[targetTable] as List)
+            .cast<Map<String, dynamic>>();
         dbState[targetTable] = <Map<String, dynamic>>[
           ...existingRecords,
           <String, dynamic>{
@@ -162,14 +166,13 @@ void main() {
             jsonString,
             currentSchemaVersion,
           ),
-          throwsA(isA<FormatException>().having(
-            (e) => e.message,
-            'message',
-            allOf(
-              contains('id'),
-              contains(targetTable),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              allOf(contains('id'), contains(targetTable)),
             ),
-          )),
+          ),
           reason:
               'Record missing "id" in table "$targetTable" should be rejected',
         );

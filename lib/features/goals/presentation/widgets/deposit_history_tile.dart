@@ -10,11 +10,7 @@ import '../../domain/models/goal_deposit_model.dart';
 ///
 /// Requirements: 2.5, 5.4
 class DepositHistoryTile extends StatelessWidget {
-  const DepositHistoryTile({
-    super.key,
-    required this.deposit,
-    this.goalColor,
-  });
+  const DepositHistoryTile({super.key, required this.deposit, this.goalColor});
 
   /// The deposit model to display.
   final GoalDepositModel deposit;
@@ -57,11 +53,7 @@ class DepositHistoryTile extends StatelessWidget {
               color: accentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              Icons.add_rounded,
-              color: accentColor,
-              size: 18,
-            ),
+            child: Icon(Icons.add_rounded, color: accentColor, size: 18),
           ),
           const SizedBox(width: 12),
 

@@ -107,8 +107,9 @@ class AlertCardWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         color: isDark ? Colors.white70 : Colors.black54,
-                        fontWeight:
-                            alert.isRead ? FontWeight.normal : FontWeight.w500,
+                        fontWeight: alert.isRead
+                            ? FontWeight.normal
+                            : FontWeight.w500,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -151,19 +152,16 @@ class AlertCardWidget extends StatelessWidget {
     } else if (difference.inDays < 7) {
       return 'alert.time_days_ago'.tr(args: ['${difference.inDays}']);
     } else {
-      return 'alert.time_date'.tr(args: [
-        '${dateTime.day}/${dateTime.month}/${dateTime.year}',
-      ]);
+      return 'alert.time_date'.tr(
+        args: ['${dateTime.day}/${dateTime.month}/${dateTime.year}'],
+      );
     }
   }
 }
 
 /// Icon widget that displays the appropriate icon based on alert type.
 class _AlertTypeIcon extends StatelessWidget {
-  const _AlertTypeIcon({
-    required this.alertType,
-    required this.theme,
-  });
+  const _AlertTypeIcon({required this.alertType, required this.theme});
 
   final AlertType alertType;
   final ThemeData theme;
@@ -171,18 +169,15 @@ class _AlertTypeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, Color color) = switch (alertType) {
-      AlertType.threshold => (
-          Icons.warning_amber_rounded,
-          Colors.orange,
-        ),
+      AlertType.threshold => (Icons.warning_amber_rounded, Colors.orange),
       AlertType.prediction => (
-          Icons.trending_up_rounded,
-          theme.colorScheme.primary,
-        ),
+        Icons.trending_up_rounded,
+        theme.colorScheme.primary,
+      ),
       AlertType.overBudget => (
-          Icons.error_outline_rounded,
-          theme.colorScheme.error,
-        ),
+        Icons.error_outline_rounded,
+        theme.colorScheme.error,
+      ),
     };
 
     return Container(
@@ -192,11 +187,7 @@ class _AlertTypeIcon extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        icon,
-        color: color,
-        size: 22,
-      ),
+      child: Icon(icon, color: color, size: 22),
     );
   }
 }

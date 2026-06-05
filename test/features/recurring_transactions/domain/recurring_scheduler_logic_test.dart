@@ -16,10 +16,9 @@ import 'package:duasaku_app/features/recurring_transactions/domain/recurring_sch
 /// Custom generators for recurring transaction domain types.
 extension FrequencyArbitrary on Any {
   /// Generates a random Frequency enum value.
-  Generator<Frequency> get frequency =>
-      any.intInRange(0, Frequency.values.length - 1).map(
-            (index) => Frequency.values[index],
-          );
+  Generator<Frequency> get frequency => any
+      .intInRange(0, Frequency.values.length - 1)
+      .map((index) => Frequency.values[index]);
 
   /// Generates a valid custom interval for a given frequency.
   Generator<int> validIntervalFor(Frequency freq) =>
@@ -90,7 +89,8 @@ void main() {
         expect(nextDate, isNotNull);
 
         // Calculate expected month difference accounting for year rollover
-        final monthDiff = (nextDate!.year - baseDate.year) * 12 +
+        final monthDiff =
+            (nextDate!.year - baseDate.year) * 12 +
             (nextDate.month - baseDate.month);
         expect(monthDiff, equals(customInterval));
 
@@ -136,8 +136,10 @@ void main() {
       'isValidCustomInterval accepts iff 1 <= interval <= frequency.maxInterval',
       (freqIndex, interval) {
         final freq = Frequency.values[freqIndex];
-        final result =
-            RecurringSchedulerLogic.isValidCustomInterval(freq, interval);
+        final result = RecurringSchedulerLogic.isValidCustomInterval(
+          freq,
+          interval,
+        );
         final expected = interval >= 1 && interval <= freq.maxInterval;
         expect(result, equals(expected));
       },
@@ -282,54 +284,50 @@ void main() {
     Glados2(
       any.intInRange(0, Frequency.values.length - 1),
       any.intInRange(0, 1000),
-    ).test(
-      'no computed next date exceeds endDate',
-      (freqIndex, dayOffset) {
-        final freq = Frequency.values[freqIndex];
-        final baseDate = DateTime(2022, 1, 1).add(Duration(days: dayOffset));
-        // End date is 5 days after base date — for daily with interval 1,
-        // some dates will be within range, others won't
-        final endDate = baseDate.add(const Duration(days: 5));
+    ).test('no computed next date exceeds endDate', (freqIndex, dayOffset) {
+      final freq = Frequency.values[freqIndex];
+      final baseDate = DateTime(2022, 1, 1).add(Duration(days: dayOffset));
+      // End date is 5 days after base date — for daily with interval 1,
+      // some dates will be within range, others won't
+      final endDate = baseDate.add(const Duration(days: 5));
 
-        final nextDate = RecurringSchedulerLogic.computeNextExecutionDate(
-          currentExecutionDate: baseDate,
-          frequency: freq,
-          customInterval: 1,
-          endDate: endDate,
+      final nextDate = RecurringSchedulerLogic.computeNextExecutionDate(
+        currentExecutionDate: baseDate,
+        frequency: freq,
+        customInterval: 1,
+        endDate: endDate,
+      );
+
+      // If a date is returned, it must not exceed endDate
+      if (nextDate != null) {
+        expect(
+          nextDate.isAfter(endDate),
+          isFalse,
+          reason: 'Next date $nextDate should not exceed end date $endDate',
         );
-
-        // If a date is returned, it must not exceed endDate
-        if (nextDate != null) {
-          expect(
-            nextDate.isAfter(endDate),
-            isFalse,
-            reason:
-                'Next date $nextDate should not exceed end date $endDate',
-          );
-        }
-      },
-    );
+      }
+    });
 
     // Without end date: always produces a valid next date
     Glados2(
       any.intInRange(0, Frequency.values.length - 1),
       any.intInRange(0, 3650),
-    ).test(
-      'null endDate always produces a valid next date',
-      (freqIndex, dayOffset) {
-        final freq = Frequency.values[freqIndex];
-        final baseDate = DateTime(2020, 1, 1).add(Duration(days: dayOffset));
+    ).test('null endDate always produces a valid next date', (
+      freqIndex,
+      dayOffset,
+    ) {
+      final freq = Frequency.values[freqIndex];
+      final baseDate = DateTime(2020, 1, 1).add(Duration(days: dayOffset));
 
-        final nextDate = RecurringSchedulerLogic.computeNextExecutionDate(
-          currentExecutionDate: baseDate,
-          frequency: freq,
-          customInterval: 1,
-          endDate: null,
-        );
+      final nextDate = RecurringSchedulerLogic.computeNextExecutionDate(
+        currentExecutionDate: baseDate,
+        frequency: freq,
+        customInterval: 1,
+        endDate: null,
+      );
 
-        expect(nextDate, isNotNull);
-      },
-    );
+      expect(nextDate, isNotNull);
+    });
 
     // Preview dates with end date: all returned dates are <= endDate
     Glados(any.intInRange(0, 1000)).test(
@@ -404,8 +402,7 @@ void main() {
         // Clamp percentElapsed to [0, 100]
         final pct = percentElapsed.clamp(0, 100);
         final lastExecution = DateTime(2023, 1, 1);
-        final nextExecution =
-            lastExecution.add(Duration(days: totalDays));
+        final nextExecution = lastExecution.add(Duration(days: totalDays));
         final elapsedDays = (totalDays * pct) ~/ 100;
         final now = lastExecution.add(Duration(days: elapsedDays));
 
@@ -464,33 +461,31 @@ void main() {
     });
 
     // Progress decreases as time passes (monotonically decreasing)
-    Glados(any.intInRange(2, 100)).test(
-      'progress is monotonically decreasing as now advances',
-      (totalDays) {
-        final lastExecution = DateTime(2023, 1, 1);
-        final nextExecution =
-            lastExecution.add(Duration(days: totalDays));
+    Glados(
+      any.intInRange(2, 100),
+    ).test('progress is monotonically decreasing as now advances', (totalDays) {
+      final lastExecution = DateTime(2023, 1, 1);
+      final nextExecution = lastExecution.add(Duration(days: totalDays));
 
-        double? previousProgress;
-        for (var day = 0; day <= totalDays; day++) {
-          final now = lastExecution.add(Duration(days: day));
-          final progress = RecurringSchedulerLogic.computeProgressRing(
-            lastExecutionDate: lastExecution,
-            nextExecutionDate: nextExecution,
-            now: now,
+      double? previousProgress;
+      for (var day = 0; day <= totalDays; day++) {
+        final now = lastExecution.add(Duration(days: day));
+        final progress = RecurringSchedulerLogic.computeProgressRing(
+          lastExecutionDate: lastExecution,
+          nextExecutionDate: nextExecution,
+          now: now,
+        );
+
+        if (previousProgress != null) {
+          expect(
+            progress,
+            lessThanOrEqualTo(previousProgress),
+            reason:
+                'Progress should decrease as time passes (day $day: $progress > previous: $previousProgress)',
           );
-
-          if (previousProgress != null) {
-            expect(
-              progress,
-              lessThanOrEqualTo(previousProgress),
-              reason:
-                  'Progress should decrease as time passes (day $day: $progress > previous: $previousProgress)',
-            );
-          }
-          previousProgress = progress;
         }
-      },
-    );
+        previousProgress = progress;
+      }
+    });
   });
 }

@@ -9,7 +9,8 @@ import '../domain/models/budget_alert_model.dart';
 class BudgetNotificationService {
   BudgetNotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
-  }) : _notifications = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
+  }) : _notifications =
+           notificationsPlugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _notifications;
 
@@ -21,20 +22,20 @@ class BudgetNotificationService {
   /// Android notification details configured with high priority.
   static const AndroidNotificationDetails androidNotificationDetails =
       AndroidNotificationDetails(
-    channelId,
-    channelName,
-    channelDescription: channelDescription,
-    importance: Importance.high,
-    priority: Priority.high,
-  );
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+      );
 
   /// iOS notification details.
   static const DarwinNotificationDetails iosNotificationDetails =
       DarwinNotificationDetails(
-    presentAlert: true,
-    presentBadge: true,
-    presentSound: true,
-  );
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
 
   /// Combined notification details for all platforms.
   static const NotificationDetails notificationDetails = NotificationDetails(

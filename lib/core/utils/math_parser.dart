@@ -1,6 +1,6 @@
 import 'dart:core';
 
-/// A lightweight, robust utility to safely parse and evaluate simple mathematical 
+/// A lightweight, robust utility to safely parse and evaluate simple mathematical
 /// expressions (supporting +, -, *, / and parentheses) fully offline.
 class MathParser {
   /// Evaluates a simple mathematical expression. Returns null if invalid or fails.
@@ -8,8 +8,8 @@ class MathParser {
     // Sanitize input
     String sanitized = expression
         .replaceAll(RegExp(r'\s+'), '') // Remove whitespace
-        .replaceAll('.', '');           // Remove thousand dots (IDR format)
-    
+        .replaceAll('.', ''); // Remove thousand dots (IDR format)
+
     // Replace comma with dot if decimals are entered
     sanitized = sanitized.replaceAll(',', '.');
 
@@ -27,7 +27,7 @@ class MathParser {
   static double _evaluate(String expression) {
     final tokens = _tokenize(expression);
     if (tokens.isEmpty) throw ArgumentError('Empty expression');
-    
+
     final state = _ParserState(tokens);
     final result = state.parseAddSub();
     if (state.index < tokens.length) {
@@ -40,7 +40,7 @@ class MathParser {
     final List<String> tokens = [];
     final length = expression.length;
     int i = 0;
-    
+
     while (i < length) {
       final char = expression[i];
       if ('+-*/()'.contains(char)) {
@@ -68,7 +68,9 @@ class _ParserState {
   _ParserState(this.tokens);
 
   double parsePrimary() {
-    if (index >= tokens.length) throw ArgumentError('Unexpected end of expression');
+    if (index >= tokens.length) {
+      throw ArgumentError('Unexpected end of expression');
+    }
     final token = tokens[index];
     if (token == '(') {
       index++; // consume '('
@@ -78,7 +80,9 @@ class _ParserState {
       }
       index++; // consume ')'
       return result;
-    } else if (token == '-' && index + 1 < tokens.length && RegExp(r'[0-9.]').hasMatch(tokens[index + 1])) {
+    } else if (token == '-' &&
+        index + 1 < tokens.length &&
+        RegExp(r'[0-9.]').hasMatch(tokens[index + 1])) {
       // Negative primary number
       index++;
       final val = double.parse(tokens[index]);

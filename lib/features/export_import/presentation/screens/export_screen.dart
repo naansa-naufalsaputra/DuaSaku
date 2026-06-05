@@ -126,10 +126,7 @@ class _ModeSelector extends ConsumerWidget {
   final ExportMode currentMode;
   final bool isExporting;
 
-  const _ModeSelector({
-    required this.currentMode,
-    required this.isExporting,
-  });
+  const _ModeSelector({required this.currentMode, required this.isExporting});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -201,9 +198,7 @@ class _SegmentButton extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: isSelected
-              ? Border.all(
-                  color: colorScheme.primary.withValues(alpha: 0.3),
-                )
+              ? Border.all(color: colorScheme.primary.withValues(alpha: 0.3))
               : null,
         ),
         child: Center(
@@ -360,10 +355,7 @@ class _ExportButton extends ConsumerWidget {
   final ExportState exportData;
   final bool isExporting;
 
-  const _ExportButton({
-    required this.exportData,
-    required this.isExporting,
-  });
+  const _ExportButton({required this.exportData, required this.isExporting});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

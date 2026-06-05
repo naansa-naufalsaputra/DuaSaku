@@ -41,16 +41,16 @@ abstract class ExportImportRepositoryInterface {
 
   /// Returns recurring transactions for [userId] as raw maps.
   /// Optionally filtered by [startDate] and [endDate].
-  Future<Result<List<Map<String, dynamic>>, AppError>> getRecurringTransactionsRaw(
+  Future<Result<List<Map<String, dynamic>>, AppError>>
+  getRecurringTransactionsRaw(
     String userId, {
     DateTime? startDate,
     DateTime? endDate,
   });
 
   /// Returns recurring execution logs for [userId] as raw maps.
-  Future<Result<List<Map<String, dynamic>>, AppError>> getRecurringExecutionLogsRaw(
-    String userId,
-  );
+  Future<Result<List<Map<String, dynamic>>, AppError>>
+  getRecurringExecutionLogsRaw(String userId);
 
   /// Returns goals for [userId] as raw maps.
   /// Optionally filtered by [startDate] and [endDate].
@@ -77,23 +77,19 @@ abstract class ExportImportRepositoryInterface {
   });
 
   /// Returns budget alert preferences for [userId] as raw maps.
-  Future<Result<List<Map<String, dynamic>>, AppError>> getBudgetAlertPreferencesRaw(
-    String userId,
-  );
+  Future<Result<List<Map<String, dynamic>>, AppError>>
+  getBudgetAlertPreferencesRaw(String userId);
 
   /// Returns budget alert threshold status for [userId] as raw maps.
-  Future<Result<List<Map<String, dynamic>>, AppError>> getBudgetAlertThresholdStatusRaw(
-    String userId,
-  );
+  Future<Result<List<Map<String, dynamic>>, AppError>>
+  getBudgetAlertThresholdStatusRaw(String userId);
 
   // ---------------------------------------------------------------------------
   // Resolved name maps for CSV enrichment
   // ---------------------------------------------------------------------------
 
   /// Returns a map of wallet ID → wallet name for [userId].
-  Future<Result<Map<String, String>, AppError>> getWalletNameMap(
-    String userId,
-  );
+  Future<Result<Map<String, String>, AppError>> getWalletNameMap(String userId);
 
   /// Returns a map of category ID → category name for [userId].
   Future<Result<Map<String, String>, AppError>> getCategoryNameMap(

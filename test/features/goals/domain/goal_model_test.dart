@@ -45,10 +45,13 @@ void main() {
       expect(goal.progressPercentage, equals(0.0));
     });
 
-    test('returns 0.0 when targetAmount is 0 and currentAmount is non-zero', () {
-      final goal = buildGoal(targetAmount: 0.0, currentAmount: 100.0);
-      expect(goal.progressPercentage, equals(0.0));
-    });
+    test(
+      'returns 0.0 when targetAmount is 0 and currentAmount is non-zero',
+      () {
+        final goal = buildGoal(targetAmount: 0.0, currentAmount: 100.0);
+        expect(goal.progressPercentage, equals(0.0));
+      },
+    );
 
     test('returns 0.0 when currentAmount is 0', () {
       final goal = buildGoal(targetAmount: 1000.0, currentAmount: 0.0);
@@ -80,10 +83,7 @@ void main() {
         targetAmount: 999999999.0,
         currentAmount: 499999999.5,
       );
-      expect(
-        goal.progressPercentage,
-        closeTo(0.5, 0.000001),
-      );
+      expect(goal.progressPercentage, closeTo(0.5, 0.000001));
     });
 
     test('returns 0.0 when currentAmount is negative (clamped)', () {
@@ -194,10 +194,13 @@ void main() {
       expect(goal.currentMilestone, equals(100));
     });
 
-    test('returns 100 when currentAmount exceeds targetAmount (clamped progress)', () {
-      final goal = buildGoal(targetAmount: 1000.0, currentAmount: 1500.0);
-      expect(goal.currentMilestone, equals(100));
-    });
+    test(
+      'returns 100 when currentAmount exceeds targetAmount (clamped progress)',
+      () {
+        final goal = buildGoal(targetAmount: 1000.0, currentAmount: 1500.0);
+        expect(goal.currentMilestone, equals(100));
+      },
+    );
 
     test('returns 0 when targetAmount is 0 (progress is 0.0)', () {
       final goal = buildGoal(targetAmount: 0.0, currentAmount: 0.0);

@@ -23,8 +23,9 @@ class GoalGamificationService {
   /// Returns 0 if there are no active goals.
   /// Result is clamped between 0 and 5.
   double calculateSGoal(List<GoalModel> goals) {
-    final activeGoals =
-        goals.where((g) => g.status == GoalStatus.active).toList();
+    final activeGoals = goals
+        .where((g) => g.status == GoalStatus.active)
+        .toList();
 
     if (activeGoals.isEmpty) return 0.0;
 

@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/export_import/domain/models/backup_metadata.dart';
 import 'package:duasaku_app/features/export_import/services/isolate_helpers.dart';
 import 'package:glados/glados.dart'
@@ -62,8 +61,7 @@ void main() {
               expect(
                 restoredRecord[key]?.toString(),
                 equals(originalRecord[key]?.toString()),
-                reason:
-                    'Table "$tableKey", record #$i, field "$key" mismatch',
+                reason: 'Table "$tableKey", record #$i, field "$key" mismatch',
               );
             }
           }

@@ -15,7 +15,9 @@ class ParserModeNotifier extends Notifier<ParserMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final modeIndex = prefs.getInt(_prefKey);
-      if (modeIndex != null && modeIndex >= 0 && modeIndex < ParserMode.values.length) {
+      if (modeIndex != null &&
+          modeIndex >= 0 &&
+          modeIndex < ParserMode.values.length) {
         state = ParserMode.values[modeIndex];
       }
     } catch (e) {

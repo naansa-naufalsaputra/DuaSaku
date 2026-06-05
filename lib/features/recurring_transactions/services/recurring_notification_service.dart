@@ -53,7 +53,8 @@ class RecurringNotificationService {
     await _notifications.zonedSchedule(
       id: notificationId,
       title: '🔔 Reminder: $transactionName',
-      body: 'Transaksi berulang "$transactionName" akan dieksekusi $timingLabel.',
+      body:
+          'Transaksi berulang "$transactionName" akan dieksekusi $timingLabel.',
       scheduledDate: scheduledDate,
       notificationDetails: _buildNotificationDetails(),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -78,7 +79,8 @@ class RecurringNotificationService {
     await _notifications.show(
       id: notificationId,
       title: '✅ $transactionName berhasil',
-      body: 'Rp ${_formatAmount(amount)} telah dicatat ke wallet "$walletName".',
+      body:
+          'Rp ${_formatAmount(amount)} telah dicatat ke wallet "$walletName".',
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );
@@ -189,10 +191,7 @@ class RecurringNotificationService {
       presentSound: true,
     );
 
-    return const NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Format amount for display in notification body.
@@ -200,9 +199,9 @@ class RecurringNotificationService {
     // Simple formatting: add thousand separators
     if (amount == amount.truncateToDouble()) {
       return amount.toInt().toString().replaceAllMapped(
-            RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-            (match) => '${match[1]}.',
-          );
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (match) => '${match[1]}.',
+      );
     }
     final parts = amount.toStringAsFixed(2).split('.');
     final intPart = parts[0].replaceAllMapped(

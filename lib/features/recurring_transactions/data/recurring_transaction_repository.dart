@@ -37,17 +37,17 @@ class RecurringTransactionRepository
   Future<Result<void, AppError>> create(RecurringTransactionModel model) async {
     try {
       // Validate wallet exists
-      final wallet = await (_db.select(_db.wallets)
-            ..where((w) => w.id.equals(model.walletId)))
-          .getSingleOrNull();
+      final wallet = await (_db.select(
+        _db.wallets,
+      )..where((w) => w.id.equals(model.walletId))).getSingleOrNull();
       if (wallet == null) {
         return Failure(AppError.validation('Wallet not found'));
       }
 
       // Validate category exists
-      final category = await (_db.select(_db.categories)
-            ..where((c) => c.id.equals(model.categoryId)))
-          .getSingleOrNull();
+      final category = await (_db.select(
+        _db.categories,
+      )..where((c) => c.id.equals(model.categoryId))).getSingleOrNull();
       if (category == null) {
         return Failure(AppError.validation('Category not found'));
       }
@@ -64,17 +64,17 @@ class RecurringTransactionRepository
   Future<Result<void, AppError>> update(RecurringTransactionModel model) async {
     try {
       // Validate wallet exists
-      final wallet = await (_db.select(_db.wallets)
-            ..where((w) => w.id.equals(model.walletId)))
-          .getSingleOrNull();
+      final wallet = await (_db.select(
+        _db.wallets,
+      )..where((w) => w.id.equals(model.walletId))).getSingleOrNull();
       if (wallet == null) {
         return Failure(AppError.validation('Wallet not found'));
       }
 
       // Validate category exists
-      final category = await (_db.select(_db.categories)
-            ..where((c) => c.id.equals(model.categoryId)))
-          .getSingleOrNull();
+      final category = await (_db.select(
+        _db.categories,
+      )..where((c) => c.id.equals(model.categoryId))).getSingleOrNull();
       if (category == null) {
         return Failure(AppError.validation('Category not found'));
       }
@@ -99,8 +99,7 @@ class RecurringTransactionRepository
   }
 
   @override
-  Future<Result<RecurringTransactionModel, AppError>> getById(
-      String id) async {
+  Future<Result<RecurringTransactionModel, AppError>> getById(String id) async {
     try {
       final row = await _dao.getById(id);
       if (row == null) {
@@ -117,23 +116,23 @@ class RecurringTransactionRepository
 
   @override
   Stream<List<RecurringTransactionModel>> watchAll(String userId) {
-    return _dao.watchByUser(userId).map(
-          (rows) => rows.map(_rowToModel).toList(),
-        );
+    return _dao
+        .watchByUser(userId)
+        .map((rows) => rows.map(_rowToModel).toList());
   }
 
   @override
   Future<List<RecurringTransactionModel>> getActive(String userId) async {
-    final rows = await (_db.select(_db.recurringTransactions)
-          ..where((t) =>
-              t.userId.equals(userId) & t.status.equals('active')))
-        .get();
+    final rows = await (_db.select(
+      _db.recurringTransactions,
+    )..where((t) => t.userId.equals(userId) & t.status.equals('active'))).get();
     return rows.map(_rowToModel).toList();
   }
 
   @override
   Future<List<RecurringTransactionModel>> getDueForExecution(
-      DateTime now) async {
+    DateTime now,
+  ) async {
     final rows = await _dao.getDueForExecution(now);
     return rows.map(_rowToModel).toList();
   }
@@ -156,13 +155,15 @@ class RecurringTransactionRepository
     DateTime? nextDate,
   ) async {
     try {
-      await (_db.update(_db.recurringTransactions)
-            ..where((t) => t.id.equals(id)))
-          .write(RecurringTransactionsCompanion(
-        nextExecutionDate: nextDate != null
-            ? Value(nextDate)
-            : const Value.absent(),
-      ));
+      await (_db.update(
+        _db.recurringTransactions,
+      )..where((t) => t.id.equals(id))).write(
+        RecurringTransactionsCompanion(
+          nextExecutionDate: nextDate != null
+              ? Value(nextDate)
+              : const Value.absent(),
+        ),
+      );
       return const Success(null);
     } on SqliteException catch (e, stack) {
       developer.log('Error updating next execution date', error: e);
@@ -172,13 +173,13 @@ class RecurringTransactionRepository
 
   @override
   Future<Result<void, AppError>> updateStatus(
-      String id, RecurringStatus status) async {
+    String id,
+    RecurringStatus status,
+  ) async {
     try {
       await (_db.update(_db.recurringTransactions)
             ..where((t) => t.id.equals(id)))
-          .write(RecurringTransactionsCompanion(
-        status: Value(status.name),
-      ));
+          .write(RecurringTransactionsCompanion(status: Value(status.name)));
       return const Success(null);
     } on SqliteException catch (e, stack) {
       developer.log('Error updating recurring transaction status', error: e);
@@ -193,11 +194,11 @@ class RecurringTransactionRepository
       if (row == null) {
         return Failure(AppError.notFound('Recurring transaction not found'));
       }
-      await (_db.update(_db.recurringTransactions)
-            ..where((t) => t.id.equals(id)))
-          .write(RecurringTransactionsCompanion(
-        retryCount: Value(row.retryCount + 1),
-      ));
+      await (_db.update(
+        _db.recurringTransactions,
+      )..where((t) => t.id.equals(id))).write(
+        RecurringTransactionsCompanion(retryCount: Value(row.retryCount + 1)),
+      );
       return const Success(null);
     } on SqliteException catch (e, stack) {
       developer.log('Error incrementing retry count', error: e);
@@ -210,9 +211,7 @@ class RecurringTransactionRepository
     try {
       await (_db.update(_db.recurringTransactions)
             ..where((t) => t.id.equals(id)))
-          .write(const RecurringTransactionsCompanion(
-        retryCount: Value(0),
-      ));
+          .write(const RecurringTransactionsCompanion(retryCount: Value(0)));
       return const Success(null);
     } on SqliteException catch (e, stack) {
       developer.log('Error resetting retry count', error: e);
@@ -224,19 +223,22 @@ class RecurringTransactionRepository
 
   @override
   Future<Result<void, AppError>> insertExecutionLog(
-      ExecutionLogModel log) async {
+    ExecutionLogModel log,
+  ) async {
     try {
-      await _dao.insertLog(RecurringExecutionLogsCompanion.insert(
-        recurringTransactionId: log.recurringTransactionId,
-        executedAt: log.executedAt,
-        status: log.status,
-        transactionId: log.transactionId != null
-            ? Value(log.transactionId)
-            : const Value.absent(),
-        errorMessage: log.errorMessage != null
-            ? Value(log.errorMessage)
-            : const Value.absent(),
-      ));
+      await _dao.insertLog(
+        RecurringExecutionLogsCompanion.insert(
+          recurringTransactionId: log.recurringTransactionId,
+          executedAt: log.executedAt,
+          status: log.status,
+          transactionId: log.transactionId != null
+              ? Value(log.transactionId)
+              : const Value.absent(),
+          errorMessage: log.errorMessage != null
+              ? Value(log.errorMessage)
+              : const Value.absent(),
+        ),
+      );
       return const Success(null);
     } on SqliteException catch (e, stack) {
       developer.log('Error inserting execution log', error: e);
@@ -249,8 +251,10 @@ class RecurringTransactionRepository
     String recurringTransactionId, {
     int? limit,
   }) async {
-    final rows =
-        await _dao.getLogsByRecurringId(recurringTransactionId, limit: limit);
+    final rows = await _dao.getLogsByRecurringId(
+      recurringTransactionId,
+      limit: limit,
+    );
     return rows.map(_logRowToModel).toList();
   }
 
@@ -297,7 +301,8 @@ class RecurringTransactionRepository
 
   /// Converts a domain model to a Drift [RecurringTransactionsCompanion].
   RecurringTransactionsCompanion _modelToCompanion(
-      RecurringTransactionModel model) {
+    RecurringTransactionModel model,
+  ) {
     return RecurringTransactionsCompanion(
       id: Value(model.id),
       userId: Value(model.userId),

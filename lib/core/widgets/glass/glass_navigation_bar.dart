@@ -81,10 +81,7 @@ class GlassNavigationBar extends StatelessWidget {
                     alpha: resolvedSurfaceOpacity,
                   ),
                   borderRadius: borderRadius,
-                  border: Border.all(
-                    color: borderGlowColor,
-                    width: 1.0,
-                  ),
+                  border: Border.all(color: borderGlowColor, width: 1.0),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -101,8 +98,9 @@ class GlassNavigationBar extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.white
-                                .withValues(alpha: innerHighlightOpacity),
+                            Colors.white.withValues(
+                              alpha: innerHighlightOpacity,
+                            ),
                             Colors.white.withValues(alpha: 0.0),
                           ],
                         ),
@@ -179,17 +177,13 @@ class _GlassNavContent extends StatelessWidget {
                   // Resolve icon theme from NavigationBarThemeData
                   final iconThemeData = navBarTheme.iconTheme;
                   final resolvedIconTheme = iconThemeData?.resolve(
-                    isSelected
-                        ? {WidgetState.selected}
-                        : <WidgetState>{},
+                    isSelected ? {WidgetState.selected} : <WidgetState>{},
                   );
 
                   // Resolve label style from NavigationBarThemeData
                   final labelStyleData = navBarTheme.labelTextStyle;
                   final resolvedLabelStyle = labelStyleData?.resolve(
-                    isSelected
-                        ? {WidgetState.selected}
-                        : <WidgetState>{},
+                    isSelected ? {WidgetState.selected} : <WidgetState>{},
                   );
 
                   final icon = isSelected
@@ -206,12 +200,14 @@ class _GlassNavContent extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconTheme(
-                              data: resolvedIconTheme ??
+                              data:
+                                  resolvedIconTheme ??
                                   IconThemeData(
                                     color: isSelected
                                         ? colorScheme.primary
-                                        : colorScheme.onSurface
-                                            .withValues(alpha: 0.5),
+                                        : colorScheme.onSurface.withValues(
+                                            alpha: 0.5,
+                                          ),
                                     size: isSelected ? 26 : 24,
                                   ),
                               child: icon,
@@ -219,12 +215,14 @@ class _GlassNavContent extends StatelessWidget {
                             const SizedBox(height: 4.0),
                             Text(
                               destination.label,
-                              style: resolvedLabelStyle ??
+                              style:
+                                  resolvedLabelStyle ??
                                   TextStyle(
                                     color: isSelected
                                         ? colorScheme.primary
-                                        : colorScheme.onSurface
-                                            .withValues(alpha: 0.5),
+                                        : colorScheme.onSurface.withValues(
+                                            alpha: 0.5,
+                                          ),
                                     fontSize: 12,
                                     fontWeight: isSelected
                                         ? FontWeight.w600

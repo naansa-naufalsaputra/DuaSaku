@@ -12,19 +12,18 @@ class RecurringTransactionDao extends DatabaseAccessor<AppDatabase>
   Stream<List<RecurringTransaction>> watchByUser(String userId) {
     return (select(recurringTransactions)
           ..where((t) => t.userId.equals(userId))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.nextExecutionDate),
-          ]))
+          ..orderBy([(t) => OrderingTerm.asc(t.nextExecutionDate)]))
         .watch();
   }
 
   /// Get active recurring transactions that are due for execution.
   /// Selects where status = 'active' AND nextExecutionDate <= [now].
   Future<List<RecurringTransaction>> getDueForExecution(DateTime now) {
-    return (select(recurringTransactions)
-          ..where((t) =>
+    return (select(recurringTransactions)..where(
+          (t) =>
               t.status.equals('active') &
-              t.nextExecutionDate.isSmallerOrEqualValue(now)))
+              t.nextExecutionDate.isSmallerOrEqualValue(now),
+        ))
         .get();
   }
 
@@ -38,14 +37,14 @@ class RecurringTransactionDao extends DatabaseAccessor<AppDatabase>
     final now = DateTime.now();
     final cutoff = now.add(Duration(days: days));
     return (select(recurringTransactions)
-          ..where((t) =>
-              t.userId.equals(userId) &
-              t.status.equals('active') &
-              t.nextExecutionDate.isSmallerOrEqualValue(cutoff) &
-              t.nextExecutionDate.isBiggerOrEqualValue(now))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.nextExecutionDate),
-          ])
+          ..where(
+            (t) =>
+                t.userId.equals(userId) &
+                t.status.equals('active') &
+                t.nextExecutionDate.isSmallerOrEqualValue(cutoff) &
+                t.nextExecutionDate.isBiggerOrEqualValue(now),
+          )
+          ..orderBy([(t) => OrderingTerm.asc(t.nextExecutionDate)])
           ..limit(limit))
         .get();
   }
@@ -57,9 +56,9 @@ class RecurringTransactionDao extends DatabaseAccessor<AppDatabase>
 
   /// Update an existing recurring transaction.
   Future<void> updateRecurring(RecurringTransactionsCompanion entry) {
-    return (update(recurringTransactions)
-          ..where((t) => t.id.equals(entry.id.value)))
-        .write(entry);
+    return (update(
+      recurringTransactions,
+    )..where((t) => t.id.equals(entry.id.value))).write(entry);
   }
 
   /// Delete a recurring transaction by ID.
@@ -69,8 +68,9 @@ class RecurringTransactionDao extends DatabaseAccessor<AppDatabase>
 
   /// Get a single recurring transaction by ID.
   Future<RecurringTransaction?> getById(String id) {
-    return (select(recurringTransactions)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      recurringTransactions,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   /// Insert an execution log entry.

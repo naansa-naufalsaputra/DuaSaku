@@ -31,21 +31,37 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
       final entityModelManager = EntityExtractorModelManager();
 
       // Check if models are already downloaded
-      final hasIndoModel = await translationModelManager.isModelDownloaded(TranslateLanguage.indonesian.bcpCode);
-      final hasEngModel = await translationModelManager.isModelDownloaded(TranslateLanguage.english.bcpCode);
-      final hasEntityModel = await entityModelManager.isModelDownloaded(EntityExtractorLanguage.english.name);
+      final hasIndoModel = await translationModelManager.isModelDownloaded(
+        TranslateLanguage.indonesian.bcpCode,
+      );
+      final hasEngModel = await translationModelManager.isModelDownloaded(
+        TranslateLanguage.english.bcpCode,
+      );
+      final hasEntityModel = await entityModelManager.isModelDownloaded(
+        EntityExtractorLanguage.english.name,
+      );
 
       // Start asynchronous background downloads (without awaiting) for models not present
       if (!hasIndoModel) {
-        debugPrint('[SmartInputMlService] Starting background download for Indonesian translation model...');
-        translationModelManager.downloadModel(TranslateLanguage.indonesian.bcpCode);
+        debugPrint(
+          '[SmartInputMlService] Starting background download for Indonesian translation model...',
+        );
+        translationModelManager.downloadModel(
+          TranslateLanguage.indonesian.bcpCode,
+        );
       }
       if (!hasEngModel) {
-        debugPrint('[SmartInputMlService] Starting background download for English translation model...');
-        translationModelManager.downloadModel(TranslateLanguage.english.bcpCode);
+        debugPrint(
+          '[SmartInputMlService] Starting background download for English translation model...',
+        );
+        translationModelManager.downloadModel(
+          TranslateLanguage.english.bcpCode,
+        );
       }
       if (!hasEntityModel) {
-        debugPrint('[SmartInputMlService] Starting background download for English Entity Extraction model...');
+        debugPrint(
+          '[SmartInputMlService] Starting background download for English Entity Extraction model...',
+        );
         entityModelManager.downloadModel(EntityExtractorLanguage.english.name);
       }
 
@@ -58,13 +74,19 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
       }
 
       if (hasEntityModel) {
-        _entityExtractor = EntityExtractor(language: EntityExtractorLanguage.english);
+        _entityExtractor = EntityExtractor(
+          language: EntityExtractorLanguage.english,
+        );
       }
 
       _initialized = true;
-      debugPrint('[SmartInputMlService] Background initialization triggered successfully.');
+      debugPrint(
+        '[SmartInputMlService] Background initialization triggered successfully.',
+      );
     } catch (e) {
-      debugPrint('[SmartInputMlService] Error triggering silent initialization: $e');
+      debugPrint(
+        '[SmartInputMlService] Error triggering silent initialization: $e',
+      );
     }
   }
 
@@ -76,9 +98,15 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
       final translationModelManager = OnDeviceTranslatorModelManager();
       final entityModelManager = EntityExtractorModelManager();
 
-      final hasIndoModel = await translationModelManager.isModelDownloaded(TranslateLanguage.indonesian.bcpCode);
-      final hasEngModel = await translationModelManager.isModelDownloaded(TranslateLanguage.english.bcpCode);
-      final hasEntityModel = await entityModelManager.isModelDownloaded(EntityExtractorLanguage.english.name);
+      final hasIndoModel = await translationModelManager.isModelDownloaded(
+        TranslateLanguage.indonesian.bcpCode,
+      );
+      final hasEngModel = await translationModelManager.isModelDownloaded(
+        TranslateLanguage.english.bcpCode,
+      );
+      final hasEntityModel = await entityModelManager.isModelDownloaded(
+        EntityExtractorLanguage.english.name,
+      );
 
       if (hasIndoModel && hasEngModel && _translatorIdEn == null) {
         _translatorIdEn = OnDeviceTranslator(
@@ -88,7 +116,9 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
       }
 
       if (hasEntityModel && _entityExtractor == null) {
-        _entityExtractor = EntityExtractor(language: EntityExtractorLanguage.english);
+        _entityExtractor = EntityExtractor(
+          language: EntityExtractorLanguage.english,
+        );
       }
     } catch (e) {
       debugPrint('[SmartInputMlService] Error instantiating ML engines: $e');
@@ -98,13 +128,18 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
   }
 
   @override
-  Future<DateTime?> extractDateTime(String text, {DateTime? referenceDate}) async {
+  Future<DateTime?> extractDateTime(
+    String text, {
+    DateTime? referenceDate,
+  }) async {
     if (text.trim().isEmpty) return null;
 
     try {
       final ready = await _ensureEnginesReady();
       if (!ready) {
-        debugPrint('[SmartInputMlService] ML Kit models are not fully downloaded/ready yet.');
+        debugPrint(
+          '[SmartInputMlService] ML Kit models are not fully downloaded/ready yet.',
+        );
         return null;
       }
 
@@ -114,10 +149,8 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
 
       // 2. Perform entity extraction on English translation
       final ref = referenceDate ?? DateTime.now();
-      final List<EntityAnnotation> annotations = await _entityExtractor!.annotateText(
-        englishText,
-        referenceTime: ref.millisecondsSinceEpoch,
-      );
+      final List<EntityAnnotation> annotations = await _entityExtractor!
+          .annotateText(englishText, referenceTime: ref.millisecondsSinceEpoch);
 
       // 3. Find the first DateTimeEntity
       for (final annotation in annotations) {
@@ -128,7 +161,9 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
         }
       }
     } catch (e) {
-      debugPrint('[SmartInputMlService] Error parsing date/time via ML Kit: $e');
+      debugPrint(
+        '[SmartInputMlService] Error parsing date/time via ML Kit: $e',
+      );
     }
 
     return null;

@@ -62,22 +62,21 @@ class ProgressRingWidget extends StatelessWidget {
             Text(
               '$daysRemaining',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: size * 0.22,
-                    height: 1,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                fontWeight: FontWeight.bold,
+                fontSize: size * 0.22,
+                height: 1,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             Text(
               'recurring.days_label'.tr(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: size * 0.15,
-                    height: 1.2,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
+                fontSize: size * 0.15,
+                height: 1.2,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ],
         ),

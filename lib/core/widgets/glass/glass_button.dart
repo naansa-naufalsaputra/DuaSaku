@@ -136,8 +136,9 @@ class _GlassButtonState extends State<GlassButton>
     // Accessibility adjustments.
     final bool isHighContrast = MediaQuery.highContrastOf(context);
     final bool isBoldText = MediaQuery.boldTextOf(context);
-    final bool accessibleNavigation =
-        MediaQuery.of(context).accessibleNavigation;
+    final bool accessibleNavigation = MediaQuery.of(
+      context,
+    ).accessibleNavigation;
 
     var resolvedSurfaceOpacity = surfaceOpacity;
     var effectiveEnableBlur = true;
@@ -147,8 +148,7 @@ class _GlassButtonState extends State<GlassButton>
       effectiveEnableBlur = false;
     }
     if (isBoldText) {
-      resolvedSurfaceOpacity =
-          (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
+      resolvedSurfaceOpacity = (resolvedSurfaceOpacity + 0.15).clamp(0.0, 1.0);
     }
     if (accessibleNavigation) {
       resolvedSurfaceOpacity = 0.92;
@@ -193,24 +193,20 @@ class _GlassButtonState extends State<GlassButton>
         height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            _contentColor(colorScheme),
-          ),
+          valueColor: AlwaysStoppedAnimation<Color>(_contentColor(colorScheme)),
         ),
       );
     }
 
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: _contentColor(colorScheme),
-                fontWeight: FontWeight.w600,
-              ) ??
+      style:
+          Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: _contentColor(colorScheme),
+            fontWeight: FontWeight.w600,
+          ) ??
           TextStyle(color: _contentColor(colorScheme)),
       child: IconTheme(
-        data: IconThemeData(
-          color: _contentColor(colorScheme),
-          size: 20,
-        ),
+        data: IconThemeData(color: _contentColor(colorScheme), size: 20),
         child: widget.child,
       ),
     );
@@ -301,10 +297,7 @@ class _GlassButtonState extends State<GlassButton>
     final decoration = BoxDecoration(
       color: primaryTintColor.withValues(alpha: surfaceOpacity),
       borderRadius: borderRadius,
-      border: Border.all(
-        color: intensifiedGlowColor,
-        width: 1.0,
-      ),
+      border: Border.all(color: intensifiedGlowColor, width: 1.0),
     );
 
     final innerHighlight = Container(
@@ -335,10 +328,7 @@ class _GlassButtonState extends State<GlassButton>
           children: [
             innerHighlight,
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               child: Center(child: child),
             ),
           ],
@@ -381,10 +371,7 @@ class _GlassButtonState extends State<GlassButton>
     final decoration = BoxDecoration(
       color: colorScheme.surface.withValues(alpha: surfaceOpacity * 0.3),
       borderRadius: borderRadius,
-      border: Border.all(
-        color: intensifiedGlowColor,
-        width: 1.0,
-      ),
+      border: Border.all(color: intensifiedGlowColor, width: 1.0),
     );
 
     Widget surface = ConstrainedBox(
@@ -392,10 +379,7 @@ class _GlassButtonState extends State<GlassButton>
       child: Container(
         decoration: decoration,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Center(child: child),
         ),
       ),
@@ -436,10 +420,7 @@ class _GlassButtonState extends State<GlassButton>
           borderRadius: const BorderRadius.all(Radius.circular(16)),
           color: glowColor,
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         child: Center(child: child),
       ),
     );

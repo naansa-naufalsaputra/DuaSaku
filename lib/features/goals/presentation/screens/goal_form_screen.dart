@@ -17,8 +17,22 @@ import '../../providers/goal_provider.dart';
 
 /// Available icons for goal selection.
 const _goalIcons = [
-  '🎯', '✈️', '🏠', '🚗', '💻', '📱', '🎓', '💍',
-  '🏖️', '🎮', '👶', '🐶', '💰', '🏥', '🎁', '📚',
+  '🎯',
+  '✈️',
+  '🏠',
+  '🚗',
+  '💻',
+  '📱',
+  '🎓',
+  '💍',
+  '🏖️',
+  '🎮',
+  '👶',
+  '🐶',
+  '💰',
+  '🏥',
+  '🎁',
+  '📚',
 ];
 
 /// Available colors for goal selection.
@@ -65,7 +79,11 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
     final goal = widget.goal;
     _nameController = TextEditingController(text: goal?.name ?? '');
     _amountController = TextEditingController(
-      text: goal != null ? NumberFormat.decimalPattern('id_ID').format(goal.targetAmount.toInt()) : '',
+      text: goal != null
+          ? NumberFormat.decimalPattern(
+              'id_ID',
+            ).format(goal.targetAmount.toInt())
+          : '',
     );
     _selectedDeadline = goal?.deadline;
     _selectedIcon = goal?.icon ?? _goalIcons.first;
@@ -110,41 +128,41 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
       ),
       body: SafeArea(
         child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Name field
-              _buildNameField(theme, isDark),
-              const SizedBox(height: 20),
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Name field
+            _buildNameField(theme, isDark),
+            const SizedBox(height: 20),
 
-              // Target amount field
-              _buildAmountField(theme, isDark),
-              const SizedBox(height: 20),
+            // Target amount field
+            _buildAmountField(theme, isDark),
+            const SizedBox(height: 20),
 
-              // Deadline picker
-              _buildDeadlinePicker(theme, isDark),
-              const SizedBox(height: 20),
+            // Deadline picker
+            _buildDeadlinePicker(theme, isDark),
+            const SizedBox(height: 20),
 
-              // Icon picker
-              _buildIconPicker(theme, isDark),
-              const SizedBox(height: 20),
+            // Icon picker
+            _buildIconPicker(theme, isDark),
+            const SizedBox(height: 20),
 
-              // Color picker
-              _buildColorPicker(theme, isDark),
-              const SizedBox(height: 20),
+            // Color picker
+            _buildColorPicker(theme, isDark),
+            const SizedBox(height: 20),
 
-              // Wallet selector
-              _buildWalletSelector(theme, isDark),
-              const SizedBox(height: 12),
+            // Wallet selector
+            _buildWalletSelector(theme, isDark),
+            const SizedBox(height: 12),
 
-              // Warning for reducing target below current amount
-              if (_isEditMode) _buildTargetWarning(theme),
-              const SizedBox(height: 32),
+            // Warning for reducing target below current amount
+            if (_isEditMode) _buildTargetWarning(theme),
+            const SizedBox(height: 32),
 
-              // Submit button
-              _buildSubmitButton(theme),
-              const SizedBox(height: 16),
-            ],
-          ),
+            // Submit button
+            _buildSubmitButton(theme),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -300,17 +318,11 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: isSelected
-                        ? Border.all(
-                            color: theme.colorScheme.primary,
-                            width: 2,
-                          )
+                        ? Border.all(color: theme.colorScheme.primary, width: 2)
                         : null,
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    icon,
-                    style: const TextStyle(fontSize: 24),
-                  ),
+                  child: Text(icon, style: const TextStyle(fontSize: 24)),
                 ),
               );
             }).toList(),
@@ -459,9 +471,7 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
           initialValue: _selectedWalletId,
           decoration: InputDecoration(
             hintText: 'goals.form_wallet_hint'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
@@ -565,10 +575,7 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
           Expanded(
             child: Text(
               'goals.warning_reduce_target'.tr(),
-              style: TextStyle(
-                color: theme.colorScheme.error,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
             ),
           ),
         ],
@@ -636,9 +643,13 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
     setState(() => _isSubmitting = true);
 
     final name = _nameController.text.trim();
-    final targetAmount = ThousandsFormatter.parse(_amountController.text.trim());
-    final colorHex =
-        _selectedColor.toARGB32().toRadixString(16).padLeft(8, '0');
+    final targetAmount = ThousandsFormatter.parse(
+      _amountController.text.trim(),
+    );
+    final colorHex = _selectedColor
+        .toARGB32()
+        .toRadixString(16)
+        .padLeft(8, '0');
 
     final notifier = ref.read(goalNotifierProvider.notifier);
 
@@ -676,9 +687,9 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
           if (mounted) context.pop();
         case Failure(:final error):
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(error.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(error.message)));
           }
       }
     }
@@ -694,9 +705,9 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
         if (mounted) context.pop();
       case Failure(:final error):
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error.toString())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
         }
     }
   }

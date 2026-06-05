@@ -47,8 +47,7 @@ class ExportService implements ExportServiceInterface {
 
       // Get wallet and category name maps for resolving FKs in CSV
       final walletNamesResult = await _repository.getWalletNameMap(_userId);
-      final categoryNamesResult =
-          await _repository.getCategoryNameMap(_userId);
+      final categoryNamesResult = await _repository.getCategoryNameMap(_userId);
 
       final Map<String, String> walletNames;
       final Map<String, String> categoryNames;
@@ -89,24 +88,27 @@ class ExportService implements ExportServiceInterface {
               () => IsolateHelpers.generateCsvContent(
                 data,
                 headers,
-                walletNames:
-                    dataType == DataType.transactions ? walletNames : null,
-                categoryNames:
-                    dataType == DataType.transactions ? categoryNames : null,
+                walletNames: dataType == DataType.transactions
+                    ? walletNames
+                    : null,
+                categoryNames: dataType == DataType.transactions
+                    ? categoryNames
+                    : null,
               ),
             );
 
-            final fileName =
-                'duasaku_${dataType.name}_$timestamp.csv';
+            final fileName = 'duasaku_${dataType.name}_$timestamp.csv';
             final filePath = p.join(tempDir.path, fileName);
             await File(filePath).writeAsString(csvContent);
 
-            return Success(ExportResult(
-              filePath: filePath,
-              mimeType: 'text/csv',
-              fileName: fileName,
-              recordCount: totalRecordCount,
-            ));
+            return Success(
+              ExportResult(
+                filePath: filePath,
+                mimeType: 'text/csv',
+                fileName: fileName,
+                recordCount: totalRecordCount,
+              ),
+            );
 
           case Failure(:final error):
             return Failure(error);
@@ -132,17 +134,20 @@ class ExportService implements ExportServiceInterface {
                 () => IsolateHelpers.generateCsvContent(
                   data,
                   headers,
-                  walletNames:
-                      dataType == DataType.transactions ? walletNames : null,
-                  categoryNames:
-                      dataType == DataType.transactions ? categoryNames : null,
+                  walletNames: dataType == DataType.transactions
+                      ? walletNames
+                      : null,
+                  categoryNames: dataType == DataType.transactions
+                      ? categoryNames
+                      : null,
                 ),
               );
 
-              final csvFileName =
-                  'duasaku_${dataType.name}_$timestamp.csv';
+              final csvFileName = 'duasaku_${dataType.name}_$timestamp.csv';
               final csvBytes = Uint8List.fromList(utf8.encode(csvContent));
-              archive.addFile(ArchiveFile(csvFileName, csvBytes.length, csvBytes));
+              archive.addFile(
+                ArchiveFile(csvFileName, csvBytes.length, csvBytes),
+              );
 
             case Failure(:final error):
               return Failure(error);
@@ -156,18 +161,22 @@ class ExportService implements ExportServiceInterface {
         final zipFilePath = p.join(tempDir.path, zipFileName);
         await File(zipFilePath).writeAsBytes(zipBytes);
 
-        return Success(ExportResult(
-          filePath: zipFilePath,
-          mimeType: 'application/zip',
-          fileName: zipFileName,
-          recordCount: totalRecordCount,
-        ));
+        return Success(
+          ExportResult(
+            filePath: zipFilePath,
+            mimeType: 'application/zip',
+            fileName: zipFileName,
+            recordCount: totalRecordCount,
+          ),
+        );
       }
     } catch (e, stack) {
-      return Failure(AppError.unknown(
-        'CSV export failed: ${e.toString()}',
-        stackTrace: stack,
-      ));
+      return Failure(
+        AppError.unknown(
+          'CSV export failed: ${e.toString()}',
+          stackTrace: stack,
+        ),
+      );
     }
   }
 
@@ -184,39 +193,38 @@ class ExportService implements ExportServiceInterface {
       // Fetch all 11 tables
       final walletsResult = await _repository.getWalletsRaw(_userId);
       final categoriesResult = await _repository.getCategoriesRaw(_userId);
-      final transactionsResult =
-          await _repository.getTransactionsRaw(_userId);
+      final transactionsResult = await _repository.getTransactionsRaw(_userId);
       final budgetsResult = await _repository.getBudgetsRaw(_userId);
-      final recurringTransactionsResult =
-          await _repository.getRecurringTransactionsRaw(_userId);
-      final recurringExecutionLogsResult =
-          await _repository.getRecurringExecutionLogsRaw(_userId);
+      final recurringTransactionsResult = await _repository
+          .getRecurringTransactionsRaw(_userId);
+      final recurringExecutionLogsResult = await _repository
+          .getRecurringExecutionLogsRaw(_userId);
       final goalsResult = await _repository.getGoalsRaw(_userId);
-      final goalDepositsResult =
-          await _repository.getGoalDepositsRaw(_userId);
-      final budgetAlertsResult =
-          await _repository.getBudgetAlertsRaw(_userId);
-      final budgetAlertPreferencesResult =
-          await _repository.getBudgetAlertPreferencesRaw(_userId);
-      final budgetAlertThresholdStatusResult =
-          await _repository.getBudgetAlertThresholdStatusRaw(_userId);
+      final goalDepositsResult = await _repository.getGoalDepositsRaw(_userId);
+      final budgetAlertsResult = await _repository.getBudgetAlertsRaw(_userId);
+      final budgetAlertPreferencesResult = await _repository
+          .getBudgetAlertPreferencesRaw(_userId);
+      final budgetAlertThresholdStatusResult = await _repository
+          .getBudgetAlertThresholdStatusRaw(_userId);
 
       // Unwrap all results
       final wallets = _unwrapResult(walletsResult);
       final categories = _unwrapResult(categoriesResult);
       final transactions = _unwrapResult(transactionsResult);
       final budgets = _unwrapResult(budgetsResult);
-      final recurringTransactions =
-          _unwrapResult(recurringTransactionsResult);
-      final recurringExecutionLogs =
-          _unwrapResult(recurringExecutionLogsResult);
+      final recurringTransactions = _unwrapResult(recurringTransactionsResult);
+      final recurringExecutionLogs = _unwrapResult(
+        recurringExecutionLogsResult,
+      );
       final goals = _unwrapResult(goalsResult);
       final goalDeposits = _unwrapResult(goalDepositsResult);
       final budgetAlerts = _unwrapResult(budgetAlertsResult);
-      final budgetAlertPreferences =
-          _unwrapResult(budgetAlertPreferencesResult);
-      final budgetAlertThresholdStatus =
-          _unwrapResult(budgetAlertThresholdStatusResult);
+      final budgetAlertPreferences = _unwrapResult(
+        budgetAlertPreferencesResult,
+      );
+      final budgetAlertThresholdStatus = _unwrapResult(
+        budgetAlertThresholdStatusResult,
+      );
 
       // Check for any failures
       if (wallets == null ||
@@ -230,9 +238,9 @@ class ExportService implements ExportServiceInterface {
           budgetAlerts == null ||
           budgetAlertPreferences == null ||
           budgetAlertThresholdStatus == null) {
-        return Failure(AppError.unknown(
-          'Failed to fetch data from one or more tables',
-        ));
+        return Failure(
+          AppError.unknown('Failed to fetch data from one or more tables'),
+        );
       }
 
       // Build backup structure
@@ -269,7 +277,8 @@ class ExportService implements ExportServiceInterface {
       final filePath = p.join(tempDir.path, fileName);
       await File(filePath).writeAsString(jsonString);
 
-      final totalRecords = wallets.length +
+      final totalRecords =
+          wallets.length +
           categories.length +
           transactions.length +
           budgets.length +
@@ -281,17 +290,21 @@ class ExportService implements ExportServiceInterface {
           budgetAlertPreferences.length +
           budgetAlertThresholdStatus.length;
 
-      return Success(ExportResult(
-        filePath: filePath,
-        mimeType: 'application/json',
-        fileName: fileName,
-        recordCount: totalRecords,
-      ));
+      return Success(
+        ExportResult(
+          filePath: filePath,
+          mimeType: 'application/json',
+          fileName: fileName,
+          recordCount: totalRecords,
+        ),
+      );
     } catch (e, stack) {
-      return Failure(AppError.unknown(
-        'JSON backup export failed: ${e.toString()}',
-        stackTrace: stack,
-      ));
+      return Failure(
+        AppError.unknown(
+          'JSON backup export failed: ${e.toString()}',
+          stackTrace: stack,
+        ),
+      );
     }
   }
 
@@ -306,16 +319,16 @@ class ExportService implements ExportServiceInterface {
   ) async {
     try {
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(filePath, mimeType: mimeType)],
-        ),
+        ShareParams(files: [XFile(filePath, mimeType: mimeType)]),
       );
       return const Success(null);
     } catch (e, stack) {
-      return Failure(AppError.unknown(
-        'Failed to share file: ${e.toString()}',
-        stackTrace: stack,
-      ));
+      return Failure(
+        AppError.unknown(
+          'Failed to share file: ${e.toString()}',
+          stackTrace: stack,
+        ),
+      );
     }
   }
 

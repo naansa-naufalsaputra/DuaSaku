@@ -53,7 +53,8 @@ class LightweightMlParser implements TransactionParserServiceInterface {
 
       // Add weights for matched tokens
       if (LightweightMlWeights.categoryWeights.containsKey(catKey)) {
-        final Map<String, double> weights = LightweightMlWeights.categoryWeights[catKey]!;
+        final Map<String, double> weights =
+            LightweightMlWeights.categoryWeights[catKey]!;
         for (final token in tokens) {
           if (weights.containsKey(token)) {
             score += weights[token]!;
@@ -129,7 +130,9 @@ class LightweightMlParser implements TransactionParserServiceInterface {
       category: bestCategoryName,
       type: type,
       walletId: matchedWalletId,
-      notes: TextSanitizer.prettifyNotes(cleanText.isNotEmpty ? cleanText : inputText),
+      notes: TextSanitizer.prettifyNotes(
+        cleanText.isNotEmpty ? cleanText : inputText,
+      ),
     );
   }
 }

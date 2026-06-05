@@ -16,15 +16,13 @@ class DartTokenizer {
   /// Dynamic ID for unknown Out-Of-Vocabulary (OOV) tokens.
   final int unkId;
 
-  DartTokenizer({
-    required this.vocabulary,
-    required this.maxLen,
-  })  : vocabMap = {
-          for (var i = 0; i < vocabulary.length; i++) vocabulary[i]: i
-        },
-        unkId = {
-          for (var i = 0; i < vocabulary.length; i++) vocabulary[i]: i
-        }['[UNK]'] ?? 1;
+  DartTokenizer({required this.vocabulary, required this.maxLen})
+    : vocabMap = {for (var i = 0; i < vocabulary.length; i++) vocabulary[i]: i},
+      unkId =
+          {
+            for (var i = 0; i < vocabulary.length; i++) vocabulary[i]: i,
+          }['[UNK]'] ??
+          1;
 
   /// Factory constructor to instantiate a tokenizer from parsed metadata JSON.
   factory DartTokenizer.fromJson(Map<String, dynamic> json) {
@@ -46,11 +44,18 @@ class DartTokenizer {
     String normalized = text.toLowerCase();
 
     // 2. Strip Keras default punctuation: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
-    final punctuationPattern = RegExp(r'[!"#$%&' "'" r'()*+,\-./:;<=>?@\[\\\]^_`{|}~]');
+    final punctuationPattern = RegExp(
+      r'[!"#$%&'
+      "'"
+      r'()*+,\-./:;<=>?@\[\\\]^_`{|}~]',
+    );
     normalized = normalized.replaceAll(punctuationPattern, '');
 
     // 3. Split by whitespace and remove empty strings
-    final tokens = normalized.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+    final tokens = normalized
+        .split(RegExp(r'\s+'))
+        .where((s) => s.isNotEmpty)
+        .toList();
 
     // 4. Map words to ID using vocabMap dynamically
     final ids = tokens.map((token) => vocabMap[token] ?? unkId).toList();

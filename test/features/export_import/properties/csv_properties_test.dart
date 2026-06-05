@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/export_import/domain/models/data_type.dart';
 import 'package:duasaku_app/features/export_import/services/isolate_helpers.dart';
 import 'package:glados/glados.dart'
@@ -110,11 +109,7 @@ void main() {
         final rng = Random(seed);
 
         // Generate transaction data with wallet/category references
-        final walletNames = {
-          'w_1': 'Cash',
-          'w_2': 'Bank BCA',
-          'w_3': 'GoPay',
-        };
+        final walletNames = {'w_1': 'Cash', 'w_2': 'Bank BCA', 'w_3': 'GoPay'};
         final categoryNames = {
           'c_1': 'Makanan',
           'c_2': 'Transport',
@@ -152,8 +147,11 @@ void main() {
         );
 
         // (a) Starts with UTF-8 BOM
-        expect(csv.startsWith('\uFEFF'), isTrue,
-            reason: 'CSV must start with UTF-8 BOM');
+        expect(
+          csv.startsWith('\uFEFF'),
+          isTrue,
+          reason: 'CSV must start with UTF-8 BOM',
+        );
 
         // (b) First row is header row with resolved name columns
         final lines = csv.split('\n');
@@ -170,10 +168,16 @@ void main() {
           final expectedWalletName = walletNames[walletId] ?? '';
           final expectedCategoryName = categoryNames[categoryId] ?? '';
 
-          expect(dataLine, contains(expectedWalletName),
-              reason: 'Row $i should contain resolved wallet name');
-          expect(dataLine, contains(expectedCategoryName),
-              reason: 'Row $i should contain resolved category name');
+          expect(
+            dataLine,
+            contains(expectedWalletName),
+            reason: 'Row $i should contain resolved wallet name',
+          );
+          expect(
+            dataLine,
+            contains(expectedCategoryName),
+            reason: 'Row $i should contain resolved category name',
+          );
         }
       },
     );
@@ -200,8 +204,9 @@ void main() {
           } else {
             // Outside range (before start or after end)
             if (rng.nextBool()) {
-              recordDate =
-                  startDate.subtract(Duration(days: 1 + rng.nextInt(365)));
+              recordDate = startDate.subtract(
+                Duration(days: 1 + rng.nextInt(365)),
+              );
             } else {
               recordDate = endDate.add(Duration(days: 1 + rng.nextInt(365)));
             }

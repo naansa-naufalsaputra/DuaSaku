@@ -25,15 +25,11 @@ class AlertPreferencesRepository
   ) async {
     try {
       final query = _db.select(_db.budgetAlertPreferences)
-        ..where(
-          (t) => t.userId.equals(userId) & t.categoryId.isNull(),
-        );
+        ..where((t) => t.userId.equals(userId) & t.categoryId.isNull());
       final row = await query.getSingleOrNull();
       if (row == null) {
         return Failure(
-          AppError.notFound(
-            'Global preferences not found for user $userId',
-          ),
+          AppError.notFound('Global preferences not found for user $userId'),
         );
       }
       return Success(_mapRowToModel(row));
@@ -55,8 +51,7 @@ class AlertPreferencesRepository
     try {
       final query = _db.select(_db.budgetAlertPreferences)
         ..where(
-          (t) =>
-              t.userId.equals(userId) & t.categoryId.equals(categoryId),
+          (t) => t.userId.equals(userId) & t.categoryId.equals(categoryId),
         );
       final row = await query.getSingleOrNull();
       if (row == null) {
@@ -84,10 +79,7 @@ class AlertPreferencesRepository
       return Success(rows.map(_mapRowToModel).toList());
     } catch (e, st) {
       return Failure(
-        AppError.database(
-          'Failed to get all preferences: $e',
-          stackTrace: st,
-        ),
+        AppError.database('Failed to get all preferences: $e', stackTrace: st),
       );
     }
   }
@@ -98,16 +90,13 @@ class AlertPreferencesRepository
   ) async {
     try {
       final companion = _mapModelToCompanion(preferences);
-      await _db.into(_db.budgetAlertPreferences).insertOnConflictUpdate(
-            companion,
-          );
+      await _db
+          .into(_db.budgetAlertPreferences)
+          .insertOnConflictUpdate(companion);
       return const Success(null);
     } catch (e, st) {
       return Failure(
-        AppError.database(
-          'Failed to save preferences: $e',
-          stackTrace: st,
-        ),
+        AppError.database('Failed to save preferences: $e', stackTrace: st),
       );
     }
   }
@@ -117,9 +106,9 @@ class AlertPreferencesRepository
     try {
       final defaults = AlertPreferenceModel.defaults(userId);
       final companion = _mapModelToCompanion(defaults);
-      await _db.into(_db.budgetAlertPreferences).insertOnConflictUpdate(
-            companion,
-          );
+      await _db
+          .into(_db.budgetAlertPreferences)
+          .insertOnConflictUpdate(companion);
       return const Success(null);
     } catch (e, st) {
       return Failure(
@@ -134,9 +123,7 @@ class AlertPreferencesRepository
   @override
   Stream<AlertPreferenceModel> watchGlobalPreferences(String userId) {
     final query = _db.select(_db.budgetAlertPreferences)
-      ..where(
-        (t) => t.userId.equals(userId) & t.categoryId.isNull(),
-      );
+      ..where((t) => t.userId.equals(userId) & t.categoryId.isNull());
     return query.watchSingle().map(_mapRowToModel);
   }
 

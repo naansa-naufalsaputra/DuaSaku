@@ -69,8 +69,8 @@ class ImportState {
 
 final importNotifierProvider =
     AsyncNotifierProvider<ImportNotifier, ImportState>(() {
-  return ImportNotifier();
-});
+      return ImportNotifier();
+    });
 
 class ImportNotifier extends AsyncNotifier<ImportState> {
   @override
@@ -95,21 +95,20 @@ class ImportNotifier extends AsyncNotifier<ImportState> {
 
     // Update state with selected file path
     final current = state.valueOrNull ?? const ImportState();
-    state = AsyncData(current.copyWith(
-      filePath: filePath,
-      clearPreview: true,
-      clearProgress: true,
-      restoreComplete: false,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        filePath: filePath,
+        clearPreview: true,
+        clearProgress: true,
+        restoreComplete: false,
+      ),
+    );
 
     // Preview the backup file
     final previewResult = await service.previewBackup(filePath);
     switch (previewResult) {
       case Success(:final value):
-        state = AsyncData(current.copyWith(
-          filePath: filePath,
-          preview: value,
-        ));
+        state = AsyncData(current.copyWith(filePath: filePath, preview: value));
       case Failure(:final error):
         state = AsyncError(error, StackTrace.current);
     }
@@ -124,31 +123,34 @@ class ImportNotifier extends AsyncNotifier<ImportState> {
 
     final service = ref.read(importServiceProvider);
 
-    state = AsyncData(current.copyWith(
-      isRestoring: true,
-      clearProgress: true,
-      restoreComplete: false,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        isRestoring: true,
+        clearProgress: true,
+        restoreComplete: false,
+      ),
+    );
 
     final restoreResult = await service.restoreBackup(
       current.filePath!,
       onProgress: (progress) {
         final latest = state.valueOrNull ?? current;
-        state = AsyncData(latest.copyWith(
-          progress: progress,
-          isRestoring: true,
-        ));
+        state = AsyncData(
+          latest.copyWith(progress: progress, isRestoring: true),
+        );
       },
     );
 
     switch (restoreResult) {
       case Success():
         _invalidateAllProviders();
-        state = AsyncData(current.copyWith(
-          isRestoring: false,
-          restoreComplete: true,
-          clearProgress: true,
-        ));
+        state = AsyncData(
+          current.copyWith(
+            isRestoring: false,
+            restoreComplete: true,
+            clearProgress: true,
+          ),
+        );
       case Failure(:final error):
         state = AsyncError(error, StackTrace.current);
     }

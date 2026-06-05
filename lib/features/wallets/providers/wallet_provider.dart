@@ -37,14 +37,16 @@ class WalletNotifier extends AsyncNotifier<List<WalletModel>> {
     }
 
     // Set up reactive stream listening
-    _subscription = repository.watchWallets(user!.id).listen(
-      (wallets) {
-        state = AsyncData(wallets);
-      },
-      onError: (e, stack) {
-        state = AsyncError(e, stack);
-      },
-    );
+    _subscription = repository
+        .watchWallets(user!.id)
+        .listen(
+          (wallets) {
+            state = AsyncData(wallets);
+          },
+          onError: (e, stack) {
+            state = AsyncError(e, stack);
+          },
+        );
 
     // Return initial data
     final result = await repository.getWallets(user.id);
@@ -62,14 +64,16 @@ class WalletNotifier extends AsyncNotifier<List<WalletModel>> {
 
     final repository = ref.read(walletRepositoryProvider);
     _subscription?.cancel();
-    _subscription = repository.watchWallets(user!.id).listen(
-      (wallets) {
-        state = AsyncData(wallets);
-      },
-      onError: (e, stack) {
-        state = AsyncError(e, stack);
-      },
-    );
+    _subscription = repository
+        .watchWallets(user!.id)
+        .listen(
+          (wallets) {
+            state = AsyncData(wallets);
+          },
+          onError: (e, stack) {
+            state = AsyncError(e, stack);
+          },
+        );
   }
 
   Future<void> addWallet({

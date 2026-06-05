@@ -18,9 +18,9 @@ import 'package:duasaku_app/features/export_import/services/export_service.dart'
 
 final exportImportRepositoryProvider =
     Provider<ExportImportRepositoryInterface>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return ExportImportRepository(db);
-});
+      final db = ref.watch(appDatabaseProvider);
+      return ExportImportRepository(db);
+    });
 
 // ---------------------------------------------------------------------------
 // Export Service Provider
@@ -85,8 +85,8 @@ class ExportState {
 
 final exportNotifierProvider =
     AsyncNotifierProvider<ExportNotifier, ExportState>(() {
-  return ExportNotifier();
-});
+      return ExportNotifier();
+    });
 
 class ExportNotifier extends AsyncNotifier<ExportState> {
   @override
@@ -97,11 +97,9 @@ class ExportNotifier extends AsyncNotifier<ExportState> {
   /// Sets the export mode (CSV or JSON).
   void setMode(ExportMode mode) {
     final current = state.valueOrNull ?? const ExportState();
-    state = AsyncData(current.copyWith(
-      mode: mode,
-      clearResult: true,
-      clearProgress: true,
-    ));
+    state = AsyncData(
+      current.copyWith(mode: mode, clearResult: true, clearProgress: true),
+    );
   }
 
   /// Toggles a data type in the selection set.
@@ -127,11 +125,13 @@ class ExportNotifier extends AsyncNotifier<ExportState> {
     final current = state.valueOrNull ?? const ExportState();
     final service = ref.read(exportServiceProvider);
 
-    state = AsyncData(current.copyWith(
-      isExporting: true,
-      clearResult: true,
-      clearProgress: true,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        isExporting: true,
+        clearResult: true,
+        clearProgress: true,
+      ),
+    );
 
     try {
       if (current.mode == ExportMode.csv) {
@@ -149,10 +149,9 @@ class ExportNotifier extends AsyncNotifier<ExportState> {
         final result = await service.exportCsv(config);
         switch (result) {
           case Success(:final value):
-            state = AsyncData(current.copyWith(
-              isExporting: false,
-              result: value,
-            ));
+            state = AsyncData(
+              current.copyWith(isExporting: false, result: value),
+            );
           case Failure(:final error):
             state = AsyncError(error, StackTrace.current);
         }
@@ -161,10 +160,9 @@ class ExportNotifier extends AsyncNotifier<ExportState> {
         final result = await service.exportJsonBackup();
         switch (result) {
           case Success(:final value):
-            state = AsyncData(current.copyWith(
-              isExporting: false,
-              result: value,
-            ));
+            state = AsyncData(
+              current.copyWith(isExporting: false, result: value),
+            );
           case Failure(:final error):
             state = AsyncError(error, StackTrace.current);
         }

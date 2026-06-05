@@ -1,4 +1,3 @@
-
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/alert_type.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/models/budget_alert_model.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,7 +72,9 @@ List<BudgetAlertModel> _generateAlertList(int seed) {
 }
 
 /// Sorts a list of alerts descending by createdAt (simulates getAlerts/watchAlerts behavior).
-List<BudgetAlertModel> _sortDescendingByCreatedAt(List<BudgetAlertModel> alerts) {
+List<BudgetAlertModel> _sortDescendingByCreatedAt(
+  List<BudgetAlertModel> alerts,
+) {
   final sorted = List<BudgetAlertModel>.from(alerts);
   sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   return sorted;
@@ -131,7 +132,9 @@ void main() {
         final alerts = List.generate(count, (i) {
           final alert = _generateBudgetAlertModel(rng);
           // Give ~50% of alerts the same timestamp
-          final createdAt = rng.nextBool() ? sharedTimestamp : _randomDateTime(rng);
+          final createdAt = rng.nextBool()
+              ? sharedTimestamp
+              : _randomDateTime(rng);
           return alert.copyWith(userId: userId, createdAt: createdAt);
         });
 
@@ -141,9 +144,9 @@ void main() {
         for (int i = 0; i < sortedAlerts.length - 1; i++) {
           expect(
             sortedAlerts[i].createdAt.isAfter(sortedAlerts[i + 1].createdAt) ||
-                sortedAlerts[i]
-                    .createdAt
-                    .isAtSameMomentAs(sortedAlerts[i + 1].createdAt),
+                sortedAlerts[i].createdAt.isAtSameMomentAs(
+                  sortedAlerts[i + 1].createdAt,
+                ),
             isTrue,
             reason:
                 'Ordering violated at index $i: ${sortedAlerts[i].createdAt} '
@@ -196,7 +199,9 @@ void main() {
         final alerts = _generateAlertList(seed);
 
         // Mark all alerts as read
-        final allReadAlerts = alerts.map((a) => a.copyWith(isRead: true)).toList();
+        final allReadAlerts = alerts
+            .map((a) => a.copyWith(isRead: true))
+            .toList();
 
         final unreadCount = _computeUnreadCount(allReadAlerts);
         expect(unreadCount, equals(0));
@@ -209,8 +214,9 @@ void main() {
         final alerts = _generateAlertList(seed);
 
         // Mark all alerts as unread
-        final allUnreadAlerts =
-            alerts.map((a) => a.copyWith(isRead: false)).toList();
+        final allUnreadAlerts = alerts
+            .map((a) => a.copyWith(isRead: false))
+            .toList();
 
         final unreadCount = _computeUnreadCount(allUnreadAlerts);
         expect(unreadCount, equals(allUnreadAlerts.length));
@@ -228,7 +234,8 @@ void main() {
         expect(
           unreadCount + readCount,
           equals(alerts.length),
-          reason: 'unread ($unreadCount) + read ($readCount) should equal '
+          reason:
+              'unread ($unreadCount) + read ($readCount) should equal '
               'total (${alerts.length})',
         );
       },

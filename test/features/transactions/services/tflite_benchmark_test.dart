@@ -54,7 +54,9 @@ void main() {
           metadataPath: 'assets/ml/metadata.json',
         );
         initStopwatch.stop();
-        print('Model Initialization Time: ${initStopwatch.elapsedMilliseconds} ms');
+        print(
+          'Model Initialization Time: ${initStopwatch.elapsedMilliseconds} ms',
+        );
 
         // Warm-up phase
         print('Running warm-up (10 iterations)...');
@@ -75,7 +77,7 @@ void main() {
         final benchmarkStopwatch = Stopwatch()..start();
         for (int i = 0; i < runCount; i++) {
           final sentence = testSentences[i % testSentences.length];
-          
+
           final inferenceStopwatch = Stopwatch()..start();
           final result = await parser.parseTransaction(
             inputText: sentence,
@@ -83,7 +85,7 @@ void main() {
             categories: categories,
           );
           inferenceStopwatch.stop();
-          
+
           latencies.add(inferenceStopwatch.elapsedMilliseconds);
 
           expect(result.amount, isNotNull);
@@ -108,7 +110,9 @@ void main() {
         print('------------------------------------------------------------');
         print('Total Inferences: $runCount');
         print('Total Time:       $totalTimeMs ms');
-        print('Avg Latency:      ${averageLatencyMs.toStringAsFixed(2)} ms/inf');
+        print(
+          'Avg Latency:      ${averageLatencyMs.toStringAsFixed(2)} ms/inf',
+        );
         print('p50 Latency:      $p50 ms');
         print('p90 Latency:      $p90 ms');
         print('p99 Latency:      $p99 ms');
@@ -119,7 +123,9 @@ void main() {
         expect(averageLatencyMs, lessThan(50.0));
       } catch (e) {
         print('------------------------------------------------------------');
-        print('⚠️  NOTICE: Native TFLite FFI library not available in local test host.');
+        print(
+          '⚠️  NOTICE: Native TFLite FFI library not available in local test host.',
+        );
         print('Exception details: $e');
         print('Falling back to simulated low-end device benchmark profiles...');
         print('------------------------------------------------------------');
@@ -133,7 +139,9 @@ void main() {
         print('   - Avg Latency:   22.40 ms per inference');
         print('   - RAM Overhead:  24.20 MB (RSS peak)');
         print('   - Cold Start:    184 ms');
-        print('   - Status:        Highly responsive (Acceptable for real-time)');
+        print(
+          '   - Status:        Highly responsive (Acceptable for real-time)',
+        );
         print('');
         print('2. Mid-End iOS (iPhone SE 2nd Gen, Apple A13 Bionic, 3GB RAM):');
         print('   - Avg Latency:   4.10 ms per inference');

@@ -16,9 +16,15 @@ class BudgetRepository {
   BudgetRepository(this._db);
 
   Future<List<BudgetModel>> getBudgets(String userId, String month) async {
-    final query = _db.select(_db.budgets).join([
-      innerJoin(_db.categories, _db.categories.id.equalsExp(_db.budgets.categoryId)),
-    ])..where(_db.budgets.userId.equals(userId) & _db.budgets.month.equals(month));
+    final query =
+        _db.select(_db.budgets).join([
+          innerJoin(
+            _db.categories,
+            _db.categories.id.equalsExp(_db.budgets.categoryId),
+          ),
+        ])..where(
+          _db.budgets.userId.equals(userId) & _db.budgets.month.equals(month),
+        );
 
     final rows = await query.get();
     return rows.map((row) {
@@ -36,19 +42,30 @@ class BudgetRepository {
   }
 
   Future<BudgetModel> setBudget(BudgetModel budget) async {
-    final category = await (_db.select(_db.categories)
-          ..where((c) => c.name.equals(budget.category) & c.userId.equals(budget.userId)))
-        .getSingleOrNull();
+    final category =
+        await (_db.select(_db.categories)..where(
+              (c) =>
+                  c.name.equals(budget.category) &
+                  c.userId.equals(budget.userId),
+            ))
+            .getSingleOrNull();
     final categoryId = category?.id ?? 'food';
 
     // Look for existing budget for this month, categoryId, and userId to keep the same primary key ID
-    final existing = await (_db.select(_db.budgets)
-          ..where((b) => b.month.equals(budget.month) & b.categoryId.equals(categoryId) & b.userId.equals(budget.userId)))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.budgets)..where(
+              (b) =>
+                  b.month.equals(budget.month) &
+                  b.categoryId.equals(categoryId) &
+                  b.userId.equals(budget.userId),
+            ))
+            .getSingleOrNull();
 
     final id = existing?.id ?? budget.id ?? const Uuid().v4();
 
-    await _db.into(_db.budgets).insert(
+    await _db
+        .into(_db.budgets)
+        .insert(
           BudgetsCompanion.insert(
             id: id,
             userId: Value(budget.userId),

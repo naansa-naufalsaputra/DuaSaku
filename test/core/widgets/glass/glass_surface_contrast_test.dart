@@ -47,7 +47,6 @@ Color _alphaBlend(Color foreground, Color background) {
   );
 }
 
-
 // ---------------------------------------------------------------------------
 // Preset Configuration Data
 // ---------------------------------------------------------------------------
@@ -136,7 +135,10 @@ void main() {
                   : compositeColor;
 
               // Step 3: Compute contrast ratio
-              final ratio = _contrastRatio(config.onSurface, effectiveBackground);
+              final ratio = _contrastRatio(
+                config.onSurface,
+                effectiveBackground,
+              );
 
               // WCAG AA requires >= 4.5:1 for normal text
               expect(
@@ -166,44 +168,57 @@ void main() {
     final darkPresets = _allPresetConfigs.where((c) => c.isDarkMode);
 
     for (final config in darkPresets) {
-      test('${config.name}: text shadow improves contrast over worst-case background', () {
-        // Use the most saturated/bright background as worst case
-        final worstCaseBg = config.backgroundColors
-            .reduce((a, b) => _relativeLuminance(a) > _relativeLuminance(b) ? a : b);
+      test(
+        '${config.name}: text shadow improves contrast over worst-case background',
+        () {
+          // Use the most saturated/bright background as worst case
+          final worstCaseBg = config.backgroundColors.reduce(
+            (a, b) => _relativeLuminance(a) > _relativeLuminance(b) ? a : b,
+          );
 
-        // Compute composite without text shadow
-        final surfaceTint = config.glassTheme.surfaceTintColor.withValues(
-          alpha: config.glassTheme.surfaceOpacity,
-        );
-        final compositeWithoutShadow = _alphaBlend(surfaceTint, worstCaseBg);
+          // Compute composite without text shadow
+          final surfaceTint = config.glassTheme.surfaceTintColor.withValues(
+            alpha: config.glassTheme.surfaceOpacity,
+          );
+          final compositeWithoutShadow = _alphaBlend(surfaceTint, worstCaseBg);
 
-        // Compute composite with text shadow
-        final compositeWithShadow = _alphaBlend(_textShadowColor, compositeWithoutShadow);
+          // Compute composite with text shadow
+          final compositeWithShadow = _alphaBlend(
+            _textShadowColor,
+            compositeWithoutShadow,
+          );
 
-        // Contrast without shadow
-        final ratioWithout = _contrastRatio(config.onSurface, compositeWithoutShadow);
-        // Contrast with shadow
-        final ratioWith = _contrastRatio(config.onSurface, compositeWithShadow);
+          // Contrast without shadow
+          final ratioWithout = _contrastRatio(
+            config.onSurface,
+            compositeWithoutShadow,
+          );
+          // Contrast with shadow
+          final ratioWith = _contrastRatio(
+            config.onSurface,
+            compositeWithShadow,
+          );
 
-        // Text shadow should improve contrast for light-on-dark text
-        expect(
-          ratioWith,
-          greaterThanOrEqualTo(ratioWithout),
-          reason:
-              '${config.name}: text shadow should improve contrast '
-              '(without: ${ratioWithout.toStringAsFixed(2)}, '
-              'with: ${ratioWith.toStringAsFixed(2)})',
-        );
+          // Text shadow should improve contrast for light-on-dark text
+          expect(
+            ratioWith,
+            greaterThanOrEqualTo(ratioWithout),
+            reason:
+                '${config.name}: text shadow should improve contrast '
+                '(without: ${ratioWithout.toStringAsFixed(2)}, '
+                'with: ${ratioWith.toStringAsFixed(2)})',
+          );
 
-        // And the result with shadow should meet WCAG AA
-        expect(
-          ratioWith,
-          greaterThanOrEqualTo(4.5),
-          reason:
-              '${config.name}: even with text shadow, contrast '
-              '${ratioWith.toStringAsFixed(2)} < 4.5',
-        );
-      });
+          // And the result with shadow should meet WCAG AA
+          expect(
+            ratioWith,
+            greaterThanOrEqualTo(4.5),
+            reason:
+                '${config.name}: even with text shadow, contrast '
+                '${ratioWith.toStringAsFixed(2)} < 4.5',
+          );
+        },
+      );
     }
   });
 
@@ -222,8 +237,9 @@ void main() {
 
         // Verify increased opacity maintains or improves contrast
         // Test against the brightest background (worst case for dark mode)
-        final worstCaseBg = config.backgroundColors
-            .reduce((a, b) => _relativeLuminance(a) > _relativeLuminance(b) ? a : b);
+        final worstCaseBg = config.backgroundColors.reduce(
+          (a, b) => _relativeLuminance(a) > _relativeLuminance(b) ? a : b,
+        );
 
         // Contrast with base opacity
         final baseTint = config.glassTheme.surfaceTintColor.withValues(
@@ -280,40 +296,42 @@ void main() {
   // =========================================================================
   group('highContrastOf accessibility override increases opacity correctly', () {
     for (final config in _allPresetConfigs) {
-      test('${config.name}: highContrast sets surfaceOpacity to 0.9 and disables blur', () {
-        const highContrastOpacity = 0.9;
+      test(
+        '${config.name}: highContrast sets surfaceOpacity to 0.9 and disables blur',
+        () {
+          const highContrastOpacity = 0.9;
 
-        // Verify high contrast opacity is always >= base opacity
-        expect(
-          highContrastOpacity,
-          greaterThanOrEqualTo(config.glassTheme.surfaceOpacity),
-          reason:
-              '${config.name}: highContrast opacity 0.9 should be >= '
-              'base opacity ${config.glassTheme.surfaceOpacity}',
-        );
-
-        // Test contrast with high contrast opacity against all backgrounds
-        for (int i = 0; i < config.backgroundColors.length; i++) {
-          final bgColor = config.backgroundColors[i];
-
-          final highContrastTint = config.glassTheme.surfaceTintColor.withValues(
-            alpha: highContrastOpacity,
-          );
-          final composite = _alphaBlend(highContrastTint, bgColor);
-
-          // For high contrast mode, we don't need the text shadow safety net
-          // because the opacity is so high the surface dominates
-          final ratio = _contrastRatio(config.onSurface, composite);
-
+          // Verify high contrast opacity is always >= base opacity
           expect(
-            ratio,
-            greaterThanOrEqualTo(4.5),
+            highContrastOpacity,
+            greaterThanOrEqualTo(config.glassTheme.surfaceOpacity),
             reason:
-                '${config.name}: highContrast mode contrast '
-                '${ratio.toStringAsFixed(2)} < 4.5 for bg #$i',
+                '${config.name}: highContrast opacity 0.9 should be >= '
+                'base opacity ${config.glassTheme.surfaceOpacity}',
           );
-        }
-      });
+
+          // Test contrast with high contrast opacity against all backgrounds
+          for (int i = 0; i < config.backgroundColors.length; i++) {
+            final bgColor = config.backgroundColors[i];
+
+            final highContrastTint = config.glassTheme.surfaceTintColor
+                .withValues(alpha: highContrastOpacity);
+            final composite = _alphaBlend(highContrastTint, bgColor);
+
+            // For high contrast mode, we don't need the text shadow safety net
+            // because the opacity is so high the surface dominates
+            final ratio = _contrastRatio(config.onSurface, composite);
+
+            expect(
+              ratio,
+              greaterThanOrEqualTo(4.5),
+              reason:
+                  '${config.name}: highContrast mode contrast '
+                  '${ratio.toStringAsFixed(2)} < 4.5 for bg #$i',
+            );
+          }
+        },
+      );
     }
   });
 
@@ -373,7 +391,8 @@ void main() {
           expect(
             ratio,
             greaterThanOrEqualTo(4.5),
-            reason: '$presetName glow1: contrast ${ratio.toStringAsFixed(2)} < 4.5',
+            reason:
+                '$presetName glow1: contrast ${ratio.toStringAsFixed(2)} < 4.5',
           );
         });
 
@@ -394,7 +413,8 @@ void main() {
           expect(
             ratio,
             greaterThanOrEqualTo(4.5),
-            reason: '$presetName glow2: contrast ${ratio.toStringAsFixed(2)} < 4.5',
+            reason:
+                '$presetName glow2: contrast ${ratio.toStringAsFixed(2)} < 4.5',
           );
         });
 
@@ -417,7 +437,8 @@ void main() {
           expect(
             ratio,
             greaterThanOrEqualTo(4.5),
-            reason: '$presetName both glows: contrast ${ratio.toStringAsFixed(2)} < 4.5',
+            reason:
+                '$presetName both glows: contrast ${ratio.toStringAsFixed(2)} < 4.5',
           );
         });
 
@@ -436,7 +457,8 @@ void main() {
           expect(
             ratio,
             greaterThanOrEqualTo(4.5),
-            reason: '$presetName base: contrast ${ratio.toStringAsFixed(2)} < 4.5',
+            reason:
+                '$presetName base: contrast ${ratio.toStringAsFixed(2)} < 4.5',
           );
         });
       });

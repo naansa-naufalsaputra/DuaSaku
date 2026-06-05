@@ -1,7 +1,6 @@
 // Feature: system-audit-fixes, Property 8: Failure preserves previous transaction data
 // **Validates: Requirements 10.4, 10.5**
 
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glados/glados.dart'
@@ -39,7 +38,8 @@ class _FakeFailingRepository implements TransactionRepositoryInterface {
 
   @override
   Future<Result<void, AppError>> insertTransaction(
-      TransactionModel transaction) async {
+    TransactionModel transaction,
+  ) async {
     return Failure(failureError);
   }
 
@@ -120,7 +120,8 @@ final _repositoryProvider = Provider<TransactionRepositoryInterface>((ref) {
 
 final _testNotifierProvider =
     AsyncNotifierProvider<_TestTransactionNotifier, List<TransactionModel>>(
-        () => _TestTransactionNotifier());
+      () => _TestTransactionNotifier(),
+    );
 
 // ---------------------------------------------------------------------------
 // Helpers: generate test data from seeds
@@ -135,13 +136,7 @@ List<TransactionModel> _generateTransactionList(int seed) {
     final type = types[rng.nextInt(types.length)];
     final amount =
         (rng.nextInt(99999) + 1).toDouble() + (rng.nextInt(100)) / 100.0;
-    final categories = [
-      'Food',
-      'Transport',
-      'Salary',
-      'Shopping',
-      'Transfer'
-    ];
+    final categories = ['Food', 'Transport', 'Salary', 'Shopping', 'Transfer'];
 
     return TransactionModel(
       id: i + 1,
@@ -184,205 +179,229 @@ AppError _createAppError(int typeIndex) {
 // ---------------------------------------------------------------------------
 
 void main() {
-  group(
-    'Feature: system-audit-fixes, '
-    'Property 8: Failure preserves previous transaction data',
-    () {
-      // Property 8: For any non-empty transaction list held in state, when
-      // addTransaction() or deleteTransaction() receives a Failure result,
-      // the resulting state SHALL have hasValue == true AND value SHALL equal
-      // the transaction list as it was before the failed operation was attempted.
+  group('Feature: system-audit-fixes, '
+      'Property 8: Failure preserves previous transaction data', () {
+    // Property 8: For any non-empty transaction list held in state, when
+    // addTransaction() or deleteTransaction() receives a Failure result,
+    // the resulting state SHALL have hasValue == true AND value SHALL equal
+    // the transaction list as it was before the failed operation was attempted.
 
-      // --- Glados-driven tests (synchronous, testing core AsyncValue logic) ---
+    // --- Glados-driven tests (synchronous, testing core AsyncValue logic) ---
 
-      Glados2(
-        any.intInRange(1, 100000), // seed for transaction list generation
-        any.intInRange(0, 3), // error type index
-        ExploreConfig(numRuns: 100),
-      ).test(
-        'addTransaction failure: AsyncValue.error with copyWithPrevious preserves data',
-        (listSeed, errorTypeIndex) {
-          final transactions = _generateTransactionList(listSeed);
-          final appError = _createAppError(errorTypeIndex);
+    Glados2(
+      any.intInRange(1, 100000), // seed for transaction list generation
+      any.intInRange(0, 3), // error type index
+      ExploreConfig(numRuns: 100),
+    ).test(
+      'addTransaction failure: AsyncValue.error with copyWithPrevious preserves data',
+      (listSeed, errorTypeIndex) {
+        final transactions = _generateTransactionList(listSeed);
+        final appError = _createAppError(errorTypeIndex);
 
-          // Test the core property: AsyncValue.error with copyWithPrevious
-          // preserves hasValue and value. This is exactly what
-          // TransactionNotifier.addTransaction does on Failure.
-          final previousData = transactions;
-          final errorState = AsyncValue<List<TransactionModel>>.error(
-            appError,
-            StackTrace.current,
-          ).copyWithPrevious(AsyncData(previousData));
+        // Test the core property: AsyncValue.error with copyWithPrevious
+        // preserves hasValue and value. This is exactly what
+        // TransactionNotifier.addTransaction does on Failure.
+        final previousData = transactions;
+        final errorState = AsyncValue<List<TransactionModel>>.error(
+          appError,
+          StackTrace.current,
+        ).copyWithPrevious(AsyncData(previousData));
 
-          // Property assertion: hasValue must be true
-          expect(errorState.hasValue, isTrue,
-              reason:
-                  'After addTransaction failure, state.hasValue must be true '
-                  '(previous data preserved via copyWithPrevious)');
+        // Property assertion: hasValue must be true
+        expect(
+          errorState.hasValue,
+          isTrue,
+          reason:
+              'After addTransaction failure, state.hasValue must be true '
+              '(previous data preserved via copyWithPrevious)',
+        );
 
-          // Property assertion: value must equal the original list
-          expect(errorState.value!.length, equals(transactions.length),
-              reason:
-                  'After addTransaction failure, state.value must have same '
-                  'length as the original list');
-        },
-      );
+        // Property assertion: value must equal the original list
+        expect(
+          errorState.value!.length,
+          equals(transactions.length),
+          reason:
+              'After addTransaction failure, state.value must have same '
+              'length as the original list',
+        );
+      },
+    );
 
-      Glados2(
-        any.intInRange(1, 100000), // seed for transaction list generation
-        any.intInRange(0, 3), // error type index
-        ExploreConfig(numRuns: 100),
-      ).test(
-        'deleteTransaction failure: AsyncValue.error with copyWithPrevious preserves pre-removal data',
-        (listSeed, errorTypeIndex) {
-          final transactions = _generateTransactionList(listSeed);
-          final appError = _createAppError(errorTypeIndex);
+    Glados2(
+      any.intInRange(1, 100000), // seed for transaction list generation
+      any.intInRange(0, 3), // error type index
+      ExploreConfig(numRuns: 100),
+    ).test(
+      'deleteTransaction failure: AsyncValue.error with copyWithPrevious preserves pre-removal data',
+      (listSeed, errorTypeIndex) {
+        final transactions = _generateTransactionList(listSeed);
+        final appError = _createAppError(errorTypeIndex);
 
-          // Simulate the deleteTransaction flow:
-          // 1. previousState captured before optimistic removal
-          final previousState = transactions;
+        // Simulate the deleteTransaction flow:
+        // 1. previousState captured before optimistic removal
+        final previousState = transactions;
 
-          // 2. Optimistic removal happens (simulated)
-          final txToDelete = transactions.first;
-          final optimisticState =
-              transactions.where((tx) => tx.id != txToDelete.id).toList();
+        // 2. Optimistic removal happens (simulated)
+        final txToDelete = transactions.first;
+        final optimisticState = transactions
+            .where((tx) => tx.id != txToDelete.id)
+            .toList();
 
-          // Verify optimistic removal actually removed something
-          expect(optimisticState.length, equals(transactions.length - 1),
-              reason: 'Optimistic removal should remove exactly one item');
+        // Verify optimistic removal actually removed something
+        expect(
+          optimisticState.length,
+          equals(transactions.length - 1),
+          reason: 'Optimistic removal should remove exactly one item',
+        );
 
-          // 3. On Failure: state is set to error with previousState preserved
-          final errorState = AsyncValue<List<TransactionModel>>.error(
-            appError,
-            StackTrace.current,
-          ).copyWithPrevious(AsyncData(previousState));
+        // 3. On Failure: state is set to error with previousState preserved
+        final errorState = AsyncValue<List<TransactionModel>>.error(
+          appError,
+          StackTrace.current,
+        ).copyWithPrevious(AsyncData(previousState));
 
-          // Property assertion: hasValue must be true
-          expect(errorState.hasValue, isTrue,
-              reason:
-                  'After deleteTransaction failure, state.hasValue must be true '
-                  '(previous data restored via copyWithPrevious)');
+        // Property assertion: hasValue must be true
+        expect(
+          errorState.hasValue,
+          isTrue,
+          reason:
+              'After deleteTransaction failure, state.hasValue must be true '
+              '(previous data restored via copyWithPrevious)',
+        );
 
-          // Property assertion: value must equal the ORIGINAL list
-          // (pre-optimistic-removal), not the optimistic state
-          expect(errorState.value!.length, equals(transactions.length),
-              reason:
-                  'After deleteTransaction failure, state.value must have same '
-                  'length as the original list (pre-optimistic-removal)');
-        },
-      );
+        // Property assertion: value must equal the ORIGINAL list
+        // (pre-optimistic-removal), not the optimistic state
+        expect(
+          errorState.value!.length,
+          equals(transactions.length),
+          reason:
+              'After deleteTransaction failure, state.value must have same '
+              'length as the original list (pre-optimistic-removal)',
+        );
+      },
+    );
 
-      // --- End-to-end tests through the actual notifier (100 iterations) ---
+    // --- End-to-end tests through the actual notifier (100 iterations) ---
 
-      test(
-        'end-to-end: addTransaction failure through notifier preserves data (100 iterations)',
-        () async {
-          for (int i = 1; i <= 100; i++) {
-            final transactions = _generateTransactionList(i);
-            final appError = _createAppError(i % 4);
+    test(
+      'end-to-end: addTransaction failure through notifier preserves data (100 iterations)',
+      () async {
+        for (int i = 1; i <= 100; i++) {
+          final transactions = _generateTransactionList(i);
+          final appError = _createAppError(i % 4);
 
-            final fakeRepo = _FakeFailingRepository(
-              initialTransactions: transactions,
-              failureError: appError,
+          final fakeRepo = _FakeFailingRepository(
+            initialTransactions: transactions,
+            failureError: appError,
+          );
+
+          final container = ProviderContainer(
+            overrides: [_repositoryProvider.overrideWithValue(fakeRepo)],
+          );
+
+          try {
+            await container.read(_testNotifierProvider.future);
+
+            final stateBeforeAdd = container.read(_testNotifierProvider);
+            expect(
+              stateBeforeAdd.hasValue,
+              isTrue,
+              reason: 'Iteration $i: initial state must have value',
+            );
+            expect(
+              stateBeforeAdd.value!.length,
+              equals(transactions.length),
+              reason: 'Iteration $i: initial state must have correct length',
             );
 
-            final container = ProviderContainer(
-              overrides: [
-                _repositoryProvider.overrideWithValue(fakeRepo),
-              ],
+            final newTransaction = TransactionModel(
+              userId: 'test-user',
+              amount: 100.0,
+              category: 'Food',
+              type: 'expense',
+              notes: 'Test add',
+              createdAt: DateTime(2024, 6, 15),
+              walletId: 'wallet-0',
             );
 
-            try {
-              await container.read(_testNotifierProvider.future);
+            await container
+                .read(_testNotifierProvider.notifier)
+                .addTransaction(newTransaction);
 
-              final stateBeforeAdd = container.read(_testNotifierProvider);
-              expect(stateBeforeAdd.hasValue, isTrue,
-                  reason: 'Iteration $i: initial state must have value');
-              expect(
-                  stateBeforeAdd.value!.length, equals(transactions.length),
-                  reason:
-                      'Iteration $i: initial state must have correct length');
-
-              final newTransaction = TransactionModel(
-                userId: 'test-user',
-                amount: 100.0,
-                category: 'Food',
-                type: 'expense',
-                notes: 'Test add',
-                createdAt: DateTime(2024, 6, 15),
-                walletId: 'wallet-0',
-              );
-
-              await container
-                  .read(_testNotifierProvider.notifier)
-                  .addTransaction(newTransaction);
-
-              final stateAfterAdd = container.read(_testNotifierProvider);
-              expect(stateAfterAdd.hasValue, isTrue,
-                  reason:
-                      'Iteration $i: hasValue must be true after add failure');
-              expect(
-                  stateAfterAdd.value!.length, equals(transactions.length),
-                  reason:
-                      'Iteration $i: value length must equal original after add failure');
-            } finally {
-              container.dispose();
-            }
+            final stateAfterAdd = container.read(_testNotifierProvider);
+            expect(
+              stateAfterAdd.hasValue,
+              isTrue,
+              reason: 'Iteration $i: hasValue must be true after add failure',
+            );
+            expect(
+              stateAfterAdd.value!.length,
+              equals(transactions.length),
+              reason:
+                  'Iteration $i: value length must equal original after add failure',
+            );
+          } finally {
+            container.dispose();
           }
-        },
-      );
+        }
+      },
+    );
 
-      test(
-        'end-to-end: deleteTransaction failure through notifier preserves data (100 iterations)',
-        () async {
-          for (int i = 1; i <= 100; i++) {
-            final transactions = _generateTransactionList(i);
-            final appError = _createAppError(i % 4);
+    test(
+      'end-to-end: deleteTransaction failure through notifier preserves data (100 iterations)',
+      () async {
+        for (int i = 1; i <= 100; i++) {
+          final transactions = _generateTransactionList(i);
+          final appError = _createAppError(i % 4);
 
-            final fakeRepo = _FakeFailingRepository(
-              initialTransactions: transactions,
-              failureError: appError,
+          final fakeRepo = _FakeFailingRepository(
+            initialTransactions: transactions,
+            failureError: appError,
+          );
+
+          final container = ProviderContainer(
+            overrides: [_repositoryProvider.overrideWithValue(fakeRepo)],
+          );
+
+          try {
+            await container.read(_testNotifierProvider.future);
+
+            final stateBeforeDelete = container.read(_testNotifierProvider);
+            expect(
+              stateBeforeDelete.hasValue,
+              isTrue,
+              reason: 'Iteration $i: initial state must have value',
+            );
+            expect(
+              stateBeforeDelete.value!.length,
+              equals(transactions.length),
+              reason: 'Iteration $i: initial state must have correct length',
             );
 
-            final container = ProviderContainer(
-              overrides: [
-                _repositoryProvider.overrideWithValue(fakeRepo),
-              ],
+            final txToDelete = transactions.first;
+
+            await container
+                .read(_testNotifierProvider.notifier)
+                .deleteTransaction(txToDelete.id!);
+
+            final stateAfterDelete = container.read(_testNotifierProvider);
+            expect(
+              stateAfterDelete.hasValue,
+              isTrue,
+              reason:
+                  'Iteration $i: hasValue must be true after delete failure',
             );
-
-            try {
-              await container.read(_testNotifierProvider.future);
-
-              final stateBeforeDelete =
-                  container.read(_testNotifierProvider);
-              expect(stateBeforeDelete.hasValue, isTrue,
-                  reason: 'Iteration $i: initial state must have value');
-              expect(stateBeforeDelete.value!.length,
-                  equals(transactions.length),
-                  reason:
-                      'Iteration $i: initial state must have correct length');
-
-              final txToDelete = transactions.first;
-
-              await container
-                  .read(_testNotifierProvider.notifier)
-                  .deleteTransaction(txToDelete.id!);
-
-              final stateAfterDelete =
-                  container.read(_testNotifierProvider);
-              expect(stateAfterDelete.hasValue, isTrue,
-                  reason:
-                      'Iteration $i: hasValue must be true after delete failure');
-              expect(stateAfterDelete.value!.length,
-                  equals(transactions.length),
-                  reason:
-                      'Iteration $i: value length must equal original after delete failure');
-            } finally {
-              container.dispose();
-            }
+            expect(
+              stateAfterDelete.value!.length,
+              equals(transactions.length),
+              reason:
+                  'Iteration $i: value length must equal original after delete failure',
+            );
+          } finally {
+            container.dispose();
           }
-        },
-      );
-    },
-  );
+        }
+      },
+    );
+  });
 }

@@ -19,8 +19,9 @@ class GoalDao extends DatabaseAccessor<AppDatabase> with _$GoalDaoMixin {
 
   /// Update an existing goal.
   Future<void> updateGoal(GoalsCompanion entry) {
-    return (update(goals)..where((t) => t.id.equals(entry.id.value)))
-        .write(entry);
+    return (update(
+      goals,
+    )..where((t) => t.id.equals(entry.id.value))).write(entry);
   }
 
   /// Delete a goal by ID (cascade deletes associated deposits).
@@ -81,10 +82,9 @@ class GoalDao extends DatabaseAccessor<AppDatabase> with _$GoalDaoMixin {
 
   /// Get a goal by its linked wallet ID (only active goals).
   Future<Goal?> getGoalByLinkedWallet(String walletId) {
-    return (select(goals)
-          ..where((t) =>
-              t.linkedWalletId.equals(walletId) &
-              t.status.equals('active')))
+    return (select(goals)..where(
+          (t) => t.linkedWalletId.equals(walletId) & t.status.equals('active'),
+        ))
         .getSingleOrNull();
   }
 
@@ -107,9 +107,7 @@ class GoalDao extends DatabaseAccessor<AppDatabase> with _$GoalDaoMixin {
   /// Archive a goal (set status to 'archived').
   Future<void> archiveGoal(String goalId) {
     return (update(goals)..where((t) => t.id.equals(goalId))).write(
-      const GoalsCompanion(
-        status: Value('archived'),
-      ),
+      const GoalsCompanion(status: Value('archived')),
     );
   }
 }
