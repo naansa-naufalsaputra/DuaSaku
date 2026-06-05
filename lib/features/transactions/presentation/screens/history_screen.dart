@@ -131,8 +131,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: isDark 
-                  ? const [Color(0x1F6366F1), Color(0x0F0F172A)]
-                  : [theme.colorScheme.primary.withValues(alpha: 0.04), Colors.white.withValues(alpha: 0.9)],
+                  ? const [Color(0x1F0D9488), Color(0x0F0F172A)]
+                  : [Colors.teal.withValues(alpha: 0.04), Colors.white.withValues(alpha: 0.9)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -508,16 +508,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             }
           });
         },
-        backgroundColor: isDark ? const Color(0x1F26233A) : Colors.white.withValues(alpha: 0.8),
-        selectedColor: theme.colorScheme.primaryContainer,
+        backgroundColor: isDark ? const Color(0x1F1E293B) : Colors.white.withValues(alpha: 0.8),
+        selectedColor: isDark ? const Color(0x3D06B6D4) : Colors.teal.shade50,
         labelStyle: TextStyle(
-          color: isSelected ? theme.colorScheme.onPrimaryContainer : (isDark ? Colors.white70 : Colors.grey[700]),
+          color: isSelected 
+              ? (isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488)) 
+              : (isDark ? Colors.white70 : Colors.grey[700]),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: isSelected ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[300]!),
+            color: isSelected 
+                ? (isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488)) 
+                : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[300]!),
           ),
         ),
         showCheckmark: false,

@@ -19,7 +19,7 @@ class SecurityState {
     this.isTimeTampered = false,
     this.isAuthenticating = false,
     this.isInitialized = false,
-    this.isSecurityEnabled = true,
+    this.isSecurityEnabled = false,
   });
 
   SecurityState copyWith({
@@ -64,7 +64,7 @@ class SecurityNotifier extends Notifier<SecurityState> with WidgetsBindingObserv
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
     final bool isEnabled = prefs.getBool(_biometricPrefKey) ?? false;
-    final bool isSecurityEnabled = prefs.getBool(_securityEnabledPrefKey) ?? true;
+    final bool isSecurityEnabled = prefs.getBool(_securityEnabledPrefKey) ?? false;
 
     state = state.copyWith(
       isBiometricEnabled: isEnabled,

@@ -609,12 +609,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             borderRadius: BorderRadius.circular(32),
                             gradient: LinearGradient(
                               colors: isDark 
-                                  ? const [Color(0xFF1e1b4b), Color(0xFF0f172a)]
-                                  : [theme.colorScheme.primary.withValues(alpha: 0.08), Colors.white],
+                                  ? const [Color(0xFF0F172A), Color(0xFF0F2D30)]
+                                  : [Colors.teal.withValues(alpha: 0.08), Colors.white],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
-                            border: Border.all(color: const Color(0x336366f1)),
+                            border: Border.all(color: isDark ? const Color(0x3306B6D4) : const Color(0x330D9488)),
                           ),
                           child: txAsync.when(
                             data: (txs) {
@@ -633,8 +633,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         children: [
                                           Text(
                                             'home.balance'.tr().toUpperCase(),
-                                            style: const TextStyle(
-                                              color: Color(0xFF818cf8),
+                                            style: TextStyle(
+                                              color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488),
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                               letterSpacing: 1.5,
@@ -664,9 +664,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: Lottie.asset(
                                           'assets/animations/wallet.json',
                                           fit: BoxFit.contain,
-                                          errorBuilder: (context, error, stackTrace) => const Icon(
+                                          errorBuilder: (context, error, stackTrace) => Icon(
                                             Icons.account_balance_wallet_rounded,
-                                            color: Color(0xFF818cf8),
+                                            color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488),
                                             size: 24,
                                           ).animate(onPlay: (controller) => controller.repeat(reverse: true))
                                            .scaleXY(begin: 0.95, end: 1.05, duration: 1500.ms, curve: Curves.easeInOut),
@@ -754,12 +754,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             borderRadius: BorderRadius.circular(24),
                             gradient: LinearGradient(
                               colors: isDark 
-                                  ? const [Color(0x1F6366F1), Color(0x0F0F172A)]
-                                  : [theme.colorScheme.primary.withValues(alpha: 0.04), Colors.white.withValues(alpha: 0.95)],
+                                  ? const [Color(0x1F0D9488), Color(0x0F0F172A)]
+                                  : [Colors.teal.withValues(alpha: 0.04), Colors.white.withValues(alpha: 0.95)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
-                            border: Border.all(color: const Color(0x226366f1)),
+                            border: Border.all(color: isDark ? const Color(0x2206B6D4) : const Color(0x220D9488)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -768,7 +768,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 children: [
                                   Icon(
                                     Icons.auto_awesome,
-                                    color: isDark ? const Color(0xFF818cf8) : theme.colorScheme.primary,
+                                    color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488),
                                     size: 16,
                                   ),
                                   const SizedBox(width: 8),
@@ -807,7 +807,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                              IconButton(
                                                icon: Icon(
                                                  Icons.camera_alt_outlined,
-                                                 color: isDark ? const Color(0xFF818cf8) : theme.colorScheme.primary,
+                                                 color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488),
                                                  size: 18,
                                                ),
                                                onPressed: _isProcessingAI || _isProcessingReceipt
@@ -827,7 +827,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                      )
                                                    : Icon(
                                                        Icons.send_rounded,
-                                                       color: isDark ? const Color(0xFF818cf8) : theme.colorScheme.primary,
+                                                       color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488),
                                                        size: 18,
                                                      ),
                                                onPressed: _isProcessingAI || _isProcessingReceipt

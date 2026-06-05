@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
-import '../../providers/insights_provider.dart';
 import '../../../gamification/providers/gamification_provider.dart';
 import '../../../transactions/providers/transaction_provider.dart';
 import '../../../transactions/providers/category_provider.dart';
@@ -12,7 +10,6 @@ import '../../../transactions/domain/models/category_model.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
-import '../../../../core/widgets/glass/glass_button.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
 import '../widgets/spending_heatmap.dart';
 
@@ -91,7 +88,6 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final insightsState = ref.watch(insightsProvider);
     final gamificationState = ref.watch(gamificationProvider);
     final transactionsAsync = ref.watch(transactionNotifierProvider);
     final transactions = transactionsAsync.value ?? [];
@@ -676,98 +672,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                   // 4. Spending Intensity Heatmap
                   const SpendingHeatmap(),
                   const SizedBox(height: 16),
-                  
-                  // 5. AI Smart Callout Box with Button
-                  GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.auto_awesome,
-                              color: isDark ? theme.colorScheme.primary : Colors.deepPurple.shade700,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'AI Financial Advice',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.deepPurple.shade900,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        insightsState.aiAdvice.when(
-                          data: (advice) {
-                            if (advice == null) {
-                              return Center(
-                                child: GlassButton(
-                                  onPressed: () {
-                                    HapticFeedback.mediumImpact();
-                                    ref.read(insightsProvider.notifier).generateAiAnalysis();
-                                  },
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.analytics),
-                                      SizedBox(width: 8),
-                                      Text('Generate AI Analysis'),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  advice,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: isDark ? Colors.white70 : Colors.deepPurple.shade900,
-                                    height: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                GlassButton(
-                                  variant: GlassButtonVariant.secondary,
-                                  onPressed: () {
-                                    HapticFeedback.mediumImpact();
-                                    ref.read(insightsProvider.notifier).generateAiAnalysis();
-                                  },
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.refresh),
-                                      SizedBox(width: 8),
-                                      Text('Regenerate'),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            );
-                          },
-                          loading: () => const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                          error: (err, stack) => Text(
-                            'Could not load advice: $err',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 6. Gamification Streak Indicator
+                  // 5. Gamification Streak Indicator
                   GlassCard(
                     enableBlur: false,
                     child: Row(
