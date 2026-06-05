@@ -37,6 +37,21 @@ android {
             )
         }
     }
+
+    applicationVariants.all {
+        val versionNameStr = versionName
+        outputs.all {
+            val apkOutput = this as? com.android.build.gradle.api.ApkVariantOutput
+            if (apkOutput != null) {
+                val abiFilter = apkOutput.filters.firstOrNull { it.filterType == "ABI" }?.identifier
+                if (abiFilter != null) {
+                    apkOutput.outputFileName = "DuaSaku-v${versionNameStr}-${abiFilter}.apk"
+                } else {
+                    apkOutput.outputFileName = "DuaSaku-v${versionNameStr}.apk"
+                }
+            }
+        }
+    }
 }
 
 kotlin {
