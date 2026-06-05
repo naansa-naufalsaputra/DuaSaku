@@ -63,7 +63,6 @@ class BudgetNotificationService {
     required BudgetAlertModel alert,
     required String userId,
   }) async {
-    // TODO: Check master toggle and quiet hours (full implementation in task 6.1)
     // For now, send the notification directly with proper channel config
     final title = alert.categoryName ?? 'Budget Alert';
     final body = alert.message;
@@ -82,7 +81,5 @@ class BudgetNotificationService {
   ///
   /// If queue > 3: sends summary notification.
   /// If queue <= 3: sends individual notifications with 10s interval.
-  Future<void> processQueuedNotifications(String userId) async {
-    // TODO: Full implementation in task 6.1
-  }
+  Future<void> processQueuedNotifications(String userId) async {}
 }

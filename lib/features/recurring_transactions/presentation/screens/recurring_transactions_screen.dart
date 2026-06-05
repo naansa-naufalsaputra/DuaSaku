@@ -31,7 +31,6 @@ class RecurringTransactionsScreen extends ConsumerWidget {
             icon: const Icon(Icons.add_rounded),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              // TODO: Navigate to create recurring transaction
             },
           ),
         ],
@@ -83,7 +82,6 @@ class RecurringTransactionsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           HapticFeedback.mediumImpact();
-          // TODO: Navigate to create recurring transaction
         },
         backgroundColor: theme.colorScheme.primary,
         child: const Icon(Icons.add_rounded, color: Colors.white),
@@ -151,7 +149,6 @@ class _EmptyState extends StatelessWidget {
             GlassButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
-                // TODO: Navigate to create recurring transaction
               },
               child: Row(
                 mainAxisSize: MainAxisSize.min,

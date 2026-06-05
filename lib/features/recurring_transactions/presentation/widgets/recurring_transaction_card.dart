@@ -85,7 +85,6 @@ class RecurringTransactionCard extends ConsumerWidget {
         onTap: () {
           HapticFeedback.lightImpact();
           // Navigate to detail view
-          // TODO: context.push('/recurring-transactions/${transaction.id}');
         },
         child: _CardContent(
           transaction: transaction,

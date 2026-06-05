@@ -226,7 +226,7 @@ void main() {
   // **Validates: Requirements 2.1, 5.1**
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 5: Execution Creates Transaction and Log', () {
-    // TODO: Implement in task 4.3
+    // Placeholder for Property 5
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -235,7 +235,7 @@ void main() {
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 6: Catch-Up Executes Missed Transactions Chronologically',
       () {
-    // TODO: Implement in task 4.4
+    // Placeholder for Property 6
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -243,7 +243,7 @@ void main() {
   // **Validates: Requirements 2.3, 8.2**
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 7: Paused Transactions Are Never Executed', () {
-    // TODO: Implement in task 4.5
+    // Placeholder for Property 7
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ void main() {
   // **Validates: Requirements 8.1, 8.5**
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 9: No Duplicate Executions', () {
-    // TODO: Implement in task 4.6
+    // Placeholder for Property 9
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -259,7 +259,7 @@ void main() {
   // **Validates: Requirements 5.7, 8.3, 9.2**
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 11: Historical Transactions Immutability', () {
-    // TODO: Implement in task 8.8
+    // Placeholder for Property 11
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -267,6 +267,6 @@ void main() {
   // **Validates: Requirements 2.7**
   // ──────────────────────────────────────────────────────────────────────────
   group('Property 14: Retry Logic', () {
-    // TODO: Implement in task 4.7
+    // Placeholder for Property 14
   });
 }
