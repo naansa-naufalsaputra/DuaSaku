@@ -12,7 +12,10 @@ import '../../../../services/service_providers.dart';
 import '../../../profile/providers/display_name_provider.dart';
 
 import '../../../../core/widgets/glass/glass_input_field.dart';
-import '../../../../core/widgets/glass/glass_button.dart';import '../../providers/transaction_provider.dart';
+import '../../../../core/widgets/glass/glass_button.dart';
+import '../../providers/transaction_provider.dart';
+import '../../providers/category_provider.dart';
+import '../../domain/models/category_model.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../gamification/providers/gamification_provider.dart';
 import '../../../wallets/providers/wallet_provider.dart';
@@ -22,6 +25,7 @@ import '../../../../core/widgets/animations/liquid_animations.dart';
 import '../../domain/models/transaction_model.dart';
 import '../widgets/transaction_type_bottom_sheet.dart';
 import '../widgets/transaction_draft_bottom_sheet.dart';
+import '../widgets/transaction_detail_dialog.dart';
 import '../../../../main.dart';
 import '../../../recurring_transactions/presentation/widgets/upcoming_recurring_dashboard_widget.dart';
 
@@ -441,6 +445,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final gamification = ref.watch(gamificationProvider);
     final txAsync = ref.watch(transactionNotifierProvider);
     final walletsAsync = ref.watch(walletProvider);
+    final categoriesAsync = ref.watch(categoryNotifierProvider);
+    final categories = categoriesAsync.valueOrNull ?? [];
     final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     // Listen for widget clicks while the app is actively running in memory
@@ -1033,10 +1039,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final tx = txItem.transaction;
                             final isExpense = tx.type.toLowerCase() == 'expense';
 
+                            final matchedCategory = categories.firstWhere(
+                              (c) => c.name.toLowerCase() == tx.category.toLowerCase(),
+                              orElse: () => CategoryModel(
+                                id: '',
+                                userId: '',
+                                name: tx.category,
+                                type: tx.type,
+                                icon: isExpense ? 'restaurant' : 'attach_money',
+                                color: isExpense ? '#F43F5E' : '#10B981',
+                                createdAt: DateTime.now(),
+                              ),
+                            );
+
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                               child: GlassCard(
                                 onTap: () {},
+                                onLongPress: () {
+                                  TransactionDetailDialog.show(
+                                    context,
+                                    transaction: tx,
+                                    category: matchedCategory,
+                                    wallets: walletsAsync.valueOrNull ?? [],
+                                  );
+                                },
                                 enableBlur: false,
                                 child: Container(
                                   padding: const EdgeInsets.all(16),

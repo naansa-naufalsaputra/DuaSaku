@@ -56,63 +56,69 @@ class GlassNavigationBar extends StatelessWidget {
 
     final borderRadius = BorderRadius.circular(24.0);
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        bottom: 12.0,
-      ),
-      child: RepaintBoundary(
-        child: ClipRRect(
-          borderRadius: borderRadius,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: resolvedBlurSigma,
-              sigmaY: resolvedBlurSigma,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: surfaceTintColor.withValues(
-                  alpha: resolvedSurfaceOpacity,
-                ),
-                borderRadius: borderRadius,
-                border: Border.all(
-                  color: borderGlowColor,
-                  width: 1.0,
-                ),
+    return SafeArea(
+      top: false,
+      left: false,
+      right: false,
+      bottom: true,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: MediaQuery.paddingOf(context).bottom > 0 ? 16.0 : 24.0,
+        ),
+        child: RepaintBoundary(
+          child: ClipRRect(
+            borderRadius: borderRadius,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: resolvedBlurSigma,
+                sigmaY: resolvedBlurSigma,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Inner highlight
-                  Container(
-                    height: 1.0,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(24.0),
-                        topRight: Radius.circular(24.0),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white
-                              .withValues(alpha: innerHighlightOpacity),
-                          Colors.white.withValues(alpha: 0.0),
-                        ],
+              child: Container(
+                decoration: BoxDecoration(
+                  color: surfaceTintColor.withValues(
+                    alpha: resolvedSurfaceOpacity,
+                  ),
+                  borderRadius: borderRadius,
+                  border: Border.all(
+                    color: borderGlowColor,
+                    width: 1.0,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Inner highlight
+                    Container(
+                      height: 1.0,
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24.0),
+                          topRight: Radius.circular(24.0),
+                        ),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white
+                                .withValues(alpha: innerHighlightOpacity),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  // Navigation items with animated indicator
-                  _GlassNavContent(
-                    selectedIndex: selectedIndex,
-                    onDestinationSelected: onDestinationSelected,
-                    destinations: destinations,
-                    navBarTheme: navBarTheme,
-                    colorScheme: colorScheme,
-                    glassTheme: glassTheme,
-                  ),
-                ],
+                    // Navigation items with animated indicator
+                    _GlassNavContent(
+                      selectedIndex: selectedIndex,
+                      onDestinationSelected: onDestinationSelected,
+                      destinations: destinations,
+                      navBarTheme: navBarTheme,
+                      colorScheme: colorScheme,
+                      glassTheme: glassTheme,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -142,7 +148,7 @@ class _GlassNavContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final itemWidth = constraints.maxWidth / destinations.length;

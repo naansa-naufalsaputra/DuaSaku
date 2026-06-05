@@ -248,5 +248,14 @@
     "income": "Pemasukan",
     "expense": "Pengeluaran",
     "transfer": "Transfer"
+  },
+  "transaction": {
+    "detail_title": "Detail Transaksi",
+    "date": "Tanggal & Waktu",
+    "wallet": "Dompet / Rekening",
+    "notes": "Catatan",
+    "no_notes": "Tidak ada catatan",
+    "location": "Lokasi Ditandai",
+    "close": "Tutup"
   }
 }

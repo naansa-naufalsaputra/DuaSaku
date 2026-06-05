@@ -248,5 +248,14 @@
     "income": "Income",
     "expense": "Expense",
     "transfer": "Transfer"
+  },
+  "transaction": {
+    "detail_title": "Transaction Detail",
+    "date": "Date & Time",
+    "wallet": "Wallet / Account",
+    "notes": "Notes",
+    "no_notes": "No notes",
+    "location": "Location Tagged",
+    "close": "Close"
   }
 }

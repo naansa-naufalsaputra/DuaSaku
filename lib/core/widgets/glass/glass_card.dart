@@ -25,6 +25,9 @@ class GlassCard extends StatefulWidget {
   /// (no animation, no haptic feedback).
   final VoidCallback? onTap;
 
+  /// Optional long press callback.
+  final VoidCallback? onLongPress;
+
   /// Padding inside the glass surface. Defaults to 16px on all sides.
   final EdgeInsetsGeometry padding;
 
@@ -36,6 +39,7 @@ class GlassCard extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.padding = const EdgeInsets.all(16),
     this.enableBlur = true,
   });
@@ -97,7 +101,7 @@ class _GlassCardState extends State<GlassCard>
 
   @override
   Widget build(BuildContext context) {
-    final isInteractive = widget.onTap != null;
+    final isInteractive = widget.onTap != null || widget.onLongPress != null;
 
     // Non-interactive: render a plain GlassSurface with constraints.
     if (!isInteractive) {
@@ -124,6 +128,12 @@ class _GlassCardState extends State<GlassCard>
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
+        onLongPress: widget.onLongPress != null
+            ? () {
+                HapticFeedback.heavyImpact();
+                widget.onLongPress?.call();
+              }
+            : null,
         behavior: HitTestBehavior.opaque,
         child: AnimatedBuilder(
           animation: _controller,

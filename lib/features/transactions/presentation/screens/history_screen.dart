@@ -7,6 +7,8 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../domain/models/category_model.dart';
 import '../../domain/models/transaction_model.dart';
+import '../../../wallets/providers/wallet_provider.dart';
+import '../widgets/transaction_detail_dialog.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
@@ -228,6 +230,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final transactionState = ref.watch(transactionNotifierProvider);
     final categoriesAsync = ref.watch(categoryNotifierProvider);
     final categories = categoriesAsync.valueOrNull ?? [];
+    final walletsAsync = ref.watch(walletProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -382,7 +385,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                         padding: const EdgeInsets.symmetric(vertical: 4),
                                         child: GlassCard(
                                           enableBlur: false,
-                                          child: Container(
+                                          onLongPress: () {
+                                            TransactionDetailDialog.show(
+                                              context,
+                                              transaction: tx,
+                                              category: matchedCategory,
+                                              wallets: walletsAsync.valueOrNull ?? [],
+                                            );
+                                          },
+                                            child: Container(
                                             padding: const EdgeInsets.all(12),
                                             decoration: BoxDecoration(
                                               color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white,
