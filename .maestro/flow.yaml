@@ -1,0 +1,175 @@
+appId: com.example.duasaku_app
+clearState: true
+---
+# ==============================================================================
+# DuaSaku E2E Test Suite (Maestro)
+# ==============================================================================
+
+# --- launch app first time (starts in OnboardingScreen) ---
+- launchApp
+
+# ==============================================================================
+# TAHAP 1: ONBOARDING FLOW
+# ==============================================================================
+
+# 1. Wallet Setup Page
+- tapOn: "Nama Dompet"
+- inputText: "Dompet Utama"
+
+- tapOn: "Bank"
+
+- tapOn: "Saldo Awal"
+- inputText: "5000000"
+
+- tapOn: "Lanjutkan"
+
+# 2. Categories Personalization Page
+- tapOn: "Lanjutkan"
+
+# 3. Security / PIN Setup Page
+# Enter PIN 1234
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "4"
+
+# Confirm PIN 1234
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "4"
+
+# ==============================================================================
+# TAHAP 2: HOME SCREEN & TRANSACTION FLOW
+# ==============================================================================
+
+# Verify we reached the Home Screen (implicitly checks bypass)
+- assertVisible: "Transaksi Baru"
+- assertVisible: "Rp 5.000.000"
+
+# 1. Manual Transaction
+- tapOn: "Transaksi Baru"
+
+- tapOn: "Jumlah"
+- inputText: "50000"
+
+- tapOn: "Food"
+- tapOn: "Dompet Utama"
+
+- tapOn: "Catatan (Opsional)"
+- inputText: "Makan siang mas"
+
+- tapOn: "Simpan Transaksi"
+
+# Verify manual transaction is visible in history on Home Screen
+- assertVisible: "Makan siang mas"
+
+# 2. AI Smart Input
+- tapOn: "Ketik apa saja (misal: Starbucks 45rb Tunai)"
+- inputText: "beli kopi starbucks 45k"
+- tapOn: "submit_smart_input_button"
+
+# Verify AI Transaction Draft bottom sheet opens
+- assertVisible: "Tinjau Transaksi AI"
+
+# Save AI parsed transaction
+- tapOn: "Simpan Transaksi"
+
+# Verify AI transaction is visible in history on Home Screen
+- assertVisible: "kopi starbucks"
+
+# ==============================================================================
+# TAHAP 3: WALLET DETAIL DECK INTERACTION
+# ==============================================================================
+
+# Tap the wallet card in the horizontal stacked cards deck
+- tapOn: "Dompet Utama"
+
+# Verify successfully navigated to Wallet Detail Screen (using filter tabs as anchor)
+- assertVisible: "Semua"
+- assertVisible: "Pengeluaran"
+
+# Verify that the parsed transaction is listed inside this wallet's detail screen
+- assertVisible: "kopi starbucks"
+
+# Go back to Home Screen
+- pressKey: "Back"
+
+# ==============================================================================
+# TAHAP 4: SAVING GOALS DASHBOARD FLOW
+# ==============================================================================
+
+# Navigate to Saving Goals dashboard
+- tapOn: "Target Tabungan"
+
+# Verify we are on Goals List screen
+- assertVisible: "Aktif"
+
+# Create a new goal
+- tapOn: "add_goal_fab"
+
+- tapOn: "Nama Target"
+- inputText: "Beli Laptop"
+
+- tapOn: "Target Jumlah"
+- inputText: "15000000"
+
+# Link goal to Dompet Utama
+- tapOn: "Pilih wallet untuk tracking otomatis"
+- tapOn: "Dompet Utama (Bank)"
+
+- tapOn: "Buat"
+
+# Verify the newly created goal is in the list
+- assertVisible: "Beli Laptop"
+
+# Tap the goal to view details
+- tapOn: "Beli Laptop"
+
+# Verify we are on Goal Detail Screen
+- assertVisible: "Detail Target"
+
+# Add a deposit
+- tapOn: "Tambah Deposit"
+
+- tapOn: "Jumlah Deposit"
+- inputText: "100000"
+
+- tapOn: "Catatan (Opsional)"
+- inputText: "Tabungan pertama"
+
+- tapOn: "Tambah"
+
+# Verify deposit is visible in history
+- assertVisible: "Tabungan pertama"
+
+# Go back to Goals dashboard
+- pressKey: "Back"
+
+# Go back to Home Screen
+- pressKey: "Back"
+
+# ==============================================================================
+# TAHAP 5: SECURITY AUTO-LOCK LOCKOUT & UNLOCK FLOW
+# ==============================================================================
+
+# Background the app
+- pressKey: "Home"
+
+# Wait 31 seconds to trigger auto-lock timeout (>30 seconds threshold)
+- delay: 31000
+
+# Relaunch the app
+- launchApp
+
+# Verify that the security lock screen has intercepted the launch
+- assertVisible: "Masukkan PIN Anda untuk masuk"
+
+# Enter PIN 1234 to unlock
+- tapOn: "1"
+- tapOn: "2"
+- tapOn: "3"
+- tapOn: "4"
+
+# Verify we are successfully unlocked and back on the Home Screen
+- assertVisible: "Transaksi Baru"

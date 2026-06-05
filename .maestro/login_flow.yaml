@@ -1,0 +1,10 @@
+appId: com.example.duasaku_app
+---
+- launchApp
+- tapOn: "email_input"
+- inputText: "test@example.com"
+- tapOn: "password_input"
+- inputText: "password123"
+- tapOn: "login_button"
+# Verify user successfully reached the Home Screen by checking if the transactions section or balance is visible
+- assertVisible: "Recent Transactions"
