@@ -135,9 +135,9 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
               Text(
                 'goals.deposit_title'.tr(),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -154,9 +154,9 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
                     args: [_currencyFormat.format(_remainingAmount)],
                   ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -195,9 +195,9 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     _errorMessage!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.error,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
                   ),
                 ),
 
