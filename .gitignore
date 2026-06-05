@@ -60,3 +60,10 @@ app.*.map.json
 *_report.txt
 build_output.txt
 build_verify.txt
+
+# Tooling, Agents, and Documentation
+.agent/
+.juri/
+.maestro/
+.kiro/
+docs/
