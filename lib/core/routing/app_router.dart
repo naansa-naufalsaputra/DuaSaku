@@ -32,6 +32,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   // Use AuthRepository directly as refreshListenable (it's a ChangeNotifier now)
   final authRepo = ref.read(authRepositoryProvider);
 
+  // Listen to securityProvider changes and notify the router via authRepo
+  ref.listen(securityProvider, (previous, next) {
+    authRepo.notifyListeners();
+  });
+
   final rootNavigatorKey = GlobalKey<NavigatorState>();
 
   return GoRouter(
@@ -45,6 +50,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authState = authRepo.currentAuthState;
       final isAuthenticated = authState.isAuthenticated;
 
+      // 0. If either AuthRepository or SecurityNotifier is not initialized, wait.
+      if (!securityState.isInitialized || !authRepo.isInitialized) {
+        return null;
+      }
+
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
       final isGoingToPinAuth = state.matchedLocation == '/pin-auth';
       final isChangingPin = state.uri.queryParameters['mode'] == 'change';
@@ -55,14 +65,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/onboarding';
         }
         return null;
-      }
-
-      // If security is disabled, auto authenticate if onboarding is complete
-      if (!securityState.isSecurityEnabled) {
-        if (!isAuthenticated) {
-          authRepo.authenticateLocally();
-          return '/home';
-        }
       }
 
       // 2. If onboarding is completed and we're on /onboarding, go to home or pin-auth

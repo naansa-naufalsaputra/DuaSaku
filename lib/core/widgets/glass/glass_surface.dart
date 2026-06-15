@@ -119,10 +119,20 @@ class GlassSurface extends StatelessWidget {
     // -------------------------------------------------------------------------
     final roundedRadius = BorderRadius.circular(borderRadius);
 
+    final bool isDarkState = Theme.of(context).brightness == Brightness.dark;
     final decoration = BoxDecoration(
       color: surfaceTintColor.withValues(alpha: resolvedSurfaceOpacity),
       borderRadius: roundedRadius,
       border: Border.all(color: borderGlowColor, width: 1.0),
+      boxShadow: isDarkState
+          ? null
+          : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
     );
 
     // Inner highlight: top-edge gradient to simulate light refraction

@@ -10,9 +10,8 @@ import '../../domain/models/transaction_model.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../widgets/transaction_detail_dialog.dart';
 import '../../../../core/theme/premium_background.dart';
-import '../../../../core/widgets/glass/glass_app_bar.dart';
-import '../../../../core/widgets/glass/glass_card.dart';
-import '../../../../core/widgets/glass/glass_input_field.dart';
+import '../../../../core/utils/category_translation.dart';
+import '../../../../core/utils/text_sanitizer.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
@@ -92,22 +91,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
   }
 
-  Color _getCategoryColor(String? colorHex, String type) {
-    if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-    try {
-      final hex = colorHex.replaceAll('#', '');
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-  }
-
   String _getDateGroupName(DateTime date, BuildContext context) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -131,7 +114,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     BuildContext context,
   ) {
     final groups = <String, List<TransactionModel>>{};
-    // Sort transactions by date descending
     final sorted = List<TransactionModel>.from(list)
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -145,7 +127,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildSummaryHeader(
     List<TransactionModel> filteredList,
     bool isDark,
-    ThemeData theme,
   ) {
     double totalIncome = 0;
     double totalExpense = 0;
@@ -163,127 +144,92 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: GlassCard(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              colors: isDark
-                  ? const [Color(0x1F0D9488), Color(0x0F0F172A)]
-                  : [
-                      Colors.teal.withValues(alpha: 0.04),
-                      Colors.white.withValues(alpha: 0.9),
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.black.withValues(alpha: 0.05),
-            ),
-          ),
-          child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Total Income
+          Row(
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_upward_rounded,
-                        color: Color(0xFF10B981),
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'bottom_sheet.income'.tr(),
-                            style: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.black54,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            currencyFormat.format(totalIncome),
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               Container(
-                width: 1,
-                height: 40,
-                color: isDark ? Colors.white10 : Colors.black12,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_upward_rounded,
+                  color: Color(0xFF10B981),
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF43F5E).withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_downward_rounded,
-                        color: Color(0xFFF43F5E),
-                        size: 20,
-                      ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'bottom_sheet.income'.tr(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'bottom_sheet.expense'.tr(),
-                            style: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.black54,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            currencyFormat.format(totalExpense),
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    currencyFormat.format(totalIncome),
+                    style: const TextStyle(
+                      color: Color(0xFF10B981),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
+          
+          // Total Expense
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF43F5E).withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_downward_rounded,
+                  color: Color(0xFFF43F5E),
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'bottom_sheet.expense'.tr(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    currencyFormat.format(totalExpense),
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -296,12 +242,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final walletsAsync = ref.watch(walletProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: const Text('Transaction History'),
-        scrollController: _scrollController,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          'Transaction History',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          color: isDark ? Colors.white : Colors.black87,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Stack(
         children: [
@@ -311,25 +273,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               children: [
                 // Search and Filter Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Search Field
-                      GlassInputField(
-                        hintText: 'Search transactions...',
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: isDark ? Colors.white70 : Colors.grey,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF2F5FA),
+                          borderRadius: BorderRadius.circular(24),
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.toLowerCase();
-                          });
-                        },
+                        child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value.toLowerCase();
+                            });
+                          },
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Search transactions...',
+                            hintStyle: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.black38,
+                              fontSize: 14,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 16,
+                            ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
 
@@ -338,11 +318,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            _buildFilterChip('All', 'all'),
+                            _buildFilterChip('All', 'all', accentColor, isDark),
                             const SizedBox(width: 8),
-                            _buildFilterChip('Income', 'income'),
+                            _buildFilterChip('Income', 'income', accentColor, isDark),
                             const SizedBox(width: 8),
-                            _buildFilterChip('Expense', 'expense'),
+                            _buildFilterChip('Expense', 'expense', accentColor, isDark),
                           ],
                         ),
                       ),
@@ -356,12 +336,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     data: (transactions) {
                       // Apply Filters
                       final filteredList = transactions.where((tx) {
-                        // Type filter
                         if (_filterType != 'all' &&
                             tx.type.toLowerCase() != _filterType) {
                           return false;
                         }
-                        // Search filter
                         if (_searchQuery.isNotEmpty) {
                           final matchCategory = tx.category
                               .toLowerCase()
@@ -384,7 +362,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
                       return Column(
                         children: [
-                          _buildSummaryHeader(filteredList, isDark, theme),
+                          _buildSummaryHeader(filteredList, isDark),
                           Expanded(
                             child: filteredList.isEmpty
                                 ? Center(
@@ -415,9 +393,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 : ListView.builder(
                                     controller: _scrollController,
                                     padding: const EdgeInsets.fromLTRB(
-                                      16,
+                                      24,
                                       8,
-                                      16,
+                                      24,
                                       100,
                                     ),
                                     itemCount: listItems.length,
@@ -428,20 +406,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                         // Chronological Day Group Header
                                         return Padding(
                                           padding: const EdgeInsets.fromLTRB(
-                                            8,
-                                            16,
-                                            8,
-                                            8,
+                                            0,
+                                            24,
+                                            0,
+                                            12,
                                           ),
                                           child: Text(
-                                            item,
+                                            item.toUpperCase(),
                                             style: TextStyle(
                                               color: isDark
-                                                  ? Colors.white70
+                                                  ? Colors.white54
                                                   : Colors.black54,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              letterSpacing: 0.5,
+                                              fontSize: 11,
+                                              letterSpacing: 1.5,
                                             ),
                                           ),
                                         );
@@ -465,18 +443,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                   ? 'restaurant'
                                                   : 'attach_money',
                                               color: isExpense
-                                                  ? '#F43F5E'
+                                                  ? '#007AFF'
                                                   : '#10B981',
                                               createdAt: DateTime.now(),
                                             ),
                                           );
 
-                                      final catColor = _getCategoryColor(
-                                        matchedCategory.color,
-                                        tx.type,
-                                      );
                                       final amountColor = isExpense
-                                          ? const Color(0xFFF43F5E)
+                                          ? (isDark ? Colors.white : Colors.black87)
                                           : const Color(0xFF10B981);
                                       final amountPrefix = isExpense
                                           ? '-'
@@ -488,150 +462,130 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                             decimalDigits: 0,
                                           ).format(tx.amount);
 
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 4,
-                                        ),
-                                        child: GlassCard(
-                                          enableBlur: false,
-                                          onLongPress: () {
-                                            TransactionDetailDialog.show(
-                                              context,
-                                              transaction: tx,
-                                              category: matchedCategory,
-                                              wallets:
-                                                  walletsAsync.valueOrNull ??
-                                                  [],
-                                            );
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.all(12),
-                                            decoration: BoxDecoration(
-                                              color: isDark
-                                                  ? Colors.white.withValues(
-                                                      alpha: 0.02,
-                                                    )
-                                                  : Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              border: Border.all(
-                                                color: isDark
-                                                    ? Colors.white.withValues(
-                                                        alpha: 0.02,
-                                                      )
-                                                    : Colors.grey.withValues(
-                                                        alpha: 0.1,
-                                                      ),
+                                      return Column(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {},
+                                            onLongPress: () {
+                                              TransactionDetailDialog.show(
+                                                context,
+                                                transaction: tx,
+                                                category: matchedCategory,
+                                                wallets:
+                                                    walletsAsync.valueOrNull ??
+                                                    [],
+                                              );
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                vertical: 16,
                                               ),
-                                              boxShadow: isDark
-                                                  ? null
-                                                  : [
-                                                      BoxShadow(
-                                                        color: Colors.black
-                                                            .withValues(
-                                                              alpha: 0.03,
-                                                            ),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(
-                                                          0,
-                                                          4,
-                                                        ),
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    width: 44,
+                                                    height: 44,
+                                                    decoration: BoxDecoration(
+                                                      color: accentColor.withValues(
+                                                        alpha: 0.08,
                                                       ),
-                                                    ],
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Container(
-                                                  width: 44,
-                                                  height: 44,
-                                                  decoration: BoxDecoration(
-                                                    color: catColor.withValues(
-                                                      alpha: 0.15,
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
+                                                    child: Icon(
+                                                      _getIconData(
+                                                        matchedCategory.icon,
+                                                      ),
+                                                      color: accentColor,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          tx.notes.isNotEmpty
+                                                              ? TextSanitizer.prettifyNotes(tx.notes)
+                                                              : tx.category.toLocalizedCategory(),
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: isDark
+                                                                ? Colors.white
+                                                                : Colors.black87,
+                                                            fontSize: 16,
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
-                                                  ),
-                                                  child: Icon(
-                                                    _getIconData(
-                                                      matchedCategory.icon,
+                                                        const SizedBox(height: 4),
+                                                        Text(
+                                                          tx.category
+                                                              .toLocalizedCategory()
+                                                              .toUpperCase(),
+                                                          style: TextStyle(
+                                                            color: isDark
+                                                                ? Colors.white30
+                                                                : Colors.black38,
+                                                            fontSize: 10,
+                                                            fontWeight:
+                                                                FontWeight.w300,
+                                                            letterSpacing: 1,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    color: catColor,
-                                                    size: 20,
                                                   ),
-                                                ),
-                                                const SizedBox(width: 14),
-                                                Expanded(
-                                                  child: Column(
+                                                  Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                        CrossAxisAlignment.end,
                                                     children: [
                                                       Text(
-                                                        tx.notes.isNotEmpty
-                                                            ? tx.notes
-                                                            : tx.category,
+                                                        '$amountPrefix$formattedAmount',
                                                         style: TextStyle(
+                                                          color: amountColor,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          color: isDark
-                                                              ? Colors.white
-                                                              : Colors.black87,
-                                                          fontSize: 15,
+                                                          fontSize: 16,
                                                         ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
                                                       ),
                                                       const SizedBox(height: 4),
                                                       Text(
-                                                        tx.category
-                                                            .toUpperCase(),
+                                                        DateFormat(
+                                                          'HH:mm',
+                                                        ).format(tx.createdAt),
                                                         style: TextStyle(
                                                           color: isDark
-                                                              ? Colors.white54
-                                                              : Colors.black54,
-                                                          fontSize: 10,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          letterSpacing: 1,
+                                                              ? Colors.white30
+                                                              : Colors.black38,
+                                                          fontSize: 11,
+                                                          fontWeight: FontWeight.w300,
                                                         ),
                                                       ),
                                                     ],
                                                   ),
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      '$amountPrefix$formattedAmount',
-                                                      style: TextStyle(
-                                                        color: amountColor,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 15,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      DateFormat(
-                                                        'HH:mm',
-                                                      ).format(tx.createdAt),
-                                                      style: TextStyle(
-                                                        color: isDark
-                                                            ? Colors.white30
-                                                            : Colors.black38,
-                                                        fontSize: 11,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                          if (index < listItems.length - 1 &&
+                                              listItems[index + 1] is! String)
+                                            Divider(
+                                              height: 1,
+                                              thickness: 1,
+                                              color: isDark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.05,
+                                                    )
+                                                  : Colors.black.withValues(
+                                                      alpha: 0.05,
+                                                    ),
+                                            ),
+                                        ],
                                       ).liquidStagger(index);
                                     },
                                   ),
@@ -657,10 +611,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, String value) {
+  Widget _buildFilterChip(String label, String value, Color accentColor, bool isDark) {
     final isSelected = _filterType == value;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
@@ -676,24 +628,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           });
         },
         backgroundColor: isDark
-            ? const Color(0x1F1E293B)
-            : Colors.white.withValues(alpha: 0.8),
-        selectedColor: isDark ? const Color(0x3D06B6D4) : Colors.teal.shade50,
+            ? const Color(0xFF1E1E1E)
+            : const Color(0xFFF2F5FA),
+        selectedColor: accentColor,
         labelStyle: TextStyle(
           color: isSelected
-              ? (isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488))
-              : (isDark ? Colors.white70 : Colors.grey[700]),
+              ? Colors.white
+              : (isDark ? Colors.white70 : Colors.black54),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected
-                ? (isDark ? const Color(0xFF06B6D4) : const Color(0xFF0D9488))
-                : (isDark
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : Colors.grey[300]!),
-          ),
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide.none,
         ),
         showCheckmark: false,
       ),

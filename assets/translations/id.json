@@ -19,7 +19,14 @@
     "scan_receipt_title": "Pindai Struk Belanja",
     "scan_from_camera": "Ambil Foto",
     "scan_from_gallery": "Pilih dari Galeri",
-    "processing_receipt": "Membaca struk secara offline..."
+    "processing_receipt": "Membaca struk secara offline...",
+    "my_wallets": "Dompet Kamu",
+    "total_balance_label": "Total Saldo",
+    "image_pick_failed": "Gagal mengambil gambar: {}",
+    "receipt_process_failed": "Gagal memproses struk: {}",
+    "action_top_up": "+ Catat",
+    "action_transfer": "⇄ Transfer",
+    "action_scan_qr": "Pindai QR"
   },
   "tabs": {
     "home": "Beranda",
@@ -52,7 +59,17 @@
     "expense": "Pengeluaran",
     "income": "Pemasukan",
     "transaction_date": "Tanggal & Waktu Transaksi",
-    "ocr_low_confidence_warning": "Struk pudar? Yuk, bantu koreksi nominalnya."
+    "ocr_low_confidence_warning": "Struk pudar? Yuk, bantu koreksi nominalnya.",
+    "err_required": "Wajib diisi",
+    "success_save": "Transaksi berhasil disimpan!",
+    "success_transfer": "Transfer berhasil disimpan!",
+    "err_same_wallet": "Tidak dapat mentransfer ke dompet yang sama",
+    "loc_fetching": "Mencari lokasi...",
+    "loc_saved": "Lokasi disimpan ({}, {})",
+    "loc_save_tx": "Simpan lokasi transaksi",
+    "loc_save_transfer": "Simpan lokasi transfer",
+    "notes_placeholder": "Tambah catatan atau deskripsi...",
+    "err_fetch_location": "Gagal mendapatkan lokasi: {}"
   },
   "profile": {
     "title": "Profil & Pengaturan",
@@ -140,7 +157,26 @@
   "wallets": {
     "empty_state_title": "Belum Ada Dompet",
     "empty_state_desc": "Tambahkan dompet pertama Anda untuk mulai mencatat transaksi keuangan.",
-    "btn_add_wallet": "Tambah Dompet"
+    "btn_add_wallet": "Tambah Dompet",
+    "type_bank": "Bank",
+    "type_ewallet": "E-Wallet",
+    "type_cash": "Tunai",
+    "title_add_new": "Tambah Dompet Baru",
+    "title_edit": "Edit Dompet",
+    "field_name_hint": "Nama Dompet (misal: BCA, Gopay, Tunai)",
+    "field_type": "Tipe Dompet",
+    "field_balance": "Saldo Awal",
+    "error_required": "Wajib diisi",
+    "btn_create": "Buat Dompet",
+    "btn_save": "Simpan Dompet",
+    "title_manage": "Kelola Dompet",
+    "label_total_balance": "TOTAL SALDO",
+    "btn_edit": "Edit",
+    "btn_delete": "Hapus",
+    "dialog_delete_title": "Hapus Dompet",
+    "dialog_delete_message": "Apakah Anda yakin ingin menghapus \"{}\"? Tindakan ini tidak dapat dibatalkan.",
+    "dialog_delete_confirm": "Hapus",
+    "dialog_delete_cancel": "Batal"
   },
   "security": {
     "time_tamper_title": "Deteksi Manipulasi Waktu!",
@@ -213,7 +249,12 @@
     "error_loading": "Gagal memuat data. Coba lagi.",
     "btn_retry": "Coba Lagi",
     "empty_state_desc": "Mulai tetapkan target tabunganmu dan lacak progresnya.",
-    "empty_completed_desc": "Target yang sudah tercapai akan muncul di sini."
+    "empty_completed_desc": "Target yang sudah tercapai akan muncul di sini.",
+    "btn_create_first": "Buat Target Pertama Saya",
+    "notification_milestone_body": "Kamu sudah mencapai {}% dari target tabungan \"{}\". Terus semangat!",
+    "notification_deadline_7d_body": "Deadline tabungan \"{}\" tinggal 7 hari lagi. Progres saat ini {}%.",
+    "notification_deadline_1d_body": "Deadline tabungan \"{}\" besok! Progres saat ini {}%. Ayo tambah tabunganmu!",
+    "notification_completion_body": "Kamu berhasil mencapai target tabungan \"{}\"! Luar biasa! 🏆"
   },
   "onboarding": {
     "welcome_title": "Selamat Datang di DuaSaku",
@@ -240,7 +281,12 @@
     "income": "Pemasukan",
     "add": "Tambah",
     "wallet_count": "Jumlah Dompet",
-    "pin_confirm_desc": "Masukkan kembali kode PIN Anda untuk konfirmasi"
+    "pin_confirm_desc": "Masukkan kembali kode PIN Anda untuk konfirmasi",
+    "custom_categories_title": "Kategori Kustom Anda:",
+    "wallet_name_preview": "NAMA DOMPET",
+    "initial_balance_notes": "Saldo Awal",
+    "wallet_number": "Dompet #{}",
+    "wallet_name_placeholder": "misal: Tunai, Mandiri, Gopay"
   },
   "history": {
     "title": "Riwayat Transaksi",
@@ -257,5 +303,25 @@
     "no_notes": "Tidak ada catatan",
     "location": "Lokasi Ditandai",
     "close": "Tutup"
+  },
+  "categories": {
+    "food": "Makanan",
+    "transport": "Transportasi",
+    "salary": "Gaji",
+    "bills": "Tagihan",
+    "shopping": "Belanja"
+  },
+  "insights": {
+    "title": "Wawasan Keuangan",
+    "overall_health": "KESEHATAN MENYELURUH",
+    "score_excellent": "Sangat Baik",
+    "score_good": "Baik",
+    "score_caution": "Perlu Perhatian",
+    "spending_trend": "Tren Pengeluaran",
+    "last_7_days": "7 Hari Terakhir",
+    "total_expense": "Total Pengeluaran",
+    "top_categories": "KATEGORI TERATAS",
+    "no_expense_data": "Tidak ada data pengeluaran tercatat.",
+    "transactions_count": "{} Transaksi"
   }
 }

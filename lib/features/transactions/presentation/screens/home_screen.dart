@@ -1,23 +1,20 @@
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/services.dart';
-import 'package:lottie/lottie.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../services/service_providers.dart';
 import '../../../profile/providers/display_name_provider.dart';
+import '../../../../core/utils/text_sanitizer.dart';
 
-import '../../../../core/widgets/glass/glass_input_field.dart';
 import '../../../../core/widgets/glass/glass_button.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../domain/models/category_model.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../../../gamification/providers/gamification_provider.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
@@ -26,6 +23,7 @@ import '../../domain/models/transaction_model.dart';
 import '../widgets/transaction_type_bottom_sheet.dart';
 import '../widgets/transaction_draft_bottom_sheet.dart';
 import '../widgets/transaction_detail_dialog.dart';
+import '../../../../core/utils/category_translation.dart';
 import '../../../../main.dart';
 import '../../../recurring_transactions/presentation/widgets/upcoming_recurring_dashboard_widget.dart';
 
@@ -143,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Gagal mengambil gambar: $e')));
+        ).showSnackBar(SnackBar(content: Text('home.image_pick_failed'.tr(args: [e.toString()]))));
       }
       return;
     }
@@ -172,7 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         HapticFeedback.vibrate();
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memproses struk: $e')));
+        ).showSnackBar(SnackBar(content: Text('home.receipt_process_failed'.tr(args: [e.toString()]))));
       }
     } finally {
       if (mounted) {
@@ -252,6 +250,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  IconData _getCategoryIconData(String? name, bool isExpense) {
+    switch (name?.toLowerCase()) {
+      case 'restaurant':
+        return Icons.restaurant_rounded;
+      case 'local_cafe':
+        return Icons.local_cafe_rounded;
+      case 'attach_money':
+        return Icons.attach_money_rounded;
+      case 'receipt':
+        return Icons.receipt_rounded;
+      case 'shopping_bag':
+        return Icons.shopping_bag_rounded;
+      case 'directions_car':
+        return Icons.directions_car_rounded;
+      case 'local_gas_station':
+        return Icons.local_gas_station_rounded;
+      case 'home':
+        return Icons.home_rounded;
+      case 'electrical_services':
+        return Icons.electrical_services_rounded;
+      case 'water_drop':
+        return Icons.water_drop_rounded;
+      case 'wifi':
+        return Icons.wifi_rounded;
+      case 'medical_services':
+        return Icons.medical_services_rounded;
+      case 'sports_esports':
+        return Icons.sports_esports_rounded;
+      case 'movie':
+        return Icons.movie_rounded;
+      case 'flight':
+        return Icons.flight_rounded;
+      case 'school':
+        return Icons.school_rounded;
+      case 'fitness_center':
+        return Icons.fitness_center_rounded;
+      case 'pets':
+        return Icons.pets_rounded;
+      case 'card_giftcard':
+        return Icons.card_giftcard_rounded;
+      case 'work':
+        return Icons.work_rounded;
+      case 'trending_up':
+        return Icons.trending_up_rounded;
+      case 'savings':
+        return Icons.savings_rounded;
+      case 'account_balance':
+        return Icons.account_balance_rounded;
+      case 'build':
+        return Icons.build_rounded;
+      case 'spa':
+        return Icons.spa_rounded;
+      case 'payments':
+        return Icons.payments_rounded;
+      default:
+        return isExpense ? Icons.shopping_bag_outlined : Icons.account_balance_wallet_outlined;
+    }
+  }
+
   void _showTransactionBottomSheet() {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
@@ -264,10 +321,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildWalletTiltedStack(WidgetRef ref, ThemeData theme, bool isDark) {
     final walletsAsync = ref.watch(walletProvider);
+    final txAsync = ref.watch(transactionNotifierProvider);
 
     return walletsAsync.when(
       data: (wallets) {
         if (wallets.isEmpty) return const SizedBox.shrink();
+
+        final txs = txAsync.valueOrNull ?? [];
+        final monthlyInc = _calculateMonthlyCashflow(txs, 'income');
+        final monthlyExp = _calculateMonthlyCashflow(txs, 'expense');
 
         return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -292,7 +354,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Dompet Kamu',
+                          'home.my_wallets'.tr(),
                           style: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 16,
@@ -308,6 +370,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: _WalletStackedLayout(
                       wallets: wallets,
                       isDark: isDark,
+                      monthlyIncome: monthlyInc,
+                      monthlyExpense: monthlyExp,
                     ),
                   ),
                 ],
@@ -324,99 +388,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildQuickActionRow(ThemeData theme, bool isDark) {
     return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildQuickActionItem(
-                  icon: Icons.add_rounded,
-                  label: 'home.new_transaction'.tr(),
-                  onTap: _showTransactionBottomSheet,
-                  isDark: isDark,
-                ),
-                const SizedBox(width: 12),
-                _buildQuickActionItem(
-                  icon: Icons.account_balance_wallet_rounded,
-                  label: 'profile.manage_wallets'.tr(),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    context.push('/manage-wallets');
-                  },
-                  isDark: isDark,
-                ),
-                const SizedBox(width: 12),
-                _buildQuickActionItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'profile.manage_categories'.tr(),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    context.push('/categories');
-                  },
-                  isDark: isDark,
-                ),
-              ],
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildQuickPill(
+              label: 'home.action_top_up'.tr(),
+              onTap: _showTransactionBottomSheet,
+              theme: theme,
+              isDark: isDark,
+              isActive: true,
             ),
           ),
-        )
-        .animate()
-        .fadeIn(duration: 500.ms, delay: 120.ms)
-        .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildQuickPill(
+              label: 'home.action_transfer'.tr(),
+              onTap: _showTransactionBottomSheet,
+              theme: theme,
+              isDark: isDark,
+              isActive: false,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildQuickPill(
+              label: 'home.action_scan_qr'.tr(),
+              onTap: _showScanSourceDialog,
+              theme: theme,
+              isDark: isDark,
+              isActive: false,
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 500.ms, delay: 120.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
   }
 
-  Widget _buildQuickActionItem({
-    required IconData icon,
+  Widget _buildQuickPill({
     required String label,
     required VoidCallback onTap,
+    required ThemeData theme,
     required bool isDark,
+    required bool isActive,
   }) {
-    return Expanded(
-      child: GlassCard(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.03)
-                : Colors.white.withValues(alpha: 0.7),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.black.withValues(alpha: 0.05),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.03),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+    final activeColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    final inactiveColor = isDark 
+        ? Colors.white.withValues(alpha: 0.08) 
+        : Colors.black.withValues(alpha: 0.04);
+    final textColor = isActive 
+        ? Colors.white 
+        : (isDark ? Colors.white70 : Colors.black87);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 38,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(19),
+          color: isActive ? activeColor : inactiveColor,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -476,7 +514,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final user = ref.watch(userProvider);
-    final gamification = ref.watch(gamificationProvider);
     final txAsync = ref.watch(transactionNotifierProvider);
     final walletsAsync = ref.watch(walletProvider);
     final categoriesAsync = ref.watch(categoryNotifierProvider);
@@ -496,6 +533,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         });
       }
     });
+    final displayName = ref.watch(displayNameProvider);
+    final String userName = displayName.isNotEmpty 
+        ? displayName 
+        : (user?.email != null && user!.email.contains('@')
+            ? user.email.split('@').first
+            : 'User');
+    final String initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -518,495 +562,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 slivers: [
                   // --- HEADER ---
                   SliverToBoxAdapter(
-                    child:
-                        Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                24,
-                                32,
-                                24,
-                                16,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            _getTimeOfDay(),
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white70
-                                                  : Colors.black54,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.orange.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color: Colors.orange.withValues(
-                                                  alpha: 0.2,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                SizedBox(
-                                                  width: 16,
-                                                  height: 16,
-                                                  child: Lottie.asset(
-                                                    'assets/animations/streak.json',
-                                                    fit: BoxFit.contain,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => const Icon(
-                                                          Icons
-                                                              .local_fire_department_rounded,
-                                                          color: Colors.orange,
-                                                          size: 16,
-                                                        ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'home.streak_days'.tr(
-                                                    args: [
-                                                      '${gamification.currentStreak}',
-                                                    ],
-                                                  ),
-                                                  style: const TextStyle(
-                                                    color: Colors.orange,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            ref
-                                                    .watch(displayNameProvider)
-                                                    .isNotEmpty
-                                                ? ref.watch(displayNameProvider)
-                                                : (user?.email
-                                                          .split('@')
-                                                          .first ??
-                                                      'User'),
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black87,
-                                              fontSize: 28,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: -0.5,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.greenAccent
-                                                  .withValues(alpha: 0.1),
-                                              border: Border.all(
-                                                color: Colors.greenAccent
-                                                    .withValues(alpha: 0.2),
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              'home.health_label'.tr(
-                                                args: [
-                                                  '${gamification.healthScore}',
-                                                ],
-                                              ),
-                                              style: const TextStyle(
-                                                color: Colors.greenAccent,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                          ),
-                                          color: Colors.white.withValues(
-                                            alpha: 0.05,
-                                          ),
-                                        ),
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.add_rounded,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 48,
-                                            minHeight: 48,
-                                          ),
-                                          padding: const EdgeInsets.all(12),
-                                          onPressed:
-                                              _showTransactionBottomSheet,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                          ),
-                                          color: Colors.white.withValues(
-                                            alpha: 0.05,
-                                          ),
-                                        ),
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.notifications_outlined,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 48,
-                                            minHeight: 48,
-                                          ),
-                                          padding: const EdgeInsets.all(12),
-                                          onPressed: () {
-                                            HapticFeedback.lightImpact();
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(duration: 400.ms)
-                            .slideY(
-                              begin: -0.2,
-                              end: 0,
-                              curve: Curves.easeOutQuad,
-                            ),
-                  ),
-
-                  // --- ASSETS CARD ---
-                  SliverToBoxAdapter(
-                    child:
-                        Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              child: GlassCard(
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  context.push('/manage-wallets');
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    gradient: LinearGradient(
-                                      colors: isDark
-                                          ? const [
-                                              Color(0xFF0F172A),
-                                              Color(0xFF0F2D30),
-                                            ]
-                                          : [
-                                              Colors.teal.withValues(
-                                                alpha: 0.08,
-                                              ),
-                                              Colors.white,
-                                            ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    border: Border.all(
-                                      color: isDark
-                                          ? const Color(0x3306B6D4)
-                                          : const Color(0x330D9488),
-                                    ),
-                                  ),
-                                  child: txAsync.when(
-                                    data: (txs) {
-                                      final wallets = walletsAsync.value ?? [];
-                                      final balance = wallets.fold<double>(
-                                        0,
-                                        (sum, w) => sum + w.balance,
-                                      );
-                                      final monthlyInc =
-                                          _calculateMonthlyCashflow(
-                                            txs,
-                                            'income',
-                                          );
-                                      final monthlyExp =
-                                          _calculateMonthlyCashflow(
-                                            txs,
-                                            'expense',
-                                          );
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'home.balance'
-                                                        .tr()
-                                                        .toUpperCase(),
-                                                    style: TextStyle(
-                                                      color: isDark
-                                                          ? const Color(
-                                                              0xFF06B6D4,
-                                                            )
-                                                          : const Color(
-                                                              0xFF0D9488,
-                                                            ),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      letterSpacing: 1.5,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    formatCurrency.format(
-                                                      balance,
-                                                    ),
-                                                    style: TextStyle(
-                                                      color: isDark
-                                                          ? Colors.white
-                                                          : Colors.black87,
-                                                      fontSize: 32,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      letterSpacing: -1,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Container(
-                                                width: 48,
-                                                height: 48,
-                                                padding: const EdgeInsets.all(
-                                                  8,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.05),
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                  border: Border.all(
-                                                    color: Colors.white
-                                                        .withValues(
-                                                          alpha: 0.05,
-                                                        ),
-                                                  ),
-                                                ),
-                                                child: Lottie.asset(
-                                                  'assets/animations/wallet.json',
-                                                  fit: BoxFit.contain,
-                                                  errorBuilder: (context, error, stackTrace) =>
-                                                      Icon(
-                                                            Icons
-                                                                .account_balance_wallet_rounded,
-                                                            color: isDark
-                                                                ? const Color(
-                                                                    0xFF06B6D4,
-                                                                  )
-                                                                : const Color(
-                                                                    0xFF0D9488,
-                                                                  ),
-                                                            size: 24,
-                                                          )
-                                                          .animate(
-                                                            onPlay:
-                                                                (
-                                                                  controller,
-                                                                ) => controller
-                                                                    .repeat(
-                                                                      reverse:
-                                                                          true,
-                                                                    ),
-                                                          )
-                                                          .scaleXY(
-                                                            begin: 0.95,
-                                                            end: 1.05,
-                                                            duration: 1500.ms,
-                                                            curve: Curves
-                                                                .easeInOut,
-                                                          ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 24),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'home.monthly_income'.tr(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white54,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        width: 8,
-                                                        height: 8,
-                                                        decoration:
-                                                            const BoxDecoration(
-                                                              color:
-                                                                  Colors.green,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                            ),
-                                                      ),
-                                                      const SizedBox(width: 6),
-                                                      Text(
-                                                        formatCurrency.format(
-                                                          monthlyInc,
-                                                        ),
-                                                        style: TextStyle(
-                                                          color: isDark
-                                                              ? Colors.white
-                                                              : Colors.black87,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                              Container(
-                                                width: 1,
-                                                height: 30,
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    'home.monthly_expense'.tr(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white54,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        formatCurrency.format(
-                                                          monthlyExp,
-                                                        ),
-                                                        style: TextStyle(
-                                                          color: isDark
-                                                              ? Colors.white
-                                                              : Colors.black87,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 6),
-                                                      Container(
-                                                        width: 8,
-                                                        height: 8,
-                                                        decoration:
-                                                            const BoxDecoration(
-                                                              color:
-                                                                  Colors.orange,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                            ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                    loading: () => const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    error: (error, stack) => const Text(
-                                      'Error loading assets',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 22,
+                                backgroundColor: isDark
+                                    ? const Color(0xFF0A84FF).withValues(alpha: 0.1)
+                                    : const Color(0xFF007AFF).withValues(alpha: 0.1),
+                                child: Text(
+                                  initial,
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
-                            )
-                            .animate()
-                            .fadeIn(duration: 500.ms, delay: 100.ms)
-                            .scale(
-                              begin: const Offset(0.95, 0.95),
-                              curve: Curves.easeOutBack,
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _getTimeOfDay(),
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white54 : Colors.black54,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    userName,
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications_none_rounded,
+                              size: 24,
                             ),
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
 
                   // --- QUICK ACTIONS ROW ---
@@ -1017,183 +631,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // --- WALLET TILTED STACK ---
                   SliverToBoxAdapter(
                     child: _buildWalletTiltedStack(ref, theme, isDark),
-                  ),
-
-                  // --- SMART INPUT CARD ---
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 8,
-                      ),
-                      child: GlassCard(
-                        onTap: () {},
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            gradient: LinearGradient(
-                              colors: isDark
-                                  ? const [Color(0x1F0D9488), Color(0x0F0F172A)]
-                                  : [
-                                      Colors.teal.withValues(alpha: 0.04),
-                                      Colors.white.withValues(alpha: 0.95),
-                                    ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0x2206B6D4)
-                                  : const Color(0x220D9488),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.auto_awesome,
-                                    color: isDark
-                                        ? const Color(0xFF06B6D4)
-                                        : const Color(0xFF0D9488),
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'home.smart_input_title'.tr(),
-                                    style: TextStyle(
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.black87,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? Colors.white.withValues(
-                                                alpha: 0.03,
-                                              )
-                                            : Colors.black.withValues(
-                                                alpha: 0.03,
-                                              ),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: isDark
-                                              ? Colors.white.withValues(
-                                                  alpha: 0.05,
-                                                )
-                                              : Colors.black.withValues(
-                                                  alpha: 0.05,
-                                                ),
-                                        ),
-                                      ),
-                                      child: GlassInputField(
-                                        controller: _homeSmartInputController,
-                                        hintText: 'home.smart_input_placeholder'
-                                            .tr(),
-                                        prefixIcon: Icon(
-                                          Icons.chat_bubble_outline_rounded,
-                                          color: isDark
-                                              ? Colors.white30
-                                              : Colors.black.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                          size: 18,
-                                        ),
-                                        suffixIcon: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.camera_alt_outlined,
-                                                color: isDark
-                                                    ? const Color(0xFF06B6D4)
-                                                    : const Color(0xFF0D9488),
-                                                size: 18,
-                                              ),
-                                              onPressed:
-                                                  _isProcessingAI ||
-                                                      _isProcessingReceipt
-                                                  ? null
-                                                  : _showScanSourceDialog,
-                                            ),
-                                            IconButton(
-                                              key: const Key(
-                                                'submit_smart_input_button',
-                                              ),
-                                              icon: _isProcessingAI
-                                                  ? SizedBox(
-                                                      width: 18,
-                                                      height: 18,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                            color: theme
-                                                                .colorScheme
-                                                                .primary,
-                                                          ),
-                                                    )
-                                                  : Icon(
-                                                      Icons.send_rounded,
-                                                      color: isDark
-                                                          ? const Color(
-                                                              0xFF06B6D4,
-                                                            )
-                                                          : const Color(
-                                                              0xFF0D9488,
-                                                            ),
-                                                      size: 18,
-                                                    ),
-                                              onPressed:
-                                                  _isProcessingAI ||
-                                                      _isProcessingReceipt
-                                                  ? null
-                                                  : () => _submitHomeSmartInput(
-                                                      _homeSmartInputController
-                                                          .text,
-                                                    ),
-                                            ),
-                                          ],
-                                        ),
-                                        onEditingComplete: _isProcessingAI
-                                            ? null
-                                            : () => _submitHomeSmartInput(
-                                                _homeSmartInputController.text,
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (_isProcessingAI) ...[
-                                const SizedBox(height: 8),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(2),
-                                  child: const LinearProgressIndicator(
-                                    minHeight: 2,
-                                    backgroundColor: Colors.transparent,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Color(0xFF818cf8),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ).animate().fadeIn(duration: 500.ms, delay: 150.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
                   ),
 
                   // --- SAVINGS GOALS ENTRY ---
@@ -1443,136 +880,117 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
-                              vertical: 8,
                             ),
-                            child: GlassCard(
-                              onTap: () {},
-                              onLongPress: () {
-                                TransactionDetailDialog.show(
-                                  context,
-                                  transaction: tx,
-                                  category: matchedCategory,
-                                  wallets: walletsAsync.valueOrNull ?? [],
-                                );
-                              },
-                              enableBlur: false,
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.03)
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.02)
-                                        : Colors.grey.withValues(alpha: 0.1),
-                                  ),
-                                  boxShadow: isDark
-                                      ? null
-                                      : [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.05,
-                                            ),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: isExpense
-                                            ? Colors.orange.withValues(
-                                                alpha: 0.1,
-                                              )
-                                            : Colors.green.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Icon(
-                                        isExpense
-                                            ? Icons.shopping_bag_outlined
-                                            : Icons
-                                                  .account_balance_wallet_outlined,
-                                        color: isExpense
-                                            ? Colors.orangeAccent
-                                            : Colors.greenAccent,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            tx.notes.isNotEmpty
-                                                ? tx.notes
-                                                : tx.category,
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black87,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            tx.category.toUpperCase(),
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white54
-                                                  : Colors.black54,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 1,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                            child: Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  onLongPress: () {
+                                    TransactionDetailDialog.show(
+                                      context,
+                                      transaction: tx,
+                                      category: matchedCategory,
+                                      wallets: walletsAsync.valueOrNull ?? [],
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          '${isExpense ? '-' : '+'}${formatCurrency.format(tx.amount)}',
-                                          style: TextStyle(
-                                            color: isExpense
-                                                ? (isDark
-                                                      ? Colors.white
-                                                      : Colors.black87)
-                                                : Colors.greenAccent,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? const Color(0xFF0A84FF).withValues(alpha: 0.08)
+                                                : const Color(0xFF007AFF).withValues(alpha: 0.08),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            _getCategoryIconData(matchedCategory.icon, isExpense),
+                                            color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                            size: 20,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          DateFormat(
-                                            'HH:mm',
-                                          ).format(tx.createdAt),
-                                          style: TextStyle(
-                                            color: isDark
-                                                ? Colors.white30
-                                                : Colors.black38,
-                                            fontSize: 12,
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                tx.notes.isNotEmpty
+                                                    ? TextSanitizer.prettifyNotes(tx.notes)
+                                                    : tx.category.toLocalizedCategory(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                tx.category.toLocalizedCategory().toUpperCase(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.white30
+                                                      : Colors.black38,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w300,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                            ],
                                           ),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              '${isExpense ? '-' : '+'}${formatCurrency.format(tx.amount)}',
+                                              style: TextStyle(
+                                                color: isExpense
+                                                    ? (isDark
+                                                          ? Colors.white
+                                                          : Colors.black87)
+                                                    : const Color(0xFF10B981),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              DateFormat(
+                                                'HH:mm',
+                                              ).format(tx.createdAt),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white30
+                                                    : Colors.black38,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w300,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                                if (index < feedItems.length - 1 && feedItems[index + 1] is! _DateHeaderItem)
+                                  Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.black.withValues(alpha: 0.05),
+                                  ),
+                              ],
                             ),
                           ).liquidStagger(txItem.index);
                         }, childCount: feedItems.length),
@@ -1624,9 +1042,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-                  // Bottom padding for FAB
-                  const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                  // Bottom padding for floating smart input bar
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
+              ),
+            ),
+          ),
+          // Floating Smart Input Bar
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isDark 
+                        ? Colors.white.withValues(alpha: 0.05) 
+                        : Colors.white.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: isDark 
+                          ? Colors.white.withValues(alpha: 0.08) 
+                          : Colors.black.withValues(alpha: 0.05),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _homeSmartInputController,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'home.smart_input_placeholder'.tr(),
+                            hintStyle: TextStyle(
+                              color: isDark ? Colors.white30 : Colors.black38,
+                              fontSize: 14,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          onEditingComplete: _isProcessingAI
+                              ? null
+                              : () => _submitHomeSmartInput(_homeSmartInputController.text),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.mic_none_rounded),
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        iconSize: 20,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: _isProcessingAI
+                            ? SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                ),
+                              )
+                            : Icon(
+                                Icons.send_rounded,
+                                color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                              ),
+                        iconSize: 20,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: _isProcessingAI || _isProcessingReceipt
+                            ? null
+                            : () => _submitHomeSmartInput(_homeSmartInputController.text),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -1689,8 +1205,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _WalletStackedLayout extends StatefulWidget {
   final List wallets;
   final bool isDark;
+  final double monthlyIncome;
+  final double monthlyExpense;
 
-  const _WalletStackedLayout({required this.wallets, required this.isDark});
+  const _WalletStackedLayout({
+    required this.wallets,
+    required this.isDark,
+    required this.monthlyIncome,
+    required this.monthlyExpense,
+  });
 
   @override
   State<_WalletStackedLayout> createState() => _WalletStackedLayoutState();
@@ -1725,77 +1248,30 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
   List<Color> _getGradientForType(String type) {
     switch (type.toLowerCase()) {
       case 'bank':
-        return const [Color(0xFF3B82F6), Color(0xFF1D4ED8)];
+        return const [Color(0xFF0056B3), Color(0xFF007AFF)];
       case 'e-wallet':
-        return const [Color(0xFF8B5CF6), Color(0xFF6D28D9)];
+        return const [Color(0xFF475569), Color(0xFF64748B)];
       case 'cash':
-        return const [Color(0xFF10B981), Color(0xFF047857)];
+        return const [Color(0xFF1E293B), Color(0xFF334155)];
       default:
-        return const [Color(0xFF6366F1), Color(0xFF4338CA)];
+        return const [Color(0xFF334155), Color(0xFF475569)];
     }
   }
 
-  IconData _getIconForType(String type) {
-    switch (type.toLowerCase()) {
-      case 'bank':
-        return Icons.account_balance_rounded;
-      case 'e-wallet':
-        return Icons.account_balance_wallet_rounded;
-      case 'cash':
-        return Icons.payments_rounded;
-      default:
-        return Icons.credit_card_rounded;
-    }
-  }
 
-  Widget _buildEmvChip() {
-    return Container(
-      width: 28,
-      height: 20,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFCD34D), Color(0xFFF59E0B), Color(0xFFD97706)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: const Color(0xFFFBBF24), width: 0.5),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 7,
-            top: 0,
-            bottom: 0,
-            child: Container(width: 0.5, color: Colors.black12),
-          ),
-          Positioned(
-            left: 14,
-            top: 0,
-            bottom: 0,
-            child: Container(width: 0.5, color: Colors.black12),
-          ),
-          Positioned(
-            left: 21,
-            top: 0,
-            bottom: 0,
-            child: Container(width: 0.5, color: Colors.black12),
-          ),
-          Positioned(
-            top: 6,
-            left: 0,
-            right: 0,
-            child: Container(height: 0.5, color: Colors.black12),
-          ),
-          Positioned(
-            top: 13,
-            left: 0,
-            right: 0,
-            child: Container(height: 0.5, color: Colors.black12),
-          ),
-        ],
-      ),
-    );
+
+  String _formatAbbreviated(double amount) {
+    if (amount >= 1000000) {
+      final val = amount / 1000000.0;
+      final valStr = val == val.toInt() ? val.toInt().toString() : val.toStringAsFixed(1);
+      return 'Rp ${valStr}M';
+    } else if (amount >= 1000) {
+      final val = amount / 1000.0;
+      final valStr = val == val.toInt() ? val.toInt().toString() : val.toStringAsFixed(1);
+      return 'Rp ${valStr}k';
+    } else {
+      return 'Rp ${amount.toStringAsFixed(0)}';
+    }
   }
 
   void _handleCardTap(int index, String walletId) {
@@ -1982,26 +1458,6 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                             ),
                                           ),
                                         ),
-                                        Positioned.fill(
-                                          child: CustomPaint(
-                                            painter: CardNoisePainter(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.05,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: -10,
-                                          bottom: -20,
-                                          child: Icon(
-                                            _getIconForType(wallet.type),
-                                            size: 100,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.06,
-                                            ),
-                                          ),
-                                        ),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 20,
@@ -2050,9 +1506,8 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
-                                                        .spaceBetween,
+                                                        .end,
                                                 children: [
-                                                  _buildEmvChip(),
                                                   Container(
                                                     padding:
                                                         const EdgeInsets.symmetric(
@@ -2109,9 +1564,7 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF6366F1,
-                              ).withValues(alpha: 0.25),
+                              color: const Color(0xFF007AFF).withValues(alpha: 0.15),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -2127,12 +1580,12 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                     gradient: LinearGradient(
                                       colors: widget.isDark
                                           ? const [
-                                              Color(0xFF1e1b4b),
-                                              Color(0xFF0f172a),
+                                              Color(0xFF0A2F7A),
+                                              Color(0xFF0A84FF),
                                             ]
                                           : const [
-                                              Color(0xFF4F46E5),
-                                              Color(0xFF6366F1),
+                                              Color(0xFF007AFF),
+                                              Color(0xFF0A84FF),
                                             ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
@@ -2140,26 +1593,10 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                   ),
                                 ),
                               ),
-                              Positioned.fill(
-                                child: CustomPaint(
-                                  painter: CardNoisePainter(
-                                    color: Colors.white.withValues(alpha: 0.05),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: -10,
-                                bottom: -20,
-                                child: Icon(
-                                  Icons.all_inclusive_rounded,
-                                  size: 100,
-                                  color: Colors.white.withValues(alpha: 0.05),
-                                ),
-                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
-                                  vertical: 20,
+                                  vertical: 16,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2171,20 +1608,13 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          'TOTAL SALDO'.toUpperCase(),
+                                          'home.total_balance_label'.tr().toUpperCase(),
                                           style: const TextStyle(
-                                            color: Color(0xFFC7D2FE),
+                                            color: Colors.white70,
                                             fontSize: 11,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w400,
                                             letterSpacing: 1.2,
                                           ),
-                                        ),
-                                        Icon(
-                                          Icons.all_inclusive_rounded,
-                                          color: widget.isDark
-                                              ? Colors.white30
-                                              : Colors.white70,
-                                          size: 18,
                                         ),
                                       ],
                                     ),
@@ -2192,10 +1622,32 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                       formatCurrency.format(totalBalance),
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 22,
+                                        fontSize: 32,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: -0.5,
                                       ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'IN +${_formatAbbreviated(widget.monthlyIncome)}',
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        Text(
+                                          'OUT -${_formatAbbreviated(widget.monthlyExpense)}',
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -2214,27 +1666,6 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
       },
     );
   }
-}
-
-class CardNoisePainter extends CustomPainter {
-  final Color color;
-  const CardNoisePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0;
-    final random = math.Random(42);
-    for (int i = 0; i < 350; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      canvas.drawPoints(ui.PointMode.points, [ui.Offset(x, y)], paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CardNoisePainter oldDelegate) => false;
 }
 
 abstract class _HomeFeedItem {}

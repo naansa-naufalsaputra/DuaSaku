@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:easy_localization/easy_localization.dart';
 
 import '../domain/models/goal_model.dart';
 
@@ -40,9 +41,9 @@ class GoalNotificationService {
 
     await _notifications.show(
       id: notificationId,
-      title: '$emoji ${goal.name} - $milestonePercent% tercapai!',
+      title: '$emoji ${'goals.notification_milestone'.tr(args: [goal.name, '$milestonePercent'])}',
       body:
-          'Kamu sudah mencapai $milestonePercent% dari target tabungan "${goal.name}". Terus semangat!',
+          'goals.notification_milestone_body'.tr(args: ['$milestonePercent', goal.name]),
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );
@@ -75,9 +76,9 @@ class GoalNotificationService {
 
         await _notifications.zonedSchedule(
           id: notificationId,
-          title: '⏰ ${goal.name} - 7 hari lagi!',
+          title: 'goals.notification_deadline_7d'.tr(args: [goal.name]),
           body:
-              'Deadline tabungan "${goal.name}" tinggal 7 hari lagi. Progres saat ini ${(goal.progressPercentage * 100).toInt()}%.',
+              'goals.notification_deadline_7d_body'.tr(args: [goal.name, '${(goal.progressPercentage * 100).toInt()}']),
           scheduledDate: scheduledDate7,
           notificationDetails: _buildNotificationDetails(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -104,9 +105,9 @@ class GoalNotificationService {
 
         await _notifications.zonedSchedule(
           id: notificationId,
-          title: '🚨 ${goal.name} - Besok deadline!',
+          title: 'goals.notification_deadline_1d'.tr(args: [goal.name]),
           body:
-              'Deadline tabungan "${goal.name}" besok! Progres saat ini ${(goal.progressPercentage * 100).toInt()}%. Ayo tambah tabunganmu!',
+              'goals.notification_deadline_1d_body'.tr(args: [goal.name, '${(goal.progressPercentage * 100).toInt()}']),
           scheduledDate: scheduledDate1,
           notificationDetails: _buildNotificationDetails(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -141,9 +142,9 @@ class GoalNotificationService {
 
     await _notifications.show(
       id: notificationId,
-      title: '🎉 Selamat! ${goal.name} tercapai!',
+      title: 'goals.notification_completion'.tr(args: [goal.name]),
       body:
-          'Kamu berhasil mencapai target tabungan "${goal.name}"! Luar biasa! 🏆',
+          'goals.notification_completion_body'.tr(args: [goal.name]),
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );

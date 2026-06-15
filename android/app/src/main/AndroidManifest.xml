@@ -9,10 +9,10 @@
     <application
         android:label="DuaSaku"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <meta-data
             android:name="io.flutter.app.android.EnableImpeller"
-            android:value="true" />
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -53,12 +53,12 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
 
   /// defaultPurple preset — dark mode.
   factory LiquidGlassTheme.defaultPurpleDark() {
-    const primaryColor = Color(0xFF9D7BFF);
+    const primaryColor = Color(0xFF0A84FF); // Luminous Electric Blue
     const surfaceColor = Color(0xFF1C1C1E);
     return LiquidGlassTheme(
       blurSigma: 12.0,
       surfaceOpacity: 0.65,
-      borderGlowColor: primaryColor.withValues(alpha: 0.3),
+      borderGlowColor: primaryColor.withValues(alpha: 0.15),
       surfaceTintColor: surfaceColor,
       innerHighlightOpacity: 0.08,
       animationDuration: const Duration(milliseconds: 300),
@@ -68,19 +68,17 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
     );
   }
 
-  /// defaultPurple preset — light mode.
   factory LiquidGlassTheme.defaultPurpleLight() {
-    const primaryColor = Color(0xFF5E17EB);
-    const surfaceColor = Color(0xFFF5F5F7);
-    return LiquidGlassTheme(
+    const surfaceColor = Color(0xFFFFFFFF); // Pure white surfaces
+    return const LiquidGlassTheme(
       blurSigma: 10.0,
       surfaceOpacity: 0.70,
-      borderGlowColor: primaryColor.withValues(alpha: 0.2),
+      borderGlowColor: Colors.transparent, // Completely borderless in light mode
       surfaceTintColor: surfaceColor,
       innerHighlightOpacity: 0.05,
-      animationDuration: const Duration(milliseconds: 300),
-      animationDurationFast: const Duration(milliseconds: 150),
-      animationDurationSlow: const Duration(milliseconds: 500),
+      animationDuration: Duration(milliseconds: 300),
+      animationDurationFast: Duration(milliseconds: 150),
+      animationDurationSlow: Duration(milliseconds: 500),
       animationCurve: Curves.easeOutCubic,
     );
   }

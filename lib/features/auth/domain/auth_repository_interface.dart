@@ -35,4 +35,7 @@ abstract class AuthRepositoryInterface {
 
   /// Whether the user has completed onboarding setup.
   bool get isOnboardingCompleted;
+
+  /// Whether the repository has been fully initialized.
+  bool get isInitialized;
 }

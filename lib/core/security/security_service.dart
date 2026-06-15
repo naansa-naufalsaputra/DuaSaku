@@ -74,8 +74,8 @@ class SecurityNotifier extends Notifier<SecurityState>
       isLocked: isSecurityEnabled && isEnabled, // If enabled, we start locked
     );
 
-    // Run NTP check in parallel or sequence
-    await verifyNtpTime();
+    // Run NTP check in background without blocking initialization
+    verifyNtpTime();
 
     state = state.copyWith(isInitialized: true);
 

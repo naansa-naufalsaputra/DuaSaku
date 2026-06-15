@@ -9,10 +9,7 @@ import '../../../../core/security/security_service.dart';
 import '../../../gamification/providers/gamification_provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/theme/premium_background.dart';
-import '../../../../core/widgets/glass/glass_card.dart';
-import '../../../../core/widgets/glass/glass_button.dart';
 import '../../../../core/services/backup_service.dart';
-import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../geofencing/providers/geofencing_alerts_provider.dart';
 import '../../../transactions/domain/parser_mode.dart';
 import '../../../transactions/providers/parser_mode_provider.dart';
@@ -79,7 +76,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     }
   }
 
-  void _showLanguagePicker(BuildContext context) {
+  void _showLanguagePicker(BuildContext context, Color accentColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentLang = context.locale.languageCode;
 
@@ -122,7 +119,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
                 trailing: currentLang == 'en'
-                    ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
+                    ? Icon(Icons.check_circle, color: accentColor)
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -139,7 +136,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
                 trailing: currentLang == 'id'
-                    ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
+                    ? Icon(Icons.check_circle, color: accentColor)
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -155,7 +152,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  void _showParserModePicker(BuildContext context) {
+  void _showParserModePicker(BuildContext context, Color accentColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentMode = ref.read(parserModeProvider);
 
@@ -193,10 +190,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF06B6D4).withValues(alpha: 0.15),
+                    color: accentColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.bolt, color: Color(0xFF06B6D4)),
+                  child: Icon(Icons.bolt, color: accentColor),
                 ),
                 title: Text(
                   'profile.parser_mode_auto'.tr(),
@@ -212,7 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
                 trailing: currentMode == ParserMode.auto
-                    ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
+                    ? Icon(Icons.check_circle, color: accentColor)
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -226,10 +223,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.15),
+                    color: accentColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.model_training, color: Colors.blue),
+                  child: Icon(Icons.model_training, color: accentColor),
                 ),
                 title: Text(
                   'profile.parser_mode_tflite'.tr(),
@@ -245,7 +242,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
                 trailing: currentMode == ParserMode.tfliteOnly
-                    ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
+                    ? Icon(Icons.check_circle, color: accentColor)
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -259,10 +256,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.15),
+                    color: accentColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.code, color: Colors.orange),
+                  child: Icon(Icons.code, color: accentColor),
                 ),
                 title: Text(
                   'profile.parser_mode_regex'.tr(),
@@ -278,7 +275,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
                 trailing: currentMode == ParserMode.regexOnly
-                    ? const Icon(Icons.check_circle, color: Color(0xFF06B6D4))
+                    ? Icon(Icons.check_circle, color: accentColor)
                     : null,
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -334,8 +331,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 ),
               ),
               actions: [
-                GlassButton(
-                  variant: GlassButtonVariant.text,
+                TextButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     Navigator.of(ctx).pop(false);
@@ -348,14 +344,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ),
                   ),
                 ),
-                GlassButton(
+                TextButton(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
                     Navigator.of(ctx).pop(true);
                   },
                   child: Text(
                     'profile.btn_overwrite'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -365,7 +364,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         false;
   }
 
-  void _showRestoreSummarySheet(BuildContext context, Map<String, int> counts) {
+  void _showRestoreSummarySheet(BuildContext context, Map<String, int> counts, Color accentColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
@@ -395,9 +394,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_circle_outline,
-                      color: Color(0xFF06B6D4),
+                      color: accentColor,
                       size: 36,
                     ),
                     const SizedBox(width: 12),
@@ -429,38 +428,54 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       'profile.stat_wallets'.tr(),
                       counts['wallets'] ?? 0,
                       Icons.account_balance_wallet,
+                      accentColor,
                     ),
                     _buildSummaryItem(
                       context,
                       'profile.stat_categories'.tr(),
                       counts['categories'] ?? 0,
                       Icons.category,
+                      accentColor,
                     ),
                     _buildSummaryItem(
                       context,
                       'profile.stat_transactions'.tr(),
                       counts['transactions'] ?? 0,
                       Icons.receipt_long,
+                      accentColor,
                     ),
                     _buildSummaryItem(
                       context,
                       'profile.stat_budgets'.tr(),
                       counts['budgets'] ?? 0,
                       Icons.pie_chart,
+                      accentColor,
                     ),
                   ],
                 ),
                 const SizedBox(height: 32),
-                GlassButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'profile.btn_done'.tr(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Text(
+                      'profile.btn_done'.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -477,6 +492,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     String label,
     int count,
     IconData icon,
+    Color accentColor,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
@@ -484,10 +500,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF06B6D4).withValues(alpha: 0.1),
+            color: accentColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF06B6D4), size: 24),
+          child: Icon(icon, color: accentColor, size: 24),
         ),
         const SizedBox(height: 8),
         Text(
@@ -510,7 +526,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  Future<void> _handleBackup() async {
+  Future<void> _handleBackup(Color accentColor) async {
     setState(() => _isLoading = true);
     try {
       final backupService = ref.read(backupServiceProvider);
@@ -519,7 +535,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('profile.backup_success_msg'.tr()),
-            backgroundColor: const Color(0xFF06B6D4),
+            backgroundColor: accentColor,
           ),
         );
       }
@@ -539,7 +555,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     }
   }
 
-  Future<void> _handleRestore() async {
+  Future<void> _handleRestore(Color accentColor) async {
     final confirm = await _showOverwriteWarning(context);
     if (!confirm) return;
 
@@ -549,7 +565,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       final counts = await backupService.importData();
       if (counts != null) {
         if (mounted) {
-          _showRestoreSummarySheet(context, counts);
+          _showRestoreSummarySheet(context, counts, accentColor);
         }
       }
     } catch (e) {
@@ -680,7 +696,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  void _showDisplayNameDialog(BuildContext context) {
+  void _showDisplayNameDialog(BuildContext context, Color accentColor) {
     final controller = TextEditingController(
       text: ref.read(displayNameProvider),
     );
@@ -721,12 +737,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 HapticFeedback.lightImpact();
                 Navigator.of(ctx).pop();
               },
-              child: Text(
-                'profile.btn_cancel'.tr(),
-                style: const TextStyle(color: Colors.grey),
-              ),
+              child: const Text(
+                'profile.btn_cancel',
+                style: TextStyle(color: Colors.grey),
+              ).tr(),
             ),
-            GlassButton(
+            TextButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 ref
@@ -736,7 +752,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               },
               child: Text(
                 'goals.save'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: accentColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -745,599 +764,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final email = user?.email ?? 'Unknown Email';
-    final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
-    final parserMode = ref.watch(parserModeProvider);
-    final geofencingAlertsEnabled = ref.watch(geofencingAlertsProvider);
-    final securityState = ref.watch(securityProvider);
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('profile.title'.tr()),
-        scrollController: _scrollController,
-      ),
-      body: Stack(
-        children: [
-          const PremiumBackground(),
-          SafeArea(
-            child: ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-              children: [
-                // Header Section
-                Center(
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 48,
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        child: Text(
-                          initial,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'profile.user_profile'.tr(),
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        email,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Achievements Group
-                _buildGroupLabel(context, 'profile.achievements'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatItem(
-                          context,
-                          'profile.achievements_health'.tr(),
-                          '${ref.watch(gamificationProvider).healthScore}',
-                          Icons.favorite,
-                          Colors.red,
-                        ),
-                        _buildStatItem(
-                          context,
-                          'profile.achievements_streak'.tr(),
-                          '${ref.watch(gamificationProvider).currentStreak}',
-                          Icons.local_fire_department,
-                          Colors.orange,
-                        ),
-                        _buildStatItem(
-                          context,
-                          'profile.achievements_badges'.tr(),
-                          '${ref.watch(gamificationProvider).unlockedBadges.length}',
-                          Icons.military_tech,
-                          Colors.blue,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Account & Wallets Section
-                _buildGroupLabel(context, 'profile.account'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.account_balance_wallet_outlined,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          title: Text('profile.manage_wallets'.tr()),
-                          subtitle: Text('profile.manage_wallets_desc'.tr()),
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            context.push('/manage-wallets');
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.category_outlined,
-                              color: Colors.purple,
-                            ),
-                          ),
-                          title: Text('profile.manage_categories'.tr()),
-                          subtitle: Text('profile.manage_categories_desc'.tr()),
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            context.push('/categories');
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.teal.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.person_outline,
-                              color: Colors.teal,
-                            ),
-                          ),
-                          title: Text('profile.display_name'.tr()),
-                          subtitle: Text(
-                            ref.watch(displayNameProvider).isNotEmpty
-                                ? ref.watch(displayNameProvider)
-                                : 'profile.display_name_desc'.tr(),
-                          ),
-                          trailing: const Icon(
-                            Icons.edit_outlined,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _showDisplayNameDialog(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // 1. Keamanan Section
-                _buildGroupLabel(context, 'profile.security'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.security_rounded),
-                          title: Text('profile.security_toggle'.tr()),
-                          subtitle: Text('profile.security_toggle_desc'.tr()),
-                          trailing: Switch(
-                            value: securityState.isSecurityEnabled,
-                            onChanged: (val) {
-                              HapticFeedback.lightImpact();
-                              ref
-                                  .read(securityProvider.notifier)
-                                  .setSecurityEnabled(val);
-                            },
-                          ),
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        Opacity(
-                          opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
-                          child: ListTile(
-                            enabled: securityState.isSecurityEnabled,
-                            leading: const Icon(Icons.fingerprint),
-                            title: Text('profile.biometric_lock'.tr()),
-                            subtitle: Text('profile.biometric_desc'.tr()),
-                            trailing: Switch(
-                              value: securityState.isBiometricEnabled,
-                              onChanged: securityState.isSecurityEnabled
-                                  ? (val) async {
-                                      HapticFeedback.lightImpact();
-                                      final success = await ref
-                                          .read(securityProvider.notifier)
-                                          .setBiometricEnabled(val);
-                                      if (val && !success) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'profile.biometric_setup_failed'
-                                                    .tr(),
-                                              ),
-                                              backgroundColor: Colors.redAccent,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    }
-                                  : null,
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        Opacity(
-                          opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
-                          child: ListTile(
-                            enabled: securityState.isSecurityEnabled,
-                            leading: const Icon(Icons.lock_outline),
-                            title: Text('profile.change_pin'.tr()),
-                            subtitle: Text('profile.change_pin_desc'.tr()),
-                            trailing: const Icon(
-                              Icons.chevron_right,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
-                            onTap: securityState.isSecurityEnabled
-                                ? () {
-                                    HapticFeedback.lightImpact();
-                                    context.push('/pin-auth?mode=change');
-                                  }
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // 2. Manajemen Data Section
-                _buildGroupLabel(context, 'profile.data_management'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.cloud_download_outlined),
-                          title: Text('profile.backup_data'.tr()),
-                          subtitle: Text('profile.backup_desc'.tr()),
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _handleBackup();
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: const Icon(Icons.cloud_upload_outlined),
-                          title: Text('profile.restore_data'.tr()),
-                          subtitle: Text('profile.restore_desc'.tr()),
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _handleRestore();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // 3. Estetika Section
-                _buildGroupLabel(context, 'profile.aesthetics'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.dark_mode_outlined),
-                            title: Text('profile.dark_mode'.tr()),
-                            trailing: Switch(
-                              value:
-                                  ref.watch(themeNotifierProvider).themeMode ==
-                                  ThemeMode.dark,
-                              onChanged: (val) {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(themeNotifierProvider.notifier)
-                                    .updateThemeMode(
-                                      val ? ThemeMode.dark : ThemeMode.light,
-                                    );
-                              },
-                            ),
-                          ),
-                          const Divider(height: 1, indent: 56),
-                          ListTile(
-                            leading: const Icon(Icons.palette_outlined),
-                            title: Text('profile.aesthetic_presets'.tr()),
-                            subtitle: Text(
-                              'profile.aesthetic_desc'.tr(),
-                              style: TextStyle(
-                                color: isDark ? Colors.white60 : Colors.black54,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 16.0,
-                              right: 16.0,
-                              bottom: 12.0,
-                            ),
-                            child: _buildPresetSelector(context, ref),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Preferences Section
-                _buildGroupLabel(context, 'profile.preferences'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      children: [
-                        // Parser Engine Setting
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF06B6D4,
-                              ).withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.bolt,
-                              color: Color(0xFF06B6D4),
-                            ),
-                          ),
-                          title: Text('profile.parser_engine'.tr()),
-                          subtitle: Text(
-                            parserMode == ParserMode.auto
-                                ? 'profile.parser_mode_auto'.tr()
-                                : parserMode == ParserMode.tfliteOnly
-                                ? 'profile.parser_mode_tflite'.tr()
-                                : 'profile.parser_mode_regex'.tr(),
-                            style: TextStyle(
-                              color: isDark ? Colors.white60 : Colors.grey[600],
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                parserMode == ParserMode.auto
-                                    ? 'Auto'
-                                    : parserMode == ParserMode.tfliteOnly
-                                    ? 'AI'
-                                    : 'Regex',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white60
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.chevron_right,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _showParserModePicker(context);
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        // Geofencing Alerts Setting
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.location_on_outlined,
-                              color: Colors.red,
-                            ),
-                          ),
-                          title: Text('profile.geofencing_alerts'.tr()),
-                          subtitle: Text('profile.geofencing_alerts_desc'.tr()),
-                          trailing: Switch(
-                            value: geofencingAlertsEnabled,
-                            onChanged: (val) async {
-                              HapticFeedback.lightImpact();
-                              final success = await ref
-                                  .read(geofencingAlertsProvider.notifier)
-                                  .toggleAlerts(val);
-                              if (!success && val) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'profile.location_permission_required'
-                                            .tr(),
-                                      ),
-                                      backgroundColor: Colors.redAccent,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // 4. Umum Section
-                _buildGroupLabel(context, 'profile.general'.tr()),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 32),
-                  child: GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.notifications_outlined),
-                          title: Text('profile.notifications'.tr()),
-                          trailing: Switch(
-                            value: _notificationsEnabled,
-                            onChanged: (val) {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _notificationsEnabled = val;
-                              });
-                            },
-                          ),
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: const Icon(Icons.language_outlined),
-                          title: Text('profile.language'.tr()),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                context.locale.languageCode == 'id'
-                                    ? 'Indonesia'
-                                    : 'English',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white60
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.chevron_right,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _showLanguagePicker(context);
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: const Icon(Icons.sync_alt),
-                          title: Text('profile.interceptor'.tr()),
-                          subtitle: Text(
-                            _isInterceptorEnabled
-                                ? 'profile.interceptor_on'.tr()
-                                : 'profile.interceptor_off'.tr(),
-                          ),
-                          trailing: Switch(
-                            value: _isInterceptorEnabled,
-                            onChanged: (val) {
-                              HapticFeedback.lightImpact();
-                              if (val && !_isInterceptorEnabled) {
-                                _requestInterceptorPermission();
-                              } else if (!val && _isInterceptorEnabled) {
-                                _requestInterceptorPermission();
-                              }
-                            },
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _requestInterceptorPermission();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Logout Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: GlassButton(
-                    variant: GlassButtonVariant.secondary,
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      ref.read(authRepositoryProvider).signOut();
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.logout, color: Colors.redAccent),
-                        const SizedBox(width: 8),
-                        Text(
-                          'profile.logout'.tr(),
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
+  Widget _buildGroupContainer({required List<Widget> children, required bool isDark}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
-          if (_isLoading)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.5),
-                child: const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF06B6D4)),
-                ),
-              ),
-            ),
         ],
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildTileIcon(IconData icon, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.08),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        icon,
+        color: accentColor,
+        size: 20,
       ),
     );
   }
@@ -1387,6 +843,728 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final email = user?.email ?? 'Unknown Email';
+    final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
+    final parserMode = ref.watch(parserModeProvider);
+    final geofencingAlertsEnabled = ref.watch(geofencingAlertsProvider);
+    final securityState = ref.watch(securityProvider);
+    final accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          'profile.title'.tr(),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          const PremiumBackground(),
+          SafeArea(
+            child: ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
+              children: [
+                // Header User Hero Section
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: accentColor,
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 44,
+                          backgroundColor: accentColor.withValues(alpha: 0.1),
+                          child: Text(
+                            initial,
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        ref.watch(displayNameProvider).isNotEmpty
+                            ? ref.watch(displayNameProvider)
+                            : 'local_user',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        email,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.white60 : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Achievements Group (Floated on Whitespace)
+                _buildGroupLabel(context, 'profile.achievements'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 28),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem(
+                        context,
+                        'profile.achievements_health'.tr(),
+                        '${ref.watch(gamificationProvider).healthScore}',
+                        Icons.favorite_rounded,
+                        accentColor,
+                      ),
+                      _buildStatItem(
+                        context,
+                        'profile.achievements_streak'.tr(),
+                        '${ref.watch(gamificationProvider).currentStreak}',
+                        Icons.local_fire_department_rounded,
+                        accentColor,
+                      ),
+                      _buildStatItem(
+                        context,
+                        'profile.achievements_badges'.tr(),
+                        '${ref.watch(gamificationProvider).unlockedBadges.length}',
+                        Icons.military_tech_rounded,
+                        accentColor,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Account & Wallets Section
+                _buildGroupLabel(context, 'profile.account'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.account_balance_wallet_outlined, accentColor),
+                        title: Text(
+                          'profile.manage_wallets'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.manage_wallets_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/manage-wallets');
+                        },
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.category_outlined, accentColor),
+                        title: Text(
+                          'profile.manage_categories'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.manage_categories_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/categories');
+                        },
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.person_outline, accentColor),
+                        title: Text(
+                          'profile.display_name'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          ref.watch(displayNameProvider).isNotEmpty
+                              ? ref.watch(displayNameProvider)
+                              : 'profile.display_name_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.edit_outlined,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showDisplayNameDialog(context, accentColor);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Keamanan Section
+                _buildGroupLabel(context, 'profile.security'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.security_rounded, accentColor),
+                        title: Text(
+                          'profile.security_toggle'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.security_toggle_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: securityState.isSecurityEnabled,
+                          activeTrackColor: accentColor,
+                          onChanged: (val) {
+                            HapticFeedback.lightImpact();
+                            ref
+                                .read(securityProvider.notifier)
+                                .setSecurityEnabled(val);
+                          },
+                        ),
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Opacity(
+                        opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
+                        child: ListTile(
+                          enabled: securityState.isSecurityEnabled,
+                          leading: _buildTileIcon(Icons.fingerprint, accentColor),
+                          title: Text(
+                            'profile.biometric_lock'.tr(),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'profile.biometric_desc'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.white38 : Colors.black38,
+                            ),
+                          ),
+                          trailing: Switch.adaptive(
+                            value: securityState.isBiometricEnabled,
+                            activeTrackColor: accentColor,
+                            onChanged: securityState.isSecurityEnabled
+                                ? (val) async {
+                                    HapticFeedback.lightImpact();
+                                    final success = await ref
+                                        .read(securityProvider.notifier)
+                                        .setBiometricEnabled(val);
+                                    if (val && !success) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'profile.biometric_setup_failed'
+                                                  .tr(),
+                                            ),
+                                            backgroundColor: Colors.redAccent,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  }
+                                : null,
+                          ),
+                        ),
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Opacity(
+                        opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
+                        child: ListTile(
+                          enabled: securityState.isSecurityEnabled,
+                          leading: _buildTileIcon(Icons.lock_outline, accentColor),
+                          title: Text(
+                            'profile.change_pin'.tr(),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'profile.change_pin_desc'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.white38 : Colors.black38,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
+                          onTap: securityState.isSecurityEnabled
+                              ? () {
+                                  HapticFeedback.lightImpact();
+                                  context.push('/pin-auth?mode=change');
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Manajemen Data Section
+                _buildGroupLabel(context, 'profile.data_management'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.cloud_download_outlined, accentColor),
+                        title: Text(
+                          'profile.backup_data'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.backup_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _handleBackup(accentColor);
+                        },
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.cloud_upload_outlined, accentColor),
+                        title: Text(
+                          'profile.restore_data'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.restore_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _handleRestore(accentColor);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Estetika Section
+                _buildGroupLabel(context, 'profile.aesthetics'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.dark_mode_outlined, accentColor),
+                        title: Text(
+                          'profile.dark_mode'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: ref.watch(themeNotifierProvider).themeMode == ThemeMode.dark,
+                          activeTrackColor: accentColor,
+                          onChanged: (val) {
+                            HapticFeedback.lightImpact();
+                            ref
+                                .read(themeNotifierProvider.notifier)
+                                .updateThemeMode(
+                                  val ? ThemeMode.dark : ThemeMode.light,
+                                );
+                          },
+                        ),
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.palette_outlined, accentColor),
+                        title: Text(
+                          'profile.aesthetic_presets'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.aesthetic_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: _buildPresetSelector(context, ref),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Preferences Section
+                _buildGroupLabel(context, 'profile.preferences'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.bolt, accentColor),
+                        title: Text(
+                          'profile.parser_engine'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          parserMode == ParserMode.auto
+                              ? 'profile.parser_mode_auto'.tr()
+                              : parserMode == ParserMode.tfliteOnly
+                              ? 'profile.parser_mode_tflite'.tr()
+                              : 'profile.parser_mode_regex'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              parserMode == ParserMode.auto
+                                  ? 'Auto'
+                                  : parserMode == ParserMode.tfliteOnly
+                                  ? 'AI'
+                                  : 'Regex',
+                              style: TextStyle(
+                                color: isDark ? Colors.white38 : Colors.black38,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showParserModePicker(context, accentColor);
+                        },
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.location_on_outlined, accentColor),
+                        title: Text(
+                          'profile.geofencing_alerts'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.geofencing_alerts_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: geofencingAlertsEnabled,
+                          activeTrackColor: accentColor,
+                          onChanged: (val) async {
+                            HapticFeedback.lightImpact();
+                            final success = await ref
+                                .read(geofencingAlertsProvider.notifier)
+                                .toggleAlerts(val);
+                            if (!success && val) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'profile.location_permission_required'
+                                          .tr(),
+                                    ),
+                                    backgroundColor: Colors.redAccent,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Umum Section
+                _buildGroupLabel(context, 'profile.general'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      ListTile(
+                        leading: _buildTileIcon(Icons.notifications_outlined, accentColor),
+                        title: Text(
+                          'profile.notifications'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: _notificationsEnabled,
+                          activeTrackColor: accentColor,
+                          onChanged: (val) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _notificationsEnabled = val;
+                            });
+                          },
+                        ),
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.language_outlined, accentColor),
+                        title: Text(
+                          'profile.language'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              context.locale.languageCode == 'id'
+                                  ? 'Indonesia'
+                                  : 'English',
+                              style: TextStyle(
+                                color: isDark ? Colors.white38 : Colors.black38,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showLanguagePicker(context, accentColor);
+                        },
+                      ),
+                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      ListTile(
+                        leading: _buildTileIcon(Icons.sync_alt, accentColor),
+                        title: Text(
+                          'profile.interceptor'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          _isInterceptorEnabled
+                              ? 'profile.interceptor_on'.tr()
+                              : 'profile.interceptor_off'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: _isInterceptorEnabled,
+                          activeTrackColor: accentColor,
+                          onChanged: (val) {
+                            HapticFeedback.lightImpact();
+                            _requestInterceptorPermission();
+                          },
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _requestInterceptorPermission();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Logout Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      foregroundColor: Colors.redAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      side: BorderSide(
+                        color: isDark
+                            ? Colors.redAccent.withValues(alpha: 0.15)
+                            : Colors.redAccent.withValues(alpha: 0.1),
+                        width: 1,
+                      ),
+                    ),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      ref.read(authRepositoryProvider).signOut();
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'profile.logout'.tr(),
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 48),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: Center(
+                  child: CircularProgressIndicator(color: accentColor),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

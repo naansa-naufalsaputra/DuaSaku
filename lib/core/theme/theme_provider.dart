@@ -107,21 +107,18 @@ class ThemePresets {
         : const Color(0xFFFFFFFF);
     final Color surfaceColor = isDark
         ? const Color(0xFF1C1C1E)
-        : const Color(0xFFF5F5F7);
+        : const Color(0xFFFFFFFF); // Pure white card surfaces for light mode
     final Color textColor = isDark
         ? const Color(0xFFF5F5F7)
         : const Color(0xFF1D1D1F);
     final Color accentColor = isDark
-        ? const Color(0xFF9D7BFF)
-        : const Color(0xFF5E17EB);
+        ? const Color(0xFF0A84FF) // Luminous Electric Blue for dark mode highlights
+        : const Color(0xFF007AFF); // Premium Royal Blue for light mode active states
 
-    final Color borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.04);
 
     return ThemeDetails(
       baseBackgroundColor: bgColor,
-      glowColor1: isDark ? const Color(0x1A9D7BFF) : const Color(0x1A5E17EB),
+      glowColor1: isDark ? const Color(0x1A0A84FF) : const Color(0x1A007AFF),
       glowColor2: isDark ? const Color(0x0DFFFFFF) : const Color(0x0D000000),
       heatmapColors: [
         isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F7),
@@ -153,11 +150,15 @@ class ThemePresets {
         ),
         cardTheme: CardThemeData(
           color: surfaceColor,
-          elevation: 0,
+          elevation: isDark ? 0 : 4, // Ultra-diffuse shadow in light mode
+          shadowColor: isDark ? Colors.transparent : Colors.black.withValues(alpha: 0.03),
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: borderColor, width: 1),
+            borderRadius: BorderRadius.circular(24), // BorderRadius.circular(24) enforced
+            side: BorderSide(
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
+              width: isDark ? 1 : 0,
+            ),
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
@@ -190,7 +191,7 @@ class ThemePresets {
           }),
         ),
         dividerTheme: DividerThemeData(
-          color: borderColor,
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
           thickness: 1,
           space: 1,
         ),

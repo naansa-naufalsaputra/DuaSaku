@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../gamification/providers/gamification_provider.dart';
 import '../../../transactions/providers/transaction_provider.dart';
 import '../../../transactions/providers/category_provider.dart';
 import '../../../transactions/domain/models/category_model.dart';
 import '../../../../core/theme/premium_background.dart';
-import '../../../../core/widgets/glass/glass_app_bar.dart';
-import '../../../../core/widgets/glass/glass_card.dart';
-import '../../../../core/widgets/animations/liquid_animations.dart';
-import '../widgets/spending_heatmap.dart';
 
 class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
@@ -89,36 +85,20 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     }
   }
 
-  Color _getCategoryColor(String? colorHex, String type) {
-    if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-    try {
-      final hex = colorHex.replaceAll('#', '');
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-  }
-
-  Color _getScoreColor(int score) {
-    if (score >= 80) return const Color(0xFF10B981);
-    if (score >= 50) return Colors.orange;
-    return const Color(0xFFF43F5E);
+  Color _getMonochromaticBlue(int index, int total, bool isDark) {
+    final baseColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    if (total <= 1) return baseColor;
+    
+    // Generate distinct shades of blue by adjusting opacity
+    double opacity = 1.0 - (index / total) * 0.7; // From 1.0 down to 0.3
+    if (opacity < 0.25) opacity = 0.25;
+    return baseColor.withValues(alpha: opacity);
   }
 
   String _getScoreMessage(int score) {
-    if (score >= 80) {
-      return "Excellent financial health! Keep it up.";
-    }
-    if (score >= 50) {
-      return "You're doing okay, but there's room for improvement.";
-    }
-    return "Caution! You need to manage your budget and savings better.";
+    if (score >= 80) return "insights.score_excellent".tr();
+    if (score >= 50) return "insights.score_good".tr();
+    return "insights.score_caution".tr();
   }
 
   @override
@@ -131,41 +111,47 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final Color accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+
     // Calculate totals
-    double totalIncome = 0;
     double totalExpense = 0;
     final Map<String, double> categoryExpenses = {};
+    final Map<String, int> categoryCounts = {};
 
     for (var t in transactions) {
-      if (t.type.toLowerCase() == 'income') {
-        totalIncome += t.amount;
-      } else if (t.type.toLowerCase() == 'expense') {
+      if (t.type.toLowerCase() == 'expense') {
         totalExpense += t.amount;
-        categoryExpenses[t.category] =
-            (categoryExpenses[t.category] ?? 0) + t.amount;
+        categoryExpenses[t.category] = (categoryExpenses[t.category] ?? 0) + t.amount;
+        categoryCounts[t.category] = (categoryCounts[t.category] ?? 0) + 1;
       }
     }
 
-    // Calculate cumulative spending day-by-day for the current month
+    // Calculate cumulative spending day-by-day for the last 7 days
     final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final startDate = todayStart.subtract(const Duration(days: 6));
+    final List<DateTime> targetDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+
     final Map<int, double> dailySpending = {};
-    for (int d = 1; d <= daysInMonth; d++) {
+    for (int d = 1; d <= 7; d++) {
       dailySpending[d] = 0.0;
     }
 
     for (var t in transactions) {
-      if (t.type.toLowerCase() == 'expense' &&
-          t.createdAt.month == now.month &&
-          t.createdAt.year == now.year) {
-        final day = t.createdAt.day;
-        dailySpending[day] = (dailySpending[day] ?? 0.0) + t.amount;
+      if (t.type.toLowerCase() == 'expense') {
+        final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+        for (int i = 0; i < 7; i++) {
+          if (tDate.isAtSameMomentAs(targetDays[i])) {
+            dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
+            break;
+          }
+        }
       }
     }
 
     final List<FlSpot> lineSpots = [];
     double cumulativeSum = 0;
-    for (int d = 1; d <= now.day; d++) {
+    for (int d = 1; d <= 7; d++) {
       cumulativeSum += dailySpending[d] ?? 0.0;
       lineSpots.add(FlSpot(d.toDouble(), cumulativeSum));
     }
@@ -191,7 +177,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
             name: category,
             type: 'expense',
             icon: 'restaurant',
-            color: '#F43F5E',
+            color: '#007AFF',
             createdAt: DateTime.now(),
           ),
         );
@@ -199,8 +185,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           _CategoryExpenseItem(
             category: category,
             amount: amount,
-            color: _getCategoryColor(matchedCategory.color, 'expense'),
             icon: matchedCategory.icon,
+            count: categoryCounts[category] ?? 0,
           ),
         );
       }
@@ -208,27 +194,19 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     // Sort from highest expenditure to lowest
     sortedExpenseBreakdown.sort((a, b) => b.amount.compareTo(a.amount));
 
-    // Prepare pie chart sections
+    // Prepare monochromatic pie chart sections
     final List<PieChartSectionData> pieSections = [];
     for (int i = 0; i < sortedExpenseBreakdown.length; i++) {
       final item = sortedExpenseBreakdown[i];
       final isTouched = i == _touchedPieIndex;
-      final radius = isTouched ? 60.0 : 50.0;
+      final radius = isTouched ? 16.0 : 12.0;
 
       pieSections.add(
         PieChartSectionData(
-          color: item.color,
+          color: _getMonochromaticBlue(i, sortedExpenseBreakdown.length, isDark),
           value: item.amount,
-          title: totalExpense > 0
-              ? '${(item.amount / totalExpense * 100).toStringAsFixed(0)}%'
-              : '',
+          title: '',
           radius: radius,
-          titleStyle: TextStyle(
-            fontSize: isTouched ? 13 : 11,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            shadows: const [Shadow(color: Colors.black45, blurRadius: 2)],
-          ),
         ),
       );
     }
@@ -236,48 +214,77 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     if (pieSections.isEmpty) {
       pieSections.add(
         PieChartSectionData(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
           value: 1,
           title: '',
-          radius: 50,
+          radius: 12,
         ),
       );
     }
 
-    // Dynamic Legend items
-    final List<Widget> legendItems = [];
-    for (var item in sortedExpenseBreakdown) {
-      legendItems.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: item.color,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              item.category,
-              style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.black87,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      );
+    // Dynamic Donut center details
+    String largestCategoryName = 'NONE';
+    double largestPercentage = 0;
+    if (totalExpense > 0 && sortedExpenseBreakdown.isNotEmpty) {
+      largestCategoryName = sortedExpenseBreakdown.first.category;
+      largestPercentage = (sortedExpenseBreakdown.first.amount / totalExpense) * 100;
     }
+
+    String displayedCategoryName = largestCategoryName;
+    double displayedPercentage = largestPercentage;
+
+    if (_touchedPieIndex >= 0 && _touchedPieIndex < sortedExpenseBreakdown.length) {
+      final touchedItem = sortedExpenseBreakdown[_touchedPieIndex];
+      displayedCategoryName = touchedItem.category;
+      displayedPercentage = (touchedItem.amount / totalExpense) * 100;
+    }
+
+    final formattedTotalExpense = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(totalExpense);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: const Text('Financial Insights'),
-        scrollController: _scrollController,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Center(
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: accentColor.withValues(alpha: 0.1),
+              child: Text(
+                'U',
+                style: TextStyle(
+                  color: accentColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          'insights.title'.tr(),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_rounded),
+            color: accentColor,
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Stack(
         children: [
@@ -285,343 +292,222 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           SafeArea(
             child: SingleChildScrollView(
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. Health Score Gauge
-                  GlassCard(
-                    enableBlur: false,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          TweenAnimationBuilder<double>(
-                            tween: Tween<double>(
-                              begin: 0,
-                              end: gamificationState.healthScore.toDouble(),
-                            ),
-                            duration: const Duration(milliseconds: 1500),
-                            curve: Curves.easeOutCubic,
-                            builder: (context, animatedValue, child) {
-                              final displayScore = animatedValue.toInt();
-                              final progress = animatedValue / 100.0;
-                              final activeColor = _getScoreColor(displayScore);
+                  // 1. Overall Health Ring Gauge
+                  const SizedBox(height: 12),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          'insights.overall_health'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 2.0,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: gamificationState.healthScore.toDouble(),
+                          ),
+                          duration: const Duration(milliseconds: 1500),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, animatedValue, child) {
+                            final displayScore = animatedValue.toInt();
+                            final progress = animatedValue / 100.0;
+                            final status = _getScoreMessage(displayScore);
 
-                              return SizedBox(
-                                width: 80,
-                                height: 80,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    CircularProgressIndicator(
-                                      value: progress,
-                                      strokeWidth: 8,
-                                      backgroundColor: isDark
-                                          ? Colors.white.withValues(alpha: 0.05)
-                                          : Colors.grey.shade200,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        activeColor,
-                                      ),
+                            return SizedBox(
+                              width: 170,
+                              height: 170,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CircularProgressIndicator(
+                                    value: progress,
+                                    strokeWidth: 4,
+                                    backgroundColor: isDark
+                                        ? Colors.white.withValues(alpha: 0.06)
+                                        : Colors.black.withValues(alpha: 0.04),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      accentColor,
                                     ),
-                                    Center(
-                                      child: Text(
-                                        '$displayScore',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 24),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Health Score',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _getScoreMessage(
-                                    gamificationState.healthScore,
-                                  ),
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white60
-                                        : Colors.grey.shade700,
-                                    fontSize: 13,
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Spending Trend Line Chart (This Month)
-                  GlassCard(
-                    enableBlur: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Spending Trend (This Month)',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Cumulative spending day-by-day',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            height: 200,
-                            child: LineChart(
-                              LineChartData(
-                                lineTouchData: LineTouchData(
-                                  enabled: true,
-                                  touchTooltipData: LineTouchTooltipData(
-                                    getTooltipColor: (spot) => theme
-                                        .colorScheme
-                                        .surface
-                                        .withValues(alpha: 0.9),
-                                    getTooltipItems: (touchedSpots) {
-                                      return touchedSpots.map((spot) {
-                                        final formatted = NumberFormat.currency(
-                                          locale: 'id_ID',
-                                          symbol: 'Rp ',
-                                          decimalDigits: 0,
-                                        ).format(spot.y);
-                                        return LineTooltipItem(
-                                          'Hari ${spot.x.toInt()}\n$formatted',
-                                          TextStyle(
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
+                                  Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '$displayScore',
+                                          style: TextStyle(
+                                            fontSize: 56,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 11,
+                                            color: isDark ? Colors.white : Colors.black87,
+                                            height: 1.1,
                                           ),
-                                        );
-                                      }).toList();
-                                    },
-                                  ),
-                                ),
-                                gridData: const FlGridData(show: false),
-                                borderData: FlBorderData(show: false),
-                                titlesData: FlTitlesData(
-                                  show: true,
-                                  topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  leftTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 30,
-                                      interval: 1.0,
-                                      getTitlesWidget: (value, meta) {
-                                        final style = TextStyle(
-                                          color: isDark
-                                              ? Colors.white60
-                                              : Colors.black54,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        );
-                                        final day = value.toInt();
-                                        if (day == 1 ||
-                                            day == 7 ||
-                                            day == 14 ||
-                                            day == 21 ||
-                                            day == 28 ||
-                                            day == now.day) {
-                                          return SideTitleWidget(
-                                            axisSide: meta.axisSide,
-                                            space: 8,
-                                            child: Text('$day', style: style),
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                minX: 1,
-                                maxX: now.day.toDouble(),
-                                minY: 0,
-                                maxY: maxYVal,
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    spots: lineSpots,
-                                    isCurved: true,
-                                    curveSmoothness: 0.35,
-                                    barWidth: 4,
-                                    color: theme.colorScheme.primary,
-                                    dotData: const FlDotData(show: false),
-                                    belowBarData: BarAreaData(
-                                      show: true,
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          theme.colorScheme.primary.withValues(
-                                            alpha: 0.30,
+                                        ),
+                                        Text(
+                                          status,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: isDark ? Colors.white60 : Colors.black54,
                                           ),
-                                          theme.colorScheme.primary.withValues(
-                                            alpha: 0.00,
-                                          ),
-                                        ],
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 40),
 
-                  // 2. Income vs Expense Bar Chart
-                  GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Income vs Expense',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                  // 2. Spending Trend Section
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
                         ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          height: 200,
-                          child: BarChart(
-                            BarChartData(
-                              alignment: BarChartAlignment.spaceAround,
-                              maxY:
-                                  (totalIncome > totalExpense
-                                      ? totalIncome
-                                      : totalExpense) *
-                                  1.2,
-                              barTouchData: BarTouchData(enabled: true),
-                              titlesData: FlTitlesData(
-                                show: true,
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget:
-                                        (double value, TitleMeta meta) {
-                                          final style = TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                            color: isDark
-                                                ? Colors.white60
-                                                : Colors.black54,
-                                          );
-                                          final String text = value.toInt() == 0
-                                              ? 'Income'
-                                              : (value.toInt() == 1
-                                                    ? 'Expense'
-                                                    : '');
-                                          return SideTitleWidget(
-                                            axisSide: meta.axisSide,
-                                            space: 4,
-                                            child: Text(text, style: style),
-                                          );
-                                        },
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'insights.spending_trend'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
-                                leftTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'insights.last_7_days'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark ? Colors.white60 : Colors.black54,
+                                  ),
                                 ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  formattedTotalExpense,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'insights.total_expense'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: accentColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          height: 120,
+                          child: LineChart(
+                            LineChartData(
+                              gridData: const FlGridData(show: false),
+                              borderData: FlBorderData(show: false),
+                              titlesData: FlTitlesData(
+                                show: true,
                                 topTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
                                 ),
                                 rightTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
                                 ),
-                              ),
-                              gridData: const FlGridData(show: false),
-                              borderData: FlBorderData(show: false),
-                              barGroups: [
-                                BarChartGroupData(
-                                  x: 0,
-                                  barRods: [
-                                    BarChartRodData(
-                                      toY: totalIncome,
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF10B981),
-                                          Color(0xFF059669),
-                                        ],
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                      ),
-                                      width: 32,
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(8),
-                                      ),
-                                    ),
-                                  ],
+                                leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
                                 ),
-                                BarChartGroupData(
-                                  x: 1,
-                                  barRods: [
-                                    BarChartRodData(
-                                      toY: totalExpense,
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFFF43F5E),
-                                          Color(0xFFE11D48),
-                                        ],
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                      ),
-                                      width: 32,
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(8),
-                                      ),
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 22,
+                                    interval: 1.0,
+                                    getTitlesWidget: (value, meta) {
+                                      final style = TextStyle(
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      );
+                                      final dayIndex = value.toInt();
+                                      if (dayIndex >= 1 && dayIndex <= 7) {
+                                        final date = targetDays[dayIndex - 1];
+                                        final label = DateFormat.E(
+                                          Localizations.localeOf(context).toString()
+                                        ).format(date);
+                                        return SideTitleWidget(
+                                          axisSide: meta.axisSide,
+                                          space: 4,
+                                          child: Text(label, style: style),
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
+                                ),
+                              ),
+                              minX: 1,
+                              maxX: 7.0,
+                              minY: 0,
+                              maxY: maxYVal,
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: lineSpots,
+                                  isCurved: true,
+                                  curveSmoothness: 0.35,
+                                  barWidth: 3,
+                                  color: accentColor,
+                                  dotData: const FlDotData(show: false),
+                                  belowBarData: BarAreaData(
+                                    show: true,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        accentColor.withValues(alpha: 0.15),
+                                        accentColor.withValues(alpha: 0.00),
+                                      ],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -630,228 +516,166 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 40),
 
-                  // 3. Expenses by Category Pie Chart & Breakdown List
-                  GlassCard(
-                    enableBlur: false,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Expenses by Category',
+                  // 3. Top Categories Section
+                  Text(
+                    'insights.top_categories'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2.0,
+                      color: isDark ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (totalExpense == 0)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40.0),
+                        child: Text(
+                          'insights.no_expense_data'.tr(),
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
+                            color: isDark ? Colors.white38 : Colors.black38,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        if (totalExpense == 0)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Text(
-                                'No expense data for this period.',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white54
-                                      : Colors.black54,
-                                ),
-                              ),
-                            ),
-                          )
-                        else ...[
-                          SizedBox(
-                            height: 180,
-                            child: PieChart(
+                      ),
+                    )
+                  else ...[
+                    // Donut Chart
+                    Center(
+                      child: SizedBox(
+                        width: 160,
+                        height: 160,
+                        child: Stack(
+                          children: [
+                            PieChart(
                               PieChartData(
                                 sectionsSpace: 2,
-                                centerSpaceRadius: 40,
+                                centerSpaceRadius: 54,
                                 pieTouchData: PieTouchData(
-                                  touchCallback:
-                                      (FlTouchEvent event, pieTouchResponse) {
-                                        setState(() {
-                                          if (!event
-                                                  .isInterestedForInteractions ||
-                                              pieTouchResponse == null ||
-                                              pieTouchResponse.touchedSection ==
-                                                  null) {
-                                            _touchedPieIndex = -1;
-                                            return;
-                                          }
-                                          _touchedPieIndex = pieTouchResponse
-                                              .touchedSection!
-                                              .touchedSectionIndex;
-                                        });
-                                      },
+                                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                    setState(() {
+                                      if (!event.isInterestedForInteractions ||
+                                          pieTouchResponse == null ||
+                                          pieTouchResponse.touchedSection == null) {
+                                        _touchedPieIndex = -1;
+                                        return;
+                                      }
+                                      _touchedPieIndex = pieTouchResponse
+                                          .touchedSection!
+                                          .touchedSectionIndex;
+                                    });
+                                  },
                                 ),
                                 sections: pieSections,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Dynamic Legend
-                          Center(
-                            child: Wrap(
-                              spacing: 12,
-                              runSpacing: 8,
-                              alignment: WrapAlignment.center,
-                              children: legendItems,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Divider(
-                            color: isDark ? Colors.white10 : Colors.black12,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Spending Breakdown',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white70 : Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: sortedExpenseBreakdown.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 16),
-                            itemBuilder: (context, index) {
-                              final item = sortedExpenseBreakdown[index];
-                              final percentage =
-                                  (item.amount / totalExpense) * 100;
-                              final formattedAmount = NumberFormat.currency(
-                                locale: 'id_ID',
-                                symbol: 'Rp ',
-                                decimalDigits: 0,
-                              ).format(item.amount);
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: item.color.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          _getIconData(item.icon),
-                                          color: item.color,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        item.category,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black87,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        '$formattedAmount (${percentage.toStringAsFixed(1)}%)',
-                                        style: TextStyle(
-                                          color: isDark
-                                              ? Colors.white70
-                                              : Colors.black54,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    '${displayedPercentage.toStringAsFixed(0)}%',
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(3),
-                                    child: LinearProgressIndicator(
-                                      value: item.amount / totalExpense,
-                                      backgroundColor: isDark
-                                          ? Colors.white.withValues(alpha: 0.05)
-                                          : Colors.black.withValues(
-                                              alpha: 0.05,
-                                            ),
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        item.color,
-                                      ),
-                                      minHeight: 6,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    displayedCategoryName.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.0,
+                                      color: isDark ? Colors.white60 : Colors.black54,
                                     ),
                                   ),
                                 ],
-                              );
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 4. Spending Intensity Heatmap
-                  const SpendingHeatmap(),
-                  const SizedBox(height: 16),
-                  // 5. Gamification Streak Indicator
-                  GlassCard(
-                    enableBlur: false,
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.orange.withValues(alpha: 0.2)
-                                : Colors.orange.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.local_fire_department,
-                            color: Colors.orange,
-                            size: 32,
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Borderless list items with dividers
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: sortedExpenseBreakdown.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04),
+                        height: 24,
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = sortedExpenseBreakdown[index];
+                        final formattedAmount = NumberFormat.currency(
+                          locale: 'id_ID',
+                          symbol: 'Rp ',
+                          decimalDigits: 0,
+                        ).format(item.amount);
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
                             children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: accentColor.withValues(alpha: 0.08),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _getIconData(item.icon),
+                                  color: accentColor,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.category,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'insights.transactions_count'.tr(args: [item.count.toString()]),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               Text(
-                                '${gamificationState.currentStreak} Days Streak!',
+                                formattedAmount,
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Keep recording your transactions daily.',
-                                style: TextStyle(
-                                  color: isDark ? Colors.white60 : Colors.grey,
-                                ),
-                              ),
                             ],
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ],
-              ).liquidFadeIn(),
+              ),
             ),
           ),
         ],
@@ -863,13 +687,13 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 class _CategoryExpenseItem {
   final String category;
   final double amount;
-  final Color color;
   final String? icon;
+  final int count;
 
   const _CategoryExpenseItem({
     required this.category,
     required this.amount,
-    required this.color,
     required this.icon,
+    required this.count,
   });
 }

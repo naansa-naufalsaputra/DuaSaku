@@ -166,24 +166,30 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
               Column(
                 children: [
                   // Amount field
-                  GlassInputField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [ThousandsFormatter()],
-                    labelText: 'goals.deposit_amount'.tr(),
-                    errorText: _amountError,
-                    onChanged: (_) {
-                      if (_amountError != null) {
-                        setState(() => _amountError = null);
-                      }
-                    },
+                  Semantics(
+                    label: 'deposit_amount_input',
+                    child: GlassInputField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [ThousandsFormatter()],
+                      labelText: 'goals.deposit_amount'.tr(),
+                      errorText: _amountError,
+                      onChanged: (_) {
+                        if (_amountError != null) {
+                          setState(() => _amountError = null);
+                        }
+                      },
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   // Note field
-                  GlassInputField(
-                    controller: _noteController,
-                    labelText: 'goals.deposit_note'.tr(),
+                  Semantics(
+                    label: 'deposit_note_input',
+                    child: GlassInputField(
+                      controller: _noteController,
+                      labelText: 'goals.deposit_note'.tr(),
+                    ),
                   ),
                 ],
               ),

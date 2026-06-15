@@ -170,29 +170,35 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
   // ─── Name Field ─────────────────────────────────────────────────────────────
 
   Widget _buildNameField(ThemeData theme, bool isDark) {
-    return GlassInputField(
-      controller: _nameController,
-      labelText: 'goals.form_name'.tr(),
-      hintText: 'goals.form_name_hint'.tr(),
-      errorText: _nameError,
-      onChanged: (_) {
-        if (_nameError != null) setState(() => _nameError = null);
-      },
+    return Semantics(
+      label: 'goal_name_input',
+      child: GlassInputField(
+        controller: _nameController,
+        labelText: 'goals.form_name'.tr(),
+        hintText: 'goals.form_name_hint'.tr(),
+        errorText: _nameError,
+        onChanged: (_) {
+          if (_nameError != null) setState(() => _nameError = null);
+        },
+      ),
     );
   }
 
   // ─── Amount Field ───────────────────────────────────────────────────────────
 
   Widget _buildAmountField(ThemeData theme, bool isDark) {
-    return GlassInputField(
-      controller: _amountController,
-      keyboardType: TextInputType.number,
-      inputFormatters: [ThousandsFormatter()],
-      labelText: 'goals.form_target_amount'.tr(),
-      errorText: _amountError,
-      onChanged: (_) {
-        if (_amountError != null) setState(() => _amountError = null);
-      },
+    return Semantics(
+      label: 'goal_amount_input',
+      child: GlassInputField(
+        controller: _amountController,
+        keyboardType: TextInputType.number,
+        inputFormatters: [ThousandsFormatter()],
+        labelText: 'goals.form_target_amount'.tr(),
+        errorText: _amountError,
+        onChanged: (_) {
+          if (_amountError != null) setState(() => _amountError = null);
+        },
+      ),
     );
   }
 

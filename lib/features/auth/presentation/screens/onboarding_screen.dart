@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/premium_background.dart';
@@ -10,11 +11,14 @@ import '../../../../core/widgets/ai_mascot.dart';
 import '../../../../core/widgets/glass/glass_input_field.dart';
 import '../../../../core/widgets/glass/glass_button.dart';
 import '../../../../core/utils/thousands_formatter.dart';
+import '../../../../core/utils/category_translation.dart';
 import '../../../wallets/domain/models/wallet_model.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../../../transactions/domain/models/category_model.dart';
 import '../../../transactions/providers/category_provider.dart';
 import '../../../transactions/data/category_repository.dart';
+import '../../../transactions/providers/transaction_provider.dart';
+import '../../../transactions/domain/models/transaction_model.dart';
 import '../../providers/auth_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -25,11 +29,17 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  Color get _accentColor {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+  }
+
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
   // Onboarding Data State
   int _walletCount = 1;
+  int _activeWalletIndex = 0;
   final List<TextEditingController> _walletNameControllers = [
     TextEditingController(),
   ];
@@ -137,26 +147,44 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     setState(() {
       _walletCount = count;
+      if (_activeWalletIndex >= count) {
+        _activeWalletIndex = count - 1;
+      }
     });
   }
 
   Future<void> _completeSetup() async {
-    // 1. Save Wallets
+    // 1. Save Wallets & Log Initial Balances as Income
     final walletRepo = ref.read(walletRepositoryProvider);
+    final transactionRepo = ref.read(transactionRepositoryProvider);
     for (int i = 0; i < _walletCount; i++) {
       final name = _walletNameControllers[i].text.trim();
       final balance = ThousandsFormatter.parse(
         _walletBalanceControllers[i].text,
       );
+      final walletId = const Uuid().v4();
       final wallet = WalletModel(
-        id: const Uuid().v4(),
+        id: walletId,
         userId: AppConstants.defaultUserId,
-        name: name.isEmpty ? 'Wallet ${i + 1}' : name,
+        name: name.isEmpty ? 'onboarding.wallet_number'.tr(args: [(i + 1).toString()]) : name,
         type: _walletTypes[i],
-        balance: balance,
+        balance: 0.0,
         createdAt: DateTime.now(),
       );
       await walletRepo.createWallet(wallet);
+
+      if (balance > 0) {
+        final initialTx = TransactionModel(
+          userId: AppConstants.defaultUserId,
+          amount: balance,
+          category: 'Salary',
+          type: 'income',
+          notes: 'onboarding.initial_balance_notes'.tr(),
+          walletId: walletId,
+          createdAt: DateTime.now(),
+        );
+        await transactionRepo.insertTransaction(initialTx);
+      }
     }
 
     // 2. Save Selected Categories & Custom Categories
@@ -179,9 +207,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       } catch (_) {}
     }
 
-    // Refresh notifier list
+    // Refresh notifier lists
     ref.invalidate(categoryNotifierProvider);
     ref.invalidate(walletProvider);
+    ref.invalidate(transactionNotifierProvider);
 
     // 3. Save Preference and PIN state to AuthRepository
     final authRepo = ref.read(authRepositoryProvider);
@@ -214,24 +243,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _validateAndGoToCategories() {
     bool hasError = false;
+    int? firstErrorIndex;
     for (int i = 0; i < _walletCount; i++) {
+      final nameErr = _walletNameControllers[i].text.trim().isEmpty
+          ? 'onboarding.wallet_name_required'.tr()
+          : null;
+      final balErr = _walletBalanceControllers[i].text.trim().isEmpty
+          ? 'onboarding.wallet_balance_required'.tr()
+          : null;
       setState(() {
-        _walletNameErrors[i] = _walletNameControllers[i].text.trim().isEmpty
-            ? 'onboarding.wallet_name_required'.tr()
-            : null;
-        _walletBalanceErrors[i] =
-            _walletBalanceControllers[i].text.trim().isEmpty
-            ? 'onboarding.wallet_balance_required'.tr()
-            : null;
+        _walletNameErrors[i] = nameErr;
+        _walletBalanceErrors[i] = balErr;
       });
-      if (_walletNameErrors[i] != null || _walletBalanceErrors[i] != null) {
+      if (nameErr != null || balErr != null) {
         hasError = true;
+        firstErrorIndex ??= i;
       }
     }
 
     if (!hasError) {
       _nextPage();
     } else {
+      if (firstErrorIndex != null) {
+        setState(() {
+          _activeWalletIndex = firstErrorIndex!;
+        });
+      }
       HapticFeedback.vibrate();
     }
   }
@@ -343,7 +380,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   },
                   child: Text(
                     'onboarding.add'.tr(),
-                    style: const TextStyle(color: Color(0xFF06B6D4)),
+                    style: TextStyle(color: _accentColor),
                   ),
                 ),
               ],
@@ -455,7 +492,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             height: 8,
                             decoration: BoxDecoration(
                               color: isActive
-                                  ? const Color(0xFF06B6D4)
+                                  ? _accentColor
                                   : Colors.grey.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -562,85 +599,135 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Wallets forms list
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _walletCount,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Wallet #${index + 1}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF06B6D4),
+            // Wallet configuration tab bar (if multiple wallets)
+            if (_walletCount > 1) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(_walletCount, (wIdx) {
+                    final isSelected = wIdx == _activeWalletIndex;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ChoiceChip(
+                        label: Text('onboarding.wallet_number'.tr(args: [(wIdx + 1).toString()])),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _activeWalletIndex = wIdx;
+                            });
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            // Live virtual card preview for the active wallet
+            _buildVirtualCardPreview(_activeWalletIndex, isDark),
+
+            // Active wallet form
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Semantics(
+                  label: 'wallet_name_input',
+                  child: GlassInputField(
+                    controller: _walletNameControllers[_activeWalletIndex],
+                    labelText: 'onboarding.wallet_name'.tr(),
+                    hintText: 'onboarding.wallet_name_placeholder'.tr(),
+                    errorText: _walletNameErrors[_activeWalletIndex],
+                    onChanged: (_) {
+                      setState(() {
+                        if (_walletNameErrors[_activeWalletIndex] != null) {
+                          _walletNameErrors[_activeWalletIndex] = null;
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: ['Bank', 'E-Wallet', 'Cash'].map((type) {
+                    final isSelected = _walletTypes[_activeWalletIndex] == type;
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0,
+                        ),
+                        child: ChoiceChip(
+                          label: Text('wallets.type_${type.toLowerCase().replaceAll('-', '')}'.tr()),
+                          selected: isSelected,
+                          onSelected: (_) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _walletTypes[_activeWalletIndex] = type;
+                            });
+                          },
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      GlassInputField(
-                        controller: _walletNameControllers[index],
-                        labelText: 'onboarding.wallet_name'.tr(),
-                        hintText: 'e.g. Tunai, Mandiri, Gopay',
-                        errorText: _walletNameErrors[index],
-                        onChanged: (_) {
-                          if (_walletNameErrors[index] != null) {
-                            setState(() => _walletNameErrors[index] = null);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      // Wallet Type Dropdown style choice chips
-                      Row(
-                        children: ['Bank', 'E-Wallet', 'Cash'].map((type) {
-                          final isSelected = _walletTypes[index] == type;
-                          return Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0,
-                              ),
-                              child: ChoiceChip(
-                                label: Text(type),
-                                selected: isSelected,
-                                onSelected: (_) {
-                                  HapticFeedback.lightImpact();
-                                  setState(() {
-                                    _walletTypes[index] = type;
-                                  });
-                                },
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 12),
-                      GlassInputField(
-                        controller: _walletBalanceControllers[index],
-                        labelText: 'onboarding.wallet_balance'.tr(),
-                        hintText: '0',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [ThousandsFormatter()],
-                        errorText: _walletBalanceErrors[index],
-                        onChanged: (_) {
-                          if (_walletBalanceErrors[index] != null) {
-                            setState(() => _walletBalanceErrors[index] = null);
-                          }
-                        },
-                      ),
-                    ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Semantics(
+                  label: 'wallet_balance_input',
+                  child: GlassInputField(
+                    controller: _walletBalanceControllers[_activeWalletIndex],
+                    labelText: 'onboarding.wallet_balance'.tr(),
+                    hintText: '0',
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [ThousandsFormatter()],
+                    errorText: _walletBalanceErrors[_activeWalletIndex],
+                    onChanged: (_) {
+                      setState(() {
+                        if (_walletBalanceErrors[_activeWalletIndex] != null) {
+                          _walletBalanceErrors[_activeWalletIndex] = null;
+                        }
+                      });
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             GlassButton(
-              onPressed: _validateAndGoToCategories,
-              child: Text('onboarding.next'.tr()),
+              onPressed: () {
+                if (_activeWalletIndex < _walletCount - 1) {
+                  // Validate current wallet fields first
+                  final name = _walletNameControllers[_activeWalletIndex].text.trim();
+                  final balanceText = _walletBalanceControllers[_activeWalletIndex].text.trim();
+                  setState(() {
+                    _walletNameErrors[_activeWalletIndex] = name.isEmpty
+                        ? 'onboarding.wallet_name_required'.tr()
+                        : null;
+                    _walletBalanceErrors[_activeWalletIndex] = balanceText.isEmpty
+                        ? 'onboarding.wallet_balance_required'.tr()
+                        : null;
+                  });
+                  if (_walletNameErrors[_activeWalletIndex] == null &&
+                      _walletBalanceErrors[_activeWalletIndex] == null) {
+                    HapticFeedback.lightImpact();
+                    setState(() {
+                      _activeWalletIndex++;
+                    });
+                  } else {
+                    HapticFeedback.vibrate();
+                  }
+                } else {
+                  _validateAndGoToCategories();
+                }
+              },
+              child: Text(
+                _activeWalletIndex < _walletCount - 1
+                    ? '${'onboarding.next'.tr()} (${'onboarding.wallet_number'.tr(args: [(_activeWalletIndex + 2).toString()])})'
+                    : 'onboarding.next'.tr(),
+              ),
             ),
           ],
         ),
@@ -681,27 +768,122 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Categories list with toggles
-            ListView.builder(
+            // Premium Category Selection Grid (2 Columns)
+            GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.3,
+              ),
               itemCount: _defaultCategories.length,
               itemBuilder: (context, index) {
                 final cat = _defaultCategories[index];
-                return SwitchListTile(
-                  title: Text(
-                    cat.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(cat.type.tr()),
-                  value: _selectedCategories[index],
-                  activeThumbColor: const Color(0xFF06B6D4),
-                  onChanged: (val) {
+                final isSelected = _selectedCategories[index];
+                final catColor = _getCategoryColor(cat.color, cat.type);
+
+                return GestureDetector(
+                  onTap: () {
                     HapticFeedback.lightImpact();
                     setState(() {
-                      _selectedCategories[index] = val;
+                      _selectedCategories[index] = !isSelected;
                     });
                   },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? catColor.withValues(alpha: isDark ? 0.15 : 0.08)
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.03)
+                              : Colors.black.withValues(alpha: 0.02)),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? catColor
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.06)),
+                        width: isSelected ? 2.0 : 1.0,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: catColor.withValues(alpha: 0.2),
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: catColor.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _getIconData(cat.icon),
+                                  color: catColor,
+                                  size: 20,
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cat.name.toLocalizedCategory(),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    cat.type.tr().toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                      color: isDark ? Colors.white38 : Colors.black38,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: catColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
@@ -709,9 +891,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             // Custom categories list
             if (_customCategories.isNotEmpty) ...[
               const Divider(height: 32),
-              const Text(
-                'Kategori Kustom Anda:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                'onboarding.custom_categories_title'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ListView.builder(
@@ -721,7 +903,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 itemBuilder: (context, index) {
                   final cat = _customCategories[index];
                   return ListTile(
-                    title: Text(cat.name),
+                    title: Text(cat.name.toLocalizedCategory()),
                     subtitle: Text(cat.type.tr()),
                     trailing: IconButton(
                       icon: const Icon(
@@ -740,20 +922,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF06B6D4)),
+                side: BorderSide(color: _accentColor),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              icon: const Icon(Icons.add, color: Color(0xFF06B6D4)),
+              icon: Icon(Icons.add, color: _accentColor),
               label: Text(
                 'onboarding.add_custom_category'.tr(),
-                style: const TextStyle(
-                  color: Color(0xFF06B6D4),
+                style: TextStyle(
+                  color: _accentColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -824,7 +1006,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             const SizedBox(height: 32),
 
-            // PIN Dots Indicator
+            // PIN Dots Indicator with micro-interaction shake on error
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(4, (index) {
@@ -836,78 +1018,113 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isFilled
-                        ? const Color(0xFF06B6D4)
+                        ? _accentColor
                         : Colors.transparent,
                     border: Border.all(
                       color: isFilled
-                          ? const Color(0xFF06B6D4)
+                          ? _accentColor
                           : Colors.grey.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
                 );
               }),
-            ),
+            ).animate(target: _pinError ? 1.0 : 0.0).shake(hz: 6, duration: 400.ms),
             const SizedBox(height: 40),
 
-            // Custom Numpad
+            // Custom Glass Numpad
             Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildNumpadButton('1'),
-                    _buildNumpadButton('2'),
-                    _buildNumpadButton('3'),
+                    _buildNumpadButton('1', isDark),
+                    _buildNumpadButton('2', isDark),
+                    _buildNumpadButton('3', isDark),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildNumpadButton('4'),
-                    _buildNumpadButton('5'),
-                    _buildNumpadButton('6'),
+                    _buildNumpadButton('4', isDark),
+                    _buildNumpadButton('5', isDark),
+                    _buildNumpadButton('6', isDark),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildNumpadButton('7'),
-                    _buildNumpadButton('8'),
-                    _buildNumpadButton('9'),
+                    _buildNumpadButton('7', isDark),
+                    _buildNumpadButton('8', isDark),
+                    _buildNumpadButton('9', isDark),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Left button: Skip Security (completely skip PIN setup)
-                    SizedBox(
+                    // Skip button inside numpad cell
+                    Container(
                       width: 72,
                       height: 72,
-                      child: TextButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          _completeSetup();
-                        },
-                        child: Text(
-                          'onboarding.skip_security'.tr(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.01)
+                            : Colors.black.withValues(alpha: 0.01),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _completeSetup();
+                          },
+                          child: Center(
+                            child: Text(
+                              'onboarding.skip_security'.tr(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white60 : Colors.black54,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
-                    _buildNumpadButton('0'),
-                    // Right button: Backspace
-                    IconButton(
-                      icon: const Icon(Icons.backspace_outlined, size: 28),
-                      onPressed: _removePinDigit,
+                    _buildNumpadButton('0', isDark),
+                    // Backspace button inside numpad cell
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.01)
+                            : Colors.black.withValues(alpha: 0.01),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _removePinDigit();
+                          },
+                          child: Center(
+                            child: Icon(
+                              Icons.backspace_outlined,
+                              size: 24,
+                              color: isDark ? Colors.white70 : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -941,29 +1158,258 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildNumpadButton(String text) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          _appendPinDigit(text);
-        },
-        borderRadius: BorderRadius.circular(40),
-        child: Container(
-          width: 72,
-          height: 72,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
-            color: Colors.white.withValues(alpha: 0.02),
+  Widget _buildNumpadButton(String text, bool isDark) {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Colors.black.withValues(alpha: 0.02),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.06),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w400),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _appendPinDigit(text);
+          },
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Curated premium financial & lifestyle icons mapping
+  IconData _getIconData(String? name) {
+    switch (name) {
+      case 'restaurant':
+        return Icons.restaurant_rounded;
+      case 'local_cafe':
+        return Icons.local_cafe_rounded;
+      case 'attach_money':
+        return Icons.attach_money_rounded;
+      case 'receipt':
+        return Icons.receipt_rounded;
+      case 'shopping_bag':
+        return Icons.shopping_bag_rounded;
+      case 'directions_car':
+        return Icons.directions_car_rounded;
+      case 'local_gas_station':
+        return Icons.local_gas_station_rounded;
+      case 'home':
+        return Icons.home_rounded;
+      case 'electrical_services':
+        return Icons.electrical_services_rounded;
+      case 'water_drop':
+        return Icons.water_drop_rounded;
+      case 'wifi':
+        return Icons.wifi_rounded;
+      case 'medical_services':
+        return Icons.medical_services_rounded;
+      case 'sports_esports':
+        return Icons.sports_esports_rounded;
+      case 'movie':
+        return Icons.movie_rounded;
+      case 'flight':
+        return Icons.flight_rounded;
+      case 'school':
+        return Icons.school_rounded;
+      case 'fitness_center':
+        return Icons.fitness_center_rounded;
+      case 'pets':
+        return Icons.pets_rounded;
+      case 'card_giftcard':
+        return Icons.card_giftcard_rounded;
+      case 'work':
+        return Icons.work_rounded;
+      case 'trending_up':
+        return Icons.trending_up_rounded;
+      case 'savings':
+        return Icons.savings_rounded;
+      case 'account_balance':
+        return Icons.account_balance_rounded;
+      case 'build':
+        return Icons.build_rounded;
+      case 'spa':
+        return Icons.spa_rounded;
+      case 'payments':
+        return Icons.payments_rounded;
+      default:
+        return Icons.category_rounded;
+    }
+  }
+
+  Color _getCategoryColor(String? colorHex, String type) {
+    if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
+    }
+    try {
+      final hex = colorHex.replaceAll('#', '');
+      return Color(int.parse('0xFF$hex'));
+    } catch (_) {
+      return type == 'expense'
+          ? const Color(0xFFF43F5E)
+          : const Color(0xFF10B981);
+    }
+  }
+
+  Widget _buildVirtualCardPreview(int index, bool isDark) {
+    final name = _walletNameControllers[index].text.trim();
+    final balanceText = _walletBalanceControllers[index].text.trim();
+    final type = _walletTypes[index];
+
+    List<Color> cardColors;
+    if (type == 'Bank') {
+      cardColors = const [Color(0xFF1E3A8A), Color(0xFF3B82F6)]; // deep blue gradient
+    } else if (type == 'E-Wallet') {
+      cardColors = const [Color(0xFF0F766E), Color(0xFF0D9488)]; // teal/cyan gradient
+    } else {
+      cardColors = const [Color(0xFF065F46), Color(0xFF10B981)]; // emerald green gradient
+    }
+
+    return Container(
+      height: 180,
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: cardColors.map((c) => c.withValues(alpha: isDark ? 0.85 : 0.95)).toList(),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cardColors[0].withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  stops: const [0.0, 0.5],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber.shade200, width: 1),
+                      ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 30,
+                              height: 1,
+                              color: Colors.amber.shade900.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          Center(
+                            child: Container(
+                              width: 1,
+                              height: 20,
+                              color: Colors.amber.shade900.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'wallets.type_${type.toLowerCase().replaceAll('-', '')}'.tr().toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Text(
+                  name.isEmpty ? 'onboarding.wallet_name_preview'.tr().toUpperCase() : name.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  balanceText.isEmpty ? 'Rp 0' : 'Rp $balanceText',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

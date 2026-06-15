@@ -50,9 +50,13 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
   User? _currentUser;
   bool _isAuthenticated = false;
   bool _isOnboardingCompleted = false;
+  bool _isInitialized = false;
 
   @override
   bool get isOnboardingCompleted => _isOnboardingCompleted;
+
+  @override
+  bool get isInitialized => _isInitialized;
 
   /// StreamController that emits the current AuthState whenever
   /// notifyListeners() is called. Used by StreamProvider-based
@@ -79,10 +83,12 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
           id: AppConstants.defaultUserId,
           email: AppConstants.defaultUserEmail,
         );
-        notifyListeners();
       }
     } catch (e) {
       debugPrint('[AuthRepository] Failed to initialize state: $e');
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
     }
   }
 

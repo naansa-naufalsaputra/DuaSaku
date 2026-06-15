@@ -124,10 +124,22 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
               // Base background
               AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
-                color: themeDetails.baseBackgroundColor,
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? null
+                      : const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFF9FBFF), // Pale pastel blue
+                            Color(0xFFFFFFFF), // Pure white
+                          ],
+                        ),
+                  color: isDark ? themeDetails.baseBackgroundColor : null,
+                ),
               ),
 
-              // Top right glow (Blob 1 - Theme Purple)
+              // Top right glow (Blob 1 - Theme Accent)
               Positioned(
                 top: -100 + dy1,
                 right: -50 + dx1,
@@ -136,7 +148,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
                   width: 300,
                   height: 300,
                   decoration: BoxDecoration(
-                    color: themeDetails.glowColor1,
+                    color: isDark ? themeDetails.glowColor1 : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -151,7 +163,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
                   width: 350,
                   height: 350,
                   decoration: BoxDecoration(
-                    color: themeDetails.glowColor2,
+                    color: isDark ? themeDetails.glowColor2 : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -166,7 +178,7 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
                   width: 260,
                   height: 260,
                   decoration: BoxDecoration(
-                    color: cyberCyanGlow,
+                    color: isDark ? cyberCyanGlow : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -174,7 +186,10 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
 
               // Blur Filter to create the glassmorphism glow effect
               BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+                filter: ImageFilter.blur(
+                  sigmaX: isDark ? 80 : 0, // No blur needed in clean light mode
+                  sigmaY: isDark ? 80 : 0,
+                ),
                 child: Container(color: Colors.transparent),
               ),
             ],

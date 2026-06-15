@@ -9,6 +9,7 @@ import '../../domain/models/wallet_model.dart';
 import '../../../transactions/providers/transaction_provider.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
+import '../../../../core/utils/category_translation.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
 
 class WalletDetailScreen extends ConsumerStatefulWidget {
@@ -446,7 +447,7 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   Text(
                                                     tx.notes.isNotEmpty
                                                         ? tx.notes
-                                                        : tx.category,
+                                                        : tx.category.toLocalizedCategory(),
                                                     style: TextStyle(
                                                       color: isDark
                                                           ? Colors.white
@@ -461,7 +462,7 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    tx.category.toUpperCase(),
+                                                    tx.category.toLocalizedCategory().toUpperCase(),
                                                     style: TextStyle(
                                                       color: isDark
                                                           ? Colors.white54

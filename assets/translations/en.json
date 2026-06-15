@@ -18,8 +18,14 @@
     "yesterday": "Yesterday",
     "scan_receipt_title": "Scan Receipt",
     "scan_from_camera": "Take Photo",
-    "scan_from_gallery": "Select from Gallery",
-    "processing_receipt": "Scanning receipt offline..."
+    "processing_receipt": "Scanning receipt offline...",
+    "my_wallets": "My Wallets",
+    "total_balance_label": "Total Balance",
+    "image_pick_failed": "Failed to pick image: {}",
+    "receipt_process_failed": "Failed to process receipt: {}",
+    "action_top_up": "+ Top Up",
+    "action_transfer": "⇄ Transfer",
+    "action_scan_qr": "Scan QR"
   },
   "tabs": {
     "home": "Home",
@@ -52,7 +58,17 @@
     "expense": "Expense",
     "income": "Income",
     "transaction_date": "Transaction Date & Time",
-    "ocr_low_confidence_warning": "Receipt blurry? Help us correct the amount."
+    "ocr_low_confidence_warning": "Receipt blurry? Help us correct the amount.",
+    "err_required": "Required",
+    "success_save": "Transaction saved successfully!",
+    "success_transfer": "Transfer saved successfully!",
+    "err_same_wallet": "Cannot transfer to same wallet",
+    "loc_fetching": "Fetching location...",
+    "loc_saved": "Location saved ({}, {})",
+    "loc_save_tx": "Save transaction location",
+    "loc_save_transfer": "Save transfer location",
+    "notes_placeholder": "Add note or description...",
+    "err_fetch_location": "Failed to get location: {}"
   },
   "profile": {
     "title": "Profile & Settings",
@@ -140,7 +156,26 @@
   "wallets": {
     "empty_state_title": "No Wallets Yet",
     "empty_state_desc": "Add your first wallet to start recording financial transactions.",
-    "btn_add_wallet": "Add Wallet"
+    "btn_add_wallet": "Add Wallet",
+    "type_bank": "Bank",
+    "type_ewallet": "E-Wallet",
+    "type_cash": "Cash",
+    "title_add_new": "Add New Wallet",
+    "title_edit": "Edit Wallet",
+    "field_name_hint": "Wallet Name (e.g. BCA, Gopay, Cash)",
+    "field_type": "Wallet Type",
+    "field_balance": "Initial Balance",
+    "error_required": "Required",
+    "btn_create": "Create Wallet",
+    "btn_save": "Save Wallet",
+    "title_manage": "Manage Wallets",
+    "label_total_balance": "TOTAL BALANCE",
+    "btn_edit": "Edit",
+    "btn_delete": "Delete",
+    "dialog_delete_title": "Delete Wallet",
+    "dialog_delete_message": "Are you sure you want to delete \"{}\"? This action cannot be undone.",
+    "dialog_delete_confirm": "Delete",
+    "dialog_delete_cancel": "Cancel"
   },
   "security": {
     "time_tamper_title": "Time Tampering Detected!",
@@ -213,7 +248,12 @@
     "error_loading": "Failed to load data. Try again.",
     "btn_retry": "Retry",
     "empty_state_desc": "Start setting your savings targets and track your progress.",
-    "empty_completed_desc": "Completed goals will appear here."
+    "empty_completed_desc": "Completed goals will appear here.",
+    "btn_create_first": "Create My First Goal",
+    "notification_milestone_body": "You have reached {}% of your savings goal \"{}\". Keep it up!",
+    "notification_deadline_7d_body": "Deadline for savings goal \"{}\" is only 7 days left. Current progress is {}%.",
+    "notification_deadline_1d_body": "Deadline for savings goal \"{}\" is tomorrow! Current progress is {}%. Let's save more!",
+    "notification_completion_body": "You have successfully reached your savings goal \"{}\"! Amazing! 🏆"
   },
   "onboarding": {
     "welcome_title": "Welcome to DuaSaku",
@@ -240,7 +280,12 @@
     "income": "Income",
     "add": "Add",
     "wallet_count": "Number of Wallets",
-    "pin_confirm_desc": "Re-enter your PIN code to confirm"
+    "pin_confirm_desc": "Re-enter your PIN code to confirm",
+    "custom_categories_title": "Your Custom Categories:",
+    "wallet_name_preview": "WALLET NAME",
+    "initial_balance_notes": "Initial Balance",
+    "wallet_number": "Wallet #{}",
+    "wallet_name_placeholder": "e.g. Cash, Debit, E-wallet"
   },
   "history": {
     "title": "Transaction History",
@@ -257,5 +302,25 @@
     "no_notes": "No notes",
     "location": "Location Tagged",
     "close": "Close"
+  },
+  "categories": {
+    "food": "Food",
+    "transport": "Transport",
+    "salary": "Salary",
+    "bills": "Bills",
+    "shopping": "Shopping"
+  },
+  "insights": {
+    "title": "Financial Insights",
+    "overall_health": "OVERALL HEALTH",
+    "score_excellent": "Excellent",
+    "score_good": "Good",
+    "score_caution": "Caution",
+    "spending_trend": "Spending Trend",
+    "last_7_days": "Last 7 Days",
+    "total_expense": "Total Expense",
+    "top_categories": "TOP CATEGORIES",
+    "no_expense_data": "No expense data recorded.",
+    "transactions_count": "{} Transactions"
   }
 }

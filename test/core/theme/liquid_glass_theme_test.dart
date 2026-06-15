@@ -14,7 +14,7 @@ void main() {
         expect(theme.animationDurationFast, const Duration(milliseconds: 150));
         expect(theme.animationDurationSlow, const Duration(milliseconds: 500));
         expect(theme.animationCurve, Curves.easeOutCubic);
-        expect(theme.borderGlowColor.a, closeTo(0.3, 0.01));
+        expect(theme.borderGlowColor.a, closeTo(0.15, 0.01));
       });
 
       test('defaultPurpleLight has correct token values', () {
@@ -25,7 +25,7 @@ void main() {
         expect(theme.animationDuration, const Duration(milliseconds: 300));
         expect(theme.animationDurationFast, const Duration(milliseconds: 150));
         expect(theme.animationDurationSlow, const Duration(milliseconds: 500));
-        expect(theme.borderGlowColor.a, closeTo(0.2, 0.01));
+        expect(theme.borderGlowColor.a, closeTo(0.0, 0.01));
       });
     });
 
