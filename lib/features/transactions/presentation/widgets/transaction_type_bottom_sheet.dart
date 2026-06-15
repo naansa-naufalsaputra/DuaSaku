@@ -80,7 +80,9 @@ class _TransactionTypeBottomSheetState
     if (hasOperators) {
       final evalResult = MathParser.eval(cleanText);
       if (evalResult != null && evalResult > 0) {
-        final formatted = NumberFormat.decimalPattern('id_ID').format(evalResult.toInt());
+        final formatted = NumberFormat.decimalPattern(
+          'id_ID',
+        ).format(evalResult.toInt());
         setState(() {
           _mathExpressionPreview = '= Rp $formatted';
         });
@@ -164,7 +166,11 @@ class _TransactionTypeBottomSheetState
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('bottom_sheet.err_fetch_location'.tr(args: [e.toString()]))),
+            SnackBar(
+              content: Text(
+                'bottom_sheet.err_fetch_location'.tr(args: [e.toString()]),
+              ),
+            ),
           );
         }
       }
@@ -285,8 +291,6 @@ class _TransactionTypeBottomSheetState
     }
   }
 
-
-
   Future<void> _submitManual() async {
     bool hasError = false;
     setState(() {
@@ -318,9 +322,9 @@ class _TransactionTypeBottomSheetState
             );
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('bottom_sheet.success_save'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('bottom_sheet.success_save'.tr())),
+          );
           context.pop();
         }
       } catch (e) {
@@ -371,9 +375,9 @@ class _TransactionTypeBottomSheetState
             );
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('bottom_sheet.success_transfer'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('bottom_sheet.success_transfer'.tr())),
+          );
           context.pop();
         }
       } catch (e) {
@@ -420,8 +424,8 @@ class _TransactionTypeBottomSheetState
                 isFromWallet == true
                     ? 'bottom_sheet.from_wallet'.tr()
                     : isFromWallet == false
-                        ? 'bottom_sheet.to_wallet'.tr()
-                        : 'bottom_sheet.wallet'.tr(),
+                    ? 'bottom_sheet.to_wallet'.tr()
+                    : 'bottom_sheet.wallet'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -439,21 +443,23 @@ class _TransactionTypeBottomSheetState
                   final isSelected = isFromWallet == true
                       ? _transferFromWalletId == wallet.id
                       : isFromWallet == false
-                          ? _transferToWalletId == wallet.id
-                          : _manualWalletId == wallet.id;
+                      ? _transferToWalletId == wallet.id
+                      : _manualWalletId == wallet.id;
                   return ListTile(
                     leading: Icon(
                       wallet.type == 'Bank'
                           ? Icons.account_balance_rounded
                           : wallet.type == 'E-Wallet'
-                              ? Icons.account_balance_wallet_rounded
-                              : Icons.payments_rounded,
+                          ? Icons.account_balance_wallet_rounded
+                          : Icons.payments_rounded,
                       color: isSelected ? const Color(0xFF007AFF) : Colors.grey,
                     ),
                     title: Text(
                       wallet.name,
                       style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
@@ -466,7 +472,10 @@ class _TransactionTypeBottomSheetState
                       style: const TextStyle(color: Colors.grey),
                     ),
                     trailing: isSelected
-                        ? const Icon(Icons.check_circle_rounded, color: Color(0xFF007AFF))
+                        ? const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF007AFF),
+                          )
                         : null,
                     onTap: () {
                       setState(() {
@@ -490,12 +499,15 @@ class _TransactionTypeBottomSheetState
     );
   }
 
-  Widget _buildWalletSelectorPill(List<WalletModel> wallets, {bool? isFromWallet}) {
+  Widget _buildWalletSelectorPill(
+    List<WalletModel> wallets, {
+    bool? isFromWallet,
+  }) {
     final String? walletId = isFromWallet == true
         ? _transferFromWalletId
         : isFromWallet == false
-            ? _transferToWalletId
-            : _manualWalletId;
+        ? _transferToWalletId
+        : _manualWalletId;
 
     final selectedWallet = wallets.firstWhere(
       (w) => w.id == walletId,
@@ -531,8 +543,8 @@ class _TransactionTypeBottomSheetState
                 selectedWallet.type == 'Bank'
                     ? Icons.account_balance_rounded
                     : selectedWallet.type == 'E-Wallet'
-                        ? Icons.account_balance_wallet_rounded
-                        : Icons.payments_rounded,
+                    ? Icons.account_balance_wallet_rounded
+                    : Icons.payments_rounded,
                 size: 14,
                 color: isDark ? Colors.white70 : Colors.black54,
               ),
@@ -542,14 +554,18 @@ class _TransactionTypeBottomSheetState
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black87,
                 ),
               ),
               const SizedBox(width: 4),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 14,
-                color: isDark ? Colors.white.withValues(alpha: 0.55) : Colors.black45,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.55)
+                    : Colors.black45,
               ),
             ],
           ),
@@ -561,7 +577,7 @@ class _TransactionTypeBottomSheetState
   Widget _buildTypeTab(String type, String label) {
     final isSelected = type == (_isTransferMode ? 'transfer' : _manualType);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -572,7 +588,9 @@ class _TransactionTypeBottomSheetState
             } else {
               _isTransferMode = false;
               _manualType = type;
-              _manualCategoryController.text = type == 'expense' ? 'Food' : 'Salary';
+              _manualCategoryController.text = type == 'expense'
+                  ? 'Food'
+                  : 'Salary';
             }
           });
         },
@@ -580,9 +598,7 @@ class _TransactionTypeBottomSheetState
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected
-                ? _accentColor
-                : Colors.transparent,
+            color: isSelected ? _accentColor : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
@@ -606,7 +622,7 @@ class _TransactionTypeBottomSheetState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final walletsAsync = ref.watch(walletProvider);
     final walletsList = walletsAsync.valueOrNull ?? [];
-    
+
     // Auto-select defaults
     if (_manualWalletId == null && walletsList.isNotEmpty) {
       _manualWalletId = walletsList.first.id;
@@ -662,8 +678,8 @@ class _TransactionTypeBottomSheetState
                       _isTransferMode
                           ? 'bottom_sheet.tab_transfer'.tr()
                           : _manualType == 'expense'
-                              ? 'bottom_sheet.expense'.tr()
-                              : 'bottom_sheet.income'.tr(),
+                          ? 'bottom_sheet.expense'.tr()
+                          : 'bottom_sheet.income'.tr(),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -672,7 +688,10 @@ class _TransactionTypeBottomSheetState
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormat('dd MMMM yyyy', context.locale.toString()).format(_selectedDate),
+                      DateFormat(
+                        'dd MMMM yyyy',
+                        context.locale.toString(),
+                      ).format(_selectedDate),
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? Colors.white38 : Colors.black38,
@@ -696,7 +715,9 @@ class _TransactionTypeBottomSheetState
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -728,11 +749,16 @@ class _TransactionTypeBottomSheetState
                               style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.9)
+                                    : Colors.black.withValues(alpha: 0.9),
                               ),
                             ),
                             ConstrainedBox(
-                              constraints: const BoxConstraints(minWidth: 60, maxWidth: 280),
+                              constraints: const BoxConstraints(
+                                minWidth: 60,
+                                maxWidth: 280,
+                              ),
                               child: IntrinsicWidth(
                                 child: Focus(
                                   onFocusChange: (hasFocus) {
@@ -745,34 +771,46 @@ class _TransactionTypeBottomSheetState
                                     }
                                   },
                                   child: TextField(
-                                    controller: _isTransferMode ? _transferAmountController : _manualAmountController,
+                                    controller: _isTransferMode
+                                        ? _transferAmountController
+                                        : _manualAmountController,
                                     keyboardType: TextInputType.text,
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 36,
                                       fontWeight: FontWeight.w900,
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                       letterSpacing: -0.5,
                                     ),
                                     decoration: InputDecoration(
                                       hintText: '0',
-                                      hintStyle: const TextStyle(color: Colors.grey),
+                                      hintStyle: const TextStyle(
+                                        color: Colors.grey,
+                                      ),
                                       border: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,
                                       contentPadding: EdgeInsets.zero,
-                                      errorText: _isTransferMode ? _transferAmountError : _manualAmountError,
+                                      errorText: _isTransferMode
+                                          ? _transferAmountError
+                                          : _manualAmountError,
                                       errorStyle: const TextStyle(height: 0),
                                     ),
                                     inputFormatters: [ThousandsFormatter()],
                                     onChanged: (val) {
                                       if (_isTransferMode) {
                                         if (_transferAmountError != null) {
-                                          setState(() => _transferAmountError = null);
+                                          setState(
+                                            () => _transferAmountError = null,
+                                          );
                                         }
                                       } else {
                                         if (_manualAmountError != null) {
-                                          setState(() => _manualAmountError = null);
+                                          setState(
+                                            () => _manualAmountError = null,
+                                          );
                                         }
                                         _updateMathPreview(val);
                                       }
@@ -790,7 +828,8 @@ class _TransactionTypeBottomSheetState
                             ),
                           ],
                         ),
-                        if (!_isTransferMode && _mathExpressionPreview.isNotEmpty) ...[
+                        if (!_isTransferMode &&
+                            _mathExpressionPreview.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             _mathExpressionPreview,
@@ -813,16 +852,24 @@ class _TransactionTypeBottomSheetState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildWalletSelectorPill(walletsList, isFromWallet: true),
+                            _buildWalletSelectorPill(
+                              walletsList,
+                              isFromWallet: true,
+                            ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                              ),
                               child: Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 14,
                                 color: isDark ? Colors.white38 : Colors.black38,
                               ),
                             ),
-                            _buildWalletSelectorPill(walletsList, isFromWallet: false),
+                            _buildWalletSelectorPill(
+                              walletsList,
+                              isFromWallet: false,
+                            ),
                           ],
                         )
                       else
@@ -832,121 +879,169 @@ class _TransactionTypeBottomSheetState
 
                     // 5. Premium Category Grid (Manual Only)
                     if (!_isTransferMode) ...[
-                      ref.watch(categoryNotifierProvider).when(
-                        data: (categories) {
-                          final filtered = categories
-                              .where((c) => c.type == _manualType)
-                              .toList();
-                          if (filtered.isEmpty) return const SizedBox.shrink();
+                      ref
+                          .watch(categoryNotifierProvider)
+                          .when(
+                            data: (categories) {
+                              final filtered = categories
+                                  .where((c) => c.type == _manualType)
+                                  .toList();
+                              if (filtered.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                child: Text(
-                                  'bottom_sheet.category'.tr().toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.5,
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 0.9,
-                                ),
-                                itemCount: filtered.length > 12 ? 12 : filtered.length,
-                                itemBuilder: (context, index) {
-                                  final cat = filtered[index];
-                                  final isSelected = _manualCategoryController.text.toLowerCase() == cat.name.toLowerCase();
-                                  final catColor = _getCategoryColor(cat.color, cat.type);
-                                  
-                                  return GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.lightImpact();
-                                      setState(() {
-                                        _manualCategoryController.text = cat.name;
-                                        if (_manualCategoryError != null) {
-                                          _manualCategoryError = null;
-                                        }
-                                      });
-                                    },
-                                    child: Column(
-                                      children: [
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          width: 56,
-                                          height: 56,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: catColor.withValues(alpha: 0.12),
-                                            border: Border.all(
-                                              color: isSelected ? const Color(0xFF007AFF) : Colors.transparent,
-                                              width: 2.5,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            _getIconData(cat.icon),
-                                            color: catColor,
-                                            size: 22,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          cat.name.toLocalizedCategory(),
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                            color: isSelected
-                                                ? (isDark ? Colors.white : Colors.black87)
-                                                : (isDark ? Colors.white54 : Colors.black54),
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4.0,
                                     ),
-                                  );
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (err, st) => Text('Error loading categories: $err'),
-                      ),
+                                    child: Text(
+                                      'bottom_sheet.category'
+                                          .tr()
+                                          .toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.5,
+                                        color: isDark
+                                            ? Colors.white38
+                                            : Colors.black38,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  GridView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                          childAspectRatio: 0.9,
+                                        ),
+                                    itemCount: filtered.length > 12
+                                        ? 12
+                                        : filtered.length,
+                                    itemBuilder: (context, index) {
+                                      final cat = filtered[index];
+                                      final isSelected =
+                                          _manualCategoryController.text
+                                              .toLowerCase() ==
+                                          cat.name.toLowerCase();
+                                      final catColor = _getCategoryColor(
+                                        cat.color,
+                                        cat.type,
+                                      );
+
+                                      return GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _manualCategoryController.text =
+                                                cat.name;
+                                            if (_manualCategoryError != null) {
+                                              _manualCategoryError = null;
+                                            }
+                                          });
+                                        },
+                                        child: Column(
+                                          children: [
+                                            AnimatedContainer(
+                                              duration: const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              width: 56,
+                                              height: 56,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: catColor.withValues(
+                                                  alpha: 0.12,
+                                                ),
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? const Color(0xFF007AFF)
+                                                      : Colors.transparent,
+                                                  width: 2.5,
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                _getIconData(cat.icon),
+                                                color: catColor,
+                                                size: 22,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              cat.name.toLocalizedCategory(),
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? (isDark
+                                                          ? Colors.white
+                                                          : Colors.black87)
+                                                    : (isDark
+                                                          ? Colors.white54
+                                                          : Colors.black54),
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (err, st) =>
+                                Text('Error loading categories: $err'),
+                          ),
                       const SizedBox(height: 24),
                     ],
 
                     // 6. Borderless Description Row
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : Colors.black.withValues(alpha: 0.02),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _isTransferMode ? _transferNotesController : _manualNotesController,
+                              controller: _isTransferMode
+                                  ? _transferNotesController
+                                  : _manualNotesController,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.9)
+                                    : Colors.black87,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'bottom_sheet.notes'.tr(),
-                                hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                                hintStyle: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,
                                 enabledBorder: InputBorder.none,
@@ -969,7 +1064,9 @@ class _TransactionTypeBottomSheetState
                       children: [
                         Checkbox(
                           value: _recordLocation,
-                          onChanged: _isFetchingLocation ? null : _toggleLocation,
+                          onChanged: _isFetchingLocation
+                              ? null
+                              : _toggleLocation,
                           activeColor: _accentColor,
                         ),
                         Expanded(
@@ -977,15 +1074,19 @@ class _TransactionTypeBottomSheetState
                             _isFetchingLocation
                                 ? 'bottom_sheet.loc_fetching'.tr()
                                 : _recordLocation
-                                    ? 'bottom_sheet.loc_saved'.tr(args: [
-                                        _latitude!.toStringAsFixed(4),
-                                        _longitude!.toStringAsFixed(4)
-                                      ])
-                                    : (_isTransferMode
-                                        ? 'bottom_sheet.loc_save_transfer'.tr()
-                                        : 'bottom_sheet.loc_save_tx'.tr()),
+                                ? 'bottom_sheet.loc_saved'.tr(
+                                    args: [
+                                      _latitude!.toStringAsFixed(4),
+                                      _longitude!.toStringAsFixed(4),
+                                    ],
+                                  )
+                                : (_isTransferMode
+                                      ? 'bottom_sheet.loc_save_transfer'.tr()
+                                      : 'bottom_sheet.loc_save_tx'.tr()),
                             style: TextStyle(
-                              color: isDark ? Colors.white60 : Colors.black.withValues(alpha: 0.6),
+                              color: isDark
+                                  ? Colors.white60
+                                  : Colors.black.withValues(alpha: 0.6),
                               fontSize: 13,
                             ),
                           ),
@@ -998,7 +1099,9 @@ class _TransactionTypeBottomSheetState
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _isTransferMode ? _submitTransfer : _submitManual,
+                        onPressed: _isTransferMode
+                            ? _submitTransfer
+                            : _submitManual,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
                           foregroundColor: Colors.white,
@@ -1009,7 +1112,9 @@ class _TransactionTypeBottomSheetState
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          _isTransferMode ? 'bottom_sheet.btn_transfer'.tr() : 'bottom_sheet.save_transaction'.tr(),
+                          _isTransferMode
+                              ? 'bottom_sheet.btn_transfer'.tr()
+                              : 'bottom_sheet.save_transaction'.tr(),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1073,6 +1178,4 @@ class _TransactionTypeBottomSheetState
       ),
     );
   }
-
-
 }

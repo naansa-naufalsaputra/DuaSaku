@@ -148,7 +148,9 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
                   width: 300,
                   height: 300,
                   decoration: BoxDecoration(
-                    color: isDark ? themeDetails.glowColor1 : Colors.transparent,
+                    color: isDark
+                        ? themeDetails.glowColor1
+                        : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -163,7 +165,9 @@ class _PremiumBackgroundState extends ConsumerState<PremiumBackground>
                   width: 350,
                   height: 350,
                   decoration: BoxDecoration(
-                    color: isDark ? themeDetails.glowColor2 : Colors.transparent,
+                    color: isDark
+                        ? themeDetails.glowColor2
+                        : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                 ),

@@ -73,7 +73,8 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
     return const LiquidGlassTheme(
       blurSigma: 10.0,
       surfaceOpacity: 0.70,
-      borderGlowColor: Colors.transparent, // Completely borderless in light mode
+      borderGlowColor:
+          Colors.transparent, // Completely borderless in light mode
       surfaceTintColor: surfaceColor,
       innerHighlightOpacity: 0.05,
       animationDuration: Duration(milliseconds: 300),

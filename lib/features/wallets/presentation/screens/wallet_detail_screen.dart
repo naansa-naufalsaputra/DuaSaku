@@ -447,7 +447,8 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   Text(
                                                     tx.notes.isNotEmpty
                                                         ? tx.notes
-                                                        : tx.category.toLocalizedCategory(),
+                                                        : tx.category
+                                                              .toLocalizedCategory(),
                                                     style: TextStyle(
                                                       color: isDark
                                                           ? Colors.white
@@ -462,7 +463,9 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    tx.category.toLocalizedCategory().toUpperCase(),
+                                                    tx.category
+                                                        .toLocalizedCategory()
+                                                        .toUpperCase(),
                                                     style: TextStyle(
                                                       color: isDark
                                                           ? Colors.white54

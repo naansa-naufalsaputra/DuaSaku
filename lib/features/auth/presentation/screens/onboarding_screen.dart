@@ -166,7 +166,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final wallet = WalletModel(
         id: walletId,
         userId: AppConstants.defaultUserId,
-        name: name.isEmpty ? 'onboarding.wallet_number'.tr(args: [(i + 1).toString()]) : name,
+        name: name.isEmpty
+            ? 'onboarding.wallet_number'.tr(args: [(i + 1).toString()])
+            : name,
         type: _walletTypes[i],
         balance: 0.0,
         createdAt: DateTime.now(),
@@ -609,7 +611,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: ChoiceChip(
-                        label: Text('onboarding.wallet_number'.tr(args: [(wIdx + 1).toString()])),
+                        label: Text(
+                          'onboarding.wallet_number'.tr(
+                            args: [(wIdx + 1).toString()],
+                          ),
+                        ),
                         selected: isSelected,
                         onSelected: (selected) {
                           if (selected) {
@@ -656,11 +662,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     final isSelected = _walletTypes[_activeWalletIndex] == type;
                     return Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4.0,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: ChoiceChip(
-                          label: Text('wallets.type_${type.toLowerCase().replaceAll('-', '')}'.tr()),
+                          label: Text(
+                            'wallets.type_${type.toLowerCase().replaceAll('-', '')}'
+                                .tr(),
+                          ),
                           selected: isSelected,
                           onSelected: (_) {
                             HapticFeedback.lightImpact();
@@ -700,13 +707,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               onPressed: () {
                 if (_activeWalletIndex < _walletCount - 1) {
                   // Validate current wallet fields first
-                  final name = _walletNameControllers[_activeWalletIndex].text.trim();
-                  final balanceText = _walletBalanceControllers[_activeWalletIndex].text.trim();
+                  final name = _walletNameControllers[_activeWalletIndex].text
+                      .trim();
+                  final balanceText =
+                      _walletBalanceControllers[_activeWalletIndex].text.trim();
                   setState(() {
                     _walletNameErrors[_activeWalletIndex] = name.isEmpty
                         ? 'onboarding.wallet_name_required'.tr()
                         : null;
-                    _walletBalanceErrors[_activeWalletIndex] = balanceText.isEmpty
+                    _walletBalanceErrors[_activeWalletIndex] =
+                        balanceText.isEmpty
                         ? 'onboarding.wallet_balance_required'.tr()
                         : null;
                   });
@@ -797,15 +807,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       color: isSelected
                           ? catColor.withValues(alpha: isDark ? 0.15 : 0.08)
                           : (isDark
-                              ? Colors.white.withValues(alpha: 0.03)
-                              : Colors.black.withValues(alpha: 0.02)),
+                                ? Colors.white.withValues(alpha: 0.03)
+                                : Colors.black.withValues(alpha: 0.02)),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
                             ? catColor
                             : (isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.06)),
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.06)),
                         width: isSelected ? 2.0 : 1.0,
                       ),
                       boxShadow: isSelected
@@ -846,7 +856,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -856,7 +868,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                       fontSize: 9,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.5,
-                                      color: isDark ? Colors.white38 : Colors.black38,
+                                      color: isDark
+                                          ? Colors.white38
+                                          : Colors.black38,
                                     ),
                                   ),
                                 ],
@@ -1008,28 +1022,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
             // PIN Dots Indicator with micro-interaction shake on error
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                final isFilled = index < currentPinLength;
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isFilled
-                        ? _accentColor
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: isFilled
-                          ? _accentColor
-                          : Colors.grey.withValues(alpha: 0.5),
-                      width: 2,
-                    ),
-                  ),
-                );
-              }),
-            ).animate(target: _pinError ? 1.0 : 0.0).shake(hz: 6, duration: 400.ms),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (index) {
+                    final isFilled = index < currentPinLength;
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isFilled ? _accentColor : Colors.transparent,
+                        border: Border.all(
+                          color: isFilled
+                              ? _accentColor
+                              : Colors.grey.withValues(alpha: 0.5),
+                          width: 2,
+                        ),
+                      ),
+                    );
+                  }),
+                )
+                .animate(target: _pinError ? 1.0 : 0.0)
+                .shake(hz: 6, duration: 400.ms),
             const SizedBox(height: 40),
 
             // Custom Glass Numpad
@@ -1286,11 +1300,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     List<Color> cardColors;
     if (type == 'Bank') {
-      cardColors = const [Color(0xFF1E3A8A), Color(0xFF3B82F6)]; // deep blue gradient
+      cardColors = const [
+        Color(0xFF1E3A8A),
+        Color(0xFF3B82F6),
+      ]; // deep blue gradient
     } else if (type == 'E-Wallet') {
-      cardColors = const [Color(0xFF0F766E), Color(0xFF0D9488)]; // teal/cyan gradient
+      cardColors = const [
+        Color(0xFF0F766E),
+        Color(0xFF0D9488),
+      ]; // teal/cyan gradient
     } else {
-      cardColors = const [Color(0xFF065F46), Color(0xFF10B981)]; // emerald green gradient
+      cardColors = const [
+        Color(0xFF065F46),
+        Color(0xFF10B981),
+      ]; // emerald green gradient
     }
 
     return Container(
@@ -1299,7 +1322,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
-          colors: cardColors.map((c) => c.withValues(alpha: isDark ? 0.85 : 0.95)).toList(),
+          colors: cardColors
+              .map((c) => c.withValues(alpha: isDark ? 0.85 : 0.95))
+              .toList(),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1347,7 +1372,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       decoration: BoxDecoration(
                         color: Colors.amber.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.shade200, width: 1),
+                        border: Border.all(
+                          color: Colors.amber.shade200,
+                          width: 1,
+                        ),
                       ),
                       child: Stack(
                         children: [
@@ -1355,27 +1383,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             child: Container(
                               width: 30,
                               height: 1,
-                              color: Colors.amber.shade900.withValues(alpha: 0.5),
+                              color: Colors.amber.shade900.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                           Center(
                             child: Container(
                               width: 1,
                               height: 20,
-                              color: Colors.amber.shade900.withValues(alpha: 0.5),
+                              color: Colors.amber.shade900.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'wallets.type_${type.toLowerCase().replaceAll('-', '')}'.tr().toUpperCase(),
+                        'wallets.type_${type.toLowerCase().replaceAll('-', '')}'
+                            .tr()
+                            .toUpperCase(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -1388,7 +1425,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  name.isEmpty ? 'onboarding.wallet_name_preview'.tr().toUpperCase() : name.toUpperCase(),
+                  name.isEmpty
+                      ? 'onboarding.wallet_name_preview'.tr().toUpperCase()
+                      : name.toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,

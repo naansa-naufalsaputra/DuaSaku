@@ -41,9 +41,11 @@ class GoalNotificationService {
 
     await _notifications.show(
       id: notificationId,
-      title: '$emoji ${'goals.notification_milestone'.tr(args: [goal.name, '$milestonePercent'])}',
-      body:
-          'goals.notification_milestone_body'.tr(args: ['$milestonePercent', goal.name]),
+      title:
+          '$emoji ${'goals.notification_milestone'.tr(args: [goal.name, '$milestonePercent'])}',
+      body: 'goals.notification_milestone_body'.tr(
+        args: ['$milestonePercent', goal.name],
+      ),
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );
@@ -77,8 +79,9 @@ class GoalNotificationService {
         await _notifications.zonedSchedule(
           id: notificationId,
           title: 'goals.notification_deadline_7d'.tr(args: [goal.name]),
-          body:
-              'goals.notification_deadline_7d_body'.tr(args: [goal.name, '${(goal.progressPercentage * 100).toInt()}']),
+          body: 'goals.notification_deadline_7d_body'.tr(
+            args: [goal.name, '${(goal.progressPercentage * 100).toInt()}'],
+          ),
           scheduledDate: scheduledDate7,
           notificationDetails: _buildNotificationDetails(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -106,8 +109,9 @@ class GoalNotificationService {
         await _notifications.zonedSchedule(
           id: notificationId,
           title: 'goals.notification_deadline_1d'.tr(args: [goal.name]),
-          body:
-              'goals.notification_deadline_1d_body'.tr(args: [goal.name, '${(goal.progressPercentage * 100).toInt()}']),
+          body: 'goals.notification_deadline_1d_body'.tr(
+            args: [goal.name, '${(goal.progressPercentage * 100).toInt()}'],
+          ),
           scheduledDate: scheduledDate1,
           notificationDetails: _buildNotificationDetails(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -143,8 +147,7 @@ class GoalNotificationService {
     await _notifications.show(
       id: notificationId,
       title: 'goals.notification_completion'.tr(args: [goal.name]),
-      body:
-          'goals.notification_completion_body'.tr(args: [goal.name]),
+      body: 'goals.notification_completion_body'.tr(args: [goal.name]),
       notificationDetails: _buildNotificationDetails(),
       payload: payload,
     );

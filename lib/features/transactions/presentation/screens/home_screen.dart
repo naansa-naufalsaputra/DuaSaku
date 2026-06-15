@@ -139,9 +139,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       debugPrint('[HomeScreen] Error picking image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('home.image_pick_failed'.tr(args: [e.toString()]))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('home.image_pick_failed'.tr(args: [e.toString()])),
+          ),
+        );
       }
       return;
     }
@@ -168,9 +170,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       debugPrint('[HomeScreen] Error processing receipt scanner: $e');
       if (mounted) {
         HapticFeedback.vibrate();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('home.receipt_process_failed'.tr(args: [e.toString()]))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'home.receipt_process_failed'.tr(args: [e.toString()]),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -305,7 +311,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 'payments':
         return Icons.payments_rounded;
       default:
-        return isExpense ? Icons.shopping_bag_outlined : Icons.account_balance_wallet_outlined;
+        return isExpense
+            ? Icons.shopping_bag_outlined
+            : Icons.account_balance_wallet_outlined;
     }
   }
 
@@ -388,41 +396,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildQuickActionRow(ThemeData theme, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_top_up'.tr(),
-              onTap: _showTransactionBottomSheet,
-              theme: theme,
-              isDark: isDark,
-              isActive: true,
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_top_up'.tr(),
+                  onTap: _showTransactionBottomSheet,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_transfer'.tr(),
+                  onTap: _showTransactionBottomSheet,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_scan_qr'.tr(),
+                  onTap: _showScanSourceDialog,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: false,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_transfer'.tr(),
-              onTap: _showTransactionBottomSheet,
-              theme: theme,
-              isDark: isDark,
-              isActive: false,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_scan_qr'.tr(),
-              onTap: _showScanSourceDialog,
-              theme: theme,
-              isDark: isDark,
-              isActive: false,
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 500.ms, delay: 120.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
+        )
+        .animate()
+        .fadeIn(duration: 500.ms, delay: 120.ms)
+        .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
   }
 
   Widget _buildQuickPill({
@@ -432,12 +443,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required bool isDark,
     required bool isActive,
   }) {
-    final activeColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
-    final inactiveColor = isDark 
-        ? Colors.white.withValues(alpha: 0.08) 
+    final activeColor = isDark
+        ? const Color(0xFF0A84FF)
+        : const Color(0xFF007AFF);
+    final inactiveColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
         : Colors.black.withValues(alpha: 0.04);
-    final textColor = isActive 
-        ? Colors.white 
+    final textColor = isActive
+        ? Colors.white
         : (isDark ? Colors.white70 : Colors.black87);
 
     return GestureDetector(
@@ -534,12 +547,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
     final displayName = ref.watch(displayNameProvider);
-    final String userName = displayName.isNotEmpty 
-        ? displayName 
+    final String userName = displayName.isNotEmpty
+        ? displayName
         : (user?.email != null && user!.email.contains('@')
-            ? user.email.split('@').first
-            : 'User');
-    final String initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+              ? user.email.split('@').first
+              : 'User');
+    final String initial = userName.isNotEmpty
+        ? userName[0].toUpperCase()
+        : 'U';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -572,12 +587,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               CircleAvatar(
                                 radius: 22,
                                 backgroundColor: isDark
-                                    ? const Color(0xFF0A84FF).withValues(alpha: 0.1)
-                                    : const Color(0xFF007AFF).withValues(alpha: 0.1),
+                                    ? const Color(
+                                        0xFF0A84FF,
+                                      ).withValues(alpha: 0.1)
+                                    : const Color(
+                                        0xFF007AFF,
+                                      ).withValues(alpha: 0.1),
                                 child: Text(
                                   initial,
                                   style: TextStyle(
-                                    color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                    color: isDark
+                                        ? const Color(0xFF0A84FF)
+                                        : const Color(0xFF007AFF),
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
@@ -590,7 +611,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Text(
                                     _getTimeOfDay(),
                                     style: TextStyle(
-                                      color: isDark ? Colors.white54 : Colors.black54,
+                                      color: isDark
+                                          ? Colors.white54
+                                          : Colors.black54,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                     ),
@@ -598,7 +621,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Text(
                                     userName,
                                     style: TextStyle(
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: -0.5,
@@ -878,9 +903,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           );
 
                           return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Column(
                               children: [
                                 InkWell(
@@ -894,7 +917,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     );
                                   },
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     child: Row(
                                       children: [
                                         Container(
@@ -902,13 +927,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           height: 44,
                                           decoration: BoxDecoration(
                                             color: isDark
-                                                ? const Color(0xFF0A84FF).withValues(alpha: 0.08)
-                                                : const Color(0xFF007AFF).withValues(alpha: 0.08),
+                                                ? const Color(
+                                                    0xFF0A84FF,
+                                                  ).withValues(alpha: 0.08)
+                                                : const Color(
+                                                    0xFF007AFF,
+                                                  ).withValues(alpha: 0.08),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
-                                            _getCategoryIconData(matchedCategory.icon, isExpense),
-                                            color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                            _getCategoryIconData(
+                                              matchedCategory.icon,
+                                              isExpense,
+                                            ),
+                                            color: isDark
+                                                ? const Color(0xFF0A84FF)
+                                                : const Color(0xFF007AFF),
                                             size: 20,
                                           ),
                                         ),
@@ -920,8 +954,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             children: [
                                               Text(
                                                 tx.notes.isNotEmpty
-                                                    ? TextSanitizer.prettifyNotes(tx.notes)
-                                                    : tx.category.toLocalizedCategory(),
+                                                    ? TextSanitizer.prettifyNotes(
+                                                        tx.notes,
+                                                      )
+                                                    : tx.category
+                                                          .toLocalizedCategory(),
                                                 style: TextStyle(
                                                   color: isDark
                                                       ? Colors.white
@@ -934,7 +971,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                tx.category.toLocalizedCategory().toUpperCase(),
+                                                tx.category
+                                                    .toLocalizedCategory()
+                                                    .toUpperCase(),
                                                 style: TextStyle(
                                                   color: isDark
                                                       ? Colors.white30
@@ -982,7 +1021,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                 ),
-                                if (index < feedItems.length - 1 && feedItems[index + 1] is! _DateHeaderItem)
+                                if (index < feedItems.length - 1 &&
+                                    feedItems[index + 1] is! _DateHeaderItem)
                                   Divider(
                                     height: 1,
                                     thickness: 1,
@@ -1058,15 +1098,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: BackdropFilter(
                 filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark 
-                        ? Colors.white.withValues(alpha: 0.05) 
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
                         : Colors.white.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: isDark 
-                          ? Colors.white.withValues(alpha: 0.08) 
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
                           : Colors.black.withValues(alpha: 0.05),
                     ),
                     boxShadow: [
@@ -1081,7 +1124,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Icon(
                         Icons.auto_awesome,
-                        color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                        color: isDark
+                            ? const Color(0xFF0A84FF)
+                            : const Color(0xFF007AFF),
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -1100,11 +1145,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             border: InputBorder.none,
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                            ),
                           ),
                           onEditingComplete: _isProcessingAI
                               ? null
-                              : () => _submitHomeSmartInput(_homeSmartInputController.text),
+                              : () => _submitHomeSmartInput(
+                                  _homeSmartInputController.text,
+                                ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1126,19 +1175,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                  color: isDark
+                                      ? const Color(0xFF0A84FF)
+                                      : const Color(0xFF007AFF),
                                 ),
                               )
                             : Icon(
                                 Icons.send_rounded,
-                                color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                                color: isDark
+                                    ? const Color(0xFF0A84FF)
+                                    : const Color(0xFF007AFF),
                               ),
                         iconSize: 20,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         onPressed: _isProcessingAI || _isProcessingReceipt
                             ? null
-                            : () => _submitHomeSmartInput(_homeSmartInputController.text),
+                            : () => _submitHomeSmartInput(
+                                _homeSmartInputController.text,
+                              ),
                       ),
                     ],
                   ),
@@ -1258,16 +1313,18 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
     }
   }
 
-
-
   String _formatAbbreviated(double amount) {
     if (amount >= 1000000) {
       final val = amount / 1000000.0;
-      final valStr = val == val.toInt() ? val.toInt().toString() : val.toStringAsFixed(1);
+      final valStr = val == val.toInt()
+          ? val.toInt().toString()
+          : val.toStringAsFixed(1);
       return 'Rp ${valStr}M';
     } else if (amount >= 1000) {
       final val = amount / 1000.0;
-      final valStr = val == val.toInt() ? val.toInt().toString() : val.toStringAsFixed(1);
+      final valStr = val == val.toInt()
+          ? val.toInt().toString()
+          : val.toStringAsFixed(1);
       return 'Rp ${valStr}k';
     } else {
       return 'Rp ${amount.toStringAsFixed(0)}';
@@ -1505,8 +1562,7 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                               const Spacer(),
                                               Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .end,
+                                                    MainAxisAlignment.end,
                                                 children: [
                                                   Container(
                                                     padding:
@@ -1564,7 +1620,9 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF007AFF).withValues(alpha: 0.15),
+                              color: const Color(
+                                0xFF007AFF,
+                              ).withValues(alpha: 0.15),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -1608,7 +1666,9 @@ class _WalletStackedLayoutState extends State<_WalletStackedLayout>
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          'home.total_balance_label'.tr().toUpperCase(),
+                                          'home.total_balance_label'
+                                              .tr()
+                                              .toUpperCase(),
                                           style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 11,

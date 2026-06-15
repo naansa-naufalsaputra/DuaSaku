@@ -86,9 +86,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   }
 
   Color _getMonochromaticBlue(int index, int total, bool isDark) {
-    final baseColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    final baseColor = isDark
+        ? const Color(0xFF0A84FF)
+        : const Color(0xFF007AFF);
     if (total <= 1) return baseColor;
-    
+
     // Generate distinct shades of blue by adjusting opacity
     double opacity = 1.0 - (index / total) * 0.7; // From 1.0 down to 0.3
     if (opacity < 0.25) opacity = 0.25;
@@ -111,7 +113,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    final Color accentColor = isDark
+        ? const Color(0xFF0A84FF)
+        : const Color(0xFF007AFF);
 
     // Calculate totals
     double totalExpense = 0;
@@ -121,7 +125,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     for (var t in transactions) {
       if (t.type.toLowerCase() == 'expense') {
         totalExpense += t.amount;
-        categoryExpenses[t.category] = (categoryExpenses[t.category] ?? 0) + t.amount;
+        categoryExpenses[t.category] =
+            (categoryExpenses[t.category] ?? 0) + t.amount;
         categoryCounts[t.category] = (categoryCounts[t.category] ?? 0) + 1;
       }
     }
@@ -130,7 +135,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     final startDate = todayStart.subtract(const Duration(days: 6));
-    final List<DateTime> targetDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+    final List<DateTime> targetDays = List.generate(
+      7,
+      (index) => startDate.add(Duration(days: index)),
+    );
 
     final Map<int, double> dailySpending = {};
     for (int d = 1; d <= 7; d++) {
@@ -139,7 +147,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     for (var t in transactions) {
       if (t.type.toLowerCase() == 'expense') {
-        final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+        final tDate = DateTime(
+          t.createdAt.year,
+          t.createdAt.month,
+          t.createdAt.day,
+        );
         for (int i = 0; i < 7; i++) {
           if (tDate.isAtSameMomentAs(targetDays[i])) {
             dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
@@ -203,7 +215,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
       pieSections.add(
         PieChartSectionData(
-          color: _getMonochromaticBlue(i, sortedExpenseBreakdown.length, isDark),
+          color: _getMonochromaticBlue(
+            i,
+            sortedExpenseBreakdown.length,
+            isDark,
+          ),
           value: item.amount,
           title: '',
           radius: radius,
@@ -227,13 +243,15 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     double largestPercentage = 0;
     if (totalExpense > 0 && sortedExpenseBreakdown.isNotEmpty) {
       largestCategoryName = sortedExpenseBreakdown.first.category;
-      largestPercentage = (sortedExpenseBreakdown.first.amount / totalExpense) * 100;
+      largestPercentage =
+          (sortedExpenseBreakdown.first.amount / totalExpense) * 100;
     }
 
     String displayedCategoryName = largestCategoryName;
     double displayedPercentage = largestPercentage;
 
-    if (_touchedPieIndex >= 0 && _touchedPieIndex < sortedExpenseBreakdown.length) {
+    if (_touchedPieIndex >= 0 &&
+        _touchedPieIndex < sortedExpenseBreakdown.length) {
       final touchedItem = sortedExpenseBreakdown[_touchedPieIndex];
       displayedCategoryName = touchedItem.category;
       displayedPercentage = (touchedItem.amount / totalExpense) * 100;
@@ -348,7 +366,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                           style: TextStyle(
                                             fontSize: 56,
                                             fontWeight: FontWeight.bold,
-                                            color: isDark ? Colors.white : Colors.black87,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black87,
                                             height: 1.1,
                                           ),
                                         ),
@@ -357,7 +377,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
-                                            color: isDark ? Colors.white60 : Colors.black54,
+                                            color: isDark
+                                                ? Colors.white60
+                                                : Colors.black54,
                                           ),
                                         ),
                                       ],
@@ -380,7 +402,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.2 : 0.03,
+                          ),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -402,7 +426,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -410,7 +436,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                   'insights.last_7_days'.tr(),
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: isDark ? Colors.white60 : Colors.black54,
+                                    color: isDark
+                                        ? Colors.white60
+                                        : Colors.black54,
                                   ),
                                 ),
                               ],
@@ -423,7 +451,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -464,7 +494,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                     interval: 1.0,
                                     getTitlesWidget: (value, meta) {
                                       final style = TextStyle(
-                                        color: isDark ? Colors.white38 : Colors.black38,
+                                        color: isDark
+                                            ? Colors.white38
+                                            : Colors.black38,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w500,
                                       );
@@ -472,7 +504,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                       if (dayIndex >= 1 && dayIndex <= 7) {
                                         final date = targetDays[dayIndex - 1];
                                         final label = DateFormat.E(
-                                          Localizations.localeOf(context).toString()
+                                          Localizations.localeOf(
+                                            context,
+                                          ).toString(),
                                         ).format(date);
                                         return SideTitleWidget(
                                           axisSide: meta.axisSide,
@@ -554,19 +588,22 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                 sectionsSpace: 2,
                                 centerSpaceRadius: 54,
                                 pieTouchData: PieTouchData(
-                                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                                    setState(() {
-                                      if (!event.isInterestedForInteractions ||
-                                          pieTouchResponse == null ||
-                                          pieTouchResponse.touchedSection == null) {
-                                        _touchedPieIndex = -1;
-                                        return;
-                                      }
-                                      _touchedPieIndex = pieTouchResponse
-                                          .touchedSection!
-                                          .touchedSectionIndex;
-                                    });
-                                  },
+                                  touchCallback:
+                                      (FlTouchEvent event, pieTouchResponse) {
+                                        setState(() {
+                                          if (!event
+                                                  .isInterestedForInteractions ||
+                                              pieTouchResponse == null ||
+                                              pieTouchResponse.touchedSection ==
+                                                  null) {
+                                            _touchedPieIndex = -1;
+                                            return;
+                                          }
+                                          _touchedPieIndex = pieTouchResponse
+                                              .touchedSection!
+                                              .touchedSectionIndex;
+                                        });
+                                      },
                                 ),
                                 sections: pieSections,
                               ),
@@ -580,7 +617,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                     style: TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -590,7 +629,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 1.0,
-                                      color: isDark ? Colors.white60 : Colors.black54,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
                                     ),
                                   ),
                                 ],
@@ -608,7 +649,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: sortedExpenseBreakdown.length,
                       separatorBuilder: (context, index) => Divider(
-                        color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : Colors.black.withValues(alpha: 0.04),
                         height: 24,
                       ),
                       itemBuilder: (context, index) {
@@ -646,15 +689,21 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'insights.transactions_count'.tr(args: [item.count.toString()]),
+                                      'insights.transactions_count'.tr(
+                                        args: [item.count.toString()],
+                                      ),
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: isDark ? Colors.white38 : Colors.black38,
+                                        color: isDark
+                                            ? Colors.white38
+                                            : Colors.black38,
                                       ),
                                     ),
                                   ],

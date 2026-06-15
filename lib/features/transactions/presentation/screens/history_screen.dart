@@ -124,10 +124,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return groups;
   }
 
-  Widget _buildSummaryHeader(
-    List<TransactionModel> filteredList,
-    bool isDark,
-  ) {
+  Widget _buildSummaryHeader(List<TransactionModel> filteredList, bool isDark) {
     double totalIncome = 0;
     double totalExpense = 0;
     for (var tx in filteredList) {
@@ -188,7 +185,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ],
           ),
-          
+
           // Total Expense
           Row(
             children: [
@@ -242,7 +239,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final walletsAsync = ref.watch(walletProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    final accentColor = isDark
+        ? const Color(0xFF0A84FF)
+        : const Color(0xFF007AFF);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -280,7 +279,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       // Search Field
                       Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF2F5FA),
+                          color: isDark
+                              ? const Color(0xFF1E1E1E)
+                              : const Color(0xFFF2F5FA),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: TextField(
@@ -320,9 +321,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           children: [
                             _buildFilterChip('All', 'all', accentColor, isDark),
                             const SizedBox(width: 8),
-                            _buildFilterChip('Income', 'income', accentColor, isDark),
+                            _buildFilterChip(
+                              'Income',
+                              'income',
+                              accentColor,
+                              isDark,
+                            ),
                             const SizedBox(width: 8),
-                            _buildFilterChip('Expense', 'expense', accentColor, isDark),
+                            _buildFilterChip(
+                              'Expense',
+                              'expense',
+                              accentColor,
+                              isDark,
+                            ),
                           ],
                         ),
                       ),
@@ -450,7 +461,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                           );
 
                                       final amountColor = isExpense
-                                          ? (isDark ? Colors.white : Colors.black87)
+                                          ? (isDark
+                                                ? Colors.white
+                                                : Colors.black87)
                                           : const Color(0xFF10B981);
                                       final amountPrefix = isExpense
                                           ? '-'
@@ -477,18 +490,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                               );
                                             },
                                             child: Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                vertical: 16,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 16,
+                                                  ),
                                               child: Row(
                                                 children: [
                                                   Container(
                                                     width: 44,
                                                     height: 44,
                                                     decoration: BoxDecoration(
-                                                      color: accentColor.withValues(
-                                                        alpha: 0.08,
-                                                      ),
+                                                      color: accentColor
+                                                          .withValues(
+                                                            alpha: 0.08,
+                                                          ),
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(
@@ -508,21 +523,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                       children: [
                                                         Text(
                                                           tx.notes.isNotEmpty
-                                                              ? TextSanitizer.prettifyNotes(tx.notes)
-                                                              : tx.category.toLocalizedCategory(),
+                                                              ? TextSanitizer.prettifyNotes(
+                                                                  tx.notes,
+                                                                )
+                                                              : tx.category
+                                                                    .toLocalizedCategory(),
                                                           style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight.w500,
                                                             color: isDark
                                                                 ? Colors.white
-                                                                : Colors.black87,
+                                                                : Colors
+                                                                      .black87,
                                                             fontSize: 16,
                                                           ),
                                                           maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                         ),
-                                                        const SizedBox(height: 4),
+                                                        const SizedBox(
+                                                          height: 4,
+                                                        ),
                                                         Text(
                                                           tx.category
                                                               .toLocalizedCategory()
@@ -530,7 +551,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                           style: TextStyle(
                                                             color: isDark
                                                                 ? Colors.white30
-                                                                : Colors.black38,
+                                                                : Colors
+                                                                      .black38,
                                                             fontSize: 10,
                                                             fontWeight:
                                                                 FontWeight.w300,
@@ -563,7 +585,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                               ? Colors.white30
                                                               : Colors.black38,
                                                           fontSize: 11,
-                                                          fontWeight: FontWeight.w300,
+                                                          fontWeight:
+                                                              FontWeight.w300,
                                                         ),
                                                       ),
                                                     ],
@@ -611,7 +634,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, String value, Color accentColor, bool isDark) {
+  Widget _buildFilterChip(
+    String label,
+    String value,
+    Color accentColor,
+    bool isDark,
+  ) {
     final isSelected = _filterType == value;
 
     return Padding(

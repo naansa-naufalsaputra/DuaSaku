@@ -96,7 +96,9 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                   children: [
                     // Title
                     Text(
-                      walletToEdit == null ? 'wallets.title_add_new'.tr() : 'wallets.title_edit'.tr(),
+                      walletToEdit == null
+                          ? 'wallets.title_add_new'.tr()
+                          : 'wallets.title_edit'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: isDark ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
@@ -182,7 +184,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'wallets.type_${type.toLowerCase().replaceAll('-', '')}'.tr(),
+                                    'wallets.type_${type.toLowerCase().replaceAll('-', '')}'
+                                        .tr(),
                                     style: TextStyle(
                                       color: isSelected
                                           ? accentColor
@@ -269,7 +272,9 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                         }
                       },
                       child: Text(
-                        walletToEdit == null ? 'wallets.btn_create'.tr() : 'wallets.btn_save'.tr(),
+                        walletToEdit == null
+                            ? 'wallets.btn_create'.tr()
+                            : 'wallets.btn_save'.tr(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -330,8 +335,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                             'wallets.title_manage'.tr(),
-                             style: TextStyle(
+                            'wallets.title_manage'.tr(),
+                            style: TextStyle(
                               color: isDark ? Colors.white : Colors.black87,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -593,13 +598,17 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                           width: 4,
                                                         ),
                                                         Text(
-                                                          'wallets.type_${wallet.type.toLowerCase().replaceAll('-', '')}'.tr(),
-                                                          style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 10,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
+                                                          'wallets.type_${wallet.type.toLowerCase().replaceAll('-', '')}'
+                                                              .tr(),
+                                                          style:
+                                                              const TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
                                                         ),
                                                       ],
                                                     ),
@@ -697,7 +706,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                                       width: 4,
                                                                     ),
                                                                     Text(
-                                                                      'wallets.btn_edit'.tr(),
+                                                                      'wallets.btn_edit'
+                                                                          .tr(),
                                                                       style: const TextStyle(
                                                                         color: Colors
                                                                             .white,
@@ -721,10 +731,16 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                                       context,
                                                                   builder: (ctx) => AlertDialog(
                                                                     title: Text(
-                                                                      'wallets.dialog_delete_title'.tr(),
+                                                                      'wallets.dialog_delete_title'
+                                                                          .tr(),
                                                                     ),
                                                                     content: Text(
-                                                                      'wallets.dialog_delete_message'.tr(args: [wallet.name]),
+                                                                      'wallets.dialog_delete_message'.tr(
+                                                                        args: [
+                                                                          wallet
+                                                                              .name,
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     actions: [
                                                                       GlassButton(
@@ -735,7 +751,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                                           false,
                                                                         ),
                                                                         child: Text(
-                                                                          'wallets.dialog_delete_cancel'.tr(),
+                                                                          'wallets.dialog_delete_cancel'
+                                                                              .tr(),
                                                                         ),
                                                                       ),
                                                                       GlassButton(
@@ -744,7 +761,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                                           true,
                                                                         ),
                                                                         child: Text(
-                                                                          'wallets.dialog_delete_confirm'.tr(),
+                                                                          'wallets.dialog_delete_confirm'
+                                                                              .tr(),
                                                                         ),
                                                                       ),
                                                                     ],
@@ -803,7 +821,8 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                                                       width: 4,
                                                                     ),
                                                                     Text(
-                                                                      'wallets.btn_delete'.tr(),
+                                                                      'wallets.btn_delete'
+                                                                          .tr(),
                                                                       style: const TextStyle(
                                                                         color: Colors
                                                                             .white,

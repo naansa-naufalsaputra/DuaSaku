@@ -112,9 +112,12 @@ class ThemePresets {
         ? const Color(0xFFF5F5F7)
         : const Color(0xFF1D1D1F);
     final Color accentColor = isDark
-        ? const Color(0xFF0A84FF) // Luminous Electric Blue for dark mode highlights
-        : const Color(0xFF007AFF); // Premium Royal Blue for light mode active states
-
+        ? const Color(
+            0xFF0A84FF,
+          ) // Luminous Electric Blue for dark mode highlights
+        : const Color(
+            0xFF007AFF,
+          ); // Premium Royal Blue for light mode active states
 
     return ThemeDetails(
       baseBackgroundColor: bgColor,
@@ -151,12 +154,18 @@ class ThemePresets {
         cardTheme: CardThemeData(
           color: surfaceColor,
           elevation: isDark ? 0 : 4, // Ultra-diffuse shadow in light mode
-          shadowColor: isDark ? Colors.transparent : Colors.black.withValues(alpha: 0.03),
+          shadowColor: isDark
+              ? Colors.transparent
+              : Colors.black.withValues(alpha: 0.03),
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24), // BorderRadius.circular(24) enforced
+            borderRadius: BorderRadius.circular(
+              24,
+            ), // BorderRadius.circular(24) enforced
             side: BorderSide(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.transparent,
               width: isDark ? 1 : 0,
             ),
           ),
@@ -191,7 +200,9 @@ class ThemePresets {
           }),
         ),
         dividerTheme: DividerThemeData(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.04),
           thickness: 1,
           space: 1,
         ),

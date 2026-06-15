@@ -364,7 +364,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         false;
   }
 
-  void _showRestoreSummarySheet(BuildContext context, Map<String, int> counts, Color accentColor) {
+  void _showRestoreSummarySheet(
+    BuildContext context,
+    Map<String, int> counts,
+    Color accentColor,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
@@ -764,7 +768,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  Widget _buildGroupContainer({required List<Widget> children, required bool isDark}) {
+  Widget _buildGroupContainer({
+    required List<Widget> children,
+    required bool isDark,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -777,9 +784,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
@@ -790,11 +795,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         color: accentColor.withValues(alpha: 0.08),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        icon,
-        color: accentColor,
-        size: 20,
-      ),
+      child: Icon(icon, color: accentColor, size: 20),
     );
   }
 
@@ -856,7 +857,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final parserMode = ref.watch(parserModeProvider);
     final geofencingAlertsEnabled = ref.watch(geofencingAlertsProvider);
     final securityState = ref.watch(securityProvider);
-    final accentColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
+    final accentColor = isDark
+        ? const Color(0xFF0A84FF)
+        : const Color(0xFF007AFF);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -890,10 +893,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: accentColor,
-                            width: 2,
-                          ),
+                          border: Border.all(color: accentColor, width: 2),
                         ),
                         child: CircleAvatar(
                           radius: 44,
@@ -972,7 +972,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     isDark: isDark,
                     children: [
                       ListTile(
-                        leading: _buildTileIcon(Icons.account_balance_wallet_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.account_balance_wallet_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.manage_wallets'.tr(),
                           style: TextStyle(
@@ -998,9 +1001,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           context.push('/manage-wallets');
                         },
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.category_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.category_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.manage_categories'.tr(),
                           style: TextStyle(
@@ -1026,9 +1036,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           context.push('/categories');
                         },
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.person_outline, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.person_outline,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.display_name'.tr(),
                           style: TextStyle(
@@ -1068,7 +1085,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     isDark: isDark,
                     children: [
                       ListTile(
-                        leading: _buildTileIcon(Icons.security_rounded, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.security_rounded,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.security_toggle'.tr(),
                           style: TextStyle(
@@ -1095,12 +1115,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           },
                         ),
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       Opacity(
                         opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
                         child: ListTile(
                           enabled: securityState.isSecurityEnabled,
-                          leading: _buildTileIcon(Icons.fingerprint, accentColor),
+                          leading: _buildTileIcon(
+                            Icons.fingerprint,
+                            accentColor,
+                          ),
                           title: Text(
                             'profile.biometric_lock'.tr(),
                             style: TextStyle(
@@ -1145,12 +1172,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           ),
                         ),
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       Opacity(
                         opacity: securityState.isSecurityEnabled ? 1.0 : 0.4,
                         child: ListTile(
                           enabled: securityState.isSecurityEnabled,
-                          leading: _buildTileIcon(Icons.lock_outline, accentColor),
+                          leading: _buildTileIcon(
+                            Icons.lock_outline,
+                            accentColor,
+                          ),
                           title: Text(
                             'profile.change_pin'.tr(),
                             style: TextStyle(
@@ -1191,7 +1225,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     isDark: isDark,
                     children: [
                       ListTile(
-                        leading: _buildTileIcon(Icons.cloud_download_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.cloud_download_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.backup_data'.tr(),
                           style: TextStyle(
@@ -1217,9 +1254,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           _handleBackup(accentColor);
                         },
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.cloud_upload_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.cloud_upload_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.restore_data'.tr(),
                           style: TextStyle(
@@ -1257,7 +1301,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     isDark: isDark,
                     children: [
                       ListTile(
-                        leading: _buildTileIcon(Icons.dark_mode_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.dark_mode_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.dark_mode'.tr(),
                           style: TextStyle(
@@ -1267,7 +1314,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           ),
                         ),
                         trailing: Switch.adaptive(
-                          value: ref.watch(themeNotifierProvider).themeMode == ThemeMode.dark,
+                          value:
+                              ref.watch(themeNotifierProvider).themeMode ==
+                              ThemeMode.dark,
                           activeTrackColor: accentColor,
                           onChanged: (val) {
                             HapticFeedback.lightImpact();
@@ -1279,9 +1328,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           },
                         ),
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.palette_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.palette_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.aesthetic_presets'.tr(),
                           style: TextStyle(
@@ -1361,9 +1417,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           _showParserModePicker(context, accentColor);
                         },
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.location_on_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.location_on_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.geofencing_alerts'.tr(),
                           style: TextStyle(
@@ -1415,7 +1478,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     isDark: isDark,
                     children: [
                       ListTile(
-                        leading: _buildTileIcon(Icons.notifications_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.notifications_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.notifications'.tr(),
                           style: TextStyle(
@@ -1435,9 +1501,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           },
                         ),
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
-                        leading: _buildTileIcon(Icons.language_outlined, accentColor),
+                        leading: _buildTileIcon(
+                          Icons.language_outlined,
+                          accentColor,
+                        ),
                         title: Text(
                           'profile.language'.tr(),
                           style: TextStyle(
@@ -1471,7 +1544,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           _showLanguagePicker(context, accentColor);
                         },
                       ),
-                      Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : Colors.black12),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
                       ListTile(
                         leading: _buildTileIcon(Icons.sync_alt, accentColor),
                         title: Text(
@@ -1514,7 +1591,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   height: 56,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      backgroundColor: isDark
+                          ? const Color(0xFF1C1C1E)
+                          : Colors.white,
                       foregroundColor: Colors.redAccent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -1536,7 +1615,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                        const Icon(
+                          Icons.logout,
+                          color: Colors.redAccent,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'profile.logout'.tr(),
