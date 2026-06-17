@@ -6,6 +6,9 @@ import 'package:duasaku_app/features/goals/data/goal_dao.dart';
 import 'package:duasaku_app/features/recurring_transactions/data/recurring_transaction_dao.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:uuid/uuid.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 // File ini akan di-generate oleh build_runner
 part 'app_database.g.dart';
@@ -405,13 +408,92 @@ class AppDatabase extends _$AppDatabase {
   );
 }
 
+bool _isValidUuid(String? uuid) {
+  if (uuid == null) return false;
+  final uuidRegex = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+  );
+  return uuidRegex.hasMatch(uuid);
+}
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'duasaku_offline.sqlite'));
+
+    // Secure storage setup
+    const secureStorage = FlutterSecureStorage();
+    String? dbKey = await secureStorage.read(key: 'db_key');
+    
+    if (dbKey != null && !_isValidUuid(dbKey)) {
+      throw ArgumentError('Invalid database key format');
+    }
+
+    if (await file.exists()) {
+      if (dbKey == null) {
+        // Deteksi apakah database eksisting adalah plaintext
+        bool isPlaintext = false;
+        sqlite.Database? rawDb;
+        try {
+          rawDb = sqlite.sqlite3.open(file.path);
+          // Jalankan user_version untuk memverifikasi plaintext
+          rawDb.select('PRAGMA user_version;');
+          isPlaintext = true;
+        } catch (_) {
+          isPlaintext = false;
+        } finally {
+          rawDb?.close();
+        }
+
+        if (isPlaintext) {
+          // Migrasi plaintext ke SQLCipher
+          dbKey = const Uuid().v4();
+          
+          // Validate key format before SQL execution (prevent SQL injection)
+          if (!_isValidUuid(dbKey)) {
+            throw ArgumentError('Generated database key has invalid format');
+          }
+          
+          final tempFile = File('${file.path}.tmp_encrypted');
+          if (await tempFile.exists()) {
+            await tempFile.delete();
+          }
+
+          final dbToEncrypt = sqlite.sqlite3.open(file.path);
+          try {
+            dbToEncrypt.execute("ATTACH DATABASE '${tempFile.path}' AS encrypted KEY '$dbKey';");
+            dbToEncrypt.execute("SELECT sqlcipher_export('encrypted');");
+            dbToEncrypt.execute("DETACH DATABASE encrypted;");
+          } finally {
+            dbToEncrypt.close();
+          }
+
+          // Gantikan file lama dengan file terenkripsi
+          await file.delete();
+          await tempFile.rename(file.path);
+
+          // Simpan key baru ke SecureStorage
+          await secureStorage.write(key: 'db_key', value: dbKey);
+        } else {
+          // Database file exist, tapi bukan plaintext, dan key tidak ada di SecureStorage.
+          // Ini adalah kegagalan pemulihan key. Tapi untuk mengizinkan pembuatan baru, kita buat key baru.
+          dbKey = const Uuid().v4();
+          await secureStorage.write(key: 'db_key', value: dbKey);
+        }
+      }
+    } else {
+      // Database baru (belum ada file)
+      if (dbKey == null) {
+        dbKey = const Uuid().v4();
+        await secureStorage.write(key: 'db_key', value: dbKey);
+      }
+    }
+
     return NativeDatabase.createInBackground(
       file,
       setup: (db) {
+        // Atur kunci enkripsi untuk SQLCipher
+        db.execute("PRAGMA key = '$dbKey';");
         db.execute('PRAGMA foreign_keys = ON;');
         db.execute('PRAGMA journal_mode = WAL;');
       },
