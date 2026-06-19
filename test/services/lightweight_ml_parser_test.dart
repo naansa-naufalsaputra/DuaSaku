@@ -39,7 +39,7 @@ void main() {
 
         expect(result.amount, equals(35000.0));
         expect(result.type, equals('expense'));
-        expect(result.category, equals('Makanan'));
+        expect(result.categoryId, equals('Makanan'));
         expect(result.walletId, equals('w1')); // Match Cash wallet
       },
     );
@@ -55,7 +55,7 @@ void main() {
 
         expect(result.amount, equals(5500000.0));
         expect(result.type, equals('income'));
-        expect(result.category, equals('Gaji'));
+        expect(result.categoryId, equals('Gaji'));
         expect(result.walletId, equals('w2')); // Match BCA wallet
       },
     );
@@ -71,7 +71,7 @@ void main() {
 
         expect(result.amount, equals(120000.0));
         expect(result.type, equals('expense'));
-        expect(result.category, equals('Belanja'));
+        expect(result.categoryId, equals('Belanja'));
       },
     );
 
@@ -85,7 +85,7 @@ void main() {
       expect(result.amount, equals(50000.0));
       expect(result.type, equals('expense'));
       // Fallback expense category should be Makanan
-      expect(result.category, equals('Makanan'));
+      expect(result.categoryId, equals('Makanan'));
     });
   });
 }

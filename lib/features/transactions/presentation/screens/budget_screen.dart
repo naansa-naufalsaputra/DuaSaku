@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../providers/budget_provider.dart';
+import '../../providers/category_provider.dart';
+import '../../data/budget_repository.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
 import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../../core/widgets/glass/glass_input_field.dart';
 import '../../../../core/widgets/glass/glass_button.dart';
 import '../../../../core/utils/thousands_formatter.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key});
@@ -18,10 +21,15 @@ class BudgetScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetScreenState extends ConsumerState<BudgetScreen> {
+  double? _suggestedAmount;
+
   void _showSetBudgetModal() {
     final catCtrl = TextEditingController();
     final amountCtrl = TextEditingController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Reset state
+    _suggestedAmount = null;
 
     showModalBottomSheet(
       context: context,
@@ -53,16 +61,55 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               GlassInputField(
                 controller: catCtrl,
                 labelText: 'Category (e.g. Food)',
+                onChanged: (value) async {
+                  if (value.trim().isEmpty) return;
+
+                  // Find category ID by name
+                  final categories = await ref.read(categoryNotifierProvider.future);
+                  final matchedCategory = categories.firstWhere(
+                    (c) => c.name.toLowerCase() == value.trim().toLowerCase(),
+                    orElse: () => categories.first,
+                  );
+
+                  // Fetch suggestion
+                  final budgetRepo = ref.read(budgetRepositoryProvider);
+                  final suggestion = await budgetRepo.getSuggestedBudget(
+                    AppConstants.defaultUserId,
+                    matchedCategory.id ?? '',
+                  );
+
+                  setState(() {
+                    _suggestedAmount = suggestion;
+                  });
+
+                  // Auto-fill if suggestion exists
+                  if (suggestion != null && amountCtrl.text.isEmpty) {
+                    amountCtrl.text = ThousandsFormatter.format(suggestion);
+                  }
+                },
               ),
+              if (_suggestedAmount != null) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Suggested: ${ref.watch(currencyFormatterProvider).format(_suggestedAmount!)} (3-month avg)',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               GlassInputField(
                 controller: amountCtrl,
                 keyboardType: TextInputType.number,
                 inputFormatters: [ThousandsFormatter()],
                 labelText: 'Amount Limit',
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 12, top: 14),
-                  child: Text('Rp ', style: TextStyle(fontSize: 16)),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 12, top: 14),
+                  child: Text('${ref.watch(currencySymbolProvider)} ', style: const TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -90,11 +137,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final budgetState = ref.watch(budgetNotifierProvider);
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    );
+    final formatter = ref.watch(currencyFormatterProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 

@@ -27,6 +27,14 @@ import '../../features/smart_budget_alerts/presentation/screens/alert_center_scr
 import '../../features/smart_budget_alerts/presentation/screens/budget_detail_screen.dart';
 import '../../features/export_import/presentation/screens/export_screen.dart';
 import '../../features/export_import/presentation/screens/import_confirmation_screen.dart';
+import '../../features/gamification/presentation/screens/gamification_dashboard_screen.dart';
+import '../../features/geofencing/presentation/screens/geofencing_map_screen.dart';
+import '../../features/debts/presentation/screens/debt_list_screen.dart';
+import '../../features/debts/presentation/screens/debt_form_screen.dart';
+import '../../features/debts/presentation/screens/debt_detail_screen.dart';
+import '../../features/bill_reminders/presentation/screens/bill_reminder_list_screen.dart';
+import '../../features/bill_reminders/presentation/screens/bill_reminder_form_screen.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Use AuthRepository directly as refreshListenable (it's a ChangeNotifier now)
@@ -237,6 +245,47 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/import',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const ImportConfirmationScreen(),
+      ),
+      GoRoute(
+        path: '/gamification',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const GamificationDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/geofencing-map',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const GeofencingMapScreen(),
+      ),
+      GoRoute(
+        path: '/debts',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const DebtListScreen(),
+      ),
+      GoRoute(
+        path: '/debts/create',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final type = state.uri.queryParameters['type'];
+          return DebtFormScreen(initialType: type);
+        },
+      ),
+      GoRoute(
+        path: '/debts/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return DebtDetailScreen(debtId: id);
+        },
+      ),
+      GoRoute(
+        path: '/bill-reminders',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const BillReminderListScreen(),
+      ),
+      GoRoute(
+        path: '/bill-reminders/create',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const BillReminderFormScreen(),
       ),
     ],
   );

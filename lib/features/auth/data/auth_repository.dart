@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:duasaku_app/core/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:pointycastle/export.dart' as pc;
 import '../domain/auth_repository_interface.dart';
 
 class User {
@@ -123,18 +125,36 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
     return pinHash != null && pinHash.isNotEmpty;
   }
 
-  /// Internal helper to hash PIN using SHA-256
-  String _hashPin(String pin) {
-    final bytes = utf8.encode(pin);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+  /// Generate a PBKDF2 hash for the given PIN and salt
+  String _pbkdf2Hash(String pin, String saltBase64) {
+    final pinBytes = utf8.encode(pin);
+    final saltBytes = base64.decode(saltBase64);
+
+    final derivator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64))
+      ..init(pc.Pbkdf2Parameters(saltBytes, 10000, 32));
+
+    final hashBytes = derivator.process(pinBytes);
+    return base64.encode(hashBytes);
+  }
+
+  /// Helper to generate a random 16-byte salt
+  String _generateSalt() {
+    final random = Random.secure();
+    final values = List<int>.generate(16, (i) => random.nextInt(256));
+    return base64.encode(values);
   }
 
   /// Set new PIN and authenticate user immediately
   @override
   Future<void> setPin(String pin) async {
-    final hashed = _hashPin(pin);
-    await _secureStorage.write(key: _pinKey, value: hashed);
+    final salt = _generateSalt();
+    final hashed = _pbkdf2Hash(pin, salt);
+    final storedValue = 'pbkdf2:10000:$salt:$hashed';
+    await _secureStorage.write(key: _pinKey, value: storedValue);
+
+    // Reset lockout counters when setting a new PIN
+    await _secureStorage.delete(key: 'auth_failed_attempts');
+    await _secureStorage.delete(key: 'auth_lockout_until');
 
     // Enable lock by default when a PIN is set (ensures E2E testing environment locks correctly)
     try {
@@ -157,20 +177,82 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
   /// Verify entered PIN
   @override
   Future<bool> verifyPin(String pin) async {
-    final storedHash = await _secureStorage.read(key: _pinKey);
-    if (storedHash == null) return false;
+    // Check if locked out
+    final lockoutUntilStr = await _secureStorage.read(key: 'auth_lockout_until');
+    if (lockoutUntilStr != null && lockoutUntilStr.isNotEmpty) {
+      try {
+        final lockoutUntil = DateTime.parse(lockoutUntilStr);
+        if (DateTime.now().isBefore(lockoutUntil)) {
+          return false;
+        }
+      } catch (_) {}
+    }
 
-    final hashedInput = _hashPin(pin);
-    if (storedHash == hashedInput) {
+    final storedValue = await _secureStorage.read(key: _pinKey);
+    if (storedValue == null || storedValue.isEmpty) return false;
+
+    bool isCorrect = false;
+
+    if (storedValue.startsWith('pbkdf2:')) {
+      final parts = storedValue.split(':');
+      if (parts.length == 4) {
+        final salt = parts[2];
+        final expectedHash = parts[3];
+        final computedHash = _pbkdf2Hash(pin, salt);
+        isCorrect = (computedHash == expectedHash);
+      }
+    } else {
+      // Legacy format: plain SHA-256 (length 64 hex)
+      final bytes = utf8.encode(pin);
+      final digest = sha256.convert(bytes);
+      final hashedInput = digest.toString();
+      isCorrect = (storedValue == hashedInput);
+
+      if (isCorrect) {
+        // Transparent migration to PBKDF2
+        final salt = _generateSalt();
+        final pbkdf2Hashed = _pbkdf2Hash(pin, salt);
+        final migratedValue = 'pbkdf2:10000:$salt:$pbkdf2Hashed';
+        await _secureStorage.write(key: _pinKey, value: migratedValue);
+        debugPrint('[AuthRepository] Seamlessly migrated PIN hash to PBKDF2');
+      }
+    }
+
+    if (isCorrect) {
       _isAuthenticated = true;
       _currentUser = User(
         id: AppConstants.defaultUserId,
         email: AppConstants.defaultUserEmail,
       );
+      // Reset lockout counter on success
+      await _secureStorage.delete(key: 'auth_failed_attempts');
+      await _secureStorage.delete(key: 'auth_lockout_until');
+
       notifyListeners();
       return true;
+    } else {
+      // Increment failed attempts
+      final attemptsStr = await _secureStorage.read(key: 'auth_failed_attempts') ?? '0';
+      final attempts = int.parse(attemptsStr) + 1;
+      await _secureStorage.write(key: 'auth_failed_attempts', value: attempts.toString());
+
+      DateTime? lockoutUntil;
+      if (attempts >= 15) {
+        lockoutUntil = DateTime.now().add(const Duration(minutes: 30));
+      } else if (attempts >= 10) {
+        lockoutUntil = DateTime.now().add(const Duration(minutes: 5));
+      } else if (attempts >= 5) {
+        lockoutUntil = DateTime.now().add(const Duration(seconds: 30));
+      }
+
+      if (lockoutUntil != null) {
+        await _secureStorage.write(
+          key: 'auth_lockout_until',
+          value: lockoutUntil.toIso8601String(),
+        );
+      }
+      return false;
     }
-    return false;
   }
 
   /// Authenticate with biometrics
@@ -205,6 +287,10 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
           id: AppConstants.defaultUserId,
           email: AppConstants.defaultUserEmail,
         );
+        // Reset lockout on successful biometric authentication
+        await _secureStorage.delete(key: 'auth_failed_attempts');
+        await _secureStorage.delete(key: 'auth_lockout_until');
+
         notifyListeners();
         return true;
       }
@@ -230,6 +316,9 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
       id: AppConstants.defaultUserId,
       email: AppConstants.defaultUserEmail,
     );
+    // Reset lockout on local authentication
+    _secureStorage.delete(key: 'auth_failed_attempts');
+    _secureStorage.delete(key: 'auth_lockout_until');
     notifyListeners();
   }
 

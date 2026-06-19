@@ -242,11 +242,17 @@ class TextSanitizer {
   }
 
   /// Sanitizes transaction notes by collapsing extra whitespaces,
-  /// trimming, and converting to Sentence case (only the first letter
-  /// of the entire string is capitalized).
+  /// trimming, and converting to Title Case (the first letter of each
+  /// word is capitalized, and the rest cast to lowercase).
   static String prettifyNotes(String input) {
     final trimmed = input.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (trimmed.isEmpty) return '';
-    return trimmed[0].toUpperCase() + trimmed.substring(1).toLowerCase();
+    return trimmed
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return '';
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 }

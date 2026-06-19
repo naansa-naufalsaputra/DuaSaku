@@ -30,7 +30,7 @@ class MockTfliteParser extends TfliteTransactionParserService {
     return mockResult ??
         const ParsedTransaction(
           amount: 999.0,
-          category: 'Makanan',
+          categoryId: 'Makanan',
           type: 'expense',
           notes: 'parsed_by_tflite',
         );
@@ -75,7 +75,7 @@ class MockLightweightMlParser extends LightweightMlParser {
     return mockResult ??
         const ParsedTransaction(
           amount: 888.0,
-          category: 'Makanan',
+          categoryId: 'Makanan',
           type: 'expense',
           notes: 'parsed_by_lightweight_ml',
         );
@@ -93,7 +93,7 @@ void main() {
       final mockTflite = MockTfliteParser(
         mockResult: const ParsedTransaction(
           amount: 50000.0,
-          category: 'Makanan',
+          categoryId: 'Makanan',
           type: 'expense',
           notes: 'nasi goreng',
         ),
@@ -137,7 +137,7 @@ void main() {
 
         // Local parser should parse 50k as 50000.0
         expect(result.amount, equals(50000.0));
-        expect(result.category, equals('Makanan'));
+        expect(result.categoryId, equals('Makanan'));
       },
     );
 
@@ -163,7 +163,7 @@ void main() {
 
       // TFLite timed out, so result must be parsed by local service (50k -> 50000.0)
       expect(result.amount, equals(50000.0));
-      expect(result.category, equals('Makanan'));
+      expect(result.categoryId, equals('Makanan'));
     });
 
     test(
@@ -173,7 +173,7 @@ void main() {
         const mockLwMl = MockLightweightMlParser(
           mockResult: ParsedTransaction(
             amount: 75000.0,
-            category: 'Makanan',
+            categoryId: 'Makanan',
             type: 'expense',
             notes: 'parsed_by_lightweight_ml',
           ),
@@ -194,7 +194,7 @@ void main() {
         );
 
         expect(result.amount, equals(75000.0));
-        expect(result.category, equals('Makanan'));
+        expect(result.categoryId, equals('Makanan'));
         expect(result.notes, equals('parsed_by_lightweight_ml'));
       },
     );
@@ -221,7 +221,7 @@ void main() {
 
         // Both failed, so local parser should resolve it (75k -> 75000.0)
         expect(result.amount, equals(75000.0));
-        expect(result.category, equals('Makanan'));
+        expect(result.categoryId, equals('Makanan'));
       },
     );
   });

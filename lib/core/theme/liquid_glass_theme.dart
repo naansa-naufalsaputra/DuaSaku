@@ -84,6 +84,70 @@ class LiquidGlassTheme extends ThemeExtension<LiquidGlassTheme> {
     );
   }
 
+  /// warmSunset preset — dark mode.
+  factory LiquidGlassTheme.warmSunsetDark() {
+    const primaryColor = Color(0xFFF7931E); // Warm amber
+    const surfaceColor = Color(0xFF1C1C1E);
+    return LiquidGlassTheme(
+      blurSigma: 12.0,
+      surfaceOpacity: 0.65,
+      borderGlowColor: primaryColor.withValues(alpha: 0.15),
+      surfaceTintColor: surfaceColor,
+      innerHighlightOpacity: 0.08,
+      animationDuration: const Duration(milliseconds: 300),
+      animationDurationFast: const Duration(milliseconds: 150),
+      animationDurationSlow: const Duration(milliseconds: 500),
+      animationCurve: Curves.easeOutCubic,
+    );
+  }
+
+  factory LiquidGlassTheme.warmSunsetLight() {
+    const surfaceColor = Color(0xFFFFFFFF);
+    return const LiquidGlassTheme(
+      blurSigma: 10.0,
+      surfaceOpacity: 0.70,
+      borderGlowColor: Colors.transparent,
+      surfaceTintColor: surfaceColor,
+      innerHighlightOpacity: 0.05,
+      animationDuration: Duration(milliseconds: 300),
+      animationDurationFast: Duration(milliseconds: 150),
+      animationDurationSlow: Duration(milliseconds: 500),
+      animationCurve: Curves.easeOutCubic,
+    );
+  }
+
+  /// midnightOcean preset — dark mode.
+  factory LiquidGlassTheme.midnightOceanDark() {
+    const primaryColor = Color(0xFF00D9FF); // Bright cyan
+    const surfaceColor = Color(0xFF1C1C1E);
+    return LiquidGlassTheme(
+      blurSigma: 12.0,
+      surfaceOpacity: 0.65,
+      borderGlowColor: primaryColor.withValues(alpha: 0.15),
+      surfaceTintColor: surfaceColor,
+      innerHighlightOpacity: 0.08,
+      animationDuration: const Duration(milliseconds: 300),
+      animationDurationFast: const Duration(milliseconds: 150),
+      animationDurationSlow: const Duration(milliseconds: 500),
+      animationCurve: Curves.easeOutCubic,
+    );
+  }
+
+  factory LiquidGlassTheme.midnightOceanLight() {
+    const surfaceColor = Color(0xFFFFFFFF);
+    return const LiquidGlassTheme(
+      blurSigma: 10.0,
+      surfaceOpacity: 0.70,
+      borderGlowColor: Colors.transparent,
+      surfaceTintColor: surfaceColor,
+      innerHighlightOpacity: 0.05,
+      animationDuration: Duration(milliseconds: 300),
+      animationDurationFast: Duration(milliseconds: 150),
+      animationDurationSlow: Duration(milliseconds: 500),
+      animationCurve: Curves.easeOutCubic,
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Convenience accessor
   // ---------------------------------------------------------------------------

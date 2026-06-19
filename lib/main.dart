@@ -1,17 +1,20 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:lottie/lottie.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/routing/app_router.dart';
 import 'core/background/background_task_helper.dart';
 import 'features/geofencing/services/geofence_service.dart';
 import 'core/security/security_service.dart';
 import 'features/transactions/services/notification_parser_service.dart';
 import 'core/config/env.dart';
+import 'core/services/balance_integrity_provider.dart';
+import 'features/transactions/providers/transaction_event_handlers_provider.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/presentation/screens/pin_auth_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -23,22 +26,40 @@ final widgetLaunchProvider = StateProvider<bool>((ref) => false);
 /// Stream controller for notification tap payloads.
 /// When a notification is tapped, the payload URI is added to this stream
 /// so the app can navigate accordingly.
-final StreamController<String> _notificationTapController =
+final StreamController<String> notificationTapController =
     StreamController<String>.broadcast();
 
 /// Handles the notification tap response from flutter_local_notifications.
 /// Parses the payload and adds it to the stream for the app to handle.
 @pragma('vm:entry-point')
-void _onNotificationTap(NotificationResponse response) {
+void onNotificationTapGlobal(NotificationResponse response) {
   final payload = response.payload;
   if (payload != null && payload.isNotEmpty) {
-    _notificationTapController.add(payload);
+    notificationTapController.add(payload);
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Sentry for production crash reporting
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = 'https://your-sentry-dsn@sentry.io/project-id'; // Todo: Replace with actual DSN
+      options.environment = kReleaseMode ? 'production' : 'development';
+      options.tracesSampleRate = 0.1; // 10% performance monitoring
+      options.enableAutoSessionTracking = true;
+      // Only capture in release mode by default
+      options.beforeSend = (event, hint) {
+        if (kDebugMode) return null; // Skip Sentry in debug
+        return event;
+      };
+    },
+    appRunner: _runApp,
+  );
+}
+
+void _runApp() async {
   // Setup Global Error Logging Interceptors
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -48,6 +69,16 @@ void main() async {
       error: details.exceptionAsString(),
       stackTrace: details.stack,
     );
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    _logGlobalError(
+      title: 'UNCAUGHT ASYNCHRONOUS ERROR',
+      emoji: '⚡',
+      error: error,
+      stackTrace: stack,
+    );
+    return true;
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
@@ -83,7 +114,7 @@ void main() async {
   );
   await flutterLocalNotificationsPlugin.initialize(
     settings: initSettings,
-    onDidReceiveNotificationResponse: _onNotificationTap,
+    onDidReceiveNotificationResponse: onNotificationTapGlobal,
   );
 
   // Check if app was launched from a notification tap
@@ -134,12 +165,26 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
     super.initState();
     _initHomeWidget();
     _initNotificationTapListener();
+    _preCacheLottieAnimations();
     // Silent background ML Kit model initialization
     Future.microtask(() {
       if (mounted) {
         ref.read(smartInputMlServiceProvider).initializeSilently();
+        // Run balance integrity check on startup
+        _runBalanceIntegrityCheck(ref);
+        // Initialize transaction event handlers
+        _initTransactionEventHandlers(ref);
       }
     });
+  }
+
+  void _preCacheLottieAnimations() {
+    try {
+      AssetLottie('assets/animations/empty_alerts.json').load();
+      AssetLottie('assets/animations/success.json').load();
+    } catch (e) {
+      debugPrint('[LottiePreCache] Error pre-caching animations: $e');
+    }
   }
 
   @override
@@ -191,12 +236,19 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
         // Navigate to Alert Center
         ref.read(routerProvider).go('/alert-center');
       }
+    } else if (uri.host == 'wallet_detail') {
+      final id = uri.queryParameters['id'];
+      if (id != null && id.isNotEmpty) {
+        ref.read(routerProvider).go('/wallets/$id');
+      } else {
+        ref.read(routerProvider).go('/manage-wallets');
+      }
     }
   }
 
   void _initNotificationTapListener() {
     // Listen for notification taps while the app is running
-    _notificationTapSubscription = _notificationTapController.stream.listen(
+    _notificationTapSubscription = notificationTapController.stream.listen(
       _handleNotificationPayload,
     );
 
@@ -219,6 +271,35 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
     if (uri == null || uri.scheme != 'duasaku') return;
 
     _handleWidgetClick(uri);
+  }
+
+  /// Runs balance integrity check in background to detect/repair wallet balance drift.
+  void _runBalanceIntegrityCheck(WidgetRef ref) async {
+    try {
+      final service = ref.read(balanceIntegrityServiceProvider);
+      final discrepancies = await service.checkAllWallets();
+      
+      if (discrepancies.isNotEmpty) {
+        debugPrint('[BalanceIntegrity] Found ${discrepancies.length} discrepancies, repairing...');
+        final repairedCount = await service.repairAllDiscrepancies(discrepancies);
+        debugPrint('[BalanceIntegrity] Repaired $repairedCount wallets');
+      } else {
+        debugPrint('[BalanceIntegrity] No balance discrepancies found');
+      }
+    } catch (e) {
+      debugPrint('[BalanceIntegrity] Error during balance check: $e');
+    }
+  }
+
+  /// Initialize transaction event handlers to listen for side-effects.
+  void _initTransactionEventHandlers(WidgetRef ref) {
+    try {
+      // Access the provider to initialize and register event handlers
+      ref.read(transactionEventHandlersProvider);
+      debugPrint('[EventHandlers] Transaction event handlers initialized');
+    } catch (e) {
+      debugPrint('[EventHandlers] Error initializing event handlers: $e');
+    }
   }
 
   @override
@@ -349,8 +430,16 @@ void _logGlobalError({
   required Object error,
   required StackTrace? stackTrace,
 }) {
-  if (!kDebugMode) return; // Silent in release modes to prevent console clutter
+  // In release mode, send to Sentry
+  if (kReleaseMode) {
+    Sentry.captureException(
+      error,
+      stackTrace: stackTrace,
+    );
+    return; // Don't log to console in release
+  }
 
+  // Debug mode: detailed console logging
   final buffer = StringBuffer();
   buffer.writeln(
     '======================================================================',
@@ -365,20 +454,12 @@ void _logGlobalError({
       '----------------------------------------------------------------------',
     );
     buffer.writeln('Stack Trace:');
-    buffer.writeln(
-      stackTrace.toString().split('\n').take(12).join('\n'),
-    ); // Show top 12 frames for clarity
+    buffer.writeln(stackTrace);
   }
   buffer.writeln(
     '======================================================================',
   );
-
-  developer.log(
-    buffer.toString(),
-    name: 'DuaSakuError',
-    error: error,
-    stackTrace: stackTrace,
-  );
+  debugPrint(buffer.toString());
 }
 
 class FriendlyErrorWidget extends StatelessWidget {
@@ -404,7 +485,7 @@ class FriendlyErrorWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Ooops! Something went wrong.',
+                  'error.title'.tr(),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
@@ -413,7 +494,7 @@ class FriendlyErrorWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'An unexpected system error occurred. We apologize for the inconvenience. Please try restarting the app.',
+                  'error.message'.tr(),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),

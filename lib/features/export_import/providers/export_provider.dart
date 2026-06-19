@@ -37,8 +37,8 @@ final exportServiceProvider = Provider<ExportServiceInterface>((ref) {
 // Export State
 // ---------------------------------------------------------------------------
 
-/// Export mode: CSV report or full JSON backup.
-enum ExportMode { csv, json }
+/// Export mode: CSV report, Excel spreadsheet, or full JSON backup.
+enum ExportMode { csv, excel, json }
 
 /// State managed by [ExportNotifier].
 class ExportState {
@@ -147,6 +147,27 @@ class ExportNotifier extends AsyncNotifier<ExportState> {
         );
 
         final result = await service.exportCsv(config);
+        switch (result) {
+          case Success(:final value):
+            state = AsyncData(
+              current.copyWith(isExporting: false, result: value),
+            );
+          case Failure(:final error):
+            state = AsyncError(error, StackTrace.current);
+        }
+      } else if (current.mode == ExportMode.excel) {
+        // Excel export with selected types and date range
+        if (current.selectedTypes.isEmpty) {
+          state = AsyncData(current.copyWith(isExporting: false));
+          return;
+        }
+
+        final config = ExportConfig(
+          selectedTypes: current.selectedTypes,
+          dateRange: current.dateRange,
+        );
+
+        final result = await service.exportExcel(config);
         switch (result) {
           case Success(:final value):
             state = AsyncData(

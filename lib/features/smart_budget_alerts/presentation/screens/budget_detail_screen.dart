@@ -6,6 +6,7 @@ import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../transactions/providers/budget_provider.dart';
 import '../../domain/models/budget_alert_model.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 /// Data class passed via GoRouter `extra` for projection info display.
 class BudgetDetailExtra {
@@ -29,11 +30,7 @@ class BudgetDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final formatter = ref.watch(currencyFormatterProvider);
 
     final budgetProgressAsync = ref.watch(budgetNotifierProvider);
 

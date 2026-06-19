@@ -168,7 +168,7 @@ void main() {
             final transaction = TransactionModel(
               userId: 'test-user',
               amount: amount,
-              category: 'Test Category',
+              categoryId: 'Test Category',
               type: 'income',
               notes: '',
               createdAt: DateTime(2024, 1, 15),
@@ -266,7 +266,7 @@ void main() {
             final transaction = TransactionModel(
               userId: 'test-user',
               amount: amount,
-              category: 'Test Category',
+              categoryId: 'Test Category',
               type: 'expense',
               notes: '',
               createdAt: DateTime(2024, 1, 15),
@@ -405,7 +405,7 @@ void main() {
             final transaction = TransactionModel(
               userId: 'test-user',
               amount: amount,
-              category: 'Test Category',
+              categoryId: 'Test Category',
               type: 'transfer',
               notes: '',
               createdAt: DateTime(2024, 1, 15),

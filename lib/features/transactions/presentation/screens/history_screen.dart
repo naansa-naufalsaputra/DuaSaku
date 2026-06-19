@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../providers/transaction_provider.dart';
@@ -9,10 +8,13 @@ import '../../domain/models/category_model.dart';
 import '../../domain/models/transaction_model.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../widgets/transaction_detail_dialog.dart';
+import '../widgets/transaction_filter_panel.dart';
 import '../../../../core/theme/premium_background.dart';
 import '../../../../core/utils/category_translation.dart';
 import '../../../../core/utils/text_sanitizer.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/utils/category_icon_helper.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -22,74 +24,29 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-  String _searchQuery = '';
-  String _filterType = 'all'; // all, income, expense
   final ScrollController _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      // Trigger load more when 200px from bottom
+      ref.read(transactionNotifierProvider.notifier).loadMoreTransactions();
     }
   }
+
 
   String _getDateGroupName(DateTime date, BuildContext context) {
     final now = DateTime.now();
@@ -134,11 +91,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         totalExpense += tx.amount;
       }
     }
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -270,98 +223,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Search and Filter Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Search Field
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E1E1E)
-                              : const Color(0xFFF2F5FA),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value.toLowerCase();
-                            });
-                          },
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Search transactions...',
-                            hintStyle: TextStyle(
-                              color: isDark ? Colors.white38 : Colors.black38,
-                              fontSize: 14,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search_rounded,
-                              color: isDark ? Colors.white54 : Colors.black54,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                              horizontal: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Filter Chips
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildFilterChip('All', 'all', accentColor, isDark),
-                            const SizedBox(width: 8),
-                            _buildFilterChip(
-                              'Income',
-                              'income',
-                              accentColor,
-                              isDark,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildFilterChip(
-                              'Expense',
-                              'expense',
-                              accentColor,
-                              isDark,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ).liquidFadeIn(),
+                // New Filter Panel (replaces old search/filter UI)
+                const TransactionFilterPanel(),
 
                 // Transaction List with Summary Header
                 Expanded(
                   child: transactionState.when(
                     data: (transactions) {
-                      // Apply Filters
-                      final filteredList = transactions.where((tx) {
-                        if (_filterType != 'all' &&
-                            tx.type.toLowerCase() != _filterType) {
-                          return false;
-                        }
-                        if (_searchQuery.isNotEmpty) {
-                          final matchCategory = tx.category
-                              .toLowerCase()
-                              .contains(_searchQuery);
-                          final matchNotes = tx.notes.toLowerCase().contains(
-                            _searchQuery,
-                          );
-                          if (!matchCategory && !matchNotes) return false;
-                        }
-                        return true;
-                      }).toList();
+                      // No client-side filtering - handled by repository now
+                      final filteredList = transactions;
 
                       // Grouped list compilation
                       final grouped = _groupTransactions(filteredList, context);
@@ -370,6 +240,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         listItems.add(dateGroupName);
                         listItems.addAll(txList);
                       });
+
+                      final notifier = ref.read(transactionNotifierProvider.notifier);
 
                       return Column(
                         children: [
@@ -409,8 +281,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       24,
                                       100,
                                     ),
-                                    itemCount: listItems.length,
+                                    itemCount: listItems.length + (notifier.hasMorePages ? 1 : 0),
                                     itemBuilder: (context, index) {
+                                      // Show loading indicator at bottom for pagination
+                                      if (index == listItems.length) {
+                                        return notifier.isLoadingMore
+                                            ? const Center(
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(16),
+                                                  child: CircularProgressIndicator(),
+                                                ),
+                                              )
+                                            : const SizedBox.shrink();
+                                      }
+                                      
                                       final item = listItems[index];
 
                                       if (item is String) {
@@ -444,11 +328,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                           .firstWhere(
                                             (c) =>
                                                 c.name.toLowerCase() ==
-                                                tx.category.toLowerCase(),
+                                                tx.categoryId.toLowerCase(),
                                             orElse: () => CategoryModel(
                                               id: '',
                                               userId: '',
-                                              name: tx.category,
+                                              name: tx.categoryId,
                                               type: tx.type,
                                               icon: isExpense
                                                   ? 'restaurant'
@@ -469,11 +353,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                           ? '-'
                                           : '+';
                                       final formattedAmount =
-                                          NumberFormat.currency(
-                                            locale: 'id_ID',
-                                            symbol: 'Rp ',
-                                            decimalDigits: 0,
-                                          ).format(tx.amount);
+                                          ref.watch(currencyFormatterProvider).format(tx.amount);
 
                                       return Column(
                                         children: [
@@ -507,7 +387,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(
-                                                      _getIconData(
+                                                      CategoryIconHelper.getIconData(
                                                         matchedCategory.icon,
                                                       ),
                                                       color: accentColor,
@@ -526,7 +406,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                               ? TextSanitizer.prettifyNotes(
                                                                   tx.notes,
                                                                 )
-                                                              : tx.category
+                                                              : tx.categoryId
                                                                     .toLocalizedCategory(),
                                                           style: TextStyle(
                                                             fontWeight:
@@ -545,7 +425,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                           height: 4,
                                                         ),
                                                         Text(
-                                                          tx.category
+                                                          tx.categoryId
                                                               .toLocalizedCategory()
                                                               .toUpperCase(),
                                                           style: TextStyle(
@@ -630,46 +510,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(
-    String label,
-    String value,
-    Color accentColor,
-    bool isDark,
-  ) {
-    final isSelected = _filterType == value;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (bool selected) {
-          HapticFeedback.lightImpact();
-          setState(() {
-            if (selected) {
-              _filterType = value;
-            }
-          });
-        },
-        backgroundColor: isDark
-            ? const Color(0xFF1E1E1E)
-            : const Color(0xFFF2F5FA),
-        selectedColor: accentColor,
-        labelStyle: TextStyle(
-          color: isSelected
-              ? Colors.white
-              : (isDark ? Colors.white70 : Colors.black54),
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide.none,
-        ),
-        showCheckmark: false,
       ),
     );
   }

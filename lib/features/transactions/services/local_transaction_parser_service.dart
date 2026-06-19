@@ -55,7 +55,7 @@ class LocalTransactionParserService
 
     return ParsedTransaction(
       amount: amount,
-      category: category,
+      categoryId: category,
       type: type,
       walletId: walletId,
       notes: TextSanitizer.prettifyNotes(notes),

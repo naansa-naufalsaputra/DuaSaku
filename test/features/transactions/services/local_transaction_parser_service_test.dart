@@ -32,9 +32,9 @@ void main() {
         expect(result.type, equals('expense'));
         expect(result.walletId, equals('w-cash'));
         // "pertalite" maps to "Transportasi" via CategorySynonymDictionary
-        expect(result.category, equals('Transportasi'));
+        expect(result.categoryId, equals('Transportasi'));
         // Notes should have amount and wallet prefix stripped but keep contextual words
-        expect(result.notes, equals('Beli pertalite cash'));
+        expect(result.notes, equals('Beli Pertalite Cash'));
       },
     );
 
@@ -49,8 +49,8 @@ void main() {
       expect(result.type, equals('income'));
       expect(result.walletId, equals('w-bca'));
       // "gaji" maps to "Gaji" or falls back logically
-      expect(result.category, equals('Gaji'));
-      expect(result.notes, equals('Dapat bonus gaji bca'));
+      expect(result.categoryId, equals('Gaji'));
+      expect(result.notes, equals('Dapat Bonus Gaji Bca'));
     });
 
     test(
@@ -64,8 +64,8 @@ void main() {
         );
 
         expect(result.amount, equals(15000.0));
-        expect(result.category, equals('Makanan'));
-        expect(result.notes, equals('Makan siang'));
+        expect(result.categoryId, equals('Makanan'));
+        expect(result.notes, equals('Makan Siang'));
       },
     );
 
@@ -81,8 +81,8 @@ void main() {
         expect(result.amount, equals(20000.0));
         // "sesuatu yang aneh" has low similarity to Makanan/Transportasi/Tagihan.
         // Falls back to the first category that matches type 'expense' (Makanan).
-        expect(result.category, equals('Makanan'));
-        expect(result.notes, equals('Sesuatu yang aneh'));
+        expect(result.categoryId, equals('Makanan'));
+        expect(result.notes, equals('Sesuatu Yang Aneh'));
       },
     );
   });

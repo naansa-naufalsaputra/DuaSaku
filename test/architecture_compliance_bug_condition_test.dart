@@ -183,10 +183,10 @@ void main() {
       }
     });
 
-    // Violation 7: syncPendingTransactions should have @Deprecated annotation
+    // Violation 7: syncPendingTransactions should be completely removed
     // **Validates: Requirements 1.7**
     test(
-      'Violation 7: syncPendingTransactions() has @Deprecated annotation or doc comment',
+      'Violation 7: syncPendingTransactions() is completely removed',
       () {
         final interfaceFile = File(
           'lib/features/transactions/domain/transaction_repository_interface.dart',
@@ -198,26 +198,18 @@ void main() {
         final interfaceContent = interfaceFile.readAsStringSync();
         final implContent = implFile.readAsStringSync();
 
-        // On unfixed code, syncPendingTransactions has no @Deprecated annotation
-        // and no doc comment explaining the intentional no-op
         expect(
-          interfaceContent.contains('@Deprecated'),
-          isTrue,
+          interfaceContent.contains('syncPendingTransactions'),
+          isFalse,
           reason:
-              'syncPendingTransactions in interface should have @Deprecated annotation',
+              'syncPendingTransactions should be completely removed from interface',
         );
 
-        // Check implementation also has documentation
-        final hasDocComment =
-            implContent.contains('/// ') &&
-            implContent.contains('syncPendingTransactions');
-        final hasDeprecated = implContent.contains('@Deprecated');
-
         expect(
-          hasDocComment || hasDeprecated,
-          isTrue,
+          implContent.contains('syncPendingTransactions'),
+          isFalse,
           reason:
-              'syncPendingTransactions implementation should have doc comment or @Deprecated',
+              'syncPendingTransactions should be completely removed from implementation',
         );
       },
     );

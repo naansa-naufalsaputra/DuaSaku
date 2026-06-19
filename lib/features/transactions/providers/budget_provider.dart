@@ -48,7 +48,7 @@ class BudgetNotifier extends AsyncNotifier<List<BudgetProgress>> {
     return budgets.map((b) {
       final categoryTxs = transactions.where((tx) {
         final txMonth = DateFormat('yyyy-MM').format(tx.createdAt);
-        return tx.category == b.category &&
+        return tx.categoryId == b.category &&
             tx.type.toLowerCase() == 'expense' &&
             txMonth == month;
       });

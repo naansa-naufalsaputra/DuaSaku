@@ -48,22 +48,22 @@ class TransactionCluster {
   }
 
   String determineName() {
-    // Find the most frequent category in this cluster
+    // Find the most frequent categoryId in this cluster
     final categoryCounts = <String, int>{};
     for (final tx in transactions) {
-      categoryCounts[tx.category] = (categoryCounts[tx.category] ?? 0) + 1;
+      categoryCounts[tx.categoryId] = (categoryCounts[tx.categoryId] ?? 0) + 1;
     }
 
-    String topCategory = 'Belanja';
+    String topCategoryId = 'uncategorized';
     int maxCount = 0;
-    categoryCounts.forEach((category, count) {
+    categoryCounts.forEach((categoryId, count) {
       if (count > maxCount) {
         maxCount = count;
-        topCategory = category;
+        topCategoryId = categoryId;
       }
     });
 
-    return 'Area $topCategory';
+    return 'Area $topCategoryId';
   }
 }
 

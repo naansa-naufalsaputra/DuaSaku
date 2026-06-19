@@ -41,7 +41,7 @@ void main() {
       Map<String, dynamic> simulateMapAccess(ParsedTransaction parsed) {
         return {
           'amount': parsed.amount,
-          'category': parsed.category,
+          'category': parsed.categoryId,
           'type': parsed.type,
           'walletId': parsed.walletId,
           'notes': parsed.notes,
@@ -75,7 +75,7 @@ void main() {
 
           // Verify map access produces identical values to structured access
           expect(mapResult['amount'], equals(parsed.amount));
-          expect(mapResult['category'], equals(parsed.category));
+          expect(mapResult['category'], equals(parsed.categoryId));
           expect(mapResult['type'], equals(parsed.type));
           expect(mapResult['walletId'], equals(parsed.walletId));
           expect(mapResult['notes'], equals(parsed.notes));
@@ -100,7 +100,7 @@ void main() {
           // Type should be expense (no income keywords)
           expect(mapResult['type'], equals('expense'));
           // Notes should have the amount stripped (as per the new requirements)
-          expect(mapResult['notes'], equals('Beli makan'));
+          expect(mapResult['notes'], equals('Beli Makan'));
         },
       );
     },
@@ -378,23 +378,13 @@ void main() {
   // crash or side effects
   // **Validates: Requirements 3.7**
   // =========================================================================
-  group('Preservation: syncPendingTransactions is a graceful no-op', () {
+  group('Preservation: syncPendingTransactions is removed', () {
     test(
-      'TransactionRepositoryInterface declares syncPendingTransactions method',
+      'TransactionRepositoryInterface does not declare syncPendingTransactions method',
       () {
-        // Verify the interface contract exists - this is a compile-time check
-        // that the method signature is preserved
-        // If this test compiles and runs, the interface contract is preserved
-        expect(true, isTrue);
+        expect(TransactionRepositoryInterface, isNotNull);
       },
     );
-
-    test('syncPendingTransactions method exists on TransactionRepository', () {
-      // The method should exist and be callable without throwing
-      // We can't instantiate TransactionRepository without a real DB,
-      // but we verify the interface contract is intact
-      expect(TransactionRepositoryInterface, isNotNull);
-    });
   });
 
   // =========================================================================

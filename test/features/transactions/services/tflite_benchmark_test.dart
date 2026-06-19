@@ -90,7 +90,7 @@ void main() {
 
           expect(result.amount, isNotNull);
           expect(result.type, isNotNull);
-          expect(result.category, isNotNull);
+          expect(result.categoryId, isNotNull);
         }
         benchmarkStopwatch.stop();
 

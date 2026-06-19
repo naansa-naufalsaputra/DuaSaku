@@ -5,7 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'liquid_glass_theme.dart';
 
-enum AppThemePreset { defaultPurple }
+enum AppThemePreset { 
+  defaultPurple,
+  warmSunset,
+  midnightOcean,
+}
 
 class ThemeState {
   final AppThemePreset preset;
@@ -101,28 +105,51 @@ class ThemeDetails {
 
 class ThemePresets {
   static ThemeDetails getDetails(AppThemePreset preset, bool isDark) {
-    // Both rosePine, cyberpunk, and defaultPurple are merged into the minimalist theme setup
     final Color bgColor = isDark
         ? const Color(0xFF121212)
         : const Color(0xFFFFFFFF);
     final Color surfaceColor = isDark
         ? const Color(0xFF1C1C1E)
-        : const Color(0xFFFFFFFF); // Pure white card surfaces for light mode
+        : const Color(0xFFFFFFFF);
     final Color textColor = isDark
         ? const Color(0xFFF5F5F7)
         : const Color(0xFF1D1D1F);
-    final Color accentColor = isDark
-        ? const Color(
-            0xFF0A84FF,
-          ) // Luminous Electric Blue for dark mode highlights
-        : const Color(
-            0xFF007AFF,
-          ); // Premium Royal Blue for light mode active states
+    
+    // Select accent color based on preset
+    final Color accentColor;
+    final Color glowColor1;
+    final Color glowColor2;
+    
+    switch (preset) {
+      case AppThemePreset.warmSunset:
+        accentColor = isDark
+            ? const Color(0xFFF7931E) // Warm amber for dark mode
+            : const Color(0xFFFF6B35); // Vibrant orange for light mode
+        glowColor1 = isDark ? const Color(0x1AF7931E) : const Color(0x1AFF6B35);
+        glowColor2 = isDark ? const Color(0x0DFFFFFF) : const Color(0x0D000000);
+        break;
+      
+      case AppThemePreset.midnightOcean:
+        accentColor = isDark
+            ? const Color(0xFF00D9FF) // Bright cyan for dark mode
+            : const Color(0xFF1E88E5); // Deep blue for light mode
+        glowColor1 = isDark ? const Color(0x1A00D9FF) : const Color(0x1A1E88E5);
+        glowColor2 = isDark ? const Color(0x0D0A1128) : const Color(0x0D000000);
+        break;
+
+      case AppThemePreset.defaultPurple:
+        accentColor = isDark
+            ? const Color(0xFF0A84FF) // Electric blue for dark mode
+            : const Color(0xFF007AFF); // Royal blue for light mode
+        glowColor1 = isDark ? const Color(0x1A0A84FF) : const Color(0x1A007AFF);
+        glowColor2 = isDark ? const Color(0x0DFFFFFF) : const Color(0x0D000000);
+        break;
+    }
 
     return ThemeDetails(
       baseBackgroundColor: bgColor,
-      glowColor1: isDark ? const Color(0x1A0A84FF) : const Color(0x1A007AFF),
-      glowColor2: isDark ? const Color(0x0DFFFFFF) : const Color(0x0D000000),
+      glowColor1: glowColor1,
+      glowColor2: glowColor2,
       heatmapColors: [
         isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F7),
         accentColor.withValues(alpha: 0.2),
@@ -207,11 +234,26 @@ class ThemePresets {
           space: 1,
         ),
         extensions: [
-          isDark
-              ? LiquidGlassTheme.defaultPurpleDark()
-              : LiquidGlassTheme.defaultPurpleLight(),
+          _getLiquidGlassTheme(preset, isDark),
         ],
       ),
     );
+  }
+
+  static LiquidGlassTheme _getLiquidGlassTheme(AppThemePreset preset, bool isDark) {
+    switch (preset) {
+      case AppThemePreset.warmSunset:
+        return isDark
+            ? LiquidGlassTheme.warmSunsetDark()
+            : LiquidGlassTheme.warmSunsetLight();
+      case AppThemePreset.midnightOcean:
+        return isDark
+            ? LiquidGlassTheme.midnightOceanDark()
+            : LiquidGlassTheme.midnightOceanLight();
+      case AppThemePreset.defaultPurple:
+        return isDark
+            ? LiquidGlassTheme.defaultPurpleDark()
+            : LiquidGlassTheme.defaultPurpleLight();
+    }
   }
 }

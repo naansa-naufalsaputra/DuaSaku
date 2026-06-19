@@ -113,7 +113,7 @@ Future<bool> _handleBudgetAlertQueueProcessing() async {
       debugPrint('[BackgroundTask] Notification init failed (non-fatal): $e');
     }
 
-    final notificationService = BudgetNotificationService();
+    final notificationService = BudgetNotificationService(db: db);
 
     // Process queued notifications for the default local user.
     // In background isolate, Riverpod is not available, so we use

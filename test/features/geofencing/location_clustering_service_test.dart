@@ -17,7 +17,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 10000,
-            category: 'Makanan',
+            categoryId: 'cat-food',
             type: 'expense',
             notes: 'makan 1',
             createdAt: DateTime.now(),
@@ -27,7 +27,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 15000,
-            category: 'Makanan',
+            categoryId: 'cat-food',
             type: 'expense',
             notes: 'makan 2',
             createdAt: DateTime.now(),
@@ -49,7 +49,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 10000,
-            category: 'Makanan',
+            categoryId: 'cat-food',
             type: 'expense',
             notes: 'makan 1',
             createdAt: now,
@@ -59,7 +59,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 15000,
-            category: 'Makanan',
+            categoryId: 'cat-food',
             type: 'expense',
             notes: 'makan 2',
             createdAt: now,
@@ -69,7 +69,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 20000,
-            category: 'Transportasi',
+            categoryId: 'cat-transport',
             type: 'expense',
             notes: 'ojek',
             createdAt: now,
@@ -101,7 +101,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 300000,
-            category: 'Belanja',
+            categoryId: 'cat-shopping',
             type: 'expense',
             notes: 'baju',
             createdAt: now,
@@ -111,7 +111,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 250000,
-            category: 'Belanja',
+            categoryId: 'cat-shopping',
             type: 'expense',
             notes: 'sepatu',
             createdAt: now,
@@ -122,7 +122,7 @@ void main() {
           TransactionModel(
             userId: 'user-1',
             amount: 10000,
-            category: 'Transportasi',
+            categoryId: 'cat-transport',
             type: 'expense',
             notes: 'parkir',
             createdAt: now,
@@ -159,7 +159,7 @@ void main() {
             TransactionModel(
               userId: 'user-1',
               amount: amount,
-              category: 'Cat$i',
+              categoryId: 'cat-other',
               type: 'expense',
               notes: 'tx $i-$j',
               createdAt: now,

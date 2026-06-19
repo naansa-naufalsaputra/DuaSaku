@@ -12,6 +12,8 @@ import '../../../../services/models/parsed_transaction.dart';
 import '../../providers/transaction_provider.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../../../core/utils/category_icon_helper.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 class TransactionDraftBottomSheet extends ConsumerStatefulWidget {
   final ParsedTransaction draftData;
@@ -47,7 +49,7 @@ class _TransactionDraftBottomSheetState
     _type = widget.draftData.type;
 
     _selectedWalletId = widget.draftData.walletId;
-    _selectedCategoryName = widget.draftData.category;
+    _selectedCategoryName = widget.draftData.categoryId;
     _selectedDate = widget.draftData.date ?? DateTime.now();
   }
 
@@ -364,7 +366,7 @@ class _TransactionDraftBottomSheetState
                       return DropdownMenuItem<String>(
                         value: w.id,
                         child: Text(
-                          '${w.name} (${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(w.balance)})',
+                          '${w.name} (${ref.watch(currencyFormatterProvider).format(w.balance)})',
                         ),
                       );
                     }).toList(),
@@ -519,7 +521,7 @@ class _TransactionDraftBottomSheetState
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        _getIconData(cat.icon),
+                                        CategoryIconHelper.getIconData(cat.icon),
                                         color: catColor,
                                         size: 14,
                                       ),
@@ -733,64 +735,7 @@ class _TransactionDraftBottomSheetState
     );
   }
 
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
+
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {

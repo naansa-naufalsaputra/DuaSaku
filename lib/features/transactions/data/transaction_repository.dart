@@ -1,17 +1,18 @@
 import 'dart:async';
 import 'package:drift/drift.dart';
-import 'package:uuid/uuid.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/app_error.dart';
-import '../../geofencing/services/geofence_sync_helper.dart';
 import '../domain/models/transaction_model.dart';
 import '../domain/transaction_repository_interface.dart';
+import '../domain/transaction_filters.dart';
+import '../domain/transaction_events.dart';
 
 class TransactionRepository implements TransactionRepositoryInterface {
   final AppDatabase _db;
+  final StreamSink<TransactionEvent>? _eventSink;
 
-  TransactionRepository(this._db);
+  TransactionRepository(this._db, [this._eventSink]);
 
   @override
   Stream<List<TransactionModel>> fetchTransactions(String userId) {
@@ -27,13 +28,120 @@ class TransactionRepository implements TransactionRepositoryInterface {
     return query.watch().map((rows) {
       return rows.map((row) {
         final tx = row.readTable(_db.transactions);
-        final cat = row.readTableOrNull(_db.categories);
 
         return TransactionModel(
           id: tx.id,
           userId: tx.userId,
           amount: tx.amount,
-          category: cat?.name ?? 'Uncategorized',
+          currency: tx.currency,
+          categoryId: tx.categoryId ?? 'uncategorized',
+          type: tx.type,
+          notes: tx.notes ?? '',
+          createdAt: tx.date,
+          walletId: tx.walletId,
+          fromWalletId: tx.fromWalletId,
+          toWalletId: tx.toWalletId,
+          latitude: tx.latitude,
+          longitude: tx.longitude,
+        );
+      }).toList();
+    });
+  }
+
+  @override
+  Stream<List<TransactionModel>> fetchTransactionsFiltered(
+    String userId,
+    TransactionFilters filters,
+    int limit,
+  ) {
+    final query = _db.select(_db.transactions).join([
+      leftOuterJoin(
+        _db.categories,
+        _db.categories.id.equalsExp(_db.transactions.categoryId),
+      ),
+    ]);
+
+    // Base filter: user ID
+    query.where(_db.transactions.userId.equals(userId));
+
+    // Apply search query filter (notes OR category name)
+    if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
+      final searchLower = filters.searchQuery!.toLowerCase();
+      query.where(
+        _db.transactions.notes.lower().contains(searchLower) |
+        _db.categories.name.lower().contains(searchLower),
+      );
+    }
+
+    // Apply date range filters
+    if (filters.startDate != null) {
+      query.where(
+        _db.transactions.date.isBiggerOrEqualValue(filters.startDate!),
+      );
+    }
+
+    if (filters.endDate != null) {
+      query.where(
+        _db.transactions.date.isSmallerOrEqualValue(filters.endDate!),
+      );
+    }
+
+    // Apply type filter
+    if (filters.type != null) {
+      query.where(_db.transactions.type.equals(filters.type!));
+    }
+
+    // Apply wallet filter (matches walletId, fromWalletId, or toWalletId)
+    if (filters.walletId != null) {
+      query.where(
+        _db.transactions.walletId.equals(filters.walletId!) |
+        _db.transactions.fromWalletId.equals(filters.walletId!) |
+        _db.transactions.toWalletId.equals(filters.walletId!),
+      );
+    }
+
+    // Apply amount range filters
+    if (filters.minAmount != null) {
+      query.where(
+        _db.transactions.amount.isBiggerOrEqualValue(filters.minAmount!),
+      );
+    }
+
+    if (filters.maxAmount != null) {
+      query.where(
+        _db.transactions.amount.isSmallerOrEqualValue(filters.maxAmount!),
+      );
+    }
+
+    // Apply tag filter (transaction must have ALL specified tags)
+    if (filters.tagIds != null && filters.tagIds!.isNotEmpty) {
+      for (final tagId in filters.tagIds!) {
+        query.where(
+          _db.transactions.id.isInQuery(
+            _db.selectOnly(_db.transactionTags)
+              ..addColumns([_db.transactionTags.transactionId])
+              ..where(_db.transactionTags.tagId.equals(tagId)),
+          ),
+        );
+      }
+    }
+
+    // Order by date descending
+    query.orderBy([OrderingTerm.desc(_db.transactions.date)]);
+
+    // Apply dynamic limit for pagination
+    query.limit(limit);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final tx = row.readTable(_db.transactions);
+
+        return TransactionModel(
+          id: tx.id,
+          userId: tx.userId,
+          amount: tx.amount,
+          currency: tx.currency,
+          categoryId: tx.categoryId ?? 'uncategorized',
           type: tx.type,
           notes: tx.notes ?? '',
           createdAt: tx.date,
@@ -53,36 +161,17 @@ class TransactionRepository implements TransactionRepositoryInterface {
   ) async {
     try {
       await _db.transaction(() async {
-        // 1. Resolve Category ID by Name
+        // 1. Validate Category ID exists
         final cat =
             await (_db.select(_db.categories)..where(
                   (c) =>
-                      c.name.equals(transaction.category) &
+                      c.id.equals(transaction.categoryId) &
                       c.userId.equals(transaction.userId),
                 ))
                 .getSingleOrNull();
 
-        String categoryId;
-        if (cat != null) {
-          categoryId = cat.id;
-        } else {
-          // Create new category on the fly if it doesn't exist
-          categoryId = const Uuid().v4();
-          await _db
-              .into(_db.categories)
-              .insert(
-                CategoriesCompanion.insert(
-                  id: categoryId,
-                  userId: transaction.userId,
-                  name: transaction.category,
-                  icon: const Value('category'),
-                  color: const Value('#9E9E9E'),
-                  type: transaction.type == 'transfer'
-                      ? 'expense'
-                      : transaction.type,
-                  createdAt: DateTime.now(),
-                ),
-              );
+        if (cat == null) {
+          throw AppError.validation('Invalid category ID: ${transaction.categoryId}');
         }
 
         // 2. Insert Transaction into Drift DB
@@ -94,8 +183,9 @@ class TransactionRepository implements TransactionRepositoryInterface {
                 walletId: Value(transaction.walletId),
                 fromWalletId: Value(transaction.fromWalletId),
                 toWalletId: Value(transaction.toWalletId),
-                categoryId: Value(categoryId),
+                categoryId: Value(transaction.categoryId),
                 amount: transaction.amount,
+                currency: Value(transaction.currency),
                 notes: Value(transaction.notes),
                 date: transaction.createdAt,
                 type: transaction.type,
@@ -104,60 +194,14 @@ class TransactionRepository implements TransactionRepositoryInterface {
               ),
             );
 
-        // 3. Adjust Wallet Balances locally
-        if (transaction.type == 'transfer') {
-          if (transaction.fromWalletId != null) {
-            final fromWallet =
-                await (_db.select(_db.wallets)
-                      ..where((w) => w.id.equals(transaction.fromWalletId!)))
-                    .getSingleOrNull();
-            if (fromWallet != null) {
-              await (_db.update(
-                _db.wallets,
-              )..where((w) => w.id.equals(fromWallet.id))).write(
-                WalletsCompanion(
-                  balance: Value(fromWallet.balance - transaction.amount),
-                ),
-              );
-            }
-          }
-          if (transaction.toWalletId != null) {
-            final toWallet =
-                await (_db.select(_db.wallets)
-                      ..where((w) => w.id.equals(transaction.toWalletId!)))
-                    .getSingleOrNull();
-            if (toWallet != null) {
-              await (_db.update(
-                _db.wallets,
-              )..where((w) => w.id.equals(toWallet.id))).write(
-                WalletsCompanion(
-                  balance: Value(toWallet.balance + transaction.amount),
-                ),
-              );
-            }
-          }
-        } else {
-          if (transaction.walletId != null) {
-            final wallet =
-                await (_db.select(_db.wallets)
-                      ..where((w) => w.id.equals(transaction.walletId!)))
-                    .getSingleOrNull();
-            if (wallet != null) {
-              final double newBalance = transaction.type == 'income'
-                  ? wallet.balance + transaction.amount
-                  : wallet.balance - transaction.amount;
-              await (_db.update(_db.wallets)
-                    ..where((w) => w.id.equals(wallet.id)))
-                  .write(WalletsCompanion(balance: Value(newBalance)));
-            }
-          }
+        // 3. If no event sink (test mode), apply balance updates inline
+        if (_eventSink == null) {
+          await _applyBalanceChangesInline(transaction);
         }
       });
 
-      // Asynchronously trigger geofence clustering sync on transaction insertion
-      unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
-      );
+      // Emit event for side-effect handlers (balance update, alerts, geofence)
+      _eventSink?.add(TransactionCreated.now(transaction));
 
       return const Success(null);
     } catch (e, stack) {
@@ -165,78 +209,180 @@ class TransactionRepository implements TransactionRepositoryInterface {
     }
   }
 
+  @override
+  Future<Result<void, AppError>> updateTransaction(
+    TransactionModel transaction,
+    TransactionModel oldTransaction,
+  ) async {
+    try {
+      await _db.transaction(() async {
+        // 1. Validate Category ID exists
+        final cat =
+            await (_db.select(_db.categories)..where(
+                  (c) =>
+                      c.id.equals(transaction.categoryId) &
+                      c.userId.equals(transaction.userId),
+                ))
+                .getSingleOrNull();
+
+        if (cat == null) {
+          throw AppError.validation('Invalid category ID: ${transaction.categoryId}');
+        }
+
+        // 2. Update the transaction row
+        await (_db.update(_db.transactions)
+              ..where((t) => t.id.equals(transaction.id!)))
+            .write(
+          TransactionsCompanion(
+            walletId: Value(transaction.walletId),
+            fromWalletId: Value(transaction.fromWalletId),
+            toWalletId: Value(transaction.toWalletId),
+            categoryId: Value(transaction.categoryId),
+            amount: Value(transaction.amount),
+            currency: Value(transaction.currency),
+            notes: Value(transaction.notes),
+            date: Value(transaction.createdAt),
+            type: Value(transaction.type),
+            latitude: Value(transaction.latitude),
+            longitude: Value(transaction.longitude),
+          ),
+        );
+
+        // 3. If no event sink (test mode), apply balance updates inline
+        if (_eventSink == null) {
+          await _revertBalanceChangesInline(oldTransaction);
+          await _applyBalanceChangesInline(transaction);
+        }
+      });
+
+      // Emit event for side-effect handlers (balance revert + apply)
+      _eventSink?.add(TransactionUpdated.now(transaction, oldTransaction));
+
+      return const Success(null);
+    } catch (e, stack) {
+      return Failure(AppError.database(e.toString(), stackTrace: stack));
+    }
+  }
+
+  @override
   @override
   Future<Result<void, AppError>> deleteTransaction(int id) async {
     try {
+      // 1. Fetch transaction details before deletion (needed for event)
+      final tx = await (_db.select(_db.transactions)
+            ..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+      
+      if (tx == null) {
+        return Failure(AppError.notFound('Transaction $id not found'));
+      }
+
+      // Convert to TransactionModel for event
+      final transactionModel = TransactionModel(
+        id: tx.id,
+        userId: tx.userId,
+        amount: tx.amount,
+        categoryId: tx.categoryId ?? 'uncategorized',
+        type: tx.type,
+        notes: tx.notes ?? '',
+        createdAt: tx.date,
+        walletId: tx.walletId,
+        fromWalletId: tx.fromWalletId,
+        toWalletId: tx.toWalletId,
+        latitude: tx.latitude,
+        longitude: tx.longitude,
+      );
+
+      // 2. Delete the transaction
       await _db.transaction(() async {
-        // 1. Fetch transaction details to revert wallet updates
-        final tx = await (_db.select(
-          _db.transactions,
-        )..where((t) => t.id.equals(id))).getSingleOrNull();
-        if (tx == null) return;
-
-        // 2. Revert Wallet Balances
-        if (tx.type == 'transfer') {
-          if (tx.fromWalletId != null) {
-            final fromWallet = await (_db.select(
-              _db.wallets,
-            )..where((w) => w.id.equals(tx.fromWalletId!))).getSingleOrNull();
-            if (fromWallet != null) {
-              await (_db.update(
-                _db.wallets,
-              )..where((w) => w.id.equals(fromWallet.id))).write(
-                WalletsCompanion(
-                  balance: Value(fromWallet.balance + tx.amount),
-                ),
-              );
-            }
-          }
-          if (tx.toWalletId != null) {
-            final toWallet = await (_db.select(
-              _db.wallets,
-            )..where((w) => w.id.equals(tx.toWalletId!))).getSingleOrNull();
-            if (toWallet != null) {
-              await (_db.update(
-                _db.wallets,
-              )..where((w) => w.id.equals(toWallet.id))).write(
-                WalletsCompanion(balance: Value(toWallet.balance - tx.amount)),
-              );
-            }
-          }
-        } else {
-          if (tx.walletId != null) {
-            final wallet = await (_db.select(
-              _db.wallets,
-            )..where((w) => w.id.equals(tx.walletId!))).getSingleOrNull();
-            if (wallet != null) {
-              final double revertedBalance = tx.type == 'income'
-                  ? wallet.balance - tx.amount
-                  : wallet.balance + tx.amount;
-              await (_db.update(_db.wallets)
-                    ..where((w) => w.id.equals(wallet.id)))
-                  .write(WalletsCompanion(balance: Value(revertedBalance)));
-            }
-          }
+        await (_db.delete(_db.transactions)..where((t) => t.id.equals(id))).go();
+        
+        // If no event sink (test mode), revert balance inline
+        if (_eventSink == null) {
+          await _revertBalanceChangesInline(transactionModel);
         }
-
-        // 3. Delete the transaction
-        await (_db.delete(
-          _db.transactions,
-        )..where((t) => t.id.equals(id))).go();
       });
+
+      // 3. Emit event for side-effect handlers (balance revert)
+      _eventSink?.add(TransactionDeleted.now(transactionModel));
+
       return const Success(null);
     } catch (e, stack) {
       return Failure(AppError.database(e.toString(), stackTrace: stack));
     }
   }
 
-  /// Intentional no-op for offline-first architecture.
-  /// Reserved for future cloud sync implementation when online mode is added.
-  @override
-  @Deprecated(
-    'No-op in offline-first architecture. Reserved for future cloud sync implementation.',
-  )
-  Future<void> syncPendingTransactions() async {
-    // No-op for offline-first architecture
+  /// Apply balance changes inline (used when eventSink is null, e.g., in tests).
+  Future<void> _applyBalanceChangesInline(TransactionModel transaction) async {
+    if (transaction.type == 'transfer') {
+      if (transaction.fromWalletId != null) {
+        final fromWallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.fromWalletId!)))
+            .getSingleOrNull();
+        if (fromWallet != null) {
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(fromWallet.id)))
+              .write(WalletsCompanion(balance: Value(fromWallet.balance - transaction.amount)));
+        }
+      }
+      if (transaction.toWalletId != null) {
+        final toWallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.toWalletId!)))
+            .getSingleOrNull();
+        if (toWallet != null) {
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(toWallet.id)))
+              .write(WalletsCompanion(balance: Value(toWallet.balance + transaction.amount)));
+        }
+      }
+    } else {
+      if (transaction.walletId != null) {
+        final wallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.walletId!)))
+            .getSingleOrNull();
+        if (wallet != null) {
+          final newBalance = transaction.type == 'income'
+              ? wallet.balance + transaction.amount
+              : wallet.balance - transaction.amount;
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(wallet.id)))
+              .write(WalletsCompanion(balance: Value(newBalance)));
+        }
+      }
+    }
+  }
+
+  /// Revert balance changes inline (used when eventSink is null, e.g., in tests).
+  Future<void> _revertBalanceChangesInline(TransactionModel transaction) async {
+    if (transaction.type == 'transfer') {
+      if (transaction.fromWalletId != null) {
+        final fromWallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.fromWalletId!)))
+            .getSingleOrNull();
+        if (fromWallet != null) {
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(fromWallet.id)))
+              .write(WalletsCompanion(balance: Value(fromWallet.balance + transaction.amount)));
+        }
+      }
+      if (transaction.toWalletId != null) {
+        final toWallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.toWalletId!)))
+            .getSingleOrNull();
+        if (toWallet != null) {
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(toWallet.id)))
+              .write(WalletsCompanion(balance: Value(toWallet.balance - transaction.amount)));
+        }
+      }
+    } else {
+      if (transaction.walletId != null) {
+        final wallet = await (_db.select(_db.wallets)
+              ..where((w) => w.id.equals(transaction.walletId!)))
+            .getSingleOrNull();
+        if (wallet != null) {
+          final revertedBalance = transaction.type == 'income'
+              ? wallet.balance - transaction.amount
+              : wallet.balance + transaction.amount;
+          await (_db.update(_db.wallets)..where((w) => w.id.equals(wallet.id)))
+              .write(WalletsCompanion(balance: Value(revertedBalance)));
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,64 @@
+  Future<Result<void, AppError>> deleteTransaction(int id) async {
+    try {
+      await _db.transaction(() async {
+        // 1. Fetch transaction details to revert wallet updates
+        final tx = await (_db.select(
+          _db.transactions,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
+        if (tx == null) return;
+
+        // 2. Revert Wallet Balances
+        if (tx.type == 'transfer') {
+          if (tx.fromWalletId != null) {
+            final fromWallet = await (_db.select(
+              _db.wallets,
+            )..where((w) => w.id.equals(tx.fromWalletId!))).getSingleOrNull();
+            if (fromWallet != null) {
+              await (_db.update(
+                _db.wallets,
+              )..where((w) => w.id.equals(fromWallet.id))).write(
+                WalletsCompanion(
+                  balance: Value(fromWallet.balance + tx.amount),
+                ),
+              );
+            }
+          }
+          if (tx.toWalletId != null) {
+            final toWallet = await (_db.select(
+              _db.wallets,
+            )..where((w) => w.id.equals(tx.toWalletId!))).getSingleOrNull();
+            if (toWallet != null) {
+              await (_db.update(
+                _db.wallets,
+              )..where((w) => w.id.equals(toWallet.id))).write(
+                WalletsCompanion(balance: Value(toWallet.balance - tx.amount)),
+              );
+            }
+          }
+        } else {
+          if (tx.walletId != null) {
+            final wallet = await (_db.select(
+              _db.wallets,
+            )..where((w) => w.id.equals(tx.walletId!))).getSingleOrNull();
+            if (wallet != null) {
+              final double revertedBalance = tx.type == 'income'
+                  ? wallet.balance - tx.amount
+                  : wallet.balance + tx.amount;
+              await (_db.update(_db.wallets)
+                    ..where((w) => w.id.equals(wallet.id)))
+                  .write(WalletsCompanion(balance: Value(revertedBalance)));
+            }
+          }
+        }
+
+        // 3. Delete the transaction
+        await (_db.delete(
+          _db.transactions,
+        )..where((t) => t.id.equals(id))).go();
+      });
+      return const Success(null);
+    } catch (e, stack) {
+      return Failure(AppError.database(e.toString(), stackTrace: stack));
+    }
+  }
+}

@@ -11,6 +11,7 @@ import 'package:duasaku_app/core/utils/app_error.dart';
 import 'package:duasaku_app/core/utils/result.dart';
 import 'package:duasaku_app/features/transactions/domain/models/transaction_model.dart';
 import 'package:duasaku_app/features/transactions/domain/transaction_repository_interface.dart';
+import 'package:duasaku_app/features/transactions/domain/transaction_filters.dart';
 import 'package:duasaku_app/features/transactions/providers/transaction_provider.dart';
 import 'package:duasaku_app/features/auth/providers/auth_provider.dart';
 import 'package:duasaku_app/features/auth/data/auth_repository.dart';
@@ -33,6 +34,15 @@ class FakeFailingTransactionRepository
   }
 
   @override
+  Stream<List<TransactionModel>> fetchTransactionsFiltered(
+    String userId,
+    TransactionFilters filters,
+    int limit,
+  ) {
+    return Stream.value([]);
+  }
+
+  @override
   Future<Result<void, AppError>> insertTransaction(
     TransactionModel transaction,
   ) async {
@@ -45,8 +55,14 @@ class FakeFailingTransactionRepository
   }
 
   @override
-  @Deprecated('Deprecated in interface')
-  Future<void> syncPendingTransactions() async {}
+  Future<Result<void, AppError>> updateTransaction(
+    TransactionModel transaction,
+    TransactionModel oldTransaction,
+  ) async {
+    return Failure(errorToReturn);
+  }
+
+
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +137,7 @@ TransactionModel _createTransaction(int seed) {
     id: seed.abs() + 1,
     userId: 'test-user',
     amount: amount,
-    category: 'Category_${seed.abs() % 10}',
+    categoryId: 'Category_${seed.abs() % 10}',
     type: type,
     notes: 'Note_$seed',
     createdAt: DateTime(2024, 1, (seed.abs() % 28) + 1),

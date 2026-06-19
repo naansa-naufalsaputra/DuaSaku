@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../../core/utils/category_icon_helper.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/premium_background.dart';
@@ -179,7 +180,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         final initialTx = TransactionModel(
           userId: AppConstants.defaultUserId,
           amount: balance,
-          category: 'Salary',
+          categoryId: 'salary',
           type: 'income',
           notes: 'onboarding.initial_balance_notes'.tr(),
           walletId: walletId,
@@ -843,7 +844,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  _getIconData(cat.icon),
+                                  CategoryIconHelper.getIconData(cat.icon),
                                   color: catColor,
                                   size: 20,
                                 ),
@@ -1217,65 +1218,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // Curated premium financial & lifestyle icons mapping
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {

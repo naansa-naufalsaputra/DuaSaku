@@ -10,6 +10,8 @@ import '../../../../core/widgets/glass/glass_button.dart';
 import '../../domain/models/goal_model.dart';
 import '../../providers/goal_provider.dart';
 
+import '../../../../core/providers/settings_provider.dart';
+
 /// Modal bottom sheet for adding a deposit to a financial goal.
 ///
 /// Displays the remaining amount needed to reach the target, an amount input
@@ -42,12 +44,6 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
   String? _amountError;
-
-  final _currencyFormat = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
 
   double get _remainingAmount =>
       widget.goal.targetAmount - widget.goal.currentAmount;
@@ -109,6 +105,7 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final currencyFormat = ref.watch(currencyFormatterProvider);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -151,7 +148,7 @@ class _GoalDepositScreenState extends ConsumerState<GoalDepositScreen> {
                 ),
                 child: Text(
                   'goals.deposit_remaining'.tr(
-                    args: [_currencyFormat.format(_remainingAmount)],
+                    args: [currencyFormat.format(_remainingAmount)],
                   ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.primary,

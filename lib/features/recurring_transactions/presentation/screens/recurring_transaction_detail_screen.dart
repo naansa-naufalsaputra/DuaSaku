@@ -13,6 +13,7 @@ import '../../domain/models/recurring_transaction_model.dart';
 import '../../domain/recurring_scheduler_logic.dart';
 import '../../providers/recurring_transaction_provider.dart';
 import '../widgets/edit_recurring_bottom_sheet.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 /// Provider for execution logs of a specific recurring transaction.
 /// Returns the last 5 execution logs for the timeline display.
@@ -189,11 +190,7 @@ class _DetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
     final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
     final isIncome = transaction.isIncome;
     final amountColor = isIncome

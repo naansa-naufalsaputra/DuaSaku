@@ -1,7 +1,10 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class Env {
   static Future<void> init() async {
-    await dotenv.load(fileName: ".env");
+    // 100% offline local-first app. No runtime .env file required.
+    // Future compile-time configuration can be queried via String.fromEnvironment.
   }
+
+  /// Example fallback for future integrations
+  static String get geminiApiKey =>
+      const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 }

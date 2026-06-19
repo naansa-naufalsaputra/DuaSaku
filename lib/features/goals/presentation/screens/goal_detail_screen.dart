@@ -15,10 +15,13 @@ import '../../providers/goal_provider.dart';
 import '../widgets/deposit_history_tile.dart';
 import '../widgets/goal_progress_bar.dart';
 
+import '../../../../core/providers/settings_provider.dart';
+
 // ---------------------------------------------------------------------------
 // Providers
 // ---------------------------------------------------------------------------
 
+/// StreamProvider that watches deposits for a specific goal.
 /// StreamProvider that watches deposits for a specific goal.
 final goalDepositsProvider = StreamProvider.autoDispose
     .family<List<GoalDepositModel>, String>((ref, goalId) {
@@ -129,11 +132,7 @@ class _DetailContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = theme.colorScheme;
     final goalColor = _parseColor(goal.color) ?? colorScheme.primary;
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),

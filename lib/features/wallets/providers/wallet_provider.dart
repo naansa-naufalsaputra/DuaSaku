@@ -80,6 +80,7 @@ class WalletNotifier extends AsyncNotifier<List<WalletModel>> {
     required String name,
     required String type,
     required double initialBalance,
+    String currency = 'IDR',
   }) async {
     final user = ref.read(userProvider);
     if (user?.id == null) throw Exception('User not logged in');
@@ -91,6 +92,7 @@ class WalletNotifier extends AsyncNotifier<List<WalletModel>> {
       name: name,
       type: type,
       balance: initialBalance,
+      currency: currency,
       createdAt: DateTime.now(),
     );
 

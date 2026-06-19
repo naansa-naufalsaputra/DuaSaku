@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/models/recurring_transaction_model.dart';
 import '../../providers/recurring_transaction_provider.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 /// Dashboard widget displaying up to 5 upcoming recurring transactions
 /// within 7 days on the home screen.
@@ -23,10 +24,73 @@ class UpcomingRecurringDashboardWidget extends ConsumerWidget {
 
     return upcomingAsync.when(
       data: (transactions) {
-        if (transactions.isEmpty) {
-          return const SizedBox.shrink();
-        }
-        return _UpcomingSection(transactions: transactions);
+        if (transactions.isEmpty) return const SizedBox.shrink();
+
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final accentColor = isDark
+            ? const Color(0xFF0A84FF)
+            : const Color(0xFF007AFF);
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'recurring.upcoming_dashboard_title'.tr(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.push('/recurring-transactions');
+                      },
+                      child: Text(
+                        'common.see_all'.tr(),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: accentColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Transaction items
+              ...transactions.asMap().entries.map((entry) {
+                final index = entry.key;
+                final transaction = entry.value;
+                return _UpcomingItem(transaction: transaction, isDark: isDark)
+                    .animate()
+                    .fadeIn(
+                      delay: Duration(milliseconds: index * 50),
+                      duration: 300.ms,
+                      curve: Curves.easeOutCubic,
+                    )
+                    .slideY(
+                      begin: 0.05,
+                      end: 0,
+                      delay: Duration(milliseconds: index * 50),
+                      duration: 300.ms,
+                      curve: Curves.easeOutCubic,
+                    );
+              }),
+            ],
+          ),
+        );
       },
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
@@ -34,89 +98,23 @@ class UpcomingRecurringDashboardWidget extends ConsumerWidget {
   }
 }
 
-// ─── Upcoming Section ─────────────────────────────────────────────────────────
-
-class _UpcomingSection extends StatelessWidget {
-  const _UpcomingSection({required this.transactions});
-
-  final List<RecurringTransactionModel> transactions;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.event_repeat_rounded,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'recurring.upcoming_section_title'.tr(),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Transaction items
-        ...transactions.asMap().entries.map((entry) {
-          final index = entry.key;
-          final transaction = entry.value;
-          return _UpcomingItem(transaction: transaction, isDark: isDark)
-              .animate()
-              .fadeIn(
-                delay: Duration(milliseconds: index * 50),
-                duration: 300.ms,
-                curve: Curves.easeOutCubic,
-              )
-              .slideY(
-                begin: 0.05,
-                end: 0,
-                delay: Duration(milliseconds: index * 50),
-                duration: 300.ms,
-                curve: Curves.easeOutCubic,
-              );
-        }),
-      ],
-    );
-  }
-}
-
 // ─── Upcoming Item Card ───────────────────────────────────────────────────────
 
-class _UpcomingItem extends StatelessWidget {
+class _UpcomingItem extends ConsumerWidget {
   const _UpcomingItem({required this.transaction, required this.isDark});
 
   final RecurringTransactionModel transaction;
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     final isIncome = transaction.isIncome;
     final amountColor = isIncome ? colorScheme.primary : colorScheme.error;
 
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
     final dateFormat = DateFormat('dd MMM', 'id_ID');
 
     final name = transaction.notes ?? transaction.frequency.label;
@@ -130,7 +128,7 @@ class _UpcomingItem extends StatelessWidget {
         context.push('/recurring-transactions/${transaction.id}');
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: isDark

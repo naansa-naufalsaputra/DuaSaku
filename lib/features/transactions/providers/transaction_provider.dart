@@ -6,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/local_db/app_database_provider.dart';
+import '../../../../core/providers/event_bus_provider.dart';
 import '../../../core/local_db/app_database.dart';
 import '../../../core/utils/result.dart';
 import '../../../services/service_providers.dart';
@@ -16,6 +17,7 @@ import '../../../services/models/parsed_transaction.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction_repository_interface.dart';
 import '../domain/models/transaction_model.dart';
+import '../domain/transaction_filters.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../wallets/providers/wallet_provider.dart';
 import '../../smart_budget_alerts/providers/alert_center_provider.dart';
@@ -26,14 +28,26 @@ final transactionRepositoryProvider = Provider<TransactionRepositoryInterface>((
   ref,
 ) {
   final db = ref.watch(appDatabaseProvider);
-  return TransactionRepository(db);
+  final eventSink = ref.watch(transactionEventSinkProvider);
+  return TransactionRepository(db, eventSink);
 });
 
 class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
+  static const int pageSize = 50;
+  
   late TransactionRepositoryInterface _repository;
   late TransactionParserServiceInterface _parserService;
   StreamSubscription<List<TransactionModel>>? _subscription;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  
+  // Filter and pagination state
+  TransactionFilters _currentFilters = const TransactionFilters();
+  int _currentLimit = pageSize;
+  bool _isLoadingMore = false;
+  
+  // Soft-delete state for undo functionality
+  TransactionModel? _deletedTransactionStash;
+  Timer? _deleteTimer;
 
   @override
   Future<List<TransactionModel>> build() async {
@@ -44,17 +58,11 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       return [];
     }
 
-    // Background sync on init
-    // ignore: deprecated_member_use
-    _repository.syncPendingTransactions();
-
     _connectivitySubscription?.cancel();
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       results,
     ) {
       if (!results.contains(ConnectivityResult.none)) {
-        // ignore: deprecated_member_use
-        _repository.syncPendingTransactions();
         loadTransactions();
       }
     });
@@ -69,7 +77,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
 
     _subscription?.cancel();
     _subscription = _repository
-        .fetchTransactions(user.id)
+        .fetchTransactionsFiltered(user.id, _currentFilters, _currentLimit)
         .listen(
           (data) {
             if (isFirst) {
@@ -98,10 +106,54 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       return;
     }
     _subscription?.cancel();
-    _subscription = _repository.fetchTransactions(user.id).listen((data) {
+    _subscription = _repository
+        .fetchTransactionsFiltered(user.id, _currentFilters, _currentLimit)
+        .listen((data) {
       state = AsyncValue.data(data);
     });
   }
+  
+  void applyFilters(TransactionFilters filters) {
+    _currentFilters = filters;
+    _currentLimit = pageSize; // Reset to initial page size
+    ref.invalidateSelf();
+  }
+  
+  void clearFilters() {
+    _currentFilters = const TransactionFilters();
+    _currentLimit = pageSize; // Reset to initial page size
+    ref.invalidateSelf();
+  }
+  
+  void loadMoreTransactions() {
+    if (_isLoadingMore) return;
+    
+    state.whenData((currentTransactions) {
+      // Check if we have full page (means more data exists)
+      if (currentTransactions.length < _currentLimit) {
+        // Already showing all data
+        return;
+      }
+      
+      _isLoadingMore = true;
+      
+      // Increment limit by pageSize
+      _currentLimit += pageSize;
+      
+      // Rebuild stream with new limit (triggers new query)
+      ref.invalidateSelf();
+      
+      _isLoadingMore = false;
+    });
+  }
+  
+  bool get hasMorePages {
+    return state.whenOrNull(
+      data: (transactions) => transactions.length >= _currentLimit,
+    ) ?? false;
+  }
+  
+  bool get isLoadingMore => _isLoadingMore;
 
   Future<void> addTransaction(TransactionModel transaction) async {
     final result = await _repository.insertTransaction(transaction);
@@ -109,10 +161,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       case Success():
         await HapticFeedback.mediumImpact();
         await loadTransactions();
-        // Fire-and-forget: trigger alert evaluation for expense transactions
-        if (transaction.type == 'expense') {
-          _triggerAlertEvaluationAfterInsert(transaction);
-        }
+        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         // Preserve previous data while surfacing error via AsyncError state
         final previousData = state.valueOrNull ?? [];
@@ -139,10 +188,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     switch (result) {
       case Success():
         await loadTransactions();
-        // Fire-and-forget: trigger alert re-evaluation for expense transactions
-        if (deletedTx != null && deletedTx.type == 'expense') {
-          _triggerAlertEvaluationAfterDelete(deletedTx);
-        }
+        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         // Restore previous state first so Riverpod's internal copyWithPrevious
         // uses the correct previous data (not the optimistic removal state)
@@ -151,6 +197,93 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
           error,
           StackTrace.current,
         ).copyWithPrevious(AsyncData(previousState ?? []));
+    }
+  }
+
+  /// Soft-delete transaction with 5-second undo window
+  /// Returns the deleted transaction for SnackBar display
+  Future<TransactionModel?> softDeleteTransaction(int id) async {
+    // Cancel any existing delete timer
+    _deleteTimer?.cancel();
+    
+    final previousState = state.valueOrNull;
+    final deletedTx = previousState?.where((tx) => tx.id == id).firstOrNull;
+    
+    if (deletedTx == null) return null;
+    
+    // Stash the transaction
+    _deletedTransactionStash = deletedTx;
+    
+    // Optimistic UI update (remove from list)
+    if (previousState != null) {
+      state = AsyncValue.data(
+        previousState.where((tx) => tx.id != id).toList(),
+      );
+    }
+    
+    // Start 5-second timer for permanent delete
+    _deleteTimer = Timer(const Duration(seconds: 5), () async {
+      await _permanentlyDelete(id, deletedTx);
+    });
+    
+    return deletedTx;
+  }
+
+  /// Undo soft-delete (cancel timer and restore transaction)
+  Future<void> undoDelete() async {
+    _deleteTimer?.cancel();
+    
+    final stashed = _deletedTransactionStash;
+    if (stashed == null) return;
+    
+    // Restore to list at original chronological position
+    final currentList = state.valueOrNull ?? [];
+    final restoredList = [...currentList, stashed]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort by date descending
+    
+    state = AsyncValue.data(restoredList);
+    _deletedTransactionStash = null;
+  }
+
+  /// Permanent delete (called after 5-second timeout)
+  Future<void> _permanentlyDelete(int id, TransactionModel deletedTx) async {
+    final result = await _repository.deleteTransaction(id);
+    switch (result) {
+      case Success():
+        _deletedTransactionStash = null;
+        await loadTransactions();
+        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      case Failure(:final error):
+        // Restore on failure
+        final currentList = state.valueOrNull ?? [];
+        final restoredList = [...currentList, deletedTx]
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        state = AsyncValue.data(restoredList);
+        _deletedTransactionStash = null;
+        
+        // Show error
+        state = AsyncValue<List<TransactionModel>>.error(
+          error,
+          StackTrace.current,
+        ).copyWithPrevious(AsyncData(restoredList));
+    }
+  }
+
+  Future<void> updateTransaction(
+    TransactionModel transaction,
+    TransactionModel oldTransaction,
+  ) async {
+    final result = await _repository.updateTransaction(transaction, oldTransaction);
+    switch (result) {
+      case Success():
+        await loadTransactions();
+        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      case Failure(:final error):
+        final previousData = state.valueOrNull ?? [];
+        state = AsyncValue<List<TransactionModel>>.error(
+          error,
+          StackTrace.current,
+        ).copyWithPrevious(AsyncData(previousData));
     }
   }
 
@@ -192,7 +325,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     final newTransaction = TransactionModel(
       userId: user.id,
       amount: amount,
-      category: category,
+      categoryId: category,
       type: type,
       notes: notes,
       walletId: walletId,
@@ -218,7 +351,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     final newTransaction = TransactionModel(
       userId: user.id,
       amount: amount,
-      category: 'Transfer',
+      categoryId: 'transfer',
       type: 'transfer',
       notes: notes,
       fromWalletId: fromWalletId,
@@ -229,84 +362,6 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     );
 
     await addTransaction(newTransaction);
-  }
-
-  // ─── Alert Evaluation Helpers ───────────────────────────────────────────────
-
-  /// Triggers alert evaluation after a new expense transaction is inserted.
-  ///
-  /// Resolves the category name to categoryId, then calls the evaluator.
-  /// Fire-and-forget — errors are logged internally by the evaluator.
-  void _triggerAlertEvaluationAfterInsert(TransactionModel transaction) {
-    // Run asynchronously without awaiting to avoid blocking the UI
-    Future<void>(() async {
-      final user = ref.read(userProvider);
-      if (user == null) return;
-
-      final db = ref.read(appDatabaseProvider);
-      final categoryId = await _resolveCategoryId(
-        db,
-        user.id,
-        transaction.category,
-      );
-      if (categoryId == null) return;
-
-      final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
-        transaction.createdAt,
-      );
-
-      final evaluator = ref.read(budgetAlertEvaluatorProvider);
-      await evaluator.evaluateAfterExpenseInsert(
-        userId: user.id,
-        categoryId: categoryId,
-        budgetMonth: budgetMonth,
-      );
-    });
-  }
-
-  /// Triggers alert re-evaluation after an expense transaction is deleted.
-  ///
-  /// Resolves the category name to categoryId, then calls the evaluator
-  /// to reset thresholds where spending has dropped.
-  void _triggerAlertEvaluationAfterDelete(TransactionModel transaction) {
-    Future<void>(() async {
-      final user = ref.read(userProvider);
-      if (user == null) return;
-
-      final db = ref.read(appDatabaseProvider);
-      final categoryId = await _resolveCategoryId(
-        db,
-        user.id,
-        transaction.category,
-      );
-      if (categoryId == null) return;
-
-      final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
-        transaction.createdAt,
-      );
-
-      final evaluator = ref.read(budgetAlertEvaluatorProvider);
-      await evaluator.evaluateAfterExpenseChange(
-        userId: user.id,
-        categoryId: categoryId,
-        budgetMonth: budgetMonth,
-      );
-    });
-  }
-
-  /// Resolves a category name to its ID from the database.
-  /// Returns null if the category is not found.
-  Future<String?> _resolveCategoryId(
-    AppDatabase db,
-    String userId,
-    String categoryName,
-  ) async {
-    final cat =
-        await (db.select(db.categories)..where(
-              (c) => c.name.equals(categoryName) & c.userId.equals(userId),
-            ))
-            .getSingleOrNull();
-    return cat?.id;
   }
 }
 

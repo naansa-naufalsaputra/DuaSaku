@@ -27,7 +27,7 @@ class TransactionParserService extends LocalTransactionParserService {
     if (result.amount == 0.0) {
       return ParsedTransaction(
         amount: 50000.0,
-        category: result.category,
+        categoryId: result.categoryId,
         type: result.type,
         walletId: result.walletId,
         notes: result.notes,

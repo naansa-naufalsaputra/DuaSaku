@@ -2,7 +2,8 @@ class TransactionModel {
   final int? id;
   final String userId;
   final double amount;
-  final String category;
+  final String currency; // ISO 4217 currency code
+  final String categoryId; // References Categories.id (foreign key)
   final String type; // 'income', 'expense', or 'transfer'
   final String notes;
   final DateTime createdAt;
@@ -11,12 +12,14 @@ class TransactionModel {
   final String? toWalletId;
   final double? latitude;
   final double? longitude;
+  final String? photoPath;
 
   TransactionModel({
     this.id,
     required this.userId,
     required this.amount,
-    required this.category,
+    this.currency = 'IDR',
+    required this.categoryId,
     required this.type,
     required this.notes,
     required this.createdAt,
@@ -25,6 +28,7 @@ class TransactionModel {
     this.toWalletId,
     this.latitude,
     this.longitude,
+    this.photoPath,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -32,7 +36,8 @@ class TransactionModel {
       id: json['id'] as int?,
       userId: json['user_id'] as String,
       amount: (json['amount'] as num).toDouble(),
-      category: json['category'] as String,
+      currency: json['currency'] as String? ?? 'IDR',
+      categoryId: json['category_id'] as String,
       type: json['type'] as String,
       notes: json['notes'] as String? ?? '',
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -41,6 +46,7 @@ class TransactionModel {
       toWalletId: json['to_wallet_id'] as String?,
       latitude: json['latitude'] as double?,
       longitude: json['longitude'] as double?,
+      photoPath: json['photo_path'] as String?,
     );
   }
 
@@ -49,7 +55,8 @@ class TransactionModel {
       if (id != null) 'id': id,
       'user_id': userId,
       'amount': amount,
-      'category': category,
+      'currency': currency,
+      'category_id': categoryId,
       'type': type,
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
@@ -58,6 +65,7 @@ class TransactionModel {
       if (toWalletId != null) 'to_wallet_id': toWalletId,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
+      if (photoPath != null) 'photo_path': photoPath,
     };
   }
 
@@ -65,7 +73,8 @@ class TransactionModel {
     int? id,
     String? userId,
     double? amount,
-    String? category,
+    String? currency,
+    String? categoryId,
     String? type,
     String? notes,
     DateTime? createdAt,
@@ -74,12 +83,14 @@ class TransactionModel {
     String? toWalletId,
     double? latitude,
     double? longitude,
+    String? photoPath,
   }) {
     return TransactionModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       amount: amount ?? this.amount,
-      category: category ?? this.category,
+      currency: currency ?? this.currency,
+      categoryId: categoryId ?? this.categoryId,
       type: type ?? this.type,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
@@ -88,6 +99,7 @@ class TransactionModel {
       toWalletId: toWalletId ?? this.toWalletId,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      photoPath: photoPath ?? this.photoPath,
     );
   }
 }

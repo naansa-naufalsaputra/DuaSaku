@@ -93,7 +93,7 @@ class SmartParserOrchestrator implements TransactionParserServiceInterface {
 
     return ParsedTransaction(
       amount: baseResult.amount,
-      category: baseResult.category,
+      categoryId: baseResult.categoryId,
       type: baseResult.type,
       walletId: baseResult.walletId,
       notes: baseResult.notes,

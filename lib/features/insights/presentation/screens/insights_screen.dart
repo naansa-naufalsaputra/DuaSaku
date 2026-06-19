@@ -7,7 +7,14 @@ import '../../../gamification/providers/gamification_provider.dart';
 import '../../../transactions/providers/transaction_provider.dart';
 import '../../../transactions/providers/category_provider.dart';
 import '../../../transactions/domain/models/category_model.dart';
+import '../../../transactions/domain/models/transaction_model.dart';
 import '../../../../core/theme/premium_background.dart';
+import '../../../../core/utils/category_icon_helper.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../providers/insights_provider.dart';
+import '../widgets/year_over_year_chart.dart';
+
+enum FilterType { weekly, monthly, yearly, custom }
 
 class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
@@ -19,6 +26,8 @@ class InsightsScreen extends ConsumerStatefulWidget {
 class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   final ScrollController _scrollController = ScrollController();
   int _touchedPieIndex = -1;
+  FilterType _selectedFilter = FilterType.monthly;
+  DateTimeRange? _customDateRange;
 
   @override
   void dispose() {
@@ -26,62 +35,41 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     super.dispose();
   }
 
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
+  Future<void> _pickCustomDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      initialDateRange: _customDateRange ?? DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 7)),
+        end: DateTime.now(),
+      ),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: Color(0xFF007AFF),
+                    surface: Color(0xFF1E1E1E),
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: Color(0xFF007AFF),
+                    surface: Colors.white,
+                    onSurface: Colors.black87,
+                  ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedFilter = FilterType.custom;
+        _customDateRange = picked;
+      });
     }
   }
 
@@ -117,45 +105,121 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         ? const Color(0xFF0A84FF)
         : const Color(0xFF007AFF);
 
-    // Calculate totals
+    // Filter transactions based on selected filter
+    final now = DateTime.now();
+    final List<TransactionModel> filteredTransactions;
+    String trendPeriodLabel = '';
+    List<DateTime> chartDays = [];
+
+    switch (_selectedFilter) {
+      case FilterType.weekly:
+        trendPeriodLabel = 'insights.last_7_days'.tr();
+        final todayStart = DateTime(now.year, now.month, now.day);
+        final startDate = todayStart.subtract(const Duration(days: 6));
+        filteredTransactions = transactions.where((t) {
+          final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+          return tDate.isAfter(startDate) || tDate.isAtSameMomentAs(startDate);
+        }).toList();
+        chartDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+        break;
+
+      case FilterType.monthly:
+        trendPeriodLabel = 'insights.filter_monthly'.tr();
+        filteredTransactions = transactions.where((t) {
+          return t.createdAt.month == now.month && t.createdAt.year == now.year;
+        }).toList();
+        final daysInMonth = now.day;
+        chartDays = List.generate(daysInMonth, (index) => DateTime(now.year, now.month, index + 1));
+        break;
+
+      case FilterType.yearly:
+        trendPeriodLabel = 'insights.filter_yearly'.tr();
+        filteredTransactions = transactions.where((t) {
+          return t.createdAt.year == now.year;
+        }).toList();
+        chartDays = List.generate(12, (index) => DateTime(now.year, index + 1, 1));
+        break;
+
+      case FilterType.custom:
+        if (_customDateRange != null) {
+          final start = DateTime(_customDateRange!.start.year, _customDateRange!.start.month, _customDateRange!.start.day);
+          final end = DateTime(_customDateRange!.end.year, _customDateRange!.end.month, _customDateRange!.end.day);
+          trendPeriodLabel = '${DateFormat('dd/MM/yy').format(start)} - ${DateFormat('dd/MM/yy').format(end)}';
+          filteredTransactions = transactions.where((t) {
+            final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+            return (tDate.isAfter(start) || tDate.isAtSameMomentAs(start)) &&
+                   (tDate.isBefore(end) || tDate.isAtSameMomentAs(end));
+          }).toList();
+          
+          final diffDays = end.difference(start).inDays + 1;
+          if (diffDays <= 31) {
+            chartDays = List.generate(diffDays, (index) => start.add(Duration(days: index)));
+          } else {
+            chartDays = [];
+            DateTime current = start;
+            while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+              chartDays.add(current);
+              current = current.add(const Duration(days: 7));
+            }
+            if (chartDays.isEmpty || chartDays.last.isBefore(end)) {
+              chartDays.add(end);
+            }
+          }
+        } else {
+          trendPeriodLabel = 'insights.filter_custom'.tr();
+          filteredTransactions = transactions;
+          final todayStart = DateTime(now.year, now.month, now.day);
+          final startDate = todayStart.subtract(const Duration(days: 6));
+          chartDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+        }
+        break;
+    }
+
+    // Calculate totals on filtered transactions
     double totalExpense = 0;
     final Map<String, double> categoryExpenses = {};
     final Map<String, int> categoryCounts = {};
 
-    for (var t in transactions) {
+    for (var t in filteredTransactions) {
       if (t.type.toLowerCase() == 'expense') {
         totalExpense += t.amount;
-        categoryExpenses[t.category] =
-            (categoryExpenses[t.category] ?? 0) + t.amount;
-        categoryCounts[t.category] = (categoryCounts[t.category] ?? 0) + 1;
+        categoryExpenses[t.categoryId] =
+            (categoryExpenses[t.categoryId] ?? 0) + t.amount;
+        categoryCounts[t.categoryId] = (categoryCounts[t.categoryId] ?? 0) + 1;
       }
     }
 
-    // Calculate cumulative spending day-by-day for the last 7 days
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day);
-    final startDate = todayStart.subtract(const Duration(days: 6));
-    final List<DateTime> targetDays = List.generate(
-      7,
-      (index) => startDate.add(Duration(days: index)),
-    );
-
+    // Calculate cumulative spending day-by-day based on the active timeframe
     final Map<int, double> dailySpending = {};
-    for (int d = 1; d <= 7; d++) {
+    for (int d = 1; d <= chartDays.length; d++) {
       dailySpending[d] = 0.0;
     }
 
-    for (var t in transactions) {
+    for (var t in filteredTransactions) {
       if (t.type.toLowerCase() == 'expense') {
         final tDate = DateTime(
           t.createdAt.year,
           t.createdAt.month,
           t.createdAt.day,
         );
-        for (int i = 0; i < 7; i++) {
-          if (tDate.isAtSameMomentAs(targetDays[i])) {
-            dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
-            break;
+        for (int i = 0; i < chartDays.length; i++) {
+          if (_selectedFilter == FilterType.yearly) {
+            if (t.createdAt.year == chartDays[i].year && t.createdAt.month == chartDays[i].month) {
+              dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
+              break;
+            }
+          } else if (_selectedFilter == FilterType.custom && chartDays.length > 31) {
+            final nextLimit = i < chartDays.length - 1 ? chartDays[i + 1] : null;
+            if ((tDate.isAfter(chartDays[i]) || tDate.isAtSameMomentAs(chartDays[i])) &&
+                (nextLimit == null || tDate.isBefore(nextLimit))) {
+              dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
+              break;
+            }
+          } else {
+            if (tDate.isAtSameMomentAs(chartDays[i])) {
+              dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
+              break;
+            }
           }
         }
       }
@@ -163,7 +227,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     final List<FlSpot> lineSpots = [];
     double cumulativeSum = 0;
-    for (int d = 1; d <= 7; d++) {
+    for (int d = 1; d <= chartDays.length; d++) {
       cumulativeSum += dailySpending[d] ?? 0.0;
       lineSpots.add(FlSpot(d.toDouble(), cumulativeSum));
     }
@@ -203,7 +267,6 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         );
       }
     });
-    // Sort from highest expenditure to lowest
     sortedExpenseBreakdown.sort((a, b) => b.amount.compareTo(a.amount));
 
     // Prepare monochromatic pie chart sections
@@ -257,11 +320,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       displayedPercentage = (touchedItem.amount / totalExpense) * 100;
     }
 
-    final formattedTotalExpense = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    ).format(totalExpense);
+    final formattedTotalExpense = ref.watch(currencyFormatterProvider).format(totalExpense);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -314,6 +373,63 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: FilterType.values.map((type) {
+                        final isSelected = _selectedFilter == type;
+                        String label = '';
+                        switch (type) {
+                          case FilterType.weekly:
+                            label = 'insights.filter_weekly'.tr();
+                            break;
+                          case FilterType.monthly:
+                            label = 'insights.filter_monthly'.tr();
+                            break;
+                          case FilterType.yearly:
+                            label = 'insights.filter_yearly'.tr();
+                            break;
+                          case FilterType.custom:
+                            if (_customDateRange != null) {
+                              final startStr = DateFormat('d/M').format(_customDateRange!.start);
+                              final endStr = DateFormat('d/M').format(_customDateRange!.end);
+                              label = '$startStr - $endStr';
+                            } else {
+                              label = 'insights.filter_custom'.tr();
+                            }
+                            break;
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(label),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              if (selected) {
+                                if (type == FilterType.custom) {
+                                  _pickCustomDateRange();
+                                } else {
+                                  setState(() {
+                                    _selectedFilter = type;
+                                  });
+                                }
+                              }
+                            },
+                            selectedColor: accentColor.withValues(alpha: 0.15),
+                            labelStyle: TextStyle(
+                              color: isSelected ? accentColor : (isDark ? Colors.white70 : Colors.black87),
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 12,
+                            ),
+                            backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                            checkmarkColor: accentColor,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // 1. Overall Health Ring Gauge
                   const SizedBox(height: 12),
                   Center(
@@ -433,7 +549,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'insights.last_7_days'.tr(),
+                                  trendPeriodLabel,
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: isDark
@@ -491,7 +607,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                   sideTitles: SideTitles(
                                     showTitles: true,
                                     reservedSize: 22,
-                                    interval: 1.0,
+                                    interval: chartDays.length <= 7
+                                        ? 1.0
+                                        : chartDays.length <= 31
+                                            ? (chartDays.length / 6).ceilToDouble()
+                                            : (chartDays.length / 5).ceilToDouble(),
                                     getTitlesWidget: (value, meta) {
                                       final style = TextStyle(
                                         color: isDark
@@ -501,26 +621,41 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                         fontWeight: FontWeight.w500,
                                       );
                                       final dayIndex = value.toInt();
-                                      if (dayIndex >= 1 && dayIndex <= 7) {
-                                        final date = targetDays[dayIndex - 1];
-                                        final label = DateFormat.E(
-                                          Localizations.localeOf(
-                                            context,
-                                          ).toString(),
-                                        ).format(date);
-                                        return SideTitleWidget(
-                                          axisSide: meta.axisSide,
-                                          space: 4,
-                                          child: Text(label, style: style),
-                                        );
+                                      if (dayIndex < 1 || dayIndex > chartDays.length) {
+                                        return const SizedBox.shrink();
                                       }
-                                      return const SizedBox.shrink();
+                                      final date = chartDays[dayIndex - 1];
+                                      final locale = Localizations.localeOf(context).toString();
+                                      String label;
+                                      switch (_selectedFilter) {
+                                        case FilterType.weekly:
+                                          label = DateFormat.E(locale).format(date);
+                                          break;
+                                        case FilterType.monthly:
+                                          label = '${date.day}';
+                                          break;
+                                        case FilterType.yearly:
+                                          label = DateFormat.MMM(locale).format(date);
+                                          break;
+                                        case FilterType.custom:
+                                          if (chartDays.length <= 14) {
+                                            label = '${date.day}';
+                                          } else {
+                                            label = DateFormat('d/M').format(date);
+                                          }
+                                          break;
+                                      }
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        space: 4,
+                                        child: Text(label, style: style),
+                                      );
                                     },
                                   ),
                                 ),
                               ),
                               minX: 1,
-                              maxX: 7.0,
+                              maxX: chartDays.length.toDouble(),
                               minY: 0,
                               maxY: maxYVal,
                               lineBarsData: [
@@ -656,11 +791,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = sortedExpenseBreakdown[index];
-                        final formattedAmount = NumberFormat.currency(
-                          locale: 'id_ID',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(item.amount);
+                        final formattedAmount = ref.watch(currencyFormatterProvider).format(item.amount);
 
                         return Container(
                           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -674,7 +805,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  _getIconData(item.icon),
+                                  CategoryIconHelper.getIconData(item.icon),
                                   color: accentColor,
                                   size: 20,
                                 ),
@@ -723,6 +854,16 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       },
                     ),
                   ],
+
+                  // 4. Year-over-Year Comparison
+                  const SizedBox(height: 24),
+                  ref.watch(yoyDataProvider).isNotEmpty
+                      ? YearOverYearChart(
+                          currentYearData: ref.watch(yoyDataProvider)['current'] ?? [],
+                          previousYearData: ref.watch(yoyDataProvider)['previous'] ?? [],
+                          currencySymbol: ref.watch(currencySymbolProvider),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),

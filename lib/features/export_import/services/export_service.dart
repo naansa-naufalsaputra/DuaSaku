@@ -15,6 +15,7 @@ import 'package:duasaku_app/features/export_import/domain/models/data_type.dart'
 import 'package:duasaku_app/features/export_import/domain/models/export_config.dart';
 import 'package:duasaku_app/features/export_import/domain/models/export_result.dart';
 import 'package:duasaku_app/features/export_import/services/isolate_helpers.dart';
+import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -157,6 +158,12 @@ class ExportService implements ExportServiceInterface {
         // Encode the archive as ZIP
         final zipBytes = ZipEncoder().encode(archive);
 
+        if (zipBytes == null) {
+          return Failure(
+            AppError.unknown('Failed to encode ZIP archive'),
+          );
+        }
+
         final zipFileName = 'duasaku_export_$timestamp.zip';
         final zipFilePath = p.join(tempDir.path, zipFileName);
         await File(zipFilePath).writeAsBytes(zipBytes);
@@ -174,6 +181,146 @@ class ExportService implements ExportServiceInterface {
       return Failure(
         AppError.unknown(
           'CSV export failed: ${e.toString()}',
+          stackTrace: stack,
+        ),
+      );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Excel Export
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Result<ExportResult, AppError>> exportExcel(ExportConfig config) async {
+    try {
+      final timestamp = _formatTimestamp(DateTime.now());
+      final tempDir = await getTemporaryDirectory();
+
+      // Get wallet and category name maps for resolving FKs
+      final walletNamesResult = await _repository.getWalletNameMap(_userId);
+      final categoryNamesResult = await _repository.getCategoryNameMap(_userId);
+
+      final Map<String, String> walletNames;
+      final Map<String, String> categoryNames;
+
+      switch (walletNamesResult) {
+        case Success(:final value):
+          walletNames = value;
+        case Failure(:final error):
+          return Failure(error);
+      }
+
+      switch (categoryNamesResult) {
+        case Success(:final value):
+          categoryNames = value;
+        case Failure(:final error):
+          return Failure(error);
+      }
+
+      // Create Excel workbook
+      final excel = Excel.createExcel();
+
+      // Remove default sheet
+      if (excel.sheets.containsKey('Sheet1')) {
+        excel.delete('Sheet1');
+      }
+
+      int totalRecordCount = 0;
+
+      // Add sheet per selected data type
+      for (final dataType in config.selectedTypes) {
+        final dataResult = await _fetchDataForType(
+          dataType,
+          startDate: config.dateRange.startDate,
+          endDate: config.dateRange.endDate,
+        );
+
+        switch (dataResult) {
+          case Success(:final value):
+            final data = value;
+            totalRecordCount += data.length;
+
+            if (data.isEmpty) continue;
+
+            final headers = _getHeadersForType(dataType, data);
+            final sheetName = dataType.name;
+
+            excel.copy('Sheet1', sheetName);
+            final sheet = excel[sheetName];
+
+            // Write headers
+            for (var i = 0; i < headers.length; i++) {
+              sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
+                  .value = TextCellValue(headers[i]);
+            }
+
+            // Write data rows
+            for (var rowIdx = 0; rowIdx < data.length; rowIdx++) {
+              final row = data[rowIdx];
+              for (var colIdx = 0; colIdx < headers.length; colIdx++) {
+                final header = headers[colIdx];
+                var cellValue = row[header];
+
+                // Resolve FK references
+                if (dataType == DataType.transactions) {
+                  if (header == 'wallet_id' && cellValue != null) {
+                    cellValue = walletNames[cellValue] ?? cellValue;
+                  } else if (header == 'from_wallet_id' && cellValue != null) {
+                    cellValue = walletNames[cellValue] ?? cellValue;
+                  } else if (header == 'to_wallet_id' && cellValue != null) {
+                    cellValue = walletNames[cellValue] ?? cellValue;
+                  } else if (header == 'category_id' && cellValue != null) {
+                    cellValue = categoryNames[cellValue] ?? cellValue;
+                  }
+                }
+
+                final cell = sheet.cell(
+                  CellIndex.indexByColumnRow(columnIndex: colIdx, rowIndex: rowIdx + 1),
+                );
+
+                if (cellValue == null) {
+                  cell.value = TextCellValue('');
+                } else if (cellValue is num) {
+                  cell.value = DoubleCellValue(cellValue.toDouble());
+                } else if (cellValue is bool) {
+                  cell.value = BoolCellValue(cellValue);
+                } else {
+                  cell.value = TextCellValue(cellValue.toString());
+                }
+              }
+            }
+
+          case Failure(:final error):
+            return Failure(error);
+        }
+      }
+
+      // Save Excel file
+      final fileName = 'duasaku_export_$timestamp.xlsx';
+      final filePath = p.join(tempDir.path, fileName);
+      final excelBytes = excel.encode();
+
+      if (excelBytes == null) {
+        return Failure(
+          AppError.unknown('Failed to encode Excel file'),
+        );
+      }
+
+      await File(filePath).writeAsBytes(excelBytes);
+
+      return Success(
+        ExportResult(
+          filePath: filePath,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          fileName: fileName,
+          recordCount: totalRecordCount,
+        ),
+      );
+    } catch (e, stack) {
+      return Failure(
+        AppError.unknown(
+          'Excel export failed: ${e.toString()}',
           stackTrace: stack,
         ),
       );

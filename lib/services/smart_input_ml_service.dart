@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_entity_extraction/google_mlkit_entity_extraction.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+import '../core/utils/local_date_parser.dart';
 
 /// Abstract service interface for On-Device Machine Learning operations.
 abstract class SmartInputMlService {
@@ -133,6 +134,11 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
     DateTime? referenceDate,
   }) async {
     if (text.trim().isEmpty) return null;
+
+    final localParsed = LocalDateParser.parse(text, referenceDate: referenceDate);
+    if (localParsed != null) {
+      return localParsed;
+    }
 
     try {
       final ready = await _ensureEnginesReady();

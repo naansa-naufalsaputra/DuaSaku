@@ -7,6 +7,11 @@ import 'math_parser.dart';
 class ThousandsFormatter extends TextInputFormatter {
   static final NumberFormat _formatter = NumberFormat.decimalPattern('id_ID');
 
+  /// Formats a number with thousands separators using the Indonesian locale format.
+  static String format(num value) {
+    return _formatter.format(value);
+  }
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,

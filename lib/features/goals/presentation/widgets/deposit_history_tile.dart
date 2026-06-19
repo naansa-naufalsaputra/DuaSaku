@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../domain/models/goal_deposit_model.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 /// List tile widget for displaying a single deposit in the deposit history.
 ///
@@ -9,7 +11,7 @@ import '../../domain/models/goal_deposit_model.dart';
 /// the date the deposit was made.
 ///
 /// Requirements: 2.5, 5.4
-class DepositHistoryTile extends StatelessWidget {
+class DepositHistoryTile extends ConsumerWidget {
   const DepositHistoryTile({super.key, required this.deposit, this.goalColor});
 
   /// The deposit model to display.
@@ -19,17 +21,13 @@ class DepositHistoryTile extends StatelessWidget {
   final Color? goalColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final accentColor = goalColor ?? colorScheme.primary;
 
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
 
     return Container(

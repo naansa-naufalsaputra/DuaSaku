@@ -92,7 +92,7 @@ void main() {
             final tx = TransactionModel(
               userId: 'stress_user',
               amount: amount,
-              category: 'Salary',
+              categoryId: 'cat_stress',
               type: isIncome ? 'income' : 'expense',
               notes: 'Concurrent Stress Tx $t',
               walletId: walletId,

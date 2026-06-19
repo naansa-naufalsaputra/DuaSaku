@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../main.dart';
 import '../domain/geofence_service_interface.dart';
 import '../domain/geofence_hotspot.dart';
 
@@ -35,9 +36,7 @@ class GeofenceService implements GeofenceServiceInterface {
 
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // Handle when notification is tapped
-      },
+      onDidReceiveNotificationResponse: onNotificationTapGlobal,
     );
 
     // 2. Request and check location permissions only if enabled in preferences
@@ -129,8 +128,15 @@ class GeofenceService implements GeofenceServiceInterface {
           priority: Priority.high,
           ticker: 'ticker',
         );
+    const DarwinNotificationDetails iosPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
+      iOS: iosPlatformChannelSpecifics,
     );
 
     await _notificationsPlugin.show(
@@ -138,6 +144,7 @@ class GeofenceService implements GeofenceServiceInterface {
       title: '⚠️ Watch your wallet!',
       body: "You've entered ${hotspot.name} (a frequent spending area).",
       notificationDetails: platformChannelSpecifics,
+      payload: 'duasaku://new_transaction',
     );
   }
 

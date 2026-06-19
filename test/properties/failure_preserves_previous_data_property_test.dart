@@ -10,6 +10,7 @@ import 'package:duasaku_app/core/utils/app_error.dart';
 import 'package:duasaku_app/core/utils/result.dart';
 import 'package:duasaku_app/features/transactions/domain/models/transaction_model.dart';
 import 'package:duasaku_app/features/transactions/domain/transaction_repository_interface.dart';
+import 'package:duasaku_app/features/transactions/domain/transaction_filters.dart';
 
 // ---------------------------------------------------------------------------
 // Minimal test notifier that replicates the exact error handling logic from
@@ -37,6 +38,15 @@ class _FakeFailingRepository implements TransactionRepositoryInterface {
   }
 
   @override
+  Stream<List<TransactionModel>> fetchTransactionsFiltered(
+    String userId,
+    TransactionFilters filters,
+    int limit,
+  ) {
+    return Stream.value(initialTransactions);
+  }
+
+  @override
   Future<Result<void, AppError>> insertTransaction(
     TransactionModel transaction,
   ) async {
@@ -49,8 +59,14 @@ class _FakeFailingRepository implements TransactionRepositoryInterface {
   }
 
   @override
-  @Deprecated('Deprecated in interface')
-  Future<void> syncPendingTransactions() async {}
+  Future<Result<void, AppError>> updateTransaction(
+    TransactionModel transaction,
+    TransactionModel oldTransaction,
+  ) async {
+    return Failure(failureError);
+  }
+
+
 }
 
 /// Minimal AsyncNotifier that replicates TransactionNotifier's error handling
@@ -142,7 +158,7 @@ List<TransactionModel> _generateTransactionList(int seed) {
       id: i + 1,
       userId: 'test-user',
       amount: amount,
-      category: categories[rng.nextInt(categories.length)],
+      categoryId: categories[rng.nextInt(categories.length)],
       type: type,
       notes: 'Transaction_$i',
       createdAt: DateTime(2024, 1 + rng.nextInt(12), 1 + rng.nextInt(28)),
@@ -317,7 +333,7 @@ void main() {
             final newTransaction = TransactionModel(
               userId: 'test-user',
               amount: 100.0,
-              category: 'Food',
+              categoryId: 'Food',
               type: 'expense',
               notes: 'Test add',
               createdAt: DateTime(2024, 6, 15),

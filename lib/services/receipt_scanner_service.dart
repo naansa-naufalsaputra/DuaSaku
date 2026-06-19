@@ -51,7 +51,7 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
         debugPrint('[ReceiptScannerService] OCR returned empty text.');
         return const ParsedTransaction(
           amount: 0.0,
-          category: 'Food', // default category
+          categoryId: 'food', // default category
           type: 'expense',
           notes: 'Struk Belanja',
           isReceiptScan: true,
@@ -80,7 +80,7 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
           wallets: [],
           categories: [],
         );
-        category = parsedResult.category;
+        category = parsedResult.categoryId;
         intentType = parsedResult.type;
       } catch (e) {
         debugPrint(
@@ -88,13 +88,13 @@ class ReceiptScannerServiceImpl implements ReceiptScannerService {
         );
         // Fallback: match via local text sanitizer keywords if TFLite fails
         final sanitized = TextSanitizer.sanitize(merchantName);
-        category = TextSanitizer.mapToCategorySynonym(sanitized) ?? 'Food';
+        category = TextSanitizer.mapToCategorySynonym(sanitized) ?? 'food';
         intentType = TextSanitizer.determineIntent(sanitized);
       }
 
       return ParsedTransaction(
         amount: amount,
-        category: category,
+        categoryId: category,
         type: intentType,
         notes: merchantName,
         date: date,

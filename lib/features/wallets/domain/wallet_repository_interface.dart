@@ -13,4 +13,8 @@ abstract class WalletRepositoryInterface {
   Future<Result<void, AppError>> createWallet(WalletModel wallet);
   Future<Result<void, AppError>> updateWallet(WalletModel wallet);
   Future<Result<void, AppError>> deleteWallet(String walletId);
+
+  /// Adjusts the balance of a wallet by the given amount.
+  /// Positive amount increases balance, negative amount decreases it.
+  Future<void> adjustBalance(String walletId, double amount);
 }

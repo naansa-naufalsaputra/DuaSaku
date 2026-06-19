@@ -127,7 +127,7 @@ class LightweightMlParser implements TransactionParserServiceInterface {
 
     return ParsedTransaction(
       amount: amount,
-      category: bestCategoryName,
+      categoryId: bestCategoryName,
       type: type,
       walletId: matchedWalletId,
       notes: TextSanitizer.prettifyNotes(

@@ -5,6 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../domain/models/goal_model.dart';
 import 'goal_progress_bar.dart';
 
+import '../../../../core/providers/settings_provider.dart';
+
 /// Card widget displaying a goal summary with progress visualization.
 ///
 /// Shows the goal name, icon, current/target amount (formatted as currency),
@@ -30,11 +32,7 @@ class GoalCard extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     final goalColor = _parseColor(goal.color) ?? colorScheme.primary;
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = ref.watch(currencyFormatterProvider);
 
     final progressPercent = (goal.progressPercentage * 100).toInt();
     final remainingDays = goal.remainingDays;

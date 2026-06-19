@@ -87,7 +87,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                     const SizedBox(height: 20),
 
                     // Mode-specific content
-                    if (exportData.mode == ExportMode.csv) ...[
+                    if (exportData.mode == ExportMode.csv || exportData.mode == ExportMode.excel) ...[
                       _CsvModeContent(exportData: exportData),
                     ] else ...[
                       _JsonModeContent(),
@@ -151,6 +151,16 @@ class _ModeSelector extends ConsumerWidget {
               onTap: () => ref
                   .read(exportNotifierProvider.notifier)
                   .setMode(ExportMode.csv),
+            ),
+          ),
+          Expanded(
+            child: _SegmentButton(
+              label: 'Excel',
+              isSelected: currentMode == ExportMode.excel,
+              isEnabled: !isExporting,
+              onTap: () => ref
+                  .read(exportNotifierProvider.notifier)
+                  .setMode(ExportMode.excel),
             ),
           ),
           Expanded(
@@ -360,7 +370,7 @@ class _ExportButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool canExport;
-    if (exportData.mode == ExportMode.csv) {
+    if (exportData.mode == ExportMode.csv || exportData.mode == ExportMode.excel) {
       canExport = exportData.selectedTypes.isNotEmpty && !isExporting;
     } else {
       canExport = !isExporting;

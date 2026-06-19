@@ -11,6 +11,9 @@ import '../../../../core/widgets/glass/glass_input_field.dart';
 import '../../../../core/widgets/glass/glass_button.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
 import '../../../../core/utils/thousands_formatter.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/widgets/currency_picker.dart';
+import '../../../../core/domain/currency.dart';
 
 class ManageWalletsScreen extends ConsumerStatefulWidget {
   const ManageWalletsScreen({super.key});
@@ -67,6 +70,7 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
       text: walletToEdit != null ? walletToEdit.balance.toInt().toString() : '',
     );
     String walletType = walletToEdit?.type ?? 'Bank';
+    String selectedCurrency = walletToEdit?.currency ?? 'IDR';
     String? nameError;
     String? balanceError;
 
@@ -205,6 +209,83 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Currency selector
+                    Text(
+                      'Currency',
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        final currency = await CurrencyPicker.show(
+                          context,
+                          selectedCurrencyCode: selectedCurrency,
+                        );
+                        if (currency != null) {
+                          setModalState(() => selectedCurrency = currency.code);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.black.withValues(alpha: 0.03),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              SupportedCurrencies.fromCode(selectedCurrency)
+                                      ?.symbol ??
+                                  selectedCurrency,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              selectedCurrency,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                SupportedCurrencies.fromCode(selectedCurrency)
+                                        ?.name ??
+                                    '',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark ? Colors.white54 : Colors.black54,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     // Balance Input Field
                     GlassInputField(
                       controller: balanceController,
@@ -248,6 +329,7 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                 name: walletName,
                                 type: walletType,
                                 initialBalance: initialBalance,
+                                currency: selectedCurrency,
                               );
                             } else {
                               final updated = WalletModel(
@@ -256,6 +338,7 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                                 name: walletName,
                                 type: walletType,
                                 balance: initialBalance,
+                                currency: selectedCurrency,
                                 createdAt: walletToEdit.createdAt,
                               );
                               await notifier.updateWallet(updated);
@@ -296,11 +379,7 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
   @override
   Widget build(BuildContext context) {
     final walletsAsync = ref.watch(walletProvider);
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final formatCurrency = ref.watch(currencyFormatterProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

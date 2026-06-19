@@ -3,16 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/local_db/app_database_provider.dart';
 import '../domain/models/category_model.dart';
+import '../domain/category_repository_interface.dart';
 
-final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
+final categoryRepositoryProvider = Provider<CategoryRepositoryInterface>((ref) {
   return CategoryRepository(ref.watch(appDatabaseProvider));
 });
 
-class CategoryRepository {
+class CategoryRepository implements CategoryRepositoryInterface {
   final AppDatabase _db;
 
   CategoryRepository(this._db);
 
+  @override
   Future<List<CategoryModel>> getCategories(String userId) async {
     final rows = await (_db.select(
       _db.categories,
@@ -32,6 +34,7 @@ class CategoryRepository {
         .toList();
   }
 
+  @override
   Future<CategoryModel> addCategory(CategoryModel category) async {
     final generatedId =
         category.id ?? DateTime.now().millisecondsSinceEpoch.toString();
@@ -58,6 +61,7 @@ class CategoryRepository {
     );
   }
 
+  @override
   Future<void> updateCategory(CategoryModel category) async {
     await (_db.update(
       _db.categories,
@@ -71,6 +75,7 @@ class CategoryRepository {
     );
   }
 
+  @override
   Future<void> deleteCategory(String id) async {
     await (_db.delete(_db.categories)..where((c) => c.id.equals(id))).go();
   }

@@ -5,17 +5,22 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../core/utils/thousands_formatter.dart';
-import '../../../../core/utils/math_parser.dart';
-import '../../../../core/utils/category_translation.dart';
+import '../../../../core/utils/math_preview_parser.dart';
 
-import '../../../../core/widgets/glass/glass_button.dart';
 import '../../providers/transaction_provider.dart';
 import '../../../wallets/providers/wallet_provider.dart';
 import '../../../wallets/domain/models/wallet_model.dart';
 import '../../providers/category_provider.dart';
+import '../../domain/models/transaction_model.dart';
+import '../../../../core/providers/settings_provider.dart';
+import 'home/manual_transaction_form.dart';
+import 'home/transfer_transaction_form.dart';
+
+enum TransactionType { expense, income, transfer }
 
 class TransactionTypeBottomSheet extends ConsumerStatefulWidget {
-  const TransactionTypeBottomSheet({super.key});
+  final TransactionModel? transaction;
+  const TransactionTypeBottomSheet({super.key, this.transaction});
 
   @override
   ConsumerState<TransactionTypeBottomSheet> createState() =>
@@ -57,6 +62,50 @@ class _TransactionTypeBottomSheetState
     return isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
   }
 
+  TransactionType get activeTransactionType {
+    if (_isTransferMode) return TransactionType.transfer;
+    return _manualType == 'expense'
+        ? TransactionType.expense
+        : TransactionType.income;
+  }
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.transaction != null) {
+      final tx = widget.transaction!;
+      _isTransferMode = (tx.type == 'transfer');
+      _selectedDate = tx.createdAt;
+      _latitude = tx.latitude;
+      _longitude = tx.longitude;
+      _recordLocation = (tx.latitude != null && tx.longitude != null);
+      
+      if (_isTransferMode) {
+        _transferAmountController.text = NumberFormat.decimalPattern('id_ID').format(tx.amount.toInt());
+        _transferNotesController.text = tx.notes;
+        _transferFromWalletId = tx.fromWalletId;
+        _transferToWalletId = tx.toWalletId;
+      } else {
+        _manualType = tx.type;
+        _manualAmountController.text = NumberFormat.decimalPattern('id_ID').format(tx.amount.toInt());
+        _manualCategoryController.text = tx.categoryId;
+        _manualNotesController.text = tx.notes;
+        _manualWalletId = tx.walletId;
+      }
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final isAutoGeolocate = ref.read(autoGeolocationProvider);
+          if (isAutoGeolocate) {
+            _toggleLocation(true);
+          }
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _manualAmountController.dispose();
@@ -68,29 +117,22 @@ class _TransactionTypeBottomSheetState
   }
 
   void _updateMathPreview(String text) {
-    final cleanText = text.trim();
-    if (cleanText.isEmpty) {
+    final currencySymbol = ref.read(currencySymbolProvider);
+    if (!MathPreviewParser.hasOperators(text)) {
       setState(() {
         _mathExpressionPreview = '';
       });
       return;
     }
 
-    final hasOperators = RegExp(r'[+\-*/()]').hasMatch(cleanText);
-    if (hasOperators) {
-      final evalResult = MathParser.eval(cleanText);
-      if (evalResult != null && evalResult > 0) {
-        final formatted = NumberFormat.decimalPattern(
-          'id_ID',
-        ).format(evalResult.toInt());
-        setState(() {
-          _mathExpressionPreview = '= Rp $formatted';
-        });
-      } else {
-        setState(() {
-          _mathExpressionPreview = '';
-        });
-      }
+    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final evalResult = MathPreviewParser.evaluate(sanitized);
+    
+    if (evalResult != null && evalResult > 0) {
+      final formatted = ref.read(currencyFormatterProvider).format(evalResult);
+      setState(() {
+        _mathExpressionPreview = '= $formatted';
+      });
     } else {
       setState(() {
         _mathExpressionPreview = '';
@@ -101,7 +143,9 @@ class _TransactionTypeBottomSheetState
   void _evaluateManualAmountField() {
     final text = _manualAmountController.text.trim();
     if (text.isEmpty) return;
-    final result = MathParser.eval(text);
+    final currencySymbol = ref.read(currencySymbolProvider);
+    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final result = MathPreviewParser.evaluate(sanitized);
     if (result != null && result > 0) {
       final formatted = NumberFormat.decimalPattern(
         'id_ID',
@@ -116,7 +160,9 @@ class _TransactionTypeBottomSheetState
   void _evaluateTransferAmountField() {
     final text = _transferAmountController.text.trim();
     if (text.isEmpty) return;
-    final result = MathParser.eval(text);
+    final currencySymbol = ref.read(currencySymbolProvider);
+    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final result = MathPreviewParser.evaluate(sanitized);
     if (result != null && result > 0) {
       final formatted = NumberFormat.decimalPattern(
         'id_ID',
@@ -142,8 +188,25 @@ class _TransactionTypeBottomSheetState
               _recordLocation = false;
               _isFetchingLocation = false;
             });
+            // Reactive rollback: auto-disable toggle if permission denied
+            ref.read(autoGeolocationProvider.notifier).setEnabled(false);
             return;
           }
+        } else if (permission == LocationPermission.deniedForever) {
+          setState(() {
+            _recordLocation = false;
+            _isFetchingLocation = false;
+          });
+          ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('bottom_sheet.location_revoked'.tr()),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+          return;
         }
 
         final position = await Geolocator.getCurrentPosition(
@@ -164,6 +227,11 @@ class _TransactionTypeBottomSheetState
           _recordLocation = false;
           _isFetchingLocation = false;
         });
+        // Reactive rollback on any location error when auto-geo was active
+        final isAutoGeo = ref.read(autoGeolocationProvider);
+        if (isAutoGeo) {
+          ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+        }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -216,80 +284,9 @@ class _TransactionTypeBottomSheetState
     }
   }
 
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
 
-  Color _getCategoryColor(String? colorHex, String type) {
-    if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-    try {
-      final hex = colorHex.replaceAll('#', '');
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return type == 'expense'
-          ? const Color(0xFFF43F5E)
-          : const Color(0xFF10B981);
-    }
-  }
+
+
 
   Future<void> _submitManual() async {
     bool hasError = false;
@@ -308,18 +305,34 @@ class _TransactionTypeBottomSheetState
       final category = _manualCategoryController.text;
       final notes = _manualNotesController.text;
       try {
-        await ref
-            .read(transactionNotifierProvider.notifier)
-            .createTransaction(
-              amount: amount,
-              category: category,
-              type: _manualType,
-              notes: notes,
-              walletId: _manualWalletId,
-              latitude: _latitude,
-              longitude: _longitude,
-              createdAt: _selectedDate,
-            );
+        if (widget.transaction != null) {
+          final updatedTx = widget.transaction!.copyWith(
+            amount: amount,
+            categoryId: category,
+            type: _manualType,
+            notes: notes,
+            walletId: _manualWalletId,
+            latitude: _latitude,
+            longitude: _longitude,
+            createdAt: _selectedDate,
+          );
+          await ref
+              .read(transactionNotifierProvider.notifier)
+              .updateTransaction(updatedTx, widget.transaction!);
+        } else {
+          await ref
+              .read(transactionNotifierProvider.notifier)
+              .createTransaction(
+                amount: amount,
+                category: category,
+                type: _manualType,
+                notes: notes,
+                walletId: _manualWalletId,
+                latitude: _latitude,
+                longitude: _longitude,
+                createdAt: _selectedDate,
+              );
+        }
         if (mounted) {
           HapticFeedback.mediumImpact();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -363,16 +376,34 @@ class _TransactionTypeBottomSheetState
         return;
       }
       try {
-        await ref
-            .read(transactionNotifierProvider.notifier)
-            .createTransfer(
-              amount: amount,
-              fromWalletId: _transferFromWalletId!,
-              toWalletId: _transferToWalletId!,
-              notes: _transferNotesController.text,
-              latitude: _latitude,
-              longitude: _longitude,
-            );
+        if (widget.transaction != null) {
+          final updatedTx = widget.transaction!.copyWith(
+            amount: amount,
+            categoryId: 'transfer',
+            type: 'transfer',
+            notes: _transferNotesController.text,
+            fromWalletId: _transferFromWalletId,
+            toWalletId: _transferToWalletId,
+            walletId: null,
+            latitude: _latitude,
+            longitude: _longitude,
+            createdAt: _selectedDate,
+          );
+          await ref
+              .read(transactionNotifierProvider.notifier)
+              .updateTransaction(updatedTx, widget.transaction!);
+        } else {
+          await ref
+              .read(transactionNotifierProvider.notifier)
+              .createTransfer(
+                amount: amount,
+                fromWalletId: _transferFromWalletId!,
+                toWalletId: _transferToWalletId!,
+                notes: _transferNotesController.text,
+                latitude: _latitude,
+                longitude: _longitude,
+              );
+        }
         if (mounted) {
           HapticFeedback.mediumImpact();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -464,11 +495,7 @@ class _TransactionTypeBottomSheetState
                       ),
                     ),
                     subtitle: Text(
-                      NumberFormat.currency(
-                        locale: 'id_ID',
-                        symbol: 'Rp ',
-                        decimalDigits: 0,
-                      ).format(wallet.balance),
+                      ref.watch(currencyFormatterProvider).format(wallet.balance),
                       style: const TextStyle(color: Colors.grey),
                     ),
                     trailing: isSelected
@@ -588,9 +615,24 @@ class _TransactionTypeBottomSheetState
             } else {
               _isTransferMode = false;
               _manualType = type;
-              _manualCategoryController.text = type == 'expense'
-                  ? 'Food'
-                  : 'Salary';
+              
+              final categories = ref.read(categoryNotifierProvider).valueOrNull ?? [];
+              final expenseCategoriesList = categories.where((c) => c.type == 'expense').toList();
+              final incomeCategoriesList = categories.where((c) => c.type == 'income').toList();
+
+              if (type == 'expense') {
+                if (expenseCategoriesList.isNotEmpty) {
+                  _manualCategoryController.text = expenseCategoriesList.first.name;
+                } else {
+                  _manualCategoryController.text = 'Food';
+                }
+              } else if (type == 'income') {
+                if (incomeCategoriesList.isNotEmpty) {
+                  _manualCategoryController.text = incomeCategoriesList.first.name;
+                } else {
+                  _manualCategoryController.text = 'Salary';
+                }
+              }
             }
           });
         },
@@ -733,398 +775,55 @@ class _TransactionTypeBottomSheetState
             // Main scrollable content
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 3. Oversick Amount Input Zone (Hero)
-                    Column(
-                      children: [
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Rp ',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.9)
-                                    : Colors.black.withValues(alpha: 0.9),
-                              ),
-                            ),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minWidth: 60,
-                                maxWidth: 280,
-                              ),
-                              child: IntrinsicWidth(
-                                child: Focus(
-                                  onFocusChange: (hasFocus) {
-                                    if (!hasFocus) {
-                                      if (_isTransferMode) {
-                                        _evaluateTransferAmountField();
-                                      } else {
-                                        _evaluateManualAmountField();
-                                      }
-                                    }
-                                  },
-                                  child: TextField(
-                                    controller: _isTransferMode
-                                        ? _transferAmountController
-                                        : _manualAmountController,
-                                    keyboardType: TextInputType.text,
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.w900,
-                                      color: isDark
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      letterSpacing: -0.5,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: '0',
-                                      hintStyle: const TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                      border: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      contentPadding: EdgeInsets.zero,
-                                      errorText: _isTransferMode
-                                          ? _transferAmountError
-                                          : _manualAmountError,
-                                      errorStyle: const TextStyle(height: 0),
-                                    ),
-                                    inputFormatters: [ThousandsFormatter()],
-                                    onChanged: (val) {
-                                      if (_isTransferMode) {
-                                        if (_transferAmountError != null) {
-                                          setState(
-                                            () => _transferAmountError = null,
-                                          );
-                                        }
-                                      } else {
-                                        if (_manualAmountError != null) {
-                                          setState(
-                                            () => _manualAmountError = null,
-                                          );
-                                        }
-                                        _updateMathPreview(val);
-                                      }
-                                    },
-                                    onEditingComplete: () {
-                                      if (_isTransferMode) {
-                                        _evaluateTransferAmountField();
-                                      } else {
-                                        _evaluateManualAmountField();
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (!_isTransferMode &&
-                            _mathExpressionPreview.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            _mathExpressionPreview,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark ? Colors.white38 : Colors.black38,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-
-                    // 4. Squishy Wallet Selector Pill
-                    if (walletsList.isEmpty)
-                      _buildEmptyWalletsCard(isDark)
-                    else ...[
-                      if (_isTransferMode)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildWalletSelectorPill(
-                              walletsList,
-                              isFromWallet: true,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 14,
-                                color: isDark ? Colors.white38 : Colors.black38,
-                              ),
-                            ),
-                            _buildWalletSelectorPill(
-                              walletsList,
-                              isFromWallet: false,
-                            ),
-                          ],
-                        )
-                      else
-                        _buildWalletSelectorPill(walletsList),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // 5. Premium Category Grid (Manual Only)
-                    if (!_isTransferMode) ...[
-                      ref
-                          .watch(categoryNotifierProvider)
-                          .when(
-                            data: (categories) {
-                              final filtered = categories
-                                  .where((c) => c.type == _manualType)
-                                  .toList();
-                              if (filtered.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0,
-                                    ),
-                                    child: Text(
-                                      'bottom_sheet.category'
-                                          .tr()
-                                          .toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1.5,
-                                        color: isDark
-                                            ? Colors.white38
-                                            : Colors.black38,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  GridView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 3,
-                                          crossAxisSpacing: 16,
-                                          mainAxisSpacing: 16,
-                                          childAspectRatio: 0.9,
-                                        ),
-                                    itemCount: filtered.length > 12
-                                        ? 12
-                                        : filtered.length,
-                                    itemBuilder: (context, index) {
-                                      final cat = filtered[index];
-                                      final isSelected =
-                                          _manualCategoryController.text
-                                              .toLowerCase() ==
-                                          cat.name.toLowerCase();
-                                      final catColor = _getCategoryColor(
-                                        cat.color,
-                                        cat.type,
-                                      );
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          HapticFeedback.lightImpact();
-                                          setState(() {
-                                            _manualCategoryController.text =
-                                                cat.name;
-                                            if (_manualCategoryError != null) {
-                                              _manualCategoryError = null;
-                                            }
-                                          });
-                                        },
-                                        child: Column(
-                                          children: [
-                                            AnimatedContainer(
-                                              duration: const Duration(
-                                                milliseconds: 200,
-                                              ),
-                                              width: 56,
-                                              height: 56,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: catColor.withValues(
-                                                  alpha: 0.12,
-                                                ),
-                                                border: Border.all(
-                                                  color: isSelected
-                                                      ? const Color(0xFF007AFF)
-                                                      : Colors.transparent,
-                                                  width: 2.5,
-                                                ),
-                                              ),
-                                              child: Icon(
-                                                _getIconData(cat.icon),
-                                                color: catColor,
-                                                size: 22,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              cat.name.toLocalizedCategory(),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w500,
-                                                color: isSelected
-                                                    ? (isDark
-                                                          ? Colors.white
-                                                          : Colors.black87)
-                                                    : (isDark
-                                                          ? Colors.white54
-                                                          : Colors.black54),
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                            loading: () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            error: (err, st) =>
-                                Text('Error loading categories: $err'),
-                          ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // 6. Borderless Description Row
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
+                child: _isTransferMode
+                    ? TransferTransactionForm(
+                        amountController: _transferAmountController,
+                        notesController: _transferNotesController,
+                        amountError: _transferAmountError,
+                        wallets: walletsList,
+                        recordLocation: _recordLocation,
+                        onRecordLocationChanged: (val) => _toggleLocation(val),
+                        isFetchingLocation: _isFetchingLocation,
+                        onSubmit: _submitTransfer,
+                        onAmountChanged: _updateMathPreview,
+                        onAmountFocusLost: _evaluateTransferAmountField,
+                        currencySymbol: ref.watch(currencySymbolProvider),
+                        fromWalletSelectorWidget: _buildWalletSelectorPill(walletsList, isFromWallet: true),
+                        toWalletSelectorWidget: _buildWalletSelectorPill(walletsList, isFromWallet: false),
+                      )
+                    : ManualTransactionForm(
+                        amountController: _manualAmountController,
+                        notesController: _manualNotesController,
+                        activeCategory: _manualCategoryController.text,
+                        onCategorySelected: (catName) {
+                          setState(() {
+                            _manualCategoryController.text = catName;
+                            if (_manualCategoryError != null) {
+                              _manualCategoryError = null;
+                            }
+                          });
+                        },
+                        amountError: _manualAmountError,
+                        categoryError: _manualCategoryError,
+                        selectedWalletId: _manualWalletId,
+                        onWalletSelected: (walletId) {
+                          setState(() {
+                            _manualWalletId = walletId;
+                          });
+                        },
+                        transactionType: _manualType,
+                        wallets: walletsList,
+                        categories: ref.read(categoryNotifierProvider).valueOrNull ?? [],
+                        recordLocation: _recordLocation,
+                        onRecordLocationChanged: (val) => _toggleLocation(val),
+                        isFetchingLocation: _isFetchingLocation,
+                        onSubmit: _submitManual,
+                        mathExpressionPreview: _mathExpressionPreview,
+                        onAmountChanged: _updateMathPreview,
+                        onAmountFocusLost: _evaluateManualAmountField,
+                        currencySymbol: ref.watch(currencySymbolProvider),
+                        walletSelectorWidget: _buildWalletSelectorPill(walletsList),
                       ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : Colors.black.withValues(alpha: 0.02),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _isTransferMode
-                                  ? _transferNotesController
-                                  : _manualNotesController,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.9)
-                                    : Colors.black87,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'bottom_sheet.notes'.tr(),
-                                hintStyle: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.camera_alt_rounded,
-                            color: isDark ? Colors.white38 : Colors.black38,
-                            size: 18,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Location Saving Row
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _recordLocation,
-                          onChanged: _isFetchingLocation
-                              ? null
-                              : _toggleLocation,
-                          activeColor: _accentColor,
-                        ),
-                        Expanded(
-                          child: Text(
-                            _isFetchingLocation
-                                ? 'bottom_sheet.loc_fetching'.tr()
-                                : _recordLocation
-                                ? 'bottom_sheet.loc_saved'.tr(
-                                    args: [
-                                      _latitude!.toStringAsFixed(4),
-                                      _longitude!.toStringAsFixed(4),
-                                    ],
-                                  )
-                                : (_isTransferMode
-                                      ? 'bottom_sheet.loc_save_transfer'.tr()
-                                      : 'bottom_sheet.loc_save_tx'.tr()),
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white60
-                                  : Colors.black.withValues(alpha: 0.6),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // 7. Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isTransferMode
-                            ? _submitTransfer
-                            : _submitManual,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _accentColor,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          _isTransferMode
-                              ? 'bottom_sheet.btn_transfer'.tr()
-                              : 'bottom_sheet.save_transaction'.tr(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
@@ -1133,49 +832,5 @@ class _TransactionTypeBottomSheetState
     );
   }
 
-  Widget _buildEmptyWalletsCard(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'bottom_sheet.no_wallet_warning'.tr(),
-            style: TextStyle(
-              color: isDark ? Colors.amber[200] : Colors.amber[800],
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: GlassButton(
-              variant: GlassButtonVariant.secondary,
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                context.pop();
-                context.push('/manage-wallets');
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.add_card, size: 16),
-                  const SizedBox(width: 8),
-                  Text('bottom_sheet.btn_create_wallet'.tr()),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../auth/providers/auth_provider.dart';
 import '../../../../core/security/security_service.dart';
@@ -14,6 +15,8 @@ import '../../../geofencing/providers/geofencing_alerts_provider.dart';
 import '../../../transactions/domain/parser_mode.dart';
 import '../../../transactions/providers/parser_mode_provider.dart';
 import '../../providers/display_name_provider.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/providers/cloud_sync_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -150,6 +153,119 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         );
       },
     );
+  }
+
+  void _showThemePresetPicker(BuildContext context, Color accentColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentPreset = ref.read(themeNotifierProvider).preset;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'profile.select_theme'.tr(),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              RadioListTile<AppThemePreset>(
+                value: AppThemePreset.defaultPurple,
+                // ignore: deprecated_member_use
+                groupValue: currentPreset,
+                title: Text(
+                  'profile.theme_default_purple'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                activeColor: accentColor,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  HapticFeedback.lightImpact();
+                  if (val != null) {
+                    ref.read(themeNotifierProvider.notifier).updatePreset(val);
+                    Navigator.of(ctx).pop();
+                  }
+                },
+              ),
+              RadioListTile<AppThemePreset>(
+                value: AppThemePreset.warmSunset,
+                // ignore: deprecated_member_use
+                groupValue: currentPreset,
+                title: Text(
+                  'profile.theme_warm_sunset'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                activeColor: accentColor,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  HapticFeedback.lightImpact();
+                  if (val != null) {
+                    ref.read(themeNotifierProvider.notifier).updatePreset(val);
+                    Navigator.of(ctx).pop();
+                  }
+                },
+              ),
+              RadioListTile<AppThemePreset>(
+                value: AppThemePreset.midnightOcean,
+                // ignore: deprecated_member_use
+                groupValue: currentPreset,
+                title: Text(
+                  'profile.theme_midnight_ocean'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                activeColor: accentColor,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  HapticFeedback.lightImpact();
+                  if (val != null) {
+                    ref.read(themeNotifierProvider.notifier).updatePreset(val);
+                    Navigator.of(ctx).pop();
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _getPresetDisplayName(AppThemePreset preset) {
+    switch (preset) {
+      case AppThemePreset.defaultPurple:
+        return 'profile.theme_default_purple'.tr();
+      case AppThemePreset.warmSunset:
+        return 'profile.theme_warm_sunset'.tr();
+      case AppThemePreset.midnightOcean:
+        return 'profile.theme_midnight_ocean'.tr();
+    }
   }
 
   void _showParserModePicker(BuildContext context, Color accentColor) {
@@ -530,11 +646,101 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
+  Future<String?> _showPasswordDialog({
+    required BuildContext context,
+    required String title,
+    required String hintText,
+    required Color accentColor,
+  }) async {
+    final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: TextField(
+            controller: controller,
+            obscureText: true,
+            autofocus: true,
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            keyboardType: TextInputType.visiblePassword,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(
+                color: isDark ? Colors.white30 : Colors.black38,
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: accentColor),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(ctx).pop(null);
+              },
+              child: Text(
+                'profile.btn_cancel'.tr(),
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final password = controller.text.trim();
+                if (password.length < 4) {
+                  HapticFeedback.vibrate();
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text('profile.backup_password_hint'.tr()),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
+                }
+                HapticFeedback.mediumImpact();
+                Navigator.of(ctx).pop(password);
+              },
+              child: Text(
+                'goals.save'.tr(),
+                style: TextStyle(
+                  color: accentColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _handleBackup(Color accentColor) async {
+    final password = await _showPasswordDialog(
+      context: context,
+      title: 'profile.backup_password_title'.tr(),
+      hintText: 'profile.backup_password_hint'.tr(),
+      accentColor: accentColor,
+    );
+    if (password == null) return;
+
     setState(() => _isLoading = true);
     try {
       final backupService = ref.read(backupServiceProvider);
-      await backupService.exportData();
+      await backupService.exportData(password);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -563,10 +769,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final confirm = await _showOverwriteWarning(context);
     if (!confirm) return;
 
+    if (!mounted) return;
+    final password = await _showPasswordDialog(
+      context: context,
+      title: 'profile.backup_password_title'.tr(),
+      hintText: 'profile.backup_password_hint'.tr(),
+      accentColor: accentColor,
+    );
+    if (password == null) return;
+
     setState(() => _isLoading = true);
     try {
       final backupService = ref.read(backupServiceProvider);
-      final counts = await backupService.importData();
+      final counts = await backupService.importData(password);
       if (counts != null) {
         if (mounted) {
           _showRestoreSummarySheet(context, counts, accentColor);
@@ -768,6 +983,87 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
+  void _showCurrencyPicker(BuildContext context, Color accentColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentSymbol = ref.read(currencySymbolProvider);
+    final currencies = [
+      ('Rp', 'Indonesian Rupiah', '\u{1F1EE}\u{1F1E9}'),
+      ('\u0024', 'US Dollar', '\u{1F1FA}\u{1F1F8}'),
+      ('\u20AC', 'Euro', '\u{1F1EA}\u{1F1FA}'),
+      ('\u00A5', 'Japanese Yen', '\u{1F1EF}\u{1F1F5}'),
+      ('\u00A3', 'British Pound', '\u{1F1EC}\u{1F1E7}'),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'profile.select_currency'.tr(),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...currencies.map((c) {
+                final symbol = c.$1;
+                final name = c.$2;
+                final flag = c.$3;
+                final isSelected = currentSymbol == symbol;
+                return ListTile(
+                  leading: Text(flag, style: const TextStyle(fontSize: 28)),
+                  title: Text(
+                    '$symbol \u2014 $name',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: accentColor)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(currencySymbolProvider.notifier).setSymbol(symbol);
+                    Navigator.of(ctx).pop();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('profile.currency_changed_msg'.tr(args: [symbol])),
+                          backgroundColor: accentColor,
+                        ),
+                      );
+                    }
+                  },
+                );
+              }),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildGroupContainer({
     required List<Widget> children,
     required bool isDark,
@@ -936,31 +1232,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 _buildGroupLabel(context, 'profile.achievements'.tr()),
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 28),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatItem(
-                        context,
-                        'profile.achievements_health'.tr(),
-                        '${ref.watch(gamificationProvider).healthScore}',
-                        Icons.favorite_rounded,
-                        accentColor,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      context.push('/gamification');
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildStatItem(
+                            context,
+                            'profile.achievements_health'.tr(),
+                            '${ref.watch(gamificationProvider).healthScore}',
+                            Icons.favorite_rounded,
+                            accentColor,
+                          ),
+                          _buildStatItem(
+                            context,
+                            'profile.achievements_streak'.tr(),
+                            '${ref.watch(gamificationProvider).currentStreak}',
+                            Icons.local_fire_department_rounded,
+                            accentColor,
+                          ),
+                          _buildStatItem(
+                            context,
+                            'profile.achievements_badges'.tr(),
+                            '${ref.watch(gamificationProvider).unlockedBadges.length}',
+                            Icons.military_tech_rounded,
+                            accentColor,
+                          ),
+                        ],
                       ),
-                      _buildStatItem(
-                        context,
-                        'profile.achievements_streak'.tr(),
-                        '${ref.watch(gamificationProvider).currentStreak}',
-                        Icons.local_fire_department_rounded,
-                        accentColor,
-                      ),
-                      _buildStatItem(
-                        context,
-                        'profile.achievements_badges'.tr(),
-                        '${ref.watch(gamificationProvider).unlockedBadges.length}',
-                        Icons.military_tech_rounded,
-                        accentColor,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
@@ -1034,6 +1340,146 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         onTap: () {
                           HapticFeedback.lightImpact();
                           context.push('/categories');
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.pie_chart_outline_rounded,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.manage_budgets'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.manage_budgets_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/budgets');
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.autorenew_rounded,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.recurring_transactions'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.recurring_transactions_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/recurring-transactions');
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.handshake_outlined,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile_menu.manage_debts'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile_menu.manage_debts_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/debts');
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.notification_important_outlined,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile_menu.bill_reminders'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile_menu.bill_reminders_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/bill-reminders');
                         },
                       ),
                       Divider(
@@ -1293,6 +1739,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   ),
                 ),
 
+                // Cadangan Cloud Section
+                _buildGroupLabel(context, 'profile.cloud_backup'.tr()),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _buildGroupContainer(
+                    isDark: isDark,
+                    children: [
+                      _buildCloudSyncContainer(context, ref, isDark, accentColor),
+                    ],
+                  ),
+                ),
+
                 // Estetika Section
                 _buildGroupLabel(context, 'profile.aesthetics'.tr()),
                 Padding(
@@ -1465,6 +1923,154 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                             }
                           },
                         ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.map_rounded,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.view_hotspot_map'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.view_hotspot_map_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/geofencing-map');
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.gps_fixed_rounded,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.auto_geolocation'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.auto_geolocation_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Switch.adaptive(
+                          value: ref.watch(autoGeolocationProvider),
+                          activeTrackColor: accentColor,
+                          onChanged: (val) async {
+                            HapticFeedback.lightImpact();
+                            if (val) {
+                              final permission = await Geolocator.checkPermission();
+                              if (permission == LocationPermission.denied) {
+                                final requested = await Geolocator.requestPermission();
+                                if (requested == LocationPermission.denied ||
+                                    requested == LocationPermission.deniedForever) {
+                                  ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('profile.location_permission_required'.tr()),
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                              } else if (permission == LocationPermission.deniedForever) {
+                                ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('profile.location_permission_required'.tr()),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+                            }
+                            ref.read(autoGeolocationProvider.notifier).setEnabled(val);
+                          },
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.currency_exchange_rounded,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.currency_symbol'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'profile.currency_symbol_desc'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              ref.watch(currencySymbolProvider),
+                              style: TextStyle(
+                                color: isDark ? Colors.white38 : Colors.black38,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showCurrencyPicker(context, accentColor);
+                        },
                       ),
                     ],
                   ),
@@ -1650,4 +2256,293 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       ),
     );
   }
+
+  Widget _buildCloudSyncContainer(
+    BuildContext context,
+    WidgetRef ref,
+    bool isDark,
+    Color accentColor,
+  ) {
+    final syncState = ref.watch(cloudSyncProvider);
+    final border = isDark ? Colors.white10 : Colors.black12;
+
+    return Column(
+      children: [
+        ListTile(
+          leading: _buildTileIcon(
+            Icons.cloud_sync_rounded,
+            accentColor,
+          ),
+          title: Text(
+            syncState.isConnected
+                ? 'Google Drive: ${syncState.currentUser?.email ?? "Connected"}'
+                : 'profile.cloud_backup_title'.tr(),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          subtitle: Text(
+            syncState.isConnected
+                ? (syncState.lastSyncTime != null
+                    ? 'Last synced: ${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(syncState.lastSyncTime!))}'
+                    : 'Not synced yet')
+                : 'profile.cloud_backup_desc'.tr(),
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ),
+          trailing: syncState.isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : TextButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    if (syncState.isConnected) {
+                      ref.read(cloudSyncProvider.notifier).disconnect();
+                    } else {
+                      ref.read(cloudSyncProvider.notifier).connect();
+                    }
+                  },
+                  child: Text(
+                    syncState.isConnected ? 'Disconnect' : 'Connect',
+                    style: TextStyle(
+                      color: accentColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+        ),
+        if (syncState.isConnected) ...[
+          Divider(
+            height: 1,
+            indent: 56,
+            color: border,
+          ),
+          ListTile(
+            leading: _buildTileIcon(
+              Icons.cloud_upload_outlined,
+              accentColor,
+            ),
+            title: Text(
+              'profile.upload_cloud'.tr(),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            subtitle: Text(
+              'profile.upload_cloud_desc'.tr(),
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+            trailing: syncState.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+            onTap: syncState.isLoading
+                ? null
+                : () async {
+                    HapticFeedback.lightImpact();
+                    final password = await _showPasswordDialog(
+                      context: context,
+                      title: 'profile.backup_password_title'.tr(),
+                      hintText: 'profile.backup_password_hint'.tr(),
+                      accentColor: accentColor,
+                    );
+                    if (password == null) return;
+
+                    final success = await ref
+                        .read(cloudSyncProvider.notifier)
+                        .performBackup(password);
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            success
+                                ? 'profile.backup_success_msg'.tr()
+                                : 'Backup failed. Please check connection.',
+                          ),
+                          backgroundColor: success ? accentColor : Colors.redAccent,
+                        ),
+                      );
+                    }
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+                        leading: _buildTileIcon(
+                          Icons.palette_outlined,
+                          accentColor,
+                        ),
+                        title: Text(
+                          'profile.theme_preset'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _getPresetDisplayName(
+                                ref.watch(themeNotifierProvider).preset,
+                              ),
+                              style: TextStyle(
+                                color: isDark ? Colors.white38 : Colors.black38,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showThemePresetPicker(context, accentColor);
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                      ListTile(
+            leading: _buildTileIcon(
+              Icons.cloud_download_outlined,
+              accentColor,
+            ),
+            title: Text(
+              'profile.restore_cloud'.tr(),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            subtitle: Text(
+              'profile.restore_cloud_desc'.tr(),
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+            trailing: syncState.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+            onTap: syncState.isLoading
+                ? null
+                : () async {
+                    HapticFeedback.lightImpact();
+                    
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        title: Text(
+                          'profile.overwrite_warning_title'.tr(),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          'profile.overwrite_warning_content'.tr(),
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: Text(
+                              'profile.btn_cancel'.tr(),
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: Text(
+                              'profile.btn_overwrite'.tr(),
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm != true) return;
+
+                    if (!context.mounted) return;
+                    final password = await _showPasswordDialog(
+                      context: context,
+                      title: 'profile.backup_password_title'.tr(),
+                      hintText: 'profile.backup_password_hint'.tr(),
+                      accentColor: accentColor,
+                    );
+                    if (password == null) return;
+
+                    final success = await ref
+                        .read(cloudSyncProvider.notifier)
+                        .performRestore(password);
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            success
+                                ? 'profile.restore_success_title'.tr()
+                                : 'profile.backup_password_error'.tr(),
+                          ),
+                          backgroundColor: success ? accentColor : Colors.redAccent,
+                        ),
+                      );
+                    }
+                  },
+          ),
+        ],
+      ],
+    );
+  }
 }
+

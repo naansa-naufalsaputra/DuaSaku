@@ -12,7 +12,11 @@ import 'receipt_scanner_service.dart';
 
 /// Provider for [SmartInputMlService] using the Google ML Kit implementation.
 final smartInputMlServiceProvider = Provider<SmartInputMlService>((ref) {
-  return SmartInputMlServiceImpl();
+  final service = SmartInputMlServiceImpl();
+  ref.onDispose(() {
+    service.close();
+  });
+  return service;
 });
 
 /// Provides a singleton [TransactionParserServiceInterface] with an orchestrated parsing strategy.

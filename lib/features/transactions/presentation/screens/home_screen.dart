@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../services/service_providers.dart';
 import '../../../profile/providers/display_name_provider.dart';
 import '../../../../core/utils/text_sanitizer.dart';
+import '../../../../services/models/parsed_transaction.dart';
 
 import '../../../../core/widgets/glass/glass_button.dart';
 import '../../providers/transaction_provider.dart';
@@ -26,6 +27,10 @@ import '../widgets/transaction_detail_dialog.dart';
 import '../../../../core/utils/category_translation.dart';
 import '../../../../main.dart';
 import '../../../recurring_transactions/presentation/widgets/upcoming_recurring_dashboard_widget.dart';
+import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/theme/theme_provider.dart';
+import '../widgets/home/wallet_stacked_layout.dart';
+import '../widgets/home/home_quick_actions.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -231,9 +236,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     setState(() => _isProcessingAI = true);
     try {
-      final draft = await ref
+      final parsed = await ref
           .read(transactionNotifierProvider.notifier)
           .parseSmartText(text);
+
+      final draft = ParsedTransaction(
+        amount: parsed.amount,
+        categoryId: parsed.categoryId,
+        type: parsed.type,
+        walletId: parsed.walletId,
+        notes: TextSanitizer.prettifyNotes(parsed.notes),
+        date: parsed.date,
+        isReceiptScan: parsed.isReceiptScan,
+        scanConfidenceLow: parsed.scanConfidenceLow,
+      );
+
       if (mounted) {
         HapticFeedback.mediumImpact();
         _homeSmartInputController.clear();
@@ -330,6 +347,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildWalletTiltedStack(WidgetRef ref, ThemeData theme, bool isDark) {
     final walletsAsync = ref.watch(walletProvider);
     final txAsync = ref.watch(transactionNotifierProvider);
+    final formatCurrency = ref.watch(currencyFormatterProvider);
 
     return walletsAsync.when(
       data: (wallets) {
@@ -375,11 +393,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _WalletStackedLayout(
+                    child: WalletStackedLayout(
                       wallets: wallets,
                       isDark: isDark,
                       monthlyIncome: monthlyInc,
                       monthlyExpense: monthlyExp,
+                      formatCurrency: formatCurrency,
                     ),
                   ),
                 ],
@@ -394,85 +413,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildQuickActionRow(ThemeData theme, bool isDark) {
-    return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildQuickPill(
-                  label: 'home.action_top_up'.tr(),
-                  onTap: _showTransactionBottomSheet,
-                  theme: theme,
-                  isDark: isDark,
-                  isActive: true,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildQuickPill(
-                  label: 'home.action_transfer'.tr(),
-                  onTap: _showTransactionBottomSheet,
-                  theme: theme,
-                  isDark: isDark,
-                  isActive: false,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildQuickPill(
-                  label: 'home.action_scan_qr'.tr(),
-                  onTap: _showScanSourceDialog,
-                  theme: theme,
-                  isDark: isDark,
-                  isActive: false,
-                ),
-              ),
-            ],
-          ),
-        )
-        .animate()
-        .fadeIn(duration: 500.ms, delay: 120.ms)
-        .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
-  }
 
-  Widget _buildQuickPill({
-    required String label,
-    required VoidCallback onTap,
-    required ThemeData theme,
-    required bool isDark,
-    required bool isActive,
-  }) {
-    final activeColor = isDark
-        ? const Color(0xFF0A84FF)
-        : const Color(0xFF007AFF);
-    final inactiveColor = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.04);
-    final textColor = isActive
-        ? Colors.white
-        : (isDark ? Colors.white70 : Colors.black87);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 38,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(19),
-          color: isActive ? activeColor : inactiveColor,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
 
   List<_HomeFeedItem> _buildFeedItems(List<TransactionModel> transactions) {
     final recentTxs = transactions.take(10).toList();
@@ -531,11 +472,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final walletsAsync = ref.watch(walletProvider);
     final categoriesAsync = ref.watch(categoryNotifierProvider);
     final categories = categoriesAsync.valueOrNull ?? [];
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final formatCurrency = ref.watch(currencyFormatterProvider);
 
     // Listen for widget clicks while the app is actively running in memory
     ref.listen<bool>(widgetLaunchProvider, (previous, next) {
@@ -633,15 +570,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ],
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.notifications_none_rounded,
-                              size: 24,
-                            ),
-                            color: isDark ? Colors.white70 : Colors.black87,
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                            },
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  isDark
+                                      ? Icons.light_mode_rounded
+                                      : Icons.dark_mode_rounded,
+                                  size: 24,
+                                ),
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                tooltip: isDark
+                                    ? 'home.toggle_theme_light'.tr()
+                                    : 'home.toggle_theme_dark'.tr(),
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  final newMode = isDark
+                                      ? ThemeMode.light
+                                      : ThemeMode.dark;
+                                  ref
+                                      .read(themeNotifierProvider.notifier)
+                                      .updateThemeMode(newMode);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: 24,
+                                ),
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -650,7 +613,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   // --- QUICK ACTIONS ROW ---
                   SliverToBoxAdapter(
-                    child: _buildQuickActionRow(theme, isDark),
+                    child: HomeQuickActions(
+                      onTopUpTap: _showTransactionBottomSheet,
+                      onTransferTap: _showTransactionBottomSheet,
+                      onScanQrTap: _showScanSourceDialog,
+                    ),
                   ),
 
                   // --- WALLET TILTED STACK ---
@@ -763,6 +730,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               end: 0,
                               curve: Curves.easeOutQuad,
                             ),
+                  ),
+
+                  // --- UPCOMING RECURRING BILLS ---
+                  const SliverToBoxAdapter(
+                    child: UpcomingRecurringDashboardWidget(),
                   ),
 
                   // --- TRANSACTIONS LIST HEADER ---
@@ -890,11 +862,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final matchedCategory = categories.firstWhere(
                             (c) =>
                                 c.name.toLowerCase() ==
-                                tx.category.toLowerCase(),
+                                tx.categoryId.toLowerCase(),
                             orElse: () => CategoryModel(
                               id: '',
                               userId: '',
-                              name: tx.category,
+                              name: tx.categoryId,
                               type: tx.type,
                               icon: isExpense ? 'restaurant' : 'attach_money',
                               color: isExpense ? '#F43F5E' : '#10B981',
@@ -957,7 +929,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                     ? TextSanitizer.prettifyNotes(
                                                         tx.notes,
                                                       )
-                                                    : tx.category
+                                                    : tx.categoryId
                                                           .toLocalizedCategory(),
                                                 style: TextStyle(
                                                   color: isDark
@@ -971,7 +943,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                tx.category
+                                                tx.categoryId
                                                     .toLocalizedCategory()
                                                     .toUpperCase(),
                                                 style: TextStyle(
@@ -1255,478 +1227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// A horizontal tilted/stacked wallet card view using PageView.
-/// Cards appear tilted and stacked like a deck, with the active card centered.
-class _WalletStackedLayout extends StatefulWidget {
-  final List wallets;
-  final bool isDark;
-  final double monthlyIncome;
-  final double monthlyExpense;
 
-  const _WalletStackedLayout({
-    required this.wallets,
-    required this.isDark,
-    required this.monthlyIncome,
-    required this.monthlyExpense,
-  });
-
-  @override
-  State<_WalletStackedLayout> createState() => _WalletStackedLayoutState();
-}
-
-class _WalletStackedLayoutState extends State<_WalletStackedLayout>
-    with TickerProviderStateMixin {
-  late final AnimationController _openController;
-  late final AnimationController _expansionController;
-  int? _animatingIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _openController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-    _expansionController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-  }
-
-  @override
-  void dispose() {
-    _openController.dispose();
-    _expansionController.dispose();
-    super.dispose();
-  }
-
-  List<Color> _getGradientForType(String type) {
-    switch (type.toLowerCase()) {
-      case 'bank':
-        return const [Color(0xFF0056B3), Color(0xFF007AFF)];
-      case 'e-wallet':
-        return const [Color(0xFF475569), Color(0xFF64748B)];
-      case 'cash':
-        return const [Color(0xFF1E293B), Color(0xFF334155)];
-      default:
-        return const [Color(0xFF334155), Color(0xFF475569)];
-    }
-  }
-
-  String _formatAbbreviated(double amount) {
-    if (amount >= 1000000) {
-      final val = amount / 1000000.0;
-      final valStr = val == val.toInt()
-          ? val.toInt().toString()
-          : val.toStringAsFixed(1);
-      return 'Rp ${valStr}M';
-    } else if (amount >= 1000) {
-      final val = amount / 1000.0;
-      final valStr = val == val.toInt()
-          ? val.toInt().toString()
-          : val.toStringAsFixed(1);
-      return 'Rp ${valStr}k';
-    } else {
-      return 'Rp ${amount.toStringAsFixed(0)}';
-    }
-  }
-
-  void _handleCardTap(int index, String walletId) {
-    if (_animatingIndex != null) return;
-    HapticFeedback.mediumImpact();
-    setState(() {
-      _animatingIndex = index;
-    });
-    _openController.forward().then((_) {
-      if (mounted) {
-        context.push('/wallets/$walletId').then((_) {
-          if (mounted) {
-            _openController.reverse().then((_) {
-              if (mounted) {
-                setState(() {
-                  _animatingIndex = null;
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    final L = widget.wallets.length;
-
-    const double cardHeight = 125.0;
-    final double totalBalance = widget.wallets.fold(
-      0.0,
-      (sum, w) => sum + w.balance,
-    );
-
-    return AnimatedBuilder(
-      animation: Listenable.merge([_openController, _expansionController]),
-      builder: (context, child) {
-        final double animatedStep = 40.0 + (_expansionController.value * 80.0);
-        final double totalHeight = cardHeight + (L * animatedStep) + 10.0;
-
-        final double expansionProgress = _expansionController.value;
-        final double scaleFactor = 0.035 - (expansionProgress * 0.02);
-
-        return RepaintBoundary(
-          child: SizedBox(
-            height: totalHeight,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                if (_animatingIndex != null) return;
-                HapticFeedback.lightImpact();
-                if (_expansionController.isAnimating) return;
-                if (_expansionController.value > 0.5) {
-                  _expansionController.animateTo(
-                    0.0,
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOutBack,
-                  );
-                } else {
-                  _expansionController.animateTo(
-                    1.0,
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOutBack,
-                  );
-                }
-              },
-              onVerticalDragUpdate: (details) {
-                if (_animatingIndex != null) return;
-                final double delta = -details.delta.dy / 150.0;
-                _expansionController.value =
-                    (_expansionController.value + delta).clamp(0.0, 1.0);
-              },
-              onVerticalDragEnd: (details) {
-                if (_animatingIndex != null) return;
-                final double velocity = details.primaryVelocity ?? 0.0;
-                if (velocity < -300) {
-                  _expansionController.animateTo(
-                    1.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                  );
-                } else if (velocity > 300) {
-                  _expansionController.animateTo(
-                    0.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                  );
-                } else {
-                  if (_expansionController.value >= 0.5) {
-                    _expansionController.animateTo(
-                      1.0,
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutBack,
-                    );
-                  } else {
-                    _expansionController.animateTo(
-                      0.0,
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutBack,
-                    );
-                  }
-                }
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ...List.generate(L, (index) {
-                    final wallet = widget.wallets[index];
-                    final isTarget = _animatingIndex == index;
-                    final isAnyTarget = _animatingIndex != null;
-
-                    final int reversePos = L - index;
-                    final double normalOffsetY = -reversePos * animatedStep;
-                    final double normalScale = 1.0 - (reversePos * scaleFactor);
-                    final double normalOpacity = 0.7 + (index / L) * 0.3;
-
-                    double offsetY = normalOffsetY;
-                    double scale = normalScale;
-                    double opacity = normalOpacity;
-
-                    if (isTarget) {
-                      offsetY =
-                          normalOffsetY + (_openController.value * -130.0);
-                      scale =
-                          normalScale +
-                          (_openController.value * (1.05 - normalScale));
-                      opacity =
-                          normalOpacity +
-                          (_openController.value * (1.0 - normalOpacity));
-                    } else if (isAnyTarget) {
-                      opacity =
-                          normalOpacity * (1.0 - _openController.value * 0.6);
-                    }
-
-                    final gradient = _getGradientForType(wallet.type);
-
-                    return Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Transform.translate(
-                        offset: Offset(0, offsetY),
-                        child: Transform.scale(
-                          scale: scale,
-                          alignment: Alignment.bottomCenter,
-                          child: Opacity(
-                            opacity: opacity.clamp(0.0, 1.0),
-                            child: GestureDetector(
-                              onTap: () => _handleCardTap(index, wallet.id),
-                              child: Hero(
-                                tag: 'wallet_card_${wallet.id}',
-                                child: Container(
-                                  height: cardHeight,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: gradient.first.withValues(
-                                          alpha: isTarget ? 0.4 : 0.15,
-                                        ),
-                                        blurRadius: isTarget ? 16 : 8,
-                                        offset: Offset(0, isTarget ? 8 : 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(24),
-                                    child: Stack(
-                                      children: [
-                                        Positioned.fill(
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: gradient,
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 16,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      wallet.name,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    formatCurrency.format(
-                                                      wallet.balance,
-                                                    ),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const Spacer(),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white
-                                                          .withValues(
-                                                            alpha: 0.2,
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            8,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      wallet.type.toUpperCase(),
-                                                      style: const TextStyle(
-                                                        color: Colors.white70,
-                                                        fontSize: 9,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Opacity(
-                      opacity: (_animatingIndex != null)
-                          ? (1.0 - _openController.value * 0.6).clamp(0.4, 1.0)
-                          : 1.0,
-                      child: Container(
-                        height: cardHeight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFF007AFF,
-                              ).withValues(alpha: 0.15),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: widget.isDark
-                                          ? const [
-                                              Color(0xFF0A2F7A),
-                                              Color(0xFF0A84FF),
-                                            ]
-                                          : const [
-                                              Color(0xFF007AFF),
-                                              Color(0xFF0A84FF),
-                                            ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 16,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'home.total_balance_label'
-                                              .tr()
-                                              .toUpperCase(),
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: 1.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      formatCurrency.format(totalBalance),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'IN +${_formatAbbreviated(widget.monthlyIncome)}',
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Text(
-                                          'OUT -${_formatAbbreviated(widget.monthlyExpense)}',
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
 
 abstract class _HomeFeedItem {}
 

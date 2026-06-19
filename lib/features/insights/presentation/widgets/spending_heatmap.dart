@@ -7,6 +7,8 @@ import '../../../../core/widgets/glass/glass_card.dart';
 import '../../../transactions/providers/transaction_provider.dart';
 import '../../../transactions/providers/budget_provider.dart';
 
+import '../../../../core/providers/settings_provider.dart';
+
 class SpendingHeatmap extends ConsumerWidget {
   const SpendingHeatmap({super.key});
 
@@ -15,6 +17,7 @@ class SpendingHeatmap extends ConsumerWidget {
     final transactionsAsync = ref.watch(transactionNotifierProvider);
     final budgetsAsync = ref.watch(budgetNotifierProvider);
     final themeState = ref.watch(themeNotifierProvider);
+    final currencyFormat = ref.watch(currencyFormatterProvider);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeDetails = ThemePresets.getDetails(themeState.preset, isDark);
@@ -144,7 +147,7 @@ class SpendingHeatmap extends ConsumerWidget {
 
                                     return Tooltip(
                                       message:
-                                          '${DateFormat('EEEE, d MMMM y').format(date)}\nSpent: Rp ${NumberFormat('#,###', 'id_ID').format(expense)}',
+                                          '${DateFormat('EEEE, d MMMM y').format(date)}\nSpent: ${currencyFormat.format(expense)}',
                                       triggerMode: TooltipTriggerMode.tap,
                                       preferBelow: false,
                                       child: Container(

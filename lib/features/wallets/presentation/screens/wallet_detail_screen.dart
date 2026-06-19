@@ -11,6 +11,7 @@ import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_card.dart';
 import '../../../../core/utils/category_translation.dart';
 import '../../../../core/widgets/animations/liquid_animations.dart';
+import '../../../../core/providers/settings_provider.dart';
 
 class WalletDetailScreen extends ConsumerStatefulWidget {
   final String walletId;
@@ -53,11 +54,7 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
   Widget build(BuildContext context) {
     final walletsAsync = ref.watch(walletProvider);
     final transactionsAsync = ref.watch(transactionNotifierProvider);
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final formatCurrency = ref.watch(currencyFormatterProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -447,7 +444,7 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   Text(
                                                     tx.notes.isNotEmpty
                                                         ? tx.notes
-                                                        : tx.category
+                                                        : tx.categoryId
                                                               .toLocalizedCategory(),
                                                     style: TextStyle(
                                                       color: isDark
@@ -463,7 +460,7 @@ class _WalletDetailScreenState extends ConsumerState<WalletDetailScreen> {
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    tx.category
+                                                    tx.categoryId
                                                         .toLocalizedCategory()
                                                         .toUpperCase(),
                                                     style: TextStyle(

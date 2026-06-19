@@ -22,7 +22,21 @@ class Wallets extends Table {
   RealColumn get balance => real().withDefault(const Constant(0.0))();
   TextColumn get icon => text()();
   TextColumn get color => text()();
+  TextColumn get currency => text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
   DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_users_email', columns: {#email})
+class Users extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get email => text().unique()();
+  TextColumn get avatarPath => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get lastActiveAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -74,6 +88,7 @@ class Transactions extends Table {
   )();
 
   RealColumn get amount => real()();
+  TextColumn get currency => text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
   TextColumn get notes => text().nullable()();
   DateTimeColumn get date => dateTime()();
   TextColumn get type => text()(); // 'income', 'expense', atau 'transfer'
@@ -82,6 +97,9 @@ class Transactions extends Table {
   // Location coordinates
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
+
+  // Photo attachment (path to image file in app documents directory)
+  TextColumn get photoPath => text().nullable()();
 }
 
 @TableIndex(name: 'idx_budgets_user_id', columns: {#userId})
@@ -244,8 +262,130 @@ class BudgetAlertThresholdStatus extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: 'idx_tags_user_id', columns: {#userId})
+class Tags extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  TextColumn get name => text().withLength(min: 1, max: 50)();
+  TextColumn get color => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(
+  name: 'idx_transaction_tags_transaction',
+  columns: {#transactionId},
+)
+@TableIndex(
+  name: 'idx_transaction_tags_tag',
+  columns: {#tagId},
+)
+class TransactionTags extends Table {
+  TextColumn get id => text()();
+  IntColumn get transactionId =>
+      integer().references(Transactions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get tagId =>
+      text().references(Tags, #id, onDelete: KeyAction.cascade)();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_debts_user_id', columns: {#userId})
+@TableIndex(name: 'idx_debts_status', columns: {#status})
+@TableIndex(name: 'idx_debts_due_date', columns: {#dueDate})
+class Debts extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  TextColumn get type => text()(); // 'debt' (I owe) or 'loan' (they owe me)
+  TextColumn get personName => text()(); // Debtor/creditor name
+  RealColumn get amount => real()();
+  TextColumn get currency => text().withDefault(const Constant('IDR'))();
+  RealColumn get paidAmount => real().withDefault(const Constant(0.0))();
+  TextColumn get status => text()(); // 'unpaid', 'partial', 'paid'
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get dueDate => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get settledAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_debt_payments_debt_id', columns: {#debtId})
+class DebtPayments extends Table {
+  TextColumn get id => text()();
+  TextColumn get debtId => text().references(Debts, #id, onDelete: KeyAction.cascade)();
+  RealColumn get amount => real()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get paidAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_transaction_splits_transaction_id', columns: {#transactionId})
+@TableIndex(name: 'idx_transaction_splits_category_id', columns: {#categoryId})
+class TransactionSplits extends Table {
+  TextColumn get id => text()();
+  IntColumn get transactionId =>
+      integer().references(Transactions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get categoryId =>
+      text().references(Categories, #id, onDelete: KeyAction.setNull)();
+  RealColumn get amount => real()();
+  TextColumn get notes => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_bill_reminders_user_id', columns: {#userId})
+@TableIndex(name: 'idx_bill_reminders_due_date', columns: {#dueDate})
+@TableIndex(name: 'idx_bill_reminders_status', columns: {#status})
+class BillReminders extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  TextColumn get title => text()();
+  RealColumn get amount => real()();
+  TextColumn get currency => text().withDefault(const Constant('IDR'))();
+  DateTimeColumn get dueDate => dateTime()();
+  IntColumn get reminderDaysBefore => integer().withDefault(const Constant(3))(); // Days before due date to notify
+  TextColumn get status => text()(); // 'pending', 'reminded', 'snoozed', 'paid', 'dismissed'
+  TextColumn get notes => text().nullable()();
+  TextColumn get recurringTransactionId => text().nullable().references(
+    RecurringTransactions,
+    #id,
+    onDelete: KeyAction.setNull,
+  )(); // Optional link to recurring transaction
+  DateTimeColumn get lastReminderSentAt => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@TableIndex(name: 'idx_recurring_templates_category', columns: {#category})
+class RecurringTemplates extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get category => text()(); // 'income', 'expense'
+  TextColumn get categoryId => text().references(Categories, #id, onDelete: KeyAction.cascade)();
+  TextColumn get frequency => text()(); // 'daily', 'weekly', 'monthly', 'yearly'
+  TextColumn get icon => text().nullable()();
+  IntColumn get suggestedAmount => integer().nullable()(); // Optional suggested amount
+  BoolColumn get isBuiltIn => boolean().withDefault(const Constant(true))(); // Built-in vs user-created
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
+    Users,
     Wallets,
     Categories,
     Transactions,
@@ -257,6 +397,13 @@ class BudgetAlertThresholdStatus extends Table {
     BudgetAlerts,
     BudgetAlertPreferences,
     BudgetAlertThresholdStatus,
+    Tags,
+    TransactionTags,
+    Debts,
+    DebtPayments,
+    TransactionSplits,
+    BillReminders,
+    RecurringTemplates,
   ],
   daos: [RecurringTransactionDao, GoalDao],
 )
@@ -267,7 +414,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -403,6 +550,75 @@ class AppDatabase extends _$AppDatabase {
         // Schema v9: Add coordinates (latitude and longitude) to transactions
         await m.addColumn(transactions, transactions.latitude);
         await m.addColumn(transactions, transactions.longitude);
+      }
+      if (from < 10) {
+        // Schema v10: Add photo attachment support to transactions
+        await m.addColumn(transactions, transactions.photoPath);
+      }
+      if (from < 11) {
+        // Schema v11: Add tags system with many-to-many relationship
+        await m.createTable(tags);
+        await m.createTable(transactionTags);
+        await m.createIndex(idxTagsUserId);
+        await m.createIndex(idxTransactionTagsTransaction);
+        await m.createIndex(idxTransactionTagsTag);
+      }
+      if (from < 12) {
+        // Schema v12: Add multi-currency support
+        await m.addColumn(wallets, wallets.currency);
+        await m.addColumn(transactions, transactions.currency);
+      }
+      if (from < 13) {
+        // Schema v13: Add multi-profile support with Users table
+        await m.createTable(users);
+        await m.createIndex(idxUsersEmail);
+
+        // Migrate existing data: create default user for all existing records
+        await customStatement('''
+          INSERT INTO users (id, name, email, created_at, last_active_at)
+          VALUES ('local_user', 'Local User', 'local_user@duasaku.local', datetime('now'), datetime('now'))
+        ''');
+      }
+      if (from < 14) {
+        // Schema v14: Add debt/loan tracking feature
+        await m.createTable(debts);
+        await m.createTable(debtPayments);
+        await m.createIndex(idxDebtsUserId);
+        await m.createIndex(idxDebtsStatus);
+        await m.createIndex(idxDebtsDueDate);
+        await m.createIndex(idxDebtPaymentsDebtId);
+      }
+      if (from < 15) {
+        // Schema v15: Add split transactions feature
+        await m.createTable(transactionSplits);
+        await m.createIndex(idxTransactionSplitsTransactionId);
+        await m.createIndex(idxTransactionSplitsCategoryId);
+      }
+      if (from < 16) {
+        // Schema v16: Add bill reminders feature
+        await m.createTable(billReminders);
+        await m.createIndex(idxBillRemindersUserId);
+        await m.createIndex(idxBillRemindersDueDate);
+        await m.createIndex(idxBillRemindersStatus);
+      }
+      if (from < 17) {
+        // Schema v17: Add recurring transaction templates
+        await m.createTable(recurringTemplates);
+        await m.createIndex(idxRecurringTemplatesCategory);
+
+        // Seed default templates
+        await customStatement('''
+          INSERT INTO recurring_templates (id, name, category, category_id, frequency, icon, suggested_amount, is_built_in, created_at)
+          VALUES
+            ('tpl_salary', 'Monthly Salary', 'income', 'salary', 'monthly', 'attach_money', NULL, 1, datetime('now')),
+            ('tpl_electricity', 'Electricity Bill', 'expense', 'bills', 'monthly', 'bolt', NULL, 1, datetime('now')),
+            ('tpl_water', 'Water Bill', 'expense', 'bills', 'monthly', 'water_drop', NULL, 1, datetime('now')),
+            ('tpl_internet', 'Internet Bill', 'expense', 'bills', 'monthly', 'wifi', NULL, 1, datetime('now')),
+            ('tpl_rent', 'Rent', 'expense', 'bills', 'monthly', 'home', NULL, 1, datetime('now')),
+            ('tpl_spotify', 'Spotify Subscription', 'expense', 'shopping', 'monthly', 'music_note', 120000, 1, datetime('now')),
+            ('tpl_netflix', 'Netflix Subscription', 'expense', 'shopping', 'monthly', 'movie', 186000, 1, datetime('now')),
+            ('tpl_gym', 'Gym Membership', 'expense', 'shopping', 'monthly', 'fitness_center', NULL, 1, datetime('now'))
+        ''');
       }
     },
   );

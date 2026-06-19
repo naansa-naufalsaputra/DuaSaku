@@ -19,6 +19,16 @@ import 'progress_ring_widget.dart';
 /// - Swipe-left for delete with confirmation dialog
 ///
 /// Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 3.10, 6.5, 6.6, 6.7
+import '../../../../core/providers/settings_provider.dart';
+
+/// Card widget displaying a single recurring transaction with:
+/// - Next execution date, frequency badge, amount (color-coded), status badge
+/// - Progress ring showing days remaining proportion
+/// - Scale bounce micro-interaction on tap
+/// - Swipe-right for pause/resume with haptic feedback
+/// - Swipe-left for delete with confirmation dialog
+///
+/// Requirements: 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 3.10, 6.5, 6.6, 6.7
 class RecurringTransactionCard extends ConsumerWidget {
   const RecurringTransactionCard({super.key, required this.transaction});
 
@@ -40,6 +50,7 @@ class RecurringTransactionCard extends ConsumerWidget {
       now: now,
     );
     final daysRemaining = nextExecution.difference(now).inDays;
+    final formatCurrency = ref.watch(currencyFormatterProvider);
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -55,21 +66,21 @@ class RecurringTransactionCard extends ConsumerWidget {
       },
       // Only allow swipe if not completed
       direction: transaction.status == RecurringStatus.completed
-          ? DismissDirection.none
-          : DismissDirection.horizontal,
+      ? DismissDirection.none
+      : DismissDirection.horizontal,
       movementDuration: const Duration(milliseconds: 250),
       // Swipe-right background (pause/resume)
       background: _SwipeBackground(
         alignment: Alignment.centerLeft,
         color: transaction.status == RecurringStatus.active
-            ? Colors.orange
-            : Colors.green,
+        ? Colors.orange
+        : Colors.green,
         icon: transaction.status == RecurringStatus.active
-            ? Icons.pause_rounded
-            : Icons.play_arrow_rounded,
+        ? Icons.pause_rounded
+        : Icons.play_arrow_rounded,
         label: transaction.status == RecurringStatus.active
-            ? 'recurring.action_pause'.tr()
-            : 'recurring.action_resume'.tr(),
+        ? 'recurring.action_pause'.tr()
+        : 'recurring.action_resume'.tr(),
       ),
       // Swipe-left background (delete)
       secondaryBackground: _SwipeBackground(
@@ -84,21 +95,22 @@ class RecurringTransactionCard extends ConsumerWidget {
           // Navigate to detail view
         },
         child:
-            _CardContent(
-                  transaction: transaction,
-                  progress: progress,
-                  daysRemaining: daysRemaining.clamp(0, 9999),
-                  isDark: isDark,
-                  colorScheme: colorScheme,
-                  theme: theme,
-                )
-                .animate(onPlay: (controller) => controller.forward())
-                .scale(
-                  begin: const Offset(1.0, 1.0),
-                  end: const Offset(1.0, 1.0),
-                  duration: 200.ms,
-                  curve: Curves.easeOutCubic,
-                ),
+        _CardContent(
+          transaction: transaction,
+          progress: progress,
+          daysRemaining: daysRemaining.clamp(0, 9999),
+          isDark: isDark,
+          colorScheme: colorScheme,
+          theme: theme,
+          formatCurrency: formatCurrency,
+        )
+        .animate(onPlay: (controller) => controller.forward())
+        .scale(
+          begin: const Offset(1.0, 1.0),
+          end: const Offset(1.0, 1.0),
+          duration: 200.ms,
+          curve: Curves.easeOutCubic,
+        ),
       ),
     );
   }
@@ -161,6 +173,7 @@ class _CardContent extends StatelessWidget {
     required this.isDark,
     required this.colorScheme,
     required this.theme,
+    required this.formatCurrency,
   });
 
   final RecurringTransactionModel transaction;
@@ -169,17 +182,13 @@ class _CardContent extends StatelessWidget {
   final bool isDark;
   final ColorScheme colorScheme;
   final ThemeData theme;
+  final NumberFormat formatCurrency;
 
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.isIncome;
     final amountColor = isIncome ? colorScheme.primary : colorScheme.error;
     final statusColor = _getStatusColor(transaction.status);
-    final formatCurrency = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
     final dateFormat = DateFormat('dd MMM yyyy');
 
     return Container(

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/providers/budget_provider.dart';
+import '../../../core/providers/settings_provider.dart';
+import '../presentation/widgets/year_over_year_chart.dart';
 
 class InsightsState {
   final AsyncValue<String?> aiAdvice;
@@ -12,6 +13,51 @@ class InsightsState {
     return InsightsState(aiAdvice: aiAdvice ?? this.aiAdvice);
   }
 }
+
+final yoyDataProvider = Provider<Map<String, List<MonthlyData>>>((ref) {
+  final transactionsAsync = ref.watch(transactionNotifierProvider);
+  final transactions = transactionsAsync.value ?? [];
+
+  final now = DateTime.now();
+  final currentYear = now.year;
+  final previousYear = currentYear - 1;
+
+  // Group by year and month
+  final Map<int, Map<int, double>> yearMonthExpenses = {};
+
+  for (final t in transactions) {
+    if (t.type != 'expense') continue;
+
+    final year = t.createdAt.year;
+    final month = t.createdAt.month;
+
+    if (year != currentYear && year != previousYear) continue;
+
+    yearMonthExpenses.putIfAbsent(year, () => {});
+    yearMonthExpenses[year]![month] =
+        (yearMonthExpenses[year]![month] ?? 0) + t.amount;
+  }
+
+  // Build 12-month data for each year
+  final currentYearData = <MonthlyData>[];
+  final previousYearData = <MonthlyData>[];
+
+  for (int month = 1; month <= 12; month++) {
+    currentYearData.add(MonthlyData(
+      month,
+      yearMonthExpenses[currentYear]?[month] ?? 0,
+    ));
+    previousYearData.add(MonthlyData(
+      month,
+      yearMonthExpenses[previousYear]?[month] ?? 0,
+    ));
+  }
+
+  return {
+    'current': currentYearData,
+    'previous': previousYearData,
+  };
+});
 
 final insightsProvider = NotifierProvider<InsightsNotifier, InsightsState>(() {
   return InsightsNotifier();
@@ -35,11 +81,7 @@ class InsightsNotifier extends Notifier<InsightsState> {
       final budgetsAsync = ref.read(budgetNotifierProvider);
       final budgets = budgetsAsync.value ?? [];
 
-      final formatCurrency = NumberFormat.currency(
-        locale: 'id_ID',
-        symbol: 'Rp ',
-        decimalDigits: 0,
-      );
+      final formatCurrency = ref.read(currencyFormatterProvider);
 
       // Calculations
       double totalIncome = 0;
@@ -51,8 +93,8 @@ class InsightsNotifier extends Notifier<InsightsState> {
           totalIncome += t.amount;
         } else if (t.type == 'expense') {
           totalExpense += t.amount;
-          categoryExpenses[t.category] =
-              (categoryExpenses[t.category] ?? 0) + t.amount;
+          categoryExpenses[t.categoryId] =
+              (categoryExpenses[t.categoryId] ?? 0) + t.amount;
         }
       }
 

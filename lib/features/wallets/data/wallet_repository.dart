@@ -26,6 +26,7 @@ class WalletRepository implements WalletRepositoryInterface {
                 name: w.name,
                 type: w.type,
                 balance: w.balance,
+                currency: w.currency,
                 createdAt: w.createdAt,
               ),
             )
@@ -50,6 +51,7 @@ class WalletRepository implements WalletRepositoryInterface {
               name: w.name,
               type: w.type,
               balance: w.balance,
+              currency: w.currency,
               createdAt: w.createdAt,
             ),
           )
@@ -69,6 +71,7 @@ class WalletRepository implements WalletRepositoryInterface {
               name: wallet.name,
               type: wallet.type,
               balance: Value(wallet.balance),
+              currency: Value(wallet.currency),
               icon: 'account_balance_wallet',
               color: '#6200EE',
               createdAt: wallet.createdAt,
@@ -91,6 +94,7 @@ class WalletRepository implements WalletRepositoryInterface {
           name: Value(wallet.name),
           type: Value(wallet.type),
           balance: Value(wallet.balance),
+          currency: Value(wallet.currency),
         ),
       );
       return const Success(null);
@@ -109,5 +113,21 @@ class WalletRepository implements WalletRepositoryInterface {
       developer.log('Error deleting wallet from Drift', error: e);
       return Failure(AppError.database(e.toString(), stackTrace: stack));
     }
+  }
+
+  @override
+  Future<void> adjustBalance(String walletId, double amount) async {
+    final wallet = await (_db.select(_db.wallets)
+          ..where((t) => t.id.equals(walletId)))
+        .getSingleOrNull();
+
+    if (wallet == null) {
+      throw StateError('Wallet not found: $walletId');
+    }
+
+    await (_db.update(_db.wallets)..where((t) => t.id.equals(walletId)))
+        .write(WalletsCompanion(
+      balance: Value(wallet.balance + amount),
+    ));
   }
 }

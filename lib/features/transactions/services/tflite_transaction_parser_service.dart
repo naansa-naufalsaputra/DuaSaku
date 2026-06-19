@@ -195,7 +195,7 @@ class TfliteTransactionParserService
 
     return ParsedTransaction(
       amount: amount,
-      category: parsedCategory,
+      categoryId: parsedCategory,
       type: type,
       walletId: matchedWalletId,
       notes: TextSanitizer.prettifyNotes(notes),
@@ -250,7 +250,7 @@ class TfliteTransactionParserService
     return TransactionModel(
       userId: userId,
       amount: parsedTx.amount,
-      category: parsedTx.category,
+      categoryId: parsedTx.categoryId,
       type: parsedTx.type,
       notes: parsedTx.notes,
       walletId: parsedTx.walletId,

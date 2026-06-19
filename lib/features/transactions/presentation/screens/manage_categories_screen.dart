@@ -7,6 +7,7 @@ import '../../../../core/theme/premium_background.dart';
 import '../../../../core/widgets/glass/glass_app_bar.dart';
 import '../../../../core/widgets/glass/glass_input_field.dart';
 import '../../../../core/widgets/glass/glass_button.dart';
+import '../../../../core/utils/category_icon_helper.dart';
 
 class ManageCategoriesScreen extends ConsumerStatefulWidget {
   const ManageCategoriesScreen({super.key});
@@ -20,35 +21,6 @@ class _ManageCategoriesScreenState
     extends ConsumerState<ManageCategoriesScreen> {
   String _selectedType = 'expense';
 
-  // Curated premium financial & lifestyle icons (including default ones)
-  final List<String> _iconNames = [
-    'restaurant',
-    'local_cafe',
-    'attach_money',
-    'receipt',
-    'shopping_bag',
-    'directions_car',
-    'local_gas_station',
-    'home',
-    'electrical_services',
-    'water_drop',
-    'wifi',
-    'medical_services',
-    'sports_esports',
-    'movie',
-    'flight',
-    'school',
-    'fitness_center',
-    'pets',
-    'card_giftcard',
-    'work',
-    'trending_up',
-    'savings',
-    'account_balance',
-    'build',
-    'spa',
-    'payments',
-  ];
 
   // 10 premium curated colors
   final List<String> _customColors = [
@@ -64,64 +36,6 @@ class _ManageCategoriesScreenState
     'EC4899', // Pink
   ];
 
-  IconData _getIconData(String? name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant_rounded;
-      case 'local_cafe':
-        return Icons.local_cafe_rounded;
-      case 'attach_money':
-        return Icons.attach_money_rounded;
-      case 'receipt':
-        return Icons.receipt_rounded;
-      case 'shopping_bag':
-        return Icons.shopping_bag_rounded;
-      case 'directions_car':
-        return Icons.directions_car_rounded;
-      case 'local_gas_station':
-        return Icons.local_gas_station_rounded;
-      case 'home':
-        return Icons.home_rounded;
-      case 'electrical_services':
-        return Icons.electrical_services_rounded;
-      case 'water_drop':
-        return Icons.water_drop_rounded;
-      case 'wifi':
-        return Icons.wifi_rounded;
-      case 'medical_services':
-        return Icons.medical_services_rounded;
-      case 'sports_esports':
-        return Icons.sports_esports_rounded;
-      case 'movie':
-        return Icons.movie_rounded;
-      case 'flight':
-        return Icons.flight_rounded;
-      case 'school':
-        return Icons.school_rounded;
-      case 'fitness_center':
-        return Icons.fitness_center_rounded;
-      case 'pets':
-        return Icons.pets_rounded;
-      case 'card_giftcard':
-        return Icons.card_giftcard_rounded;
-      case 'work':
-        return Icons.work_rounded;
-      case 'trending_up':
-        return Icons.trending_up_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'account_balance':
-        return Icons.account_balance_rounded;
-      case 'build':
-        return Icons.build_rounded;
-      case 'spa':
-        return Icons.spa_rounded;
-      case 'payments':
-        return Icons.payments_rounded;
-      default:
-        return Icons.category_rounded;
-    }
-  }
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
@@ -200,7 +114,6 @@ class _ManageCategoriesScreenState
                     ),
                     const SizedBox(height: 16),
 
-                    // Type Segmented Choice
                     Row(
                       children: [
                         Expanded(
@@ -208,7 +121,12 @@ class _ManageCategoriesScreenState
                             variant: GlassButtonVariant.secondary,
                             onPressed: () {
                               HapticFeedback.lightImpact();
-                              setModalState(() => type = 'expense');
+                              setModalState(() {
+                                type = 'expense';
+                                if (!CategoryIconHelper.getExpenseIcons().contains(selectedIcon)) {
+                                  selectedIcon = CategoryIconHelper.getExpenseIcons().first;
+                                }
+                              });
                             },
                             child: const Text(
                               'Expense',
@@ -225,7 +143,12 @@ class _ManageCategoriesScreenState
                             variant: GlassButtonVariant.secondary,
                             onPressed: () {
                               HapticFeedback.lightImpact();
-                              setModalState(() => type = 'income');
+                              setModalState(() {
+                                type = 'income';
+                                if (!CategoryIconHelper.getIncomeIcons().contains(selectedIcon)) {
+                                  selectedIcon = CategoryIconHelper.getIncomeIcons().first;
+                                }
+                              });
                             },
                             child: const Text(
                               'Income',
@@ -448,9 +371,14 @@ class _ManageCategoriesScreenState
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
                             ),
-                        itemCount: _iconNames.length,
+                        itemCount: type == 'expense'
+                            ? CategoryIconHelper.getExpenseIcons().length
+                            : CategoryIconHelper.getIncomeIcons().length,
                         itemBuilder: (context, idx) {
-                          final iconName = _iconNames[idx];
+                          final iconNames = type == 'expense'
+                              ? CategoryIconHelper.getExpenseIcons()
+                              : CategoryIconHelper.getIncomeIcons();
+                          final iconName = iconNames[idx];
                           final isSelected = selectedIcon == iconName;
                           final activeColor = isCustomColor
                               ? Color(int.parse('0xFF$selectedColor'))
@@ -477,7 +405,7 @@ class _ManageCategoriesScreenState
                                 ),
                               ),
                               child: Icon(
-                                _getIconData(iconName),
+                                CategoryIconHelper.getIconData(iconName),
                                 color: isSelected
                                     ? activeColor
                                     : (isDark
@@ -741,7 +669,7 @@ class _ManageCategoriesScreenState
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  _getIconData(cat.icon),
+                                  CategoryIconHelper.getIconData(cat.icon),
                                   color: activeColor,
                                 ),
                               ),

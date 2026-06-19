@@ -34,13 +34,12 @@ class GeofenceSyncHelper {
       final rows = await query.get();
       final transactions = rows.map((row) {
         final tx = row.readTable(db.transactions);
-        final cat = row.readTableOrNull(db.categories);
 
         return TransactionModel(
           id: tx.id,
           userId: tx.userId,
           amount: tx.amount,
-          category: cat?.name ?? 'Uncategorized',
+          categoryId: tx.categoryId ?? 'uncategorized',
           type: tx.type,
           notes: tx.notes ?? '',
           createdAt: tx.date,

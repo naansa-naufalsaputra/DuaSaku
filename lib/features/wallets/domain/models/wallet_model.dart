@@ -4,6 +4,7 @@ class WalletModel {
   final String name;
   final String type; // 'Bank', 'E-Wallet', 'Cash'
   final double balance;
+  final String currency; // ISO 4217 currency code (e.g., 'IDR', 'USD')
   final DateTime createdAt;
 
   WalletModel({
@@ -12,6 +13,7 @@ class WalletModel {
     required this.name,
     required this.type,
     required this.balance,
+    this.currency = 'IDR',
     required this.createdAt,
   });
 
@@ -22,6 +24,7 @@ class WalletModel {
       name: json['name'] as String,
       type: json['type'] as String,
       balance: (json['balance'] as num).toDouble(),
+      currency: json['currency'] as String? ?? 'IDR',
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -33,17 +36,24 @@ class WalletModel {
       'name': name,
       'type': type,
       'balance': balance,
+      'currency': currency,
       'created_at': createdAt.toIso8601String(),
     };
   }
 
-  WalletModel copyWith({String? name, String? type, double? balance}) {
+  WalletModel copyWith({
+    String? name,
+    String? type,
+    double? balance,
+    String? currency,
+  }) {
     return WalletModel(
       id: id,
       userId: userId,
       name: name ?? this.name,
       type: type ?? this.type,
       balance: balance ?? this.balance,
+      currency: currency ?? this.currency,
       createdAt: createdAt,
     );
   }

@@ -404,7 +404,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Transport'));
+      expect(result.categoryId, equals('Transport'));
     });
 
     test('"makan siang" matches Food category', () {
@@ -413,7 +413,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Food'));
+      expect(result.categoryId, equals('Food'));
     });
 
     test('"bayar listrik" matches Bills category', () {
@@ -422,7 +422,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Bills'));
+      expect(result.categoryId, equals('Bills'));
     });
 
     test('"belanja baju" matches Shopping category', () {
@@ -431,7 +431,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Shopping'));
+      expect(result.categoryId, equals('Shopping'));
     });
 
     test('"gaji bulan ini" matches Salary category', () {
@@ -440,7 +440,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Salary'));
+      expect(result.categoryId, equals('Salary'));
     });
 
     test('"nonton bioskop" matches Entertainment category', () {
@@ -449,7 +449,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Entertainment'));
+      expect(result.categoryId, equals('Entertainment'));
     });
 
     test('"beli kopi starbucks" matches Food category', () {
@@ -458,7 +458,7 @@ void main() {
         wallets: wallets,
         categories: testCategories,
       );
-      expect(result.category, equals('Food'));
+      expect(result.categoryId, equals('Food'));
     });
 
     test('falls back to type-appropriate category when no keyword matches', () {
@@ -468,7 +468,7 @@ void main() {
         categories: testCategories,
       );
       // Should pick first expense category since type is expense
-      expect(result.category, equals('Food'));
+      expect(result.categoryId, equals('Food'));
     });
   });
 }

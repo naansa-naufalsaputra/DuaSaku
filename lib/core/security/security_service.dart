@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../utils/logger.dart';
 
 class SecurityState {
   final bool isLocked;
@@ -104,10 +106,10 @@ class SecurityNotifier extends Notifier<SecurityState>
       } else {
         state = state.copyWith(isTimeTampered: false);
       }
-    } catch (e) {
+    } catch (e, stack) {
       // If NTP check fails due to offline state or network issue, we do not lock the user out,
       // but log the event. Real systems might enforce offline limits.
-      debugPrint('[SecurityService] NTP check failed: $e');
+      ref.read(loggerProvider).error('[SecurityService] NTP check failed', e, stack);
     }
   }
 
@@ -122,14 +124,14 @@ class SecurityNotifier extends Notifier<SecurityState>
             .getAvailableBiometrics();
 
         if (!canCheck || !isDeviceSupported || available.isEmpty) {
-          debugPrint(
+          ref.read(loggerProvider).warning(
             '[SecurityService] Biometrics not supported or none enrolled',
           );
           return false;
         }
 
         final bool didAuthenticate = await _auth.authenticate(
-          localizedReason: 'Konfirmasi biometrik untuk mengaktifkan kunci',
+          localizedReason: 'profile.biometric_confirm'.tr(),
           options: const AuthenticationOptions(
             stickyAuth: true,
             biometricOnly: true,
@@ -139,9 +141,11 @@ class SecurityNotifier extends Notifier<SecurityState>
         if (!didAuthenticate) {
           return false;
         }
-      } catch (e) {
-        debugPrint(
-          '[SecurityService] Failed to verify biometric on toggle: $e',
+      } catch (e, stack) {
+        ref.read(loggerProvider).error(
+          '[SecurityService] Failed to verify biometric on toggle',
+          e,
+          stack,
         );
         return false;
       }
@@ -172,7 +176,7 @@ class SecurityNotifier extends Notifier<SecurityState>
       }
 
       final bool didAuthenticate = await _auth.authenticate(
-        localizedReason: 'Gunakan biometrik untuk mengakses DuaSaku',
+        localizedReason: 'pin_auth.biometric_reason'.tr(),
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -187,8 +191,8 @@ class SecurityNotifier extends Notifier<SecurityState>
         state = state.copyWith(isAuthenticating: false);
         return false;
       }
-    } catch (e) {
-      debugPrint('[SecurityService] Biometric authentication failed: $e');
+    } catch (e, stack) {
+      ref.read(loggerProvider).error('[SecurityService] Biometric authentication failed', e, stack);
       state = state.copyWith(isAuthenticating: false);
       return false;
     }
