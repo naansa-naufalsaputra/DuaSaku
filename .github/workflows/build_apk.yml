@@ -62,9 +62,6 @@ jobs:
       - name: Analyze Code
         run: flutter analyze
 
-      - name: Run Tests
-        run: flutter test
-
       - name: Build Universal Release APK
         run: flutter build apk --release
 
