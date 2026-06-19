@@ -322,7 +322,7 @@ void main() {
             );
 
         // Calculate balance: 1000 - 300 + 500 - 200 = 1000
-        final computed = await (service as dynamic)._computeBalance('wallet-7');
+        final computed = await service.computeBalance('wallet-7');
         expect(computed, closeTo(1000.0, 0.01));
       },
     );

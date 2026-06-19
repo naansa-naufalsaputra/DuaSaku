@@ -24,7 +24,7 @@ class BalanceIntegrityService {
       final wallets = await _db.select(_db.wallets).get();
 
       for (final wallet in wallets) {
-        final computed = await _computeBalance(wallet.id);
+        final computed = await computeBalance(wallet.id);
         final stored = wallet.balance;
         final difference = stored - computed;
 
@@ -48,7 +48,7 @@ class BalanceIntegrityService {
   /// as schema v8 migration:
   /// SUM(income to wallet) - SUM(expense from wallet)
   /// + SUM(transfers into wallet) - SUM(transfers out of wallet)
-  Future<double> _computeBalance(String walletId) async {
+  Future<double> computeBalance(String walletId) async {
     // Query using Drift's type-safe API
     final incomeQuery = _db.selectOnly(_db.transactions)
       ..addColumns([_db.transactions.amount.sum()])
@@ -93,7 +93,7 @@ class BalanceIntegrityService {
   /// Uses atomic transaction to ensure consistency. Logs repair operation.
   Future<void> repairWallet(String walletId) async {
     await _db.transaction(() async {
-      final computed = await _computeBalance(walletId);
+      final computed = await computeBalance(walletId);
 
       await (_db.update(_db.wallets)..where((w) => w.id.equals(walletId)))
           .write(WalletsCompanion(balance: Value(computed)));

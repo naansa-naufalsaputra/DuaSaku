@@ -583,7 +583,7 @@ class AppDatabase extends _$AppDatabase {
         // Migrate existing data: create default user for all existing records
         await customStatement('''
           INSERT INTO users (id, name, email, created_at, last_active_at)
-          VALUES ('local_user', 'Local User', 'local_user@duasaku.local', datetime('now'), datetime('now'))
+          VALUES ('${AppConstants.defaultUserId}', 'Local User', '${AppConstants.defaultUserId}@duasaku.local', datetime('now'), datetime('now'))
         ''');
       }
       if (from < 14) {

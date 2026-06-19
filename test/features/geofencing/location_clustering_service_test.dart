@@ -87,8 +87,8 @@ void main() {
         expect(hotspot.latitude, closeTo(-6.9904, 0.0001));
         // Average longitude: (110.4229 + 110.4230 + 110.4228) / 3 = 110.4229
         expect(hotspot.longitude, closeTo(110.4229, 0.0001));
-        // Top category is 'Makanan' (count: 2) vs 'Transportasi' (count: 1)
-        expect(hotspot.name, equals('Area Makanan'));
+        // Top category is 'cat-food' (count: 2) vs 'cat-transport' (count: 1)
+        expect(hotspot.name, equals('Area cat-food'));
       },
     );
 
@@ -138,7 +138,7 @@ void main() {
         // The other cluster (-7.0200) only has 1 transaction and 10k spend, so it is filtered out.
         expect(hotspots.length, equals(1));
         expect(hotspots.first.latitude, closeTo(-6.9904, 0.0005));
-        expect(hotspots.first.name, equals('Area Belanja'));
+        expect(hotspots.first.name, equals('Area cat-shopping'));
       },
     );
 
@@ -159,7 +159,7 @@ void main() {
             TransactionModel(
               userId: 'user-1',
               amount: amount,
-              categoryId: 'cat-other',
+              categoryId: 'Cat$i',
               type: 'expense',
               notes: 'tx $i-$j',
               createdAt: now,
