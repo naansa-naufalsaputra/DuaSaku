@@ -259,7 +259,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                         }
                         final amount = double.tryParse(value);
                         if (amount == null || amount <= 0) {
-                          return 'debts.amount'.tr() + ' > 0';
+                          return '${'debts.amount'.tr()} > 0';
                         }
                         return null;
                       },
@@ -291,7 +291,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                 Text(
                                   _dueDate != null
                                       ? DateFormat.yMMMd().format(_dueDate!)
-                                      : 'debts.due_date'.tr() + ' (Opsional)',
+                                      : '${'debts.due_date'.tr()} (Opsional)',
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: _dueDate != null
@@ -329,7 +329,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                       controller: _notesController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        labelText: 'debts.notes'.tr() + ' (Opsional)',
+                        labelText: '${'debts.notes'.tr()} (Opsional)',
                         alignLabelWithHint: true,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),

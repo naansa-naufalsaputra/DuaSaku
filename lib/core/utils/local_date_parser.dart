@@ -223,8 +223,9 @@ class LocalDateParser {
     if (clean.startsWith('agu') ||
         clean.startsWith('ags') ||
         clean.startsWith('agt') ||
-        clean.startsWith('aug'))
+        clean.startsWith('aug')) {
       return 8;
+    }
     if (clean.startsWith('sep')) return 9;
     if (clean.startsWith('okt') || clean.startsWith('oct')) return 10;
     if (clean.startsWith('nov')) return 11;

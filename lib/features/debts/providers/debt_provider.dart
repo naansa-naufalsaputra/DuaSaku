@@ -5,7 +5,6 @@ import '../../../core/local_db/app_database_provider.dart';
 import '../../../core/utils/app_error.dart';
 import '../../../core/utils/result.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../wallets/providers/wallet_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/domain/models/transaction_model.dart';
 import '../data/debt_repository.dart';

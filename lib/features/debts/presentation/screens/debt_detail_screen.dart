@@ -57,7 +57,7 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
           .read(debtNotifierProvider.notifier)
           .deleteDebt(widget.debtId);
 
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isDeleting = false;
         });
@@ -492,9 +492,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'bottom_sheet.err_required'.tr() +
-                ': ' +
-                'bottom_sheet.wallet'.tr(),
+            '${'bottom_sheet.err_required'.tr()}: ${'bottom_sheet.wallet'.tr()}',
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -602,10 +600,10 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                 }
                 final val = double.tryParse(value);
                 if (val == null || val <= 0) {
-                  return 'debts.amount'.tr() + ' > 0';
+                  return '${'debts.amount'.tr()} > 0';
                 }
                 if (val > widget.debt.remainingAmount) {
-                  return 'Maksimal ' + widget.debt.remainingAmount.toString();
+                  return 'Maksimal ${widget.debt.remainingAmount}';
                 }
                 return null;
               },
@@ -652,7 +650,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                   }
 
                   return DropdownButtonFormField<String>(
-                    value: _selectedWalletId,
+                    initialValue: _selectedWalletId,
                     decoration: InputDecoration(
                       labelText: 'debts.select_wallet'.tr(),
                       border: OutlineInputBorder(
@@ -685,7 +683,7 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
             TextFormField(
               controller: _notesController,
               decoration: InputDecoration(
-                labelText: 'debts.notes'.tr() + ' (Opsional)',
+                labelText: '${'debts.notes'.tr()} (Opsional)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

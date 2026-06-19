@@ -228,7 +228,7 @@ class _BillReminderFormScreenState
 
                     // Reminder days before dropdown
                     DropdownButtonFormField<int>(
-                      value: _reminderDaysBefore,
+                      initialValue: _reminderDaysBefore,
                       decoration: InputDecoration(
                         labelText: 'bill_reminders.reminder_days'.tr(),
                         border: OutlineInputBorder(

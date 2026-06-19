@@ -243,10 +243,12 @@ void main() {
       // Verify balances are now correct
       final wallets = await db.select(db.wallets).get();
       for (final wallet in wallets) {
-        if (wallet.id == 'wallet-5')
+        if (wallet.id == 'wallet-5') {
           expect(wallet.balance, closeTo(500.0, 0.01));
-        if (wallet.id == 'wallet-6')
+        }
+        if (wallet.id == 'wallet-6') {
           expect(wallet.balance, closeTo(1000.0, 0.01));
+        }
       }
     });
 

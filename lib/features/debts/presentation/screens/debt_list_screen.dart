@@ -210,7 +210,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen>
           : Colors.grey[200],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: Colors.transparent),
+        side: const BorderSide(color: Colors.transparent),
       ),
       onSelected: (selected) {
         if (selected) {

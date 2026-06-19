@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:drift/drift.dart' hide Column;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -7,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/local_db/app_database_provider.dart';
 import '../../../../core/providers/event_bus_provider.dart';
-import '../../../core/local_db/app_database.dart';
 import '../../../core/utils/result.dart';
 import '../../../services/service_providers.dart';
 import '../domain/transaction_parser_service_interface.dart';
@@ -20,8 +18,6 @@ import '../domain/models/transaction_model.dart';
 import '../domain/transaction_filters.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../wallets/providers/wallet_provider.dart';
-import '../../smart_budget_alerts/providers/alert_center_provider.dart';
-import '../../smart_budget_alerts/services/budget_alert_evaluator.dart';
 import 'category_provider.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepositoryInterface>((
@@ -174,9 +170,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
   }
 
   Future<void> deleteTransaction(int id) async {
-    // Capture transaction details before deletion for alert re-evaluation
     final previousState = state.valueOrNull;
-    final deletedTx = previousState?.where((tx) => tx.id == id).firstOrNull;
 
     // Optimistic UI update
     if (previousState != null) {

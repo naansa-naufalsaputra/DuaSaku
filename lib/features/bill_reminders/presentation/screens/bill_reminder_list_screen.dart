@@ -494,7 +494,7 @@ class _MarkPaidBottomSheetState extends ConsumerState<_MarkPaidBottomSheet> {
                 }
 
                 return DropdownButtonFormField<String>(
-                  value: _selectedWalletId,
+                  initialValue: _selectedWalletId,
                   decoration: InputDecoration(
                     labelText: 'bill_reminders.select_wallet'.tr(),
                     border: OutlineInputBorder(
@@ -553,7 +553,7 @@ class _MarkPaidBottomSheetState extends ConsumerState<_MarkPaidBottomSheet> {
                       _isSubmitting = false;
                     });
 
-                    if (mounted) {
+                    if (context.mounted) {
                       switch (result) {
                         case Success():
                           HapticFeedback.lightImpact();
