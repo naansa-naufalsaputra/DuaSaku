@@ -52,7 +52,11 @@ void main() {
 
       expect(transactions.length, greaterThan(0));
       expect(
-        transactions.every((t) => t.categoryId == 'category-1' || t.notes.toLowerCase().contains('food')),
+        transactions.every(
+          (t) =>
+              t.categoryId == 'category-1' ||
+              t.notes.toLowerCase().contains('food'),
+        ),
         isTrue,
       );
     });
