@@ -11,43 +11,44 @@ import '../../../transactions/domain/models/transaction_model.dart';
 import '../../domain/geofence_hotspot.dart';
 import '../../services/location_clustering_service.dart';
 
-final geofencingMapHotspotsProvider = FutureProvider.autoDispose<List<GeofenceHotspot>>((ref) async {
-  final db = ref.watch(appDatabaseProvider);
-  final user = ref.watch(userProvider);
-  
-  if (user == null) return const [];
+final geofencingMapHotspotsProvider =
+    FutureProvider.autoDispose<List<GeofenceHotspot>>((ref) async {
+      final db = ref.watch(appDatabaseProvider);
+      final user = ref.watch(userProvider);
 
-  final query = db.select(db.transactions).join([
-    leftOuterJoin(
-      db.categories,
-      db.categories.id.equalsExp(db.transactions.categoryId),
-    ),
-  ]);
-  query.where(db.transactions.userId.equals(user.id));
-  
-  final rows = await query.get();
-  final transactions = rows.map((row) {
-    final tx = row.readTable(db.transactions);
+      if (user == null) return const [];
 
-    return TransactionModel(
-      id: tx.id,
-      userId: tx.userId,
-      amount: tx.amount,
-      categoryId: tx.categoryId ?? 'uncategorized',
-      type: tx.type,
-      notes: tx.notes ?? '',
-      createdAt: tx.date,
-      walletId: tx.walletId,
-      fromWalletId: tx.fromWalletId,
-      toWalletId: tx.toWalletId,
-      latitude: tx.latitude,
-      longitude: tx.longitude,
-    );
-  }).toList();
-  
-  final clusteringService = LocationClusteringService();
-  return clusteringService.detectHotspots(transactions);
-});
+      final query = db.select(db.transactions).join([
+        leftOuterJoin(
+          db.categories,
+          db.categories.id.equalsExp(db.transactions.categoryId),
+        ),
+      ]);
+      query.where(db.transactions.userId.equals(user.id));
+
+      final rows = await query.get();
+      final transactions = rows.map((row) {
+        final tx = row.readTable(db.transactions);
+
+        return TransactionModel(
+          id: tx.id,
+          userId: tx.userId,
+          amount: tx.amount,
+          categoryId: tx.categoryId ?? 'uncategorized',
+          type: tx.type,
+          notes: tx.notes ?? '',
+          createdAt: tx.date,
+          walletId: tx.walletId,
+          fromWalletId: tx.fromWalletId,
+          toWalletId: tx.toWalletId,
+          latitude: tx.latitude,
+          longitude: tx.longitude,
+        );
+      }).toList();
+
+      final clusteringService = LocationClusteringService();
+      return clusteringService.detectHotspots(transactions);
+    });
 
 class GeofencingMapScreen extends ConsumerWidget {
   const GeofencingMapScreen({super.key});
@@ -57,21 +58,29 @@ class GeofencingMapScreen extends ConsumerWidget {
     final hotspotsAsync = ref.watch(geofencingMapHotspotsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Modern Minimalist Dark / Light mode color styles matching DuaSaku theme
     final cardBgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final cardBorderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05);
+    final cardBorderColor = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.05);
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF9F9FA),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF9F9FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: textColor,
+            size: 20,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -120,9 +129,12 @@ class GeofencingMapScreen extends ConsumerWidget {
               ),
             );
           }
-          
-          final centerLatLng = LatLng(hotspots.first.latitude, hotspots.first.longitude);
-          
+
+          final centerLatLng = LatLng(
+            hotspots.first.latitude,
+            hotspots.first.longitude,
+          );
+
           return FlutterMap(
             options: MapOptions(
               initialCenter: centerLatLng,
@@ -138,10 +150,26 @@ class GeofencingMapScreen extends ConsumerWidget {
                     ? (context, tileWidget, tile) {
                         return ColorFiltered(
                           colorFilter: const ColorFilter.matrix(<double>[
-                            -0.2126, -0.7152, -0.0722, 0, 255,
-                            -0.2126, -0.7152, -0.0722, 0, 255,
-                            -0.2126, -0.7152, -0.0722, 0, 255,
-                            0,       0,       0,       1, 0,
+                            -0.2126,
+                            -0.7152,
+                            -0.0722,
+                            0,
+                            255,
+                            -0.2126,
+                            -0.7152,
+                            -0.0722,
+                            0,
+                            255,
+                            -0.2126,
+                            -0.7152,
+                            -0.0722,
+                            0,
+                            255,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
                           ]),
                           child: tileWidget,
                         );
@@ -149,38 +177,56 @@ class GeofencingMapScreen extends ConsumerWidget {
                     : null,
               ),
               CircleLayer(
-                circles: hotspots.map((h) => CircleMarker(
-                  point: LatLng(h.latitude, h.longitude),
-                  radius: 150.0,
-                  useRadiusInMeter: true,
-                  color: Colors.redAccent.withValues(alpha: 0.15),
-                  borderColor: Colors.redAccent.withValues(alpha: 0.45),
-                  borderStrokeWidth: 1.5,
-                )).toList(),
+                circles: hotspots
+                    .map(
+                      (h) => CircleMarker(
+                        point: LatLng(h.latitude, h.longitude),
+                        radius: 150.0,
+                        useRadiusInMeter: true,
+                        color: Colors.redAccent.withValues(alpha: 0.15),
+                        borderColor: Colors.redAccent.withValues(alpha: 0.45),
+                        borderStrokeWidth: 1.5,
+                      ),
+                    )
+                    .toList(),
               ),
               MarkerLayer(
-                markers: hotspots.map((h) => Marker(
-                  point: LatLng(h.latitude, h.longitude),
-                  width: 44,
-                  height: 44,
-                  child: GestureDetector(
-                    onTap: () => _showHotspotDetails(context, ref, h, cardBgColor, cardBorderColor, textColor),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.redAccent, width: 2),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.location_on_rounded,
-                          color: Colors.redAccent,
-                          size: 24,
+                markers: hotspots
+                    .map(
+                      (h) => Marker(
+                        point: LatLng(h.latitude, h.longitude),
+                        width: 44,
+                        height: 44,
+                        child: GestureDetector(
+                          onTap: () => _showHotspotDetails(
+                            context,
+                            ref,
+                            h,
+                            cardBgColor,
+                            cardBorderColor,
+                            textColor,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.redAccent,
+                                width: 2,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                color: Colors.redAccent,
+                                size: 24,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                )).toList(),
+                    )
+                    .toList(),
               ),
             ],
           );
@@ -260,16 +306,25 @@ class GeofencingMapScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'Radius: 150m from centroid',
-                style: TextStyle(fontSize: 13, color: text.withValues(alpha: 0.7)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: text.withValues(alpha: 0.7),
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 'Latitude: ${hotspot.latitude.toStringAsFixed(6)}',
-                style: TextStyle(fontSize: 13, color: text.withValues(alpha: 0.7)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: text.withValues(alpha: 0.7),
+                ),
               ),
               Text(
                 'Longitude: ${hotspot.longitude.toStringAsFixed(6)}',
-                style: TextStyle(fontSize: 13, color: text.withValues(alpha: 0.7)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: text.withValues(alpha: 0.7),
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(

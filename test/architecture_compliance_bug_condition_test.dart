@@ -185,34 +185,31 @@ void main() {
 
     // Violation 7: syncPendingTransactions should be completely removed
     // **Validates: Requirements 1.7**
-    test(
-      'Violation 7: syncPendingTransactions() is completely removed',
-      () {
-        final interfaceFile = File(
-          'lib/features/transactions/domain/transaction_repository_interface.dart',
-        );
-        final implFile = File(
-          'lib/features/transactions/data/transaction_repository.dart',
-        );
+    test('Violation 7: syncPendingTransactions() is completely removed', () {
+      final interfaceFile = File(
+        'lib/features/transactions/domain/transaction_repository_interface.dart',
+      );
+      final implFile = File(
+        'lib/features/transactions/data/transaction_repository.dart',
+      );
 
-        final interfaceContent = interfaceFile.readAsStringSync();
-        final implContent = implFile.readAsStringSync();
+      final interfaceContent = interfaceFile.readAsStringSync();
+      final implContent = implFile.readAsStringSync();
 
-        expect(
-          interfaceContent.contains('syncPendingTransactions'),
-          isFalse,
-          reason:
-              'syncPendingTransactions should be completely removed from interface',
-        );
+      expect(
+        interfaceContent.contains('syncPendingTransactions'),
+        isFalse,
+        reason:
+            'syncPendingTransactions should be completely removed from interface',
+      );
 
-        expect(
-          implContent.contains('syncPendingTransactions'),
-          isFalse,
-          reason:
-              'syncPendingTransactions should be completely removed from implementation',
-        );
-      },
-    );
+      expect(
+        implContent.contains('syncPendingTransactions'),
+        isFalse,
+        reason:
+            'syncPendingTransactions should be completely removed from implementation',
+      );
+    });
 
     // Violation 8: Features should have abstract interfaces in domain/
     // **Validates: Requirements 1.8**

@@ -9,11 +9,7 @@ void main() {
   group('Happy Path Integration Test', () {
     testWidgets('App initialization and loading check', (tester) async {
       // Pump the main app widget
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: app.DuaSakuApp(),
-        ),
-      );
+      await tester.pumpWidget(const ProviderScope(child: app.DuaSakuApp()));
       await tester.pumpAndSettle();
 
       // Assert that the app is initialized successfully and the root widget tree is present

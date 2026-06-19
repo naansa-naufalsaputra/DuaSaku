@@ -40,10 +40,7 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
   @override
   CloudSyncState build() {
     _init();
-    return const CloudSyncState(
-      isConnected: false,
-      isLoading: false,
-    );
+    return const CloudSyncState(isConnected: false, isLoading: false);
   }
 
   Future<void> _init() async {
@@ -51,7 +48,7 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
     final connected = await service.isConnected;
     final prefs = await SharedPreferences.getInstance();
     final lastSync = prefs.getString('last_cloud_sync_time');
-    
+
     GoogleSignInAccount? account = service.currentUser;
     if (connected && account == null) {
       account = await service.signInSilently();
@@ -69,7 +66,7 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final service = ref.read(cloudSyncServiceProvider);
     final account = await service.signIn();
-    
+
     if (account != null) {
       state = state.copyWith(
         currentUser: account,
@@ -90,24 +87,18 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final service = ref.read(cloudSyncServiceProvider);
     await service.signOut();
-    state = const CloudSyncState(
-      isConnected: false,
-      isLoading: false,
-    );
+    state = const CloudSyncState(isConnected: false, isLoading: false);
   }
 
   Future<bool> performBackup(String pin) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final service = ref.read(cloudSyncServiceProvider);
     final success = await service.backupToCloud(pin);
-    
+
     if (success) {
       final prefs = await SharedPreferences.getInstance();
       final lastSync = prefs.getString('last_cloud_sync_time');
-      state = state.copyWith(
-        isLoading: false,
-        lastSyncTime: lastSync,
-      );
+      state = state.copyWith(isLoading: false, lastSyncTime: lastSync);
       return true;
     } else {
       state = state.copyWith(
@@ -122,7 +113,7 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final service = ref.read(cloudSyncServiceProvider);
     final success = await service.restoreFromCloud(pin);
-    
+
     if (success) {
       state = state.copyWith(isLoading: false);
       return true;
@@ -136,6 +127,8 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
   }
 }
 
-final cloudSyncProvider = NotifierProvider<CloudSyncNotifier, CloudSyncState>(() {
-  return CloudSyncNotifier();
-});
+final cloudSyncProvider = NotifierProvider<CloudSyncNotifier, CloudSyncState>(
+  () {
+    return CloudSyncNotifier();
+  },
+);

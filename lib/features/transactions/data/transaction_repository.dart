@@ -69,7 +69,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
       final searchLower = filters.searchQuery!.toLowerCase();
       query.where(
         _db.transactions.notes.lower().contains(searchLower) |
-        _db.categories.name.lower().contains(searchLower),
+            _db.categories.name.lower().contains(searchLower),
       );
     }
 
@@ -95,8 +95,8 @@ class TransactionRepository implements TransactionRepositoryInterface {
     if (filters.walletId != null) {
       query.where(
         _db.transactions.walletId.equals(filters.walletId!) |
-        _db.transactions.fromWalletId.equals(filters.walletId!) |
-        _db.transactions.toWalletId.equals(filters.walletId!),
+            _db.transactions.fromWalletId.equals(filters.walletId!) |
+            _db.transactions.toWalletId.equals(filters.walletId!),
       );
     }
 
@@ -171,7 +171,9 @@ class TransactionRepository implements TransactionRepositoryInterface {
                 .getSingleOrNull();
 
         if (cat == null) {
-          throw AppError.validation('Invalid category ID: ${transaction.categoryId}');
+          throw AppError.validation(
+            'Invalid category ID: ${transaction.categoryId}',
+          );
         }
 
         // 2. Insert Transaction into Drift DB
@@ -226,13 +228,15 @@ class TransactionRepository implements TransactionRepositoryInterface {
                 .getSingleOrNull();
 
         if (cat == null) {
-          throw AppError.validation('Invalid category ID: ${transaction.categoryId}');
+          throw AppError.validation(
+            'Invalid category ID: ${transaction.categoryId}',
+          );
         }
 
         // 2. Update the transaction row
-        await (_db.update(_db.transactions)
-              ..where((t) => t.id.equals(transaction.id!)))
-            .write(
+        await (_db.update(
+          _db.transactions,
+        )..where((t) => t.id.equals(transaction.id!))).write(
           TransactionsCompanion(
             walletId: Value(transaction.walletId),
             fromWalletId: Value(transaction.fromWalletId),
@@ -269,10 +273,10 @@ class TransactionRepository implements TransactionRepositoryInterface {
   Future<Result<void, AppError>> deleteTransaction(int id) async {
     try {
       // 1. Fetch transaction details before deletion (needed for event)
-      final tx = await (_db.select(_db.transactions)
-            ..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
-      
+      final tx = await (_db.select(
+        _db.transactions,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+
       if (tx == null) {
         return Failure(AppError.notFound('Transaction $id not found'));
       }
@@ -295,8 +299,10 @@ class TransactionRepository implements TransactionRepositoryInterface {
 
       // 2. Delete the transaction
       await _db.transaction(() async {
-        await (_db.delete(_db.transactions)..where((t) => t.id.equals(id))).go();
-        
+        await (_db.delete(
+          _db.transactions,
+        )..where((t) => t.id.equals(id))).go();
+
         // If no event sink (test mode), revert balance inline
         if (_eventSink == null) {
           await _revertBalanceChangesInline(transactionModel);
@@ -316,28 +322,40 @@ class TransactionRepository implements TransactionRepositoryInterface {
   Future<void> _applyBalanceChangesInline(TransactionModel transaction) async {
     if (transaction.type == 'transfer') {
       if (transaction.fromWalletId != null) {
-        final fromWallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.fromWalletId!)))
-            .getSingleOrNull();
+        final fromWallet =
+            await (_db.select(_db.wallets)
+                  ..where((w) => w.id.equals(transaction.fromWalletId!)))
+                .getSingleOrNull();
         if (fromWallet != null) {
-          await (_db.update(_db.wallets)..where((w) => w.id.equals(fromWallet.id)))
-              .write(WalletsCompanion(balance: Value(fromWallet.balance - transaction.amount)));
+          await (_db.update(
+            _db.wallets,
+          )..where((w) => w.id.equals(fromWallet.id))).write(
+            WalletsCompanion(
+              balance: Value(fromWallet.balance - transaction.amount),
+            ),
+          );
         }
       }
       if (transaction.toWalletId != null) {
-        final toWallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.toWalletId!)))
-            .getSingleOrNull();
+        final toWallet =
+            await (_db.select(_db.wallets)
+                  ..where((w) => w.id.equals(transaction.toWalletId!)))
+                .getSingleOrNull();
         if (toWallet != null) {
-          await (_db.update(_db.wallets)..where((w) => w.id.equals(toWallet.id)))
-              .write(WalletsCompanion(balance: Value(toWallet.balance + transaction.amount)));
+          await (_db.update(
+            _db.wallets,
+          )..where((w) => w.id.equals(toWallet.id))).write(
+            WalletsCompanion(
+              balance: Value(toWallet.balance + transaction.amount),
+            ),
+          );
         }
       }
     } else {
       if (transaction.walletId != null) {
-        final wallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.walletId!)))
-            .getSingleOrNull();
+        final wallet = await (_db.select(
+          _db.wallets,
+        )..where((w) => w.id.equals(transaction.walletId!))).getSingleOrNull();
         if (wallet != null) {
           final newBalance = transaction.type == 'income'
               ? wallet.balance + transaction.amount
@@ -353,28 +371,40 @@ class TransactionRepository implements TransactionRepositoryInterface {
   Future<void> _revertBalanceChangesInline(TransactionModel transaction) async {
     if (transaction.type == 'transfer') {
       if (transaction.fromWalletId != null) {
-        final fromWallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.fromWalletId!)))
-            .getSingleOrNull();
+        final fromWallet =
+            await (_db.select(_db.wallets)
+                  ..where((w) => w.id.equals(transaction.fromWalletId!)))
+                .getSingleOrNull();
         if (fromWallet != null) {
-          await (_db.update(_db.wallets)..where((w) => w.id.equals(fromWallet.id)))
-              .write(WalletsCompanion(balance: Value(fromWallet.balance + transaction.amount)));
+          await (_db.update(
+            _db.wallets,
+          )..where((w) => w.id.equals(fromWallet.id))).write(
+            WalletsCompanion(
+              balance: Value(fromWallet.balance + transaction.amount),
+            ),
+          );
         }
       }
       if (transaction.toWalletId != null) {
-        final toWallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.toWalletId!)))
-            .getSingleOrNull();
+        final toWallet =
+            await (_db.select(_db.wallets)
+                  ..where((w) => w.id.equals(transaction.toWalletId!)))
+                .getSingleOrNull();
         if (toWallet != null) {
-          await (_db.update(_db.wallets)..where((w) => w.id.equals(toWallet.id)))
-              .write(WalletsCompanion(balance: Value(toWallet.balance - transaction.amount)));
+          await (_db.update(
+            _db.wallets,
+          )..where((w) => w.id.equals(toWallet.id))).write(
+            WalletsCompanion(
+              balance: Value(toWallet.balance - transaction.amount),
+            ),
+          );
         }
       }
     } else {
       if (transaction.walletId != null) {
-        final wallet = await (_db.select(_db.wallets)
-              ..where((w) => w.id.equals(transaction.walletId!)))
-            .getSingleOrNull();
+        final wallet = await (_db.select(
+          _db.wallets,
+        )..where((w) => w.id.equals(transaction.walletId!))).getSingleOrNull();
         if (wallet != null) {
           final revertedBalance = transaction.type == 'income'
               ? wallet.balance - transaction.amount

@@ -118,8 +118,10 @@ class BudgetRepository implements BudgetRepositoryInterface {
     }
 
     // Calculate average per month
-    final monthsDiff = now.month - threeMonthsAgo.month +
-                       (now.year - threeMonthsAgo.year) * 12;
+    final monthsDiff =
+        now.month -
+        threeMonthsAgo.month +
+        (now.year - threeMonthsAgo.year) * 12;
     final averagePerMonth = totalSpending / monthsDiff;
 
     // Round up to nearest 10k for cleaner suggestion

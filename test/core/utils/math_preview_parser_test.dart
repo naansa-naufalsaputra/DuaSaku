@@ -3,27 +3,30 @@ import 'package:duasaku_app/core/utils/math_preview_parser.dart';
 
 void main() {
   group('MathPreviewParser Tests', () {
-    test('sanitizeExpression cleans currency symbols and formats correctly', () {
-      // IDR / Rp formatting
-      expect(
-        MathPreviewParser.sanitizeExpression('Rp 15.000 + Rp 5.000', 'Rp'),
-        '15000+5000',
-      );
-      expect(
-        MathPreviewParser.sanitizeExpression('Rp 12.500,50 * 2', 'Rp'),
-        '12500.50*2',
-      );
+    test(
+      'sanitizeExpression cleans currency symbols and formats correctly',
+      () {
+        // IDR / Rp formatting
+        expect(
+          MathPreviewParser.sanitizeExpression('Rp 15.000 + Rp 5.000', 'Rp'),
+          '15000+5000',
+        );
+        expect(
+          MathPreviewParser.sanitizeExpression('Rp 12.500,50 * 2', 'Rp'),
+          '12500.50*2',
+        );
 
-      // USD / $ formatting
-      expect(
-        MathPreviewParser.sanitizeExpression('\$ 10,000 + \$ 500', '\$'),
-        '10000+500',
-      );
-      expect(
-        MathPreviewParser.sanitizeExpression('\$ 12.50 * 2', '\$'),
-        '12.50*2',
-      );
-    });
+        // USD / $ formatting
+        expect(
+          MathPreviewParser.sanitizeExpression('\$ 10,000 + \$ 500', '\$'),
+          '10000+500',
+        );
+        expect(
+          MathPreviewParser.sanitizeExpression('\$ 12.50 * 2', '\$'),
+          '12.50*2',
+        );
+      },
+    );
 
     test('hasOperators detects mathematical operators correctly', () {
       expect(MathPreviewParser.hasOperators('15000'), false);

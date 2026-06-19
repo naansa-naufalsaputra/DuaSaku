@@ -1218,7 +1218,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
       return type == 'expense'

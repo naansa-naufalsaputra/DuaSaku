@@ -43,9 +43,7 @@ final alertThresholdStatusRepositoryProvider =
 final budgetNotificationServiceProvider = Provider<BudgetNotificationService>((
   ref,
 ) {
-  return BudgetNotificationService(
-    db: ref.watch(appDatabaseProvider),
-  );
+  return BudgetNotificationService(db: ref.watch(appDatabaseProvider));
 });
 
 /// Provides the AlertEngineService for threshold evaluation.

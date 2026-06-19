@@ -413,8 +413,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-
-
   List<_HomeFeedItem> _buildFeedItems(List<TransactionModel> transactions) {
     final recentTxs = transactions.take(10).toList();
     final Map<DateTime, List<TransactionModel>> grouped = {};
@@ -1226,8 +1224,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
-
-
 
 abstract class _HomeFeedItem {}
 

@@ -48,7 +48,7 @@ void main() {
 
       final getRes = await repository.getDebts('user-1');
       expect(getRes, isA<Success<List<DebtModel>, dynamic>>());
-      
+
       final list = (getRes as Success<List<DebtModel>, dynamic>).value;
       expect(list.length, equals(1));
       expect(list.first.personName, equals('John Doe'));
@@ -60,7 +60,7 @@ void main() {
 
       final res = await repository.getDebtById('debt-1');
       expect(res, isA<Success<DebtModel?, dynamic>>());
-      
+
       final debt = (res as Success<DebtModel?, dynamic>).value;
       expect(debt, isNotNull);
       expect(debt!.id, equals('debt-1'));
@@ -102,7 +102,7 @@ void main() {
 
     test('deleteDebt removes the debt', () async {
       await repository.createDebt(testDebt);
-      
+
       final delRes = await repository.deleteDebt('debt-1');
       expect(delRes, isA<Success<void, dynamic>>());
 

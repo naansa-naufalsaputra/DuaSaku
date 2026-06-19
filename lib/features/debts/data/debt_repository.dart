@@ -14,12 +14,11 @@ class DebtRepository implements DebtRepositoryInterface {
   @override
   Future<Result<List<DebtModel>, AppError>> getDebts(String userId) async {
     try {
-      final rows = await (_db.select(_db.debts)
-            ..where((d) => d.userId.equals(userId))
-            ..orderBy([
-              (d) => OrderingTerm.desc(d.createdAt),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.debts)
+                ..where((d) => d.userId.equals(userId))
+                ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+              .get();
 
       return Success(rows.map(_mapToModel).toList());
     } catch (e, stack) {
@@ -31,9 +30,9 @@ class DebtRepository implements DebtRepositoryInterface {
   @override
   Future<Result<DebtModel?, AppError>> getDebtById(String debtId) async {
     try {
-      final row = await (_db.select(_db.debts)
-            ..where((d) => d.id.equals(debtId)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.debts,
+      )..where((d) => d.id.equals(debtId))).getSingleOrNull();
 
       if (row == null) return const Success(null);
       return Success(_mapToModel(row));
@@ -49,12 +48,13 @@ class DebtRepository implements DebtRepositoryInterface {
     String status,
   ) async {
     try {
-      final rows = await (_db.select(_db.debts)
-            ..where((d) => d.userId.equals(userId) & d.status.equals(status))
-            ..orderBy([
-              (d) => OrderingTerm.desc(d.createdAt),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.debts)
+                ..where(
+                  (d) => d.userId.equals(userId) & d.status.equals(status),
+                )
+                ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+              .get();
 
       return Success(rows.map(_mapToModel).toList());
     } catch (e, stack) {
@@ -69,15 +69,16 @@ class DebtRepository implements DebtRepositoryInterface {
   ) async {
     try {
       final now = DateTime.now();
-      final rows = await (_db.select(_db.debts)
-            ..where((d) =>
-                d.userId.equals(userId) &
-                d.status.isNotValue('paid') &
-                d.dueDate.isSmallerThanValue(now))
-            ..orderBy([
-              (d) => OrderingTerm.asc(d.dueDate),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.debts)
+                ..where(
+                  (d) =>
+                      d.userId.equals(userId) &
+                      d.status.isNotValue('paid') &
+                      d.dueDate.isSmallerThanValue(now),
+                )
+                ..orderBy([(d) => OrderingTerm.asc(d.dueDate)]))
+              .get();
 
       return Success(rows.map(_mapToModel).toList());
     } catch (e, stack) {
@@ -89,7 +90,9 @@ class DebtRepository implements DebtRepositoryInterface {
   @override
   Future<Result<void, AppError>> createDebt(DebtModel debt) async {
     try {
-      await _db.into(_db.debts).insert(
+      await _db
+          .into(_db.debts)
+          .insert(
             DebtsCompanion.insert(
               id: debt.id,
               userId: debt.userId,
@@ -153,7 +156,9 @@ class DebtRepository implements DebtRepositoryInterface {
     try {
       await _db.transaction(() async {
         // 1. Insert payment record
-        await _db.into(_db.debtPayments).insert(
+        await _db
+            .into(_db.debtPayments)
+            .insert(
               DebtPaymentsCompanion.insert(
                 id: payment.id,
                 debtId: payment.debtId,
@@ -164,9 +169,9 @@ class DebtRepository implements DebtRepositoryInterface {
             );
 
         // 2. Update debt paid_amount and status
-        final debt = await (_db.select(_db.debts)
-              ..where((d) => d.id.equals(debtId)))
-            .getSingle();
+        final debt = await (_db.select(
+          _db.debts,
+        )..where((d) => d.id.equals(debtId))).getSingle();
 
         final newPaidAmount = debt.paidAmount + payment.amount;
         final newStatus = newPaidAmount >= debt.amount ? 'paid' : 'partial';
@@ -192,22 +197,25 @@ class DebtRepository implements DebtRepositoryInterface {
     String debtId,
   ) async {
     try {
-      final rows = await (_db.select(_db.debtPayments)
-            ..where((p) => p.debtId.equals(debtId))
-            ..orderBy([
-              (p) => OrderingTerm.desc(p.paidAt),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.debtPayments)
+                ..where((p) => p.debtId.equals(debtId))
+                ..orderBy([(p) => OrderingTerm.desc(p.paidAt)]))
+              .get();
 
-      return Success(rows
-          .map((p) => DebtPaymentModel(
+      return Success(
+        rows
+            .map(
+              (p) => DebtPaymentModel(
                 id: p.id,
                 debtId: p.debtId,
                 amount: p.amount,
                 notes: p.notes,
                 paidAt: p.paidAt,
-              ))
-          .toList());
+              ),
+            )
+            .toList(),
+      );
     } catch (e, stack) {
       developer.log('Error fetching payment history', error: e);
       return Failure(AppError.database(e.toString(), stackTrace: stack));
@@ -218,9 +226,7 @@ class DebtRepository implements DebtRepositoryInterface {
   Stream<List<DebtModel>> watchDebts(String userId) {
     return (_db.select(_db.debts)
           ..where((d) => d.userId.equals(userId))
-          ..orderBy([
-            (d) => OrderingTerm.desc(d.createdAt),
-          ]))
+          ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
         .watch()
         .map((rows) => rows.map(_mapToModel).toList());
   }
@@ -229,9 +235,7 @@ class DebtRepository implements DebtRepositoryInterface {
   Stream<List<DebtModel>> watchDebtsByStatus(String userId, String status) {
     return (_db.select(_db.debts)
           ..where((d) => d.userId.equals(userId) & d.status.equals(status))
-          ..orderBy([
-            (d) => OrderingTerm.desc(d.createdAt),
-          ]))
+          ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
         .watch()
         .map((rows) => rows.map(_mapToModel).toList());
   }

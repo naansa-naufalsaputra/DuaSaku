@@ -12,7 +12,8 @@ class BudgetNotificationService {
   BudgetNotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
     AppDatabase? db,
-  }) : _notifications = notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
+  }) : _notifications =
+           notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
        _db = db ?? AppDatabase();
 
   final FlutterLocalNotificationsPlugin _notifications;
@@ -175,13 +176,16 @@ class BudgetNotificationService {
       final alertRows = await alertsQuery.get();
 
       final notifiedIds = await _getNotifiedAlertIds();
-      final queuedAlerts = alertRows.where((a) => !notifiedIds.contains(a.id)).toList();
+      final queuedAlerts = alertRows
+          .where((a) => !notifiedIds.contains(a.id))
+          .toList();
 
       if (queuedAlerts.isEmpty) return;
 
       if (queuedAlerts.length > 3) {
         const summaryTitle = 'Rangkuman Pengingat Keuangan';
-        final summaryBody = 'Kamu memiliki ${queuedAlerts.length} peringatan anggaran baru.';
+        final summaryBody =
+            'Kamu memiliki ${queuedAlerts.length} peringatan anggaran baru.';
 
         await _notifications.show(
           id: 'summary_alert'.hashCode,

@@ -178,7 +178,9 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
   @override
   Future<bool> verifyPin(String pin) async {
     // Check if locked out
-    final lockoutUntilStr = await _secureStorage.read(key: 'auth_lockout_until');
+    final lockoutUntilStr = await _secureStorage.read(
+      key: 'auth_lockout_until',
+    );
     if (lockoutUntilStr != null && lockoutUntilStr.isNotEmpty) {
       try {
         final lockoutUntil = DateTime.parse(lockoutUntilStr);
@@ -232,9 +234,13 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
       return true;
     } else {
       // Increment failed attempts
-      final attemptsStr = await _secureStorage.read(key: 'auth_failed_attempts') ?? '0';
+      final attemptsStr =
+          await _secureStorage.read(key: 'auth_failed_attempts') ?? '0';
       final attempts = int.parse(attemptsStr) + 1;
-      await _secureStorage.write(key: 'auth_failed_attempts', value: attempts.toString());
+      await _secureStorage.write(
+        key: 'auth_failed_attempts',
+        value: attempts.toString(),
+      );
 
       DateTime? lockoutUntil;
       if (attempts >= 15) {

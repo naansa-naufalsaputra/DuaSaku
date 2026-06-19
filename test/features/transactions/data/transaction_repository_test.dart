@@ -21,7 +21,9 @@ void main() {
     repository = TransactionRepository(db);
 
     // Seed Category
-    await db.into(db.categories).insert(
+    await db
+        .into(db.categories)
+        .insert(
           CategoriesCompanion.insert(
             id: categoryId,
             userId: userId,
@@ -34,7 +36,9 @@ void main() {
         );
 
     // Seed Wallet 1
-    await db.into(db.wallets).insert(
+    await db
+        .into(db.wallets)
+        .insert(
           WalletsCompanion.insert(
             id: walletId,
             userId: userId,
@@ -48,7 +52,9 @@ void main() {
         );
 
     // Seed Wallet 2
-    await db.into(db.wallets).insert(
+    await db
+        .into(db.wallets)
+        .insert(
           WalletsCompanion.insert(
             id: toWalletId,
             userId: userId,
@@ -81,9 +87,9 @@ void main() {
       final result = await repository.insertTransaction(tx);
       expect(result, isA<Success<void, dynamic>>());
 
-      final wallet = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
+      final wallet = await (db.select(
+        db.wallets,
+      )..where((w) => w.id.equals(walletId))).getSingle();
       expect(wallet.balance, equals(800.0)); // 1000 - 200
     });
 
@@ -101,37 +107,40 @@ void main() {
       final result = await repository.insertTransaction(tx);
       expect(result, isA<Success<void, dynamic>>());
 
-      final wallet = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
+      final wallet = await (db.select(
+        db.wallets,
+      )..where((w) => w.id.equals(walletId))).getSingle();
       expect(wallet.balance, equals(1300.0)); // 1000 + 300
     });
 
-    test('insertTransaction - transfer moves amount from wallet to wallet', () async {
-      final tx = TransactionModel(
-        userId: userId,
-        amount: 100.0,
-        categoryId: categoryId,
-        type: 'transfer',
-        notes: 'Pindah saldo',
-        fromWalletId: walletId,
-        toWalletId: toWalletId,
-        createdAt: DateTime.now(),
-      );
+    test(
+      'insertTransaction - transfer moves amount from wallet to wallet',
+      () async {
+        final tx = TransactionModel(
+          userId: userId,
+          amount: 100.0,
+          categoryId: categoryId,
+          type: 'transfer',
+          notes: 'Pindah saldo',
+          fromWalletId: walletId,
+          toWalletId: toWalletId,
+          createdAt: DateTime.now(),
+        );
 
-      final result = await repository.insertTransaction(tx);
-      expect(result, isA<Success<void, dynamic>>());
+        final result = await repository.insertTransaction(tx);
+        expect(result, isA<Success<void, dynamic>>());
 
-      final source = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
-      final destination = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(toWalletId)))
-          .getSingle();
+        final source = await (db.select(
+          db.wallets,
+        )..where((w) => w.id.equals(walletId))).getSingle();
+        final destination = await (db.select(
+          db.wallets,
+        )..where((w) => w.id.equals(toWalletId))).getSingle();
 
-      expect(source.balance, equals(900.0)); // 1000 - 100
-      expect(destination.balance, equals(600.0)); // 500 + 100
-    });
+        expect(source.balance, equals(900.0)); // 1000 - 100
+        expect(destination.balance, equals(600.0)); // 500 + 100
+      },
+    );
 
     test('deleteTransaction - expense reverts balance (adds back)', () async {
       // 1. Insert transaction
@@ -147,9 +156,9 @@ void main() {
       await repository.insertTransaction(tx);
 
       // Verify intermediate balance
-      var wallet = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
+      var wallet = await (db.select(
+        db.wallets,
+      )..where((w) => w.id.equals(walletId))).getSingle();
       expect(wallet.balance, equals(800.0));
 
       // 2. Fetch transaction id to delete it
@@ -160,9 +169,9 @@ void main() {
       expect(result, isA<Success<void, dynamic>>());
 
       // 4. Verify balance is restored
-      wallet = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
+      wallet = await (db.select(
+        db.wallets,
+      )..where((w) => w.id.equals(walletId))).getSingle();
       expect(wallet.balance, equals(1000.0));
     });
 
@@ -199,9 +208,9 @@ void main() {
       expect(updatedTxRow.notes, equals('Makan siang mewah'));
 
       // 5. Verify balance adjustment: Revert old (-200) -> 1000, apply new (-400) -> 600
-      final wallet = await (db.select(db.wallets)
-            ..where((w) => w.id.equals(walletId)))
-          .getSingle();
+      final wallet = await (db.select(
+        db.wallets,
+      )..where((w) => w.id.equals(walletId))).getSingle();
       expect(wallet.balance, equals(600.0));
     });
   });

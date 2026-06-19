@@ -22,53 +22,61 @@ void main() {
   });
 
   group('WalletRepository Unit Tests', () {
-    test('createWallet and getWallets - successfully saves and retrieves wallet', () async {
-      final wallet = WalletModel(
-        id: walletId,
-        userId: userId,
-        name: 'Gopay',
-        type: 'ewallet',
-        balance: 150000.0,
-        createdAt: DateTime.now(),
-      );
+    test(
+      'createWallet and getWallets - successfully saves and retrieves wallet',
+      () async {
+        final wallet = WalletModel(
+          id: walletId,
+          userId: userId,
+          name: 'Gopay',
+          type: 'ewallet',
+          balance: 150000.0,
+          createdAt: DateTime.now(),
+        );
 
-      final createResult = await repository.createWallet(wallet);
-      expect(createResult, isA<Success<void, dynamic>>());
+        final createResult = await repository.createWallet(wallet);
+        expect(createResult, isA<Success<void, dynamic>>());
 
-      final getResult = await repository.getWallets(userId);
-      expect(getResult, isA<Success<List<WalletModel>, dynamic>>());
+        final getResult = await repository.getWallets(userId);
+        expect(getResult, isA<Success<List<WalletModel>, dynamic>>());
 
-      final wallets = (getResult as Success<List<WalletModel>, dynamic>).value;
-      expect(wallets.length, equals(1));
-      expect(wallets.first.id, equals(walletId));
-      expect(wallets.first.name, equals('Gopay'));
-      expect(wallets.first.balance, equals(150000.0));
-    });
+        final wallets =
+            (getResult as Success<List<WalletModel>, dynamic>).value;
+        expect(wallets.length, equals(1));
+        expect(wallets.first.id, equals(walletId));
+        expect(wallets.first.name, equals('Gopay'));
+        expect(wallets.first.balance, equals(150000.0));
+      },
+    );
 
-    test('updateWallet - updates name, type, and balance successfully', () async {
-      final wallet = WalletModel(
-        id: walletId,
-        userId: userId,
-        name: 'Gopay',
-        type: 'ewallet',
-        balance: 150000.0,
-        createdAt: DateTime.now(),
-      );
-      await repository.createWallet(wallet);
+    test(
+      'updateWallet - updates name, type, and balance successfully',
+      () async {
+        final wallet = WalletModel(
+          id: walletId,
+          userId: userId,
+          name: 'Gopay',
+          type: 'ewallet',
+          balance: 150000.0,
+          createdAt: DateTime.now(),
+        );
+        await repository.createWallet(wallet);
 
-      final updatedWallet = wallet.copyWith(
-        name: 'Gopay Premium',
-        balance: 200000.0,
-      );
+        final updatedWallet = wallet.copyWith(
+          name: 'Gopay Premium',
+          balance: 200000.0,
+        );
 
-      final updateResult = await repository.updateWallet(updatedWallet);
-      expect(updateResult, isA<Success<void, dynamic>>());
+        final updateResult = await repository.updateWallet(updatedWallet);
+        expect(updateResult, isA<Success<void, dynamic>>());
 
-      final getResult = await repository.getWallets(userId);
-      final wallets = (getResult as Success<List<WalletModel>, dynamic>).value;
-      expect(wallets.first.name, equals('Gopay Premium'));
-      expect(wallets.first.balance, equals(200000.0));
-    });
+        final getResult = await repository.getWallets(userId);
+        final wallets =
+            (getResult as Success<List<WalletModel>, dynamic>).value;
+        expect(wallets.first.name, equals('Gopay Premium'));
+        expect(wallets.first.balance, equals(200000.0));
+      },
+    );
 
     test('deleteWallet - removes wallet successfully', () async {
       final wallet = WalletModel(
@@ -106,7 +114,9 @@ void main() {
         emitsInOrder([
           isEmpty, // Initial empty list
           [
-            predicate<WalletModel>((w) => w.id == walletId && w.name == 'Gopay')
+            predicate<WalletModel>(
+              (w) => w.id == walletId && w.name == 'Gopay',
+            ),
           ], // List after insert
         ]),
       );

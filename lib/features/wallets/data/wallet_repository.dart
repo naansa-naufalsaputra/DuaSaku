@@ -117,17 +117,16 @@ class WalletRepository implements WalletRepositoryInterface {
 
   @override
   Future<void> adjustBalance(String walletId, double amount) async {
-    final wallet = await (_db.select(_db.wallets)
-          ..where((t) => t.id.equals(walletId)))
-        .getSingleOrNull();
+    final wallet = await (_db.select(
+      _db.wallets,
+    )..where((t) => t.id.equals(walletId))).getSingleOrNull();
 
     if (wallet == null) {
       throw StateError('Wallet not found: $walletId');
     }
 
-    await (_db.update(_db.wallets)..where((t) => t.id.equals(walletId)))
-        .write(WalletsCompanion(
-      balance: Value(wallet.balance + amount),
-    ));
+    await (_db.update(_db.wallets)..where((t) => t.id.equals(walletId))).write(
+      WalletsCompanion(balance: Value(wallet.balance + amount)),
+    );
   }
 }

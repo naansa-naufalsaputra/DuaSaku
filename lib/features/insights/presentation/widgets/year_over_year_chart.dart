@@ -96,15 +96,27 @@ class YearOverYearChart extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                         final months = [
-                          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                          'Jan',
+                          'Feb',
+                          'Mar',
+                          'Apr',
+                          'May',
+                          'Jun',
+                          'Jul',
+                          'Aug',
+                          'Sep',
+                          'Oct',
+                          'Nov',
+                          'Dec',
                         ];
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             months[value.toInt()],
                             style: TextStyle(
-                              color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                               fontSize: 10,
                             ),
                           ),
@@ -125,7 +137,9 @@ class YearOverYearChart extends StatelessWidget {
                   LineChartBarData(
                     spots: _buildSpots(currentYearData),
                     isCurved: true,
-                    color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                    color: isDark
+                        ? const Color(0xFF0A84FF)
+                        : const Color(0xFF007AFF),
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: FlDotData(
@@ -133,7 +147,9 @@ class YearOverYearChart extends StatelessWidget {
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: 4,
-                          color: isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF),
+                          color: isDark
+                              ? const Color(0xFF0A84FF)
+                              : const Color(0xFF007AFF),
                           strokeWidth: 2,
                           strokeColor: colorScheme.surface,
                         );
@@ -141,8 +157,11 @@ class YearOverYearChart extends StatelessWidget {
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: (isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF))
-                          .withValues(alpha: 0.1),
+                      color:
+                          (isDark
+                                  ? const Color(0xFF0A84FF)
+                                  : const Color(0xFF007AFF))
+                              .withValues(alpha: 0.1),
                     ),
                   ),
                   // Previous year line
@@ -207,7 +226,9 @@ class YearOverYearChart extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 12,
           ),
         ),
@@ -244,8 +265,14 @@ class YearOverYearChart extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     // Calculate totals
-    final currentTotal = currentYearData.fold<double>(0, (sum, d) => sum + d.amount);
-    final previousTotal = previousYearData.fold<double>(0, (sum, d) => sum + d.amount);
+    final currentTotal = currentYearData.fold<double>(
+      0,
+      (sum, d) => sum + d.amount,
+    );
+    final previousTotal = previousYearData.fold<double>(
+      0,
+      (sum, d) => sum + d.amount,
+    );
     final percentChange = previousTotal > 0
         ? ((currentTotal - previousTotal) / previousTotal * 100)
         : 0.0;
@@ -297,7 +324,12 @@ class YearOverYearChart extends StatelessWidget {
     );
   }
 
-  Widget _buildInsightRow(BuildContext context, String label, String value, Color color) {
+  Widget _buildInsightRow(
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -315,7 +347,9 @@ class YearOverYearChart extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
             ),
@@ -335,8 +369,18 @@ class YearOverYearChart extends StatelessWidget {
 
   String _getMonthName(int month) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return months[month - 1];
   }

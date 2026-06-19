@@ -126,9 +126,7 @@ class ManualTransactionForm extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           hintText: '0',
-                          hintStyle: const TextStyle(
-                            color: Colors.grey,
-                          ),
+                          hintStyle: const TextStyle(color: Colors.grey),
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -192,10 +190,13 @@ class ManualTransactionForm extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 0.9,
             ),
-            itemCount: filteredCategories.length > 12 ? 12 : filteredCategories.length,
+            itemCount: filteredCategories.length > 12
+                ? 12
+                : filteredCategories.length,
             itemBuilder: (context, index) {
               final cat = filteredCategories[index];
-              final isSelected = activeCategory.toLowerCase() == cat.name.toLowerCase();
+              final isSelected =
+                  activeCategory.toLowerCase() == cat.name.toLowerCase();
               final catColor = _getPastelColor(cat, index);
 
               return GestureDetector(
@@ -213,7 +214,9 @@ class ManualTransactionForm extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: catColor.withValues(alpha: 0.12),
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF007AFF) : Colors.transparent,
+                          color: isSelected
+                              ? const Color(0xFF007AFF)
+                              : Colors.transparent,
                           width: 2.5,
                         ),
                       ),
@@ -229,7 +232,9 @@ class ManualTransactionForm extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: isSelected
                             ? (isDark ? Colors.white : Colors.black87)
                             : (isDark ? Colors.white54 : Colors.black54),
@@ -336,10 +341,7 @@ class ManualTransactionForm extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Text(
               'bottom_sheet.save'.tr(),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ),

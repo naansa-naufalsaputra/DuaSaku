@@ -12,28 +12,28 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      switch (methodCall.method) {
-        case 'write':
-          final args = methodCall.arguments as Map;
-          secureStore[args['key'] as String] = args['value'] as String;
-          return null;
-        case 'read':
-          final args = methodCall.arguments as Map;
-          return secureStore[args['key'] as String];
-        case 'delete':
-          final args = methodCall.arguments as Map;
-          secureStore.remove(args['key'] as String);
-          return null;
-        case 'deleteAll':
-          secureStore.clear();
-          return null;
-        case 'containsKey':
-          final args = methodCall.arguments as Map;
-          return secureStore.containsKey(args['key'] as String);
-        default:
-          return null;
-      }
-    });
+          switch (methodCall.method) {
+            case 'write':
+              final args = methodCall.arguments as Map;
+              secureStore[args['key'] as String] = args['value'] as String;
+              return null;
+            case 'read':
+              final args = methodCall.arguments as Map;
+              return secureStore[args['key'] as String];
+            case 'delete':
+              final args = methodCall.arguments as Map;
+              secureStore.remove(args['key'] as String);
+              return null;
+            case 'deleteAll':
+              secureStore.clear();
+              return null;
+            case 'containsKey':
+              final args = methodCall.arguments as Map;
+              return secureStore.containsKey(args['key'] as String);
+            default:
+              return null;
+          }
+        });
   });
 
   setUp(() {
@@ -42,16 +42,19 @@ void main() {
   });
 
   group('AuthRepository Unit Tests', () {
-    test('setPin and verifyPin - successfully creates and verifies PIN', () async {
-      final repository = AuthRepository();
-      await repository.setPin('1234');
+    test(
+      'setPin and verifyPin - successfully creates and verifies PIN',
+      () async {
+        final repository = AuthRepository();
+        await repository.setPin('1234');
 
-      final hasPin = await repository.hasPinSet();
-      expect(hasPin, isTrue);
+        final hasPin = await repository.hasPinSet();
+        expect(hasPin, isTrue);
 
-      final isCorrect = await repository.verifyPin('1234');
-      expect(isCorrect, isTrue);
-    });
+        final isCorrect = await repository.verifyPin('1234');
+        expect(isCorrect, isTrue);
+      },
+    );
 
     test('verifyPin - fails with incorrect PIN', () async {
       final repository = AuthRepository();
@@ -76,18 +79,21 @@ void main() {
       expect(correctPinVerifyAfterLockout, isFalse);
     });
 
-    test('completeOnboarding - updates state and sets PIN if provided', () async {
-      final repository = AuthRepository();
-      expect(repository.isOnboardingCompleted, isFalse);
+    test(
+      'completeOnboarding - updates state and sets PIN if provided',
+      () async {
+        final repository = AuthRepository();
+        expect(repository.isOnboardingCompleted, isFalse);
 
-      await repository.completeOnboarding(pin: '5678');
-      expect(repository.isOnboardingCompleted, isTrue);
+        await repository.completeOnboarding(pin: '5678');
+        expect(repository.isOnboardingCompleted, isTrue);
 
-      final hasPin = await repository.hasPinSet();
-      expect(hasPin, isTrue);
+        final hasPin = await repository.hasPinSet();
+        expect(hasPin, isTrue);
 
-      final isCorrect = await repository.verifyPin('5678');
-      expect(isCorrect, isTrue);
-    });
+        final isCorrect = await repository.verifyPin('5678');
+        expect(isCorrect, isTrue);
+      },
+    );
   });
 }

@@ -35,7 +35,6 @@ import '../../features/debts/presentation/screens/debt_detail_screen.dart';
 import '../../features/bill_reminders/presentation/screens/bill_reminder_list_screen.dart';
 import '../../features/bill_reminders/presentation/screens/bill_reminder_form_screen.dart';
 
-
 final routerProvider = Provider<GoRouter>((ref) {
   // Use AuthRepository directly as refreshListenable (it's a ChangeNotifier now)
   final authRepo = ref.read(authRepositoryProvider);

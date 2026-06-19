@@ -89,7 +89,10 @@ class GamificationDashboardScreen extends ConsumerWidget {
               children: [
                 // Custom Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -117,7 +120,7 @@ class GamificationDashboardScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                
+
                 // Content Scroll View
                 Expanded(
                   child: ListView(
@@ -126,7 +129,10 @@ class GamificationDashboardScreen extends ConsumerWidget {
                       // Radar Chart Section
                       GlassCard(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 24,
+                            horizontal: 16,
+                          ),
                           child: Column(
                             children: [
                               Text(
@@ -134,7 +140,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white60 : Colors.black54,
+                                  color: isDark
+                                      ? Colors.white60
+                                      : Colors.black54,
                                   letterSpacing: 1.2,
                                 ),
                               ),
@@ -146,7 +154,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                     radarShape: RadarShape.polygon,
                                     dataSets: [
                                       RadarDataSet(
-                                        fillColor: accentColor.withValues(alpha: 0.15),
+                                        fillColor: accentColor.withValues(
+                                          alpha: 0.15,
+                                        ),
                                         borderColor: accentColor,
                                         entryRadius: 4,
                                         borderWidth: 2,
@@ -160,19 +170,27 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                       ),
                                     ],
                                     radarBorderData: BorderSide(
-                                      color: isDark ? Colors.white24 : Colors.black12,
+                                      color: isDark
+                                          ? Colors.white24
+                                          : Colors.black12,
                                       width: 1.5,
                                     ),
                                     gridBorderData: BorderSide(
-                                      color: isDark ? Colors.white10 : Colors.black12,
+                                      color: isDark
+                                          ? Colors.white10
+                                          : Colors.black12,
                                       width: 1,
                                     ),
                                     tickBorderData: BorderSide(
-                                      color: isDark ? Colors.white10 : Colors.black12,
+                                      color: isDark
+                                          ? Colors.white10
+                                          : Colors.black12,
                                       width: 1,
                                     ),
                                     ticksTextStyle: TextStyle(
-                                      color: isDark ? Colors.white30 : Colors.black38,
+                                      color: isDark
+                                          ? Colors.white30
+                                          : Colors.black38,
                                       fontSize: 8,
                                     ),
                                     tickCount: 4,
@@ -180,36 +198,45 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                       switch (index) {
                                         case 0:
                                           return RadarChartTitle(
-                                            text: 'gamification.radar_budget'.tr(),
+                                            text: 'gamification.radar_budget'
+                                                .tr(),
                                             angle: angle,
                                           );
                                         case 1:
                                           return RadarChartTitle(
-                                            text: 'gamification.radar_saving'.tr(),
+                                            text: 'gamification.radar_saving'
+                                                .tr(),
                                             angle: angle,
                                           );
                                         case 2:
                                           return RadarChartTitle(
-                                            text: 'gamification.radar_streak'.tr(),
+                                            text: 'gamification.radar_streak'
+                                                .tr(),
                                             angle: angle,
                                           );
                                         case 3:
                                           return RadarChartTitle(
-                                            text: 'gamification.radar_wallet'.tr(),
+                                            text: 'gamification.radar_wallet'
+                                                .tr(),
                                             angle: angle,
                                           );
                                         case 4:
                                           return RadarChartTitle(
-                                            text: 'gamification.radar_goal'.tr(),
+                                            text: 'gamification.radar_goal'
+                                                .tr(),
                                             angle: angle,
                                           );
                                         default:
-                                          return const RadarChartTitle(text: '');
+                                          return const RadarChartTitle(
+                                            text: '',
+                                          );
                                       }
                                     },
                                     titlePositionPercentageOffset: 0.15,
                                     titleTextStyle: TextStyle(
-                                      color: isDark ? Colors.white70 : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -217,10 +244,11 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Score Breakdown
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Column(
                                     children: [
@@ -237,7 +265,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.white54 : Colors.black54,
+                                          color: isDark
+                                              ? Colors.white54
+                                              : Colors.black54,
                                         ),
                                       ),
                                     ],
@@ -245,7 +275,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                   Container(
                                     width: 1,
                                     height: 36,
-                                    color: isDark ? Colors.white24 : Colors.black12,
+                                    color: isDark
+                                        ? Colors.white24
+                                        : Colors.black12,
                                   ),
                                   Column(
                                     children: [
@@ -262,7 +294,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.white54 : Colors.black54,
+                                          color: isDark
+                                              ? Colors.white54
+                                              : Colors.black54,
                                         ),
                                       ),
                                     ],
@@ -274,7 +308,7 @@ class GamificationDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Badges List
                       Text(
                         'profile.achievements_badges'.tr().toUpperCase(),
@@ -290,14 +324,18 @@ class GamificationDashboardScreen extends ConsumerWidget {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: badgeList.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final badge = badgeList[index];
-                          final isUnlocked = gamificationState.unlockedBadges.contains(badge.id);
-                          
-                          final iconColor = isUnlocked ? badge.activeColor : Colors.grey;
-                          final bgColor = isUnlocked 
-                              ? badge.activeColor.withValues(alpha: 0.1) 
+                          final isUnlocked = gamificationState.unlockedBadges
+                              .contains(badge.id);
+
+                          final iconColor = isUnlocked
+                              ? badge.activeColor
+                              : Colors.grey;
+                          final bgColor = isUnlocked
+                              ? badge.activeColor.withValues(alpha: 0.1)
                               : Colors.grey.withValues(alpha: 0.08);
 
                           return Opacity(
@@ -323,14 +361,17 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             badge.title,
                                             style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold,
-                                              color: isDark ? Colors.white : Colors.black87,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : Colors.black87,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
@@ -338,7 +379,9 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                             badge.description,
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: isDark ? Colors.white60 : Colors.black54,
+                                              color: isDark
+                                                  ? Colors.white60
+                                                  : Colors.black54,
                                             ),
                                           ),
                                         ],
@@ -346,14 +389,14 @@ class GamificationDashboardScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      isUnlocked 
-                                          ? 'gamification.unlocked_badge'.tr() 
+                                      isUnlocked
+                                          ? 'gamification.unlocked_badge'.tr()
                                           : 'gamification.locked_badge'.tr(),
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
-                                        color: isUnlocked 
-                                            ? badge.activeColor 
+                                        color: isUnlocked
+                                            ? badge.activeColor
                                             : Colors.grey,
                                       ),
                                     ),

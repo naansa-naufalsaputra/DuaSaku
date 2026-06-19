@@ -159,9 +159,7 @@ class ExportService implements ExportServiceInterface {
         final zipBytes = ZipEncoder().encode(archive);
 
         if (zipBytes == null) {
-          return Failure(
-            AppError.unknown('Failed to encode ZIP archive'),
-          );
+          return Failure(AppError.unknown('Failed to encode ZIP archive'));
         }
 
         final zipFileName = 'duasaku_export_$timestamp.zip';
@@ -192,7 +190,9 @@ class ExportService implements ExportServiceInterface {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<Result<ExportResult, AppError>> exportExcel(ExportConfig config) async {
+  Future<Result<ExportResult, AppError>> exportExcel(
+    ExportConfig config,
+  ) async {
     try {
       final timestamp = _formatTimestamp(DateTime.now());
       final tempDir = await getTemporaryDirectory();
@@ -251,8 +251,11 @@ class ExportService implements ExportServiceInterface {
 
             // Write headers
             for (var i = 0; i < headers.length; i++) {
-              sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
-                  .value = TextCellValue(headers[i]);
+              sheet
+                  .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
+                  .value = TextCellValue(
+                headers[i],
+              );
             }
 
             // Write data rows
@@ -276,7 +279,10 @@ class ExportService implements ExportServiceInterface {
                 }
 
                 final cell = sheet.cell(
-                  CellIndex.indexByColumnRow(columnIndex: colIdx, rowIndex: rowIdx + 1),
+                  CellIndex.indexByColumnRow(
+                    columnIndex: colIdx,
+                    rowIndex: rowIdx + 1,
+                  ),
                 );
 
                 if (cellValue == null) {
@@ -302,9 +308,7 @@ class ExportService implements ExportServiceInterface {
       final excelBytes = excel.encode();
 
       if (excelBytes == null) {
-        return Failure(
-          AppError.unknown('Failed to encode Excel file'),
-        );
+        return Failure(AppError.unknown('Failed to encode Excel file'));
       }
 
       await File(filePath).writeAsBytes(excelBytes);
@@ -312,7 +316,8 @@ class ExportService implements ExportServiceInterface {
       return Success(
         ExportResult(
           filePath: filePath,
-          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          mimeType:
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           fileName: fileName,
           recordCount: totalRecordCount,
         ),

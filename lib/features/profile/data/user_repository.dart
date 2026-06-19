@@ -16,14 +16,18 @@ class UserRepository implements UserRepositoryInterface {
     try {
       final rows = await _db.select(_db.users).get();
       return Success(
-        rows.map((u) => UserModel(
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          avatarPath: u.avatarPath,
-          createdAt: u.createdAt,
-          lastActiveAt: u.lastActiveAt,
-        )).toList(),
+        rows
+            .map(
+              (u) => UserModel(
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                avatarPath: u.avatarPath,
+                createdAt: u.createdAt,
+                lastActiveAt: u.lastActiveAt,
+              ),
+            )
+            .toList(),
       );
     } catch (e, stack) {
       developer.log('Error fetching users from Drift', error: e);
@@ -34,20 +38,22 @@ class UserRepository implements UserRepositoryInterface {
   @override
   Future<Result<UserModel?, AppError>> getUserById(String userId) async {
     try {
-      final row = await (_db.select(_db.users)
-            ..where((u) => u.id.equals(userId)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.users,
+      )..where((u) => u.id.equals(userId))).getSingleOrNull();
 
       if (row == null) return const Success(null);
 
-      return Success(UserModel(
-        id: row.id,
-        name: row.name,
-        email: row.email,
-        avatarPath: row.avatarPath,
-        createdAt: row.createdAt,
-        lastActiveAt: row.lastActiveAt,
-      ));
+      return Success(
+        UserModel(
+          id: row.id,
+          name: row.name,
+          email: row.email,
+          avatarPath: row.avatarPath,
+          createdAt: row.createdAt,
+          lastActiveAt: row.lastActiveAt,
+        ),
+      );
     } catch (e, stack) {
       developer.log('Error fetching user by ID', error: e);
       return Failure(AppError.database(e.toString(), stackTrace: stack));
@@ -57,16 +63,18 @@ class UserRepository implements UserRepositoryInterface {
   @override
   Future<Result<void, AppError>> createUser(UserModel user) async {
     try {
-      await _db.into(_db.users).insert(
-        UsersCompanion.insert(
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          avatarPath: Value(user.avatarPath),
-          createdAt: user.createdAt,
-          lastActiveAt: user.lastActiveAt,
-        ),
-      );
+      await _db
+          .into(_db.users)
+          .insert(
+            UsersCompanion.insert(
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              avatarPath: Value(user.avatarPath),
+              createdAt: user.createdAt,
+              lastActiveAt: user.lastActiveAt,
+            ),
+          );
       return const Success(null);
     } catch (e, stack) {
       developer.log('Error creating user in Drift', error: e);
@@ -77,9 +85,7 @@ class UserRepository implements UserRepositoryInterface {
   @override
   Future<Result<void, AppError>> updateUser(UserModel user) async {
     try {
-      await (_db.update(_db.users)
-            ..where((u) => u.id.equals(user.id)))
-          .write(
+      await (_db.update(_db.users)..where((u) => u.id.equals(user.id))).write(
         UsersCompanion(
           name: Value(user.name),
           email: Value(user.email),
@@ -99,9 +105,7 @@ class UserRepository implements UserRepositoryInterface {
     try {
       await _db.transaction(() async {
         // Delete user and all associated data (CASCADE will handle foreign keys)
-        await (_db.delete(_db.users)
-              ..where((u) => u.id.equals(userId)))
-            .go();
+        await (_db.delete(_db.users)..where((u) => u.id.equals(userId))).go();
       });
       return const Success(null);
     } catch (e, stack) {
@@ -113,12 +117,8 @@ class UserRepository implements UserRepositoryInterface {
   @override
   Future<Result<void, AppError>> updateLastActive(String userId) async {
     try {
-      await (_db.update(_db.users)
-            ..where((u) => u.id.equals(userId)))
-          .write(
-        UsersCompanion(
-          lastActiveAt: Value(DateTime.now()),
-        ),
+      await (_db.update(_db.users)..where((u) => u.id.equals(userId))).write(
+        UsersCompanion(lastActiveAt: Value(DateTime.now())),
       );
       return const Success(null);
     } catch (e, stack) {
@@ -130,14 +130,18 @@ class UserRepository implements UserRepositoryInterface {
   @override
   Stream<List<UserModel>> watchAllUsers() {
     return _db.select(_db.users).watch().map((rows) {
-      return rows.map((u) => UserModel(
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        avatarPath: u.avatarPath,
-        createdAt: u.createdAt,
-        lastActiveAt: u.lastActiveAt,
-      )).toList();
+      return rows
+          .map(
+            (u) => UserModel(
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              avatarPath: u.avatarPath,
+              createdAt: u.createdAt,
+              lastActiveAt: u.lastActiveAt,
+            ),
+          )
+          .toList();
     });
   }
 }

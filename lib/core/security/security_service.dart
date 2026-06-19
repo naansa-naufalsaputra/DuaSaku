@@ -109,7 +109,9 @@ class SecurityNotifier extends Notifier<SecurityState>
     } catch (e, stack) {
       // If NTP check fails due to offline state or network issue, we do not lock the user out,
       // but log the event. Real systems might enforce offline limits.
-      ref.read(loggerProvider).error('[SecurityService] NTP check failed', e, stack);
+      ref
+          .read(loggerProvider)
+          .error('[SecurityService] NTP check failed', e, stack);
     }
   }
 
@@ -124,9 +126,11 @@ class SecurityNotifier extends Notifier<SecurityState>
             .getAvailableBiometrics();
 
         if (!canCheck || !isDeviceSupported || available.isEmpty) {
-          ref.read(loggerProvider).warning(
-            '[SecurityService] Biometrics not supported or none enrolled',
-          );
+          ref
+              .read(loggerProvider)
+              .warning(
+                '[SecurityService] Biometrics not supported or none enrolled',
+              );
           return false;
         }
 
@@ -142,11 +146,13 @@ class SecurityNotifier extends Notifier<SecurityState>
           return false;
         }
       } catch (e, stack) {
-        ref.read(loggerProvider).error(
-          '[SecurityService] Failed to verify biometric on toggle',
-          e,
-          stack,
-        );
+        ref
+            .read(loggerProvider)
+            .error(
+              '[SecurityService] Failed to verify biometric on toggle',
+              e,
+              stack,
+            );
         return false;
       }
     }
@@ -192,7 +198,9 @@ class SecurityNotifier extends Notifier<SecurityState>
         return false;
       }
     } catch (e, stack) {
-      ref.read(loggerProvider).error('[SecurityService] Biometric authentication failed', e, stack);
+      ref
+          .read(loggerProvider)
+          .error('[SecurityService] Biometric authentication failed', e, stack);
       state = state.copyWith(isAuthenticating: false);
       return false;
     }

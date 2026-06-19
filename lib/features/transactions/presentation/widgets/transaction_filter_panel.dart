@@ -36,10 +36,7 @@ class _TransactionFilterPanelState
     return Card(
       margin: const EdgeInsets.all(16),
       child: ExpansionTile(
-        title: Text(
-          'filters.title'.tr(),
-          style: theme.textTheme.titleMedium,
-        ),
+        title: Text('filters.title'.tr(), style: theme.textTheme.titleMedium),
         children: [
           // Search field
           Padding(
@@ -215,9 +212,7 @@ class _TransactionFilterPanelState
           initialValue: _selectedWalletId,
           decoration: InputDecoration(
             labelText: 'filters.wallet'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           items: [
             DropdownMenuItem<String?>(
@@ -272,7 +267,9 @@ class _TransactionFilterPanelState
   }
 
   void _applyFilters() {
-    ref.read(transactionNotifierProvider.notifier).applyFilters(
+    ref
+        .read(transactionNotifierProvider.notifier)
+        .applyFilters(
           TransactionFilters(
             searchQuery: _searchController.text.isEmpty
                 ? null

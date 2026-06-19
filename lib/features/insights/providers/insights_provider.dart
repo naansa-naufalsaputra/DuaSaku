@@ -43,20 +43,15 @@ final yoyDataProvider = Provider<Map<String, List<MonthlyData>>>((ref) {
   final previousYearData = <MonthlyData>[];
 
   for (int month = 1; month <= 12; month++) {
-    currentYearData.add(MonthlyData(
-      month,
-      yearMonthExpenses[currentYear]?[month] ?? 0,
-    ));
-    previousYearData.add(MonthlyData(
-      month,
-      yearMonthExpenses[previousYear]?[month] ?? 0,
-    ));
+    currentYearData.add(
+      MonthlyData(month, yearMonthExpenses[currentYear]?[month] ?? 0),
+    );
+    previousYearData.add(
+      MonthlyData(month, yearMonthExpenses[previousYear]?[month] ?? 0),
+    );
   }
 
-  return {
-    'current': currentYearData,
-    'previous': previousYearData,
-  };
+  return {'current': currentYearData, 'previous': previousYearData};
 });
 
 final insightsProvider = NotifierProvider<InsightsNotifier, InsightsState>(() {

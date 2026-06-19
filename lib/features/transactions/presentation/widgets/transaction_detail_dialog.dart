@@ -40,8 +40,6 @@ class TransactionDetailDialog extends ConsumerWidget {
     );
   }
 
-
-
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
       return type == 'expense'
@@ -225,7 +223,9 @@ class TransactionDetailDialog extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: isDark ? Colors.white24 : Colors.black12),
+                            side: BorderSide(
+                              color: isDark ? Colors.white24 : Colors.black12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -263,18 +263,32 @@ class TransactionDetailDialog extends ConsumerWidget {
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                                title: Text('transaction.delete_confirm_title'.tr()),
-                                content: Text('transaction.delete_confirm_message'.tr()),
+                                backgroundColor: isDark
+                                    ? const Color(0xFF1E1E1E)
+                                    : Colors.white,
+                                title: Text(
+                                  'transaction.delete_confirm_title'.tr(),
+                                ),
+                                content: Text(
+                                  'transaction.delete_confirm_message'.tr(),
+                                ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).pop(false),
-                                    child: Text('transaction.delete_confirm_no'.tr()),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: Text(
+                                      'transaction.delete_confirm_no'.tr(),
+                                    ),
                                   ),
                                   TextButton(
-                                    style: TextButton.styleFrom(foregroundColor: const Color(0xFFF43F5E)),
-                                    onPressed: () => Navigator.of(context).pop(true),
-                                    child: Text('transaction.delete_confirm_yes'.tr()),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: const Color(0xFFF43F5E),
+                                    ),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: Text(
+                                      'transaction.delete_confirm_yes'.tr(),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -282,12 +296,12 @@ class TransactionDetailDialog extends ConsumerWidget {
                             if (confirm == true) {
                               if (context.mounted) {
                                 Navigator.of(context).pop(); // pop dialog
-                                
+
                                 // Soft-delete with undo window
                                 final deletedTx = await ref
                                     .read(transactionNotifierProvider.notifier)
                                     .softDeleteTransaction(transaction.id!);
-                                
+
                                 if (context.mounted && deletedTx != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -297,7 +311,10 @@ class TransactionDetailDialog extends ConsumerWidget {
                                         label: 'transaction.undo'.tr(),
                                         onPressed: () {
                                           ref
-                                              .read(transactionNotifierProvider.notifier)
+                                              .read(
+                                                transactionNotifierProvider
+                                                    .notifier,
+                                              )
                                               .undoDelete();
                                         },
                                       ),
@@ -307,7 +324,10 @@ class TransactionDetailDialog extends ConsumerWidget {
                               }
                             }
                           },
-                          icon: const Icon(Icons.delete_forever_rounded, size: 18),
+                          icon: const Icon(
+                            Icons.delete_forever_rounded,
+                            size: 18,
+                          ),
                           label: Text('transaction.delete'.tr()),
                         ),
                       ),

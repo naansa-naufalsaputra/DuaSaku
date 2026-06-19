@@ -383,14 +383,24 @@ class PinAuthScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           state.lockoutSecondsRemaining > 0
-                              ? 'pin_auth.lockout_message'.tr(args: [state.lockoutSecondsRemaining.toString()])
-                              : (state.message.isEmpty ? '' : state.message.tr()),
+                              ? 'pin_auth.lockout_message'.tr(
+                                  args: [
+                                    state.lockoutSecondsRemaining.toString(),
+                                  ],
+                                )
+                              : (state.message.isEmpty
+                                    ? ''
+                                    : state.message.tr()),
                           style: TextStyle(
                             fontSize: 14,
-                            color: state.lockoutSecondsRemaining > 0 || state.hasError
+                            color:
+                                state.lockoutSecondsRemaining > 0 ||
+                                    state.hasError
                                 ? Colors.redAccent
                                 : (isDark ? Colors.white70 : Colors.black54),
-                            fontWeight: state.lockoutSecondsRemaining > 0 || state.hasError
+                            fontWeight:
+                                state.lockoutSecondsRemaining > 0 ||
+                                    state.hasError
                                 ? FontWeight.w600
                                 : FontWeight.normal,
                           ),

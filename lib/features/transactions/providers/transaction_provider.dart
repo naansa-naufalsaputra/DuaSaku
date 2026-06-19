@@ -34,17 +34,17 @@ final transactionRepositoryProvider = Provider<TransactionRepositoryInterface>((
 
 class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
   static const int pageSize = 50;
-  
+
   late TransactionRepositoryInterface _repository;
   late TransactionParserServiceInterface _parserService;
   StreamSubscription<List<TransactionModel>>? _subscription;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
-  
+
   // Filter and pagination state
   TransactionFilters _currentFilters = const TransactionFilters();
   int _currentLimit = pageSize;
   bool _isLoadingMore = false;
-  
+
   // Soft-delete state for undo functionality
   TransactionModel? _deletedTransactionStash;
   Timer? _deleteTimer;
@@ -109,50 +109,51 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     _subscription = _repository
         .fetchTransactionsFiltered(user.id, _currentFilters, _currentLimit)
         .listen((data) {
-      state = AsyncValue.data(data);
-    });
+          state = AsyncValue.data(data);
+        });
   }
-  
+
   void applyFilters(TransactionFilters filters) {
     _currentFilters = filters;
     _currentLimit = pageSize; // Reset to initial page size
     ref.invalidateSelf();
   }
-  
+
   void clearFilters() {
     _currentFilters = const TransactionFilters();
     _currentLimit = pageSize; // Reset to initial page size
     ref.invalidateSelf();
   }
-  
+
   void loadMoreTransactions() {
     if (_isLoadingMore) return;
-    
+
     state.whenData((currentTransactions) {
       // Check if we have full page (means more data exists)
       if (currentTransactions.length < _currentLimit) {
         // Already showing all data
         return;
       }
-      
+
       _isLoadingMore = true;
-      
+
       // Increment limit by pageSize
       _currentLimit += pageSize;
-      
+
       // Rebuild stream with new limit (triggers new query)
       ref.invalidateSelf();
-      
+
       _isLoadingMore = false;
     });
   }
-  
+
   bool get hasMorePages {
     return state.whenOrNull(
-      data: (transactions) => transactions.length >= _currentLimit,
-    ) ?? false;
+          data: (transactions) => transactions.length >= _currentLimit,
+        ) ??
+        false;
   }
-  
+
   bool get isLoadingMore => _isLoadingMore;
 
   Future<void> addTransaction(TransactionModel transaction) async {
@@ -161,7 +162,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       case Success():
         await HapticFeedback.mediumImpact();
         await loadTransactions();
-        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         // Preserve previous data while surfacing error via AsyncError state
         final previousData = state.valueOrNull ?? [];
@@ -188,7 +189,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     switch (result) {
       case Success():
         await loadTransactions();
-        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         // Restore previous state first so Riverpod's internal copyWithPrevious
         // uses the correct previous data (not the optimistic removal state)
@@ -205,42 +206,44 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
   Future<TransactionModel?> softDeleteTransaction(int id) async {
     // Cancel any existing delete timer
     _deleteTimer?.cancel();
-    
+
     final previousState = state.valueOrNull;
     final deletedTx = previousState?.where((tx) => tx.id == id).firstOrNull;
-    
+
     if (deletedTx == null) return null;
-    
+
     // Stash the transaction
     _deletedTransactionStash = deletedTx;
-    
+
     // Optimistic UI update (remove from list)
     if (previousState != null) {
       state = AsyncValue.data(
         previousState.where((tx) => tx.id != id).toList(),
       );
     }
-    
+
     // Start 5-second timer for permanent delete
     _deleteTimer = Timer(const Duration(seconds: 5), () async {
       await _permanentlyDelete(id, deletedTx);
     });
-    
+
     return deletedTx;
   }
 
   /// Undo soft-delete (cancel timer and restore transaction)
   Future<void> undoDelete() async {
     _deleteTimer?.cancel();
-    
+
     final stashed = _deletedTransactionStash;
     if (stashed == null) return;
-    
+
     // Restore to list at original chronological position
     final currentList = state.valueOrNull ?? [];
     final restoredList = [...currentList, stashed]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort by date descending
-    
+      ..sort(
+        (a, b) => b.createdAt.compareTo(a.createdAt),
+      ); // Sort by date descending
+
     state = AsyncValue.data(restoredList);
     _deletedTransactionStash = null;
   }
@@ -252,7 +255,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
       case Success():
         _deletedTransactionStash = null;
         await loadTransactions();
-        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         // Restore on failure
         final currentList = state.valueOrNull ?? [];
@@ -260,7 +263,7 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         state = AsyncValue.data(restoredList);
         _deletedTransactionStash = null;
-        
+
         // Show error
         state = AsyncValue<List<TransactionModel>>.error(
           error,
@@ -273,11 +276,14 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionModel>> {
     TransactionModel transaction,
     TransactionModel oldTransaction,
   ) async {
-    final result = await _repository.updateTransaction(transaction, oldTransaction);
+    final result = await _repository.updateTransaction(
+      transaction,
+      oldTransaction,
+    );
     switch (result) {
       case Success():
         await loadTransactions();
-        // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
+      // Evaluasi budget alert ditangani secara reaktif oleh TransactionEventHandlers
       case Failure(:final error):
         final previousData = state.valueOrNull ?? [];
         state = AsyncValue<List<TransactionModel>>.error(

@@ -8,10 +8,7 @@ import 'package:duasaku_app/core/domain/currency.dart';
 class CurrencyPicker extends StatelessWidget {
   final String? selectedCurrencyCode;
 
-  const CurrencyPicker({
-    super.key,
-    this.selectedCurrencyCode,
-  });
+  const CurrencyPicker({super.key, this.selectedCurrencyCode});
 
   static Future<Currency?> show(
     BuildContext context, {
@@ -22,9 +19,8 @@ class CurrencyPicker extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => CurrencyPicker(
-        selectedCurrencyCode: selectedCurrencyCode,
-      ),
+      builder: (context) =>
+          CurrencyPicker(selectedCurrencyCode: selectedCurrencyCode),
     );
   }
 

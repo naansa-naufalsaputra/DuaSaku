@@ -8,7 +8,7 @@ import '../domain/models/transaction_model.dart';
 import '../../smart_budget_alerts/services/budget_alert_evaluator.dart';
 
 /// Handles side-effects triggered by transaction events.
-/// 
+///
 /// Listens to the transaction event stream and performs:
 /// - Wallet balance updates (apply/revert)
 /// - Geofence hotspot synchronization
@@ -63,16 +63,22 @@ class TransactionEventHandlers {
       }
 
       // 2. Trigger geofence sync (async, non-blocking)
-      unawaited(GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId));
+      unawaited(
+        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+      );
 
       // 3. Evaluate budget alerts for expenses
       if (transaction.type == 'expense') {
-        final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(transaction.createdAt);
-        unawaited(_budgetEvaluator.evaluateAfterExpenseInsert(
-          userId: transaction.userId,
-          categoryId: transaction.categoryId,
-          budgetMonth: budgetMonth,
-        ));
+        final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
+          transaction.createdAt,
+        );
+        unawaited(
+          _budgetEvaluator.evaluateAfterExpenseInsert(
+            userId: transaction.userId,
+            categoryId: transaction.categoryId,
+            budgetMonth: budgetMonth,
+          ),
+        );
       }
     } catch (e) {
       debugPrint('[TransactionEventHandlers] Error handling created event: $e');
@@ -92,29 +98,39 @@ class TransactionEventHandlers {
       await _applyBalanceChanges(transaction);
 
       // 3. Trigger geofence sync
-      unawaited(GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId));
+      unawaited(
+        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+      );
 
       // 4. Re-evaluate budget alerts
       if (transaction.type == 'expense' || oldTransaction.type == 'expense') {
         if (oldTransaction.type == 'expense') {
-          final oldBudgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(oldTransaction.createdAt);
-          unawaited(_budgetEvaluator.evaluateAfterExpenseChange(
-            userId: oldTransaction.userId,
-            categoryId: oldTransaction.categoryId,
-            budgetMonth: oldBudgetMonth,
-          ));
+          final oldBudgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
+            oldTransaction.createdAt,
+          );
+          unawaited(
+            _budgetEvaluator.evaluateAfterExpenseChange(
+              userId: oldTransaction.userId,
+              categoryId: oldTransaction.categoryId,
+              budgetMonth: oldBudgetMonth,
+            ),
+          );
         }
 
         if (transaction.type == 'expense' &&
             (transaction.categoryId != oldTransaction.categoryId ||
                 transaction.amount != oldTransaction.amount ||
                 transaction.createdAt != oldTransaction.createdAt)) {
-          final newBudgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(transaction.createdAt);
-          unawaited(_budgetEvaluator.evaluateAfterExpenseInsert(
-            userId: transaction.userId,
-            categoryId: transaction.categoryId,
-            budgetMonth: newBudgetMonth,
-          ));
+          final newBudgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
+            transaction.createdAt,
+          );
+          unawaited(
+            _budgetEvaluator.evaluateAfterExpenseInsert(
+              userId: transaction.userId,
+              categoryId: transaction.categoryId,
+              budgetMonth: newBudgetMonth,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -129,16 +145,22 @@ class TransactionEventHandlers {
       await _revertBalanceChanges(transaction);
 
       // 2. Trigger geofence sync
-      unawaited(GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId));
+      unawaited(
+        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+      );
 
       // 3. Re-evaluate budget alerts
       if (transaction.type == 'expense') {
-        final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(transaction.createdAt);
-        unawaited(_budgetEvaluator.evaluateAfterExpenseChange(
-          userId: transaction.userId,
-          categoryId: transaction.categoryId,
-          budgetMonth: budgetMonth,
-        ));
+        final budgetMonth = BudgetAlertEvaluator.getBudgetMonthForDate(
+          transaction.createdAt,
+        );
+        unawaited(
+          _budgetEvaluator.evaluateAfterExpenseChange(
+            userId: transaction.userId,
+            categoryId: transaction.categoryId,
+            budgetMonth: budgetMonth,
+          ),
+        );
       }
     } catch (e) {
       debugPrint('[TransactionEventHandlers] Error handling deleted event: $e');

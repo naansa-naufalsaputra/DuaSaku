@@ -1035,7 +1035,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     '$symbol \u2014 $name',
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   trailing: isSelected
@@ -1048,7 +1050,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('profile.currency_changed_msg'.tr(args: [symbol])),
+                          content: Text(
+                            'profile.currency_changed_msg'.tr(args: [symbol]),
+                          ),
                           backgroundColor: accentColor,
                         ),
                       );
@@ -1746,7 +1750,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   child: _buildGroupContainer(
                     isDark: isDark,
                     children: [
-                      _buildCloudSyncContainer(context, ref, isDark, accentColor),
+                      _buildCloudSyncContainer(
+                        context,
+                        ref,
+                        isDark,
+                        accentColor,
+                      ),
                     ],
                   ),
                 ),
@@ -1930,10 +1939,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         color: isDark ? Colors.white10 : Colors.black12,
                       ),
                       ListTile(
-                        leading: _buildTileIcon(
-                          Icons.map_rounded,
-                          accentColor,
-                        ),
+                        leading: _buildTileIcon(Icons.map_rounded, accentColor),
                         title: Text(
                           'profile.view_hotspot_map'.tr(),
                           style: TextStyle(
@@ -1990,28 +1996,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           onChanged: (val) async {
                             HapticFeedback.lightImpact();
                             if (val) {
-                              final permission = await Geolocator.checkPermission();
+                              final permission =
+                                  await Geolocator.checkPermission();
                               if (permission == LocationPermission.denied) {
-                                final requested = await Geolocator.requestPermission();
+                                final requested =
+                                    await Geolocator.requestPermission();
                                 if (requested == LocationPermission.denied ||
-                                    requested == LocationPermission.deniedForever) {
-                                  ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+                                    requested ==
+                                        LocationPermission.deniedForever) {
+                                  ref
+                                      .read(autoGeolocationProvider.notifier)
+                                      .setEnabled(false);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('profile.location_permission_required'.tr()),
+                                        content: Text(
+                                          'profile.location_permission_required'
+                                              .tr(),
+                                        ),
                                         backgroundColor: Colors.redAccent,
                                       ),
                                     );
                                   }
                                   return;
                                 }
-                              } else if (permission == LocationPermission.deniedForever) {
-                                ref.read(autoGeolocationProvider.notifier).setEnabled(false);
+                              } else if (permission ==
+                                  LocationPermission.deniedForever) {
+                                ref
+                                    .read(autoGeolocationProvider.notifier)
+                                    .setEnabled(false);
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('profile.location_permission_required'.tr()),
+                                      content: Text(
+                                        'profile.location_permission_required'
+                                            .tr(),
+                                      ),
                                       backgroundColor: Colors.redAccent,
                                     ),
                                   );
@@ -2019,7 +2039,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 return;
                               }
                             }
-                            ref.read(autoGeolocationProvider.notifier).setEnabled(val);
+                            ref
+                                .read(autoGeolocationProvider.notifier)
+                                .setEnabled(val);
                           },
                         ),
                       ),
@@ -2269,10 +2291,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     return Column(
       children: [
         ListTile(
-          leading: _buildTileIcon(
-            Icons.cloud_sync_rounded,
-            accentColor,
-          ),
+          leading: _buildTileIcon(Icons.cloud_sync_rounded, accentColor),
           title: Text(
             syncState.isConnected
                 ? 'Google Drive: ${syncState.currentUser?.email ?? "Connected"}'
@@ -2286,8 +2305,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           subtitle: Text(
             syncState.isConnected
                 ? (syncState.lastSyncTime != null
-                    ? 'Last synced: ${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(syncState.lastSyncTime!))}'
-                    : 'Not synced yet')
+                      ? 'Last synced: ${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(syncState.lastSyncTime!))}'
+                      : 'Not synced yet')
                 : 'profile.cloud_backup_desc'.tr(),
             style: TextStyle(
               fontSize: 12,
@@ -2319,16 +2338,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 ),
         ),
         if (syncState.isConnected) ...[
-          Divider(
-            height: 1,
-            indent: 56,
-            color: border,
-          ),
+          Divider(height: 1, indent: 56, color: border),
           ListTile(
-            leading: _buildTileIcon(
-              Icons.cloud_upload_outlined,
-              accentColor,
-            ),
+            leading: _buildTileIcon(Icons.cloud_upload_outlined, accentColor),
             title: Text(
               'profile.upload_cloud'.tr(),
               style: TextStyle(
@@ -2350,11 +2362,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: Colors.grey,
-                  ),
+                : const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
             onTap: syncState.isLoading
                 ? null
                 : () async {
@@ -2379,65 +2387,57 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 ? 'profile.backup_success_msg'.tr()
                                 : 'Backup failed. Please check connection.',
                           ),
-                          backgroundColor: success ? accentColor : Colors.redAccent,
+                          backgroundColor: success
+                              ? accentColor
+                              : Colors.redAccent,
                         ),
                       );
                     }
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: isDark ? Colors.white10 : Colors.black12,
-                      ),
-                      ListTile(
-                        leading: _buildTileIcon(
-                          Icons.palette_outlined,
-                          accentColor,
-                        ),
-                        title: Text(
-                          'profile.theme_preset'.tr(),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _getPresetDisplayName(
-                                ref.watch(themeNotifierProvider).preset,
-                              ),
-                              style: TextStyle(
-                                color: isDark ? Colors.white38 : Colors.black38,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.chevron_right,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _showThemePresetPicker(context, accentColor);
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: isDark ? Colors.white10 : Colors.black12,
-                      ),
-                      ListTile(
-            leading: _buildTileIcon(
-              Icons.cloud_download_outlined,
-              accentColor,
+                  },
+          ),
+          Divider(
+            height: 1,
+            indent: 56,
+            color: isDark ? Colors.white10 : Colors.black12,
+          ),
+          ListTile(
+            leading: _buildTileIcon(Icons.palette_outlined, accentColor),
+            title: Text(
+              'profile.theme_preset'.tr(),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
             ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _getPresetDisplayName(
+                    ref.watch(themeNotifierProvider).preset,
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white38 : Colors.black38,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+              ],
+            ),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showThemePresetPicker(context, accentColor);
+            },
+          ),
+          Divider(
+            height: 1,
+            indent: 56,
+            color: isDark ? Colors.white10 : Colors.black12,
+          ),
+          ListTile(
+            leading: _buildTileIcon(Icons.cloud_download_outlined, accentColor),
             title: Text(
               'profile.restore_cloud'.tr(),
               style: TextStyle(
@@ -2459,20 +2459,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: Colors.grey,
-                  ),
+                : const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
             onTap: syncState.isLoading
                 ? null
                 : () async {
                     HapticFeedback.lightImpact();
-                    
+
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                        backgroundColor: isDark
+                            ? const Color(0xFF1E293B)
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -2534,7 +2532,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 ? 'profile.restore_success_title'.tr()
                                 : 'profile.backup_password_error'.tr(),
                           ),
-                          backgroundColor: success ? accentColor : Colors.redAccent,
+                          backgroundColor: success
+                              ? accentColor
+                              : Colors.redAccent,
                         ),
                       );
                     }
@@ -2545,4 +2545,3 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 }
-

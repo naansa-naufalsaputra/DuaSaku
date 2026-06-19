@@ -51,45 +51,58 @@ void main() {
       expect(decoded['ciphertext'], isNot(equals(plaintext)));
     });
 
-    test('decryptBackup restores plaintext successfully with correct password', () {
-      const plaintext = '{"userId": "123", "balance": 50000.0}';
-      const password = 'secure_backup_password';
+    test(
+      'decryptBackup restores plaintext successfully with correct password',
+      () {
+        const plaintext = '{"userId": "123", "balance": 50000.0}';
+        const password = 'secure_backup_password';
 
-      final encryptedJson = backupService.encryptBackup(plaintext, password);
-      final decrypted = backupService.decryptBackup(encryptedJson, password);
+        final encryptedJson = backupService.encryptBackup(plaintext, password);
+        final decrypted = backupService.decryptBackup(encryptedJson, password);
 
-      expect(decrypted, equals(plaintext));
-    });
+        expect(decrypted, equals(plaintext));
+      },
+    );
 
-    test('decryptBackup throws FormatException when incorrect password is used', () {
-      const plaintext = '{"userId": "123", "balance": 50000.0}';
-      const password = 'correct_password';
-      const wrongPassword = 'wrong_password';
+    test(
+      'decryptBackup throws FormatException when incorrect password is used',
+      () {
+        const plaintext = '{"userId": "123", "balance": 50000.0}';
+        const password = 'correct_password';
+        const wrongPassword = 'wrong_password';
 
-      final encryptedJson = backupService.encryptBackup(plaintext, password);
+        final encryptedJson = backupService.encryptBackup(plaintext, password);
 
-      expect(
-        () => backupService.decryptBackup(encryptedJson, wrongPassword),
-        throwsA(isA<FormatException>().having(
-          (e) => e.message,
-          'message',
-          contains('Kata sandi salah'),
-        )),
-      );
-    });
+        expect(
+          () => backupService.decryptBackup(encryptedJson, wrongPassword),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('Kata sandi salah'),
+            ),
+          ),
+        );
+      },
+    );
 
-    test('decryptBackup throws FormatException when backup signature is missing', () {
-      const invalidJson = '{"iv": "abc", "ciphertext": "xyz"}';
-      const password = 'password';
+    test(
+      'decryptBackup throws FormatException when backup signature is missing',
+      () {
+        const invalidJson = '{"iv": "abc", "ciphertext": "xyz"}';
+        const password = 'password';
 
-      expect(
-        () => backupService.decryptBackup(invalidJson, password),
-        throwsA(isA<FormatException>().having(
-          (e) => e.message,
-          'message',
-          contains('tidak terenkripsi atau format tidak dikenali'),
-        )),
-      );
-    });
+        expect(
+          () => backupService.decryptBackup(invalidJson, password),
+          throwsA(
+            isA<FormatException>().having(
+              (e) => e.message,
+              'message',
+              contains('tidak terenkripsi atau format tidak dikenali'),
+            ),
+          ),
+        );
+      },
+    );
   });
 }

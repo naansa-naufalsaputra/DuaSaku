@@ -521,7 +521,9 @@ class _TransactionDraftBottomSheetState
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        CategoryIconHelper.getIconData(cat.icon),
+                                        CategoryIconHelper.getIconData(
+                                          cat.icon,
+                                        ),
                                         color: catColor,
                                         size: 14,
                                       ),
@@ -734,8 +736,6 @@ class _TransactionDraftBottomSheetState
       ],
     );
   }
-
-
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {

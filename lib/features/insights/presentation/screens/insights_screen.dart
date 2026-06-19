@@ -38,10 +38,12 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   Future<void> _pickCustomDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
-      initialDateRange: _customDateRange ?? DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 7)),
-        end: DateTime.now(),
-      ),
+      initialDateRange:
+          _customDateRange ??
+          DateTimeRange(
+            start: DateTime.now().subtract(const Duration(days: 7)),
+            end: DateTime.now(),
+          ),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -117,10 +119,17 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         final todayStart = DateTime(now.year, now.month, now.day);
         final startDate = todayStart.subtract(const Duration(days: 6));
         filteredTransactions = transactions.where((t) {
-          final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+          final tDate = DateTime(
+            t.createdAt.year,
+            t.createdAt.month,
+            t.createdAt.day,
+          );
           return tDate.isAfter(startDate) || tDate.isAtSameMomentAs(startDate);
         }).toList();
-        chartDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+        chartDays = List.generate(
+          7,
+          (index) => startDate.add(Duration(days: index)),
+        );
         break;
 
       case FilterType.monthly:
@@ -129,7 +138,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           return t.createdAt.month == now.month && t.createdAt.year == now.year;
         }).toList();
         final daysInMonth = now.day;
-        chartDays = List.generate(daysInMonth, (index) => DateTime(now.year, now.month, index + 1));
+        chartDays = List.generate(
+          daysInMonth,
+          (index) => DateTime(now.year, now.month, index + 1),
+        );
         break;
 
       case FilterType.yearly:
@@ -137,23 +149,42 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         filteredTransactions = transactions.where((t) {
           return t.createdAt.year == now.year;
         }).toList();
-        chartDays = List.generate(12, (index) => DateTime(now.year, index + 1, 1));
+        chartDays = List.generate(
+          12,
+          (index) => DateTime(now.year, index + 1, 1),
+        );
         break;
 
       case FilterType.custom:
         if (_customDateRange != null) {
-          final start = DateTime(_customDateRange!.start.year, _customDateRange!.start.month, _customDateRange!.start.day);
-          final end = DateTime(_customDateRange!.end.year, _customDateRange!.end.month, _customDateRange!.end.day);
-          trendPeriodLabel = '${DateFormat('dd/MM/yy').format(start)} - ${DateFormat('dd/MM/yy').format(end)}';
+          final start = DateTime(
+            _customDateRange!.start.year,
+            _customDateRange!.start.month,
+            _customDateRange!.start.day,
+          );
+          final end = DateTime(
+            _customDateRange!.end.year,
+            _customDateRange!.end.month,
+            _customDateRange!.end.day,
+          );
+          trendPeriodLabel =
+              '${DateFormat('dd/MM/yy').format(start)} - ${DateFormat('dd/MM/yy').format(end)}';
           filteredTransactions = transactions.where((t) {
-            final tDate = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+            final tDate = DateTime(
+              t.createdAt.year,
+              t.createdAt.month,
+              t.createdAt.day,
+            );
             return (tDate.isAfter(start) || tDate.isAtSameMomentAs(start)) &&
-                   (tDate.isBefore(end) || tDate.isAtSameMomentAs(end));
+                (tDate.isBefore(end) || tDate.isAtSameMomentAs(end));
           }).toList();
-          
+
           final diffDays = end.difference(start).inDays + 1;
           if (diffDays <= 31) {
-            chartDays = List.generate(diffDays, (index) => start.add(Duration(days: index)));
+            chartDays = List.generate(
+              diffDays,
+              (index) => start.add(Duration(days: index)),
+            );
           } else {
             chartDays = [];
             DateTime current = start;
@@ -170,7 +201,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           filteredTransactions = transactions;
           final todayStart = DateTime(now.year, now.month, now.day);
           final startDate = todayStart.subtract(const Duration(days: 6));
-          chartDays = List.generate(7, (index) => startDate.add(Duration(days: index)));
+          chartDays = List.generate(
+            7,
+            (index) => startDate.add(Duration(days: index)),
+          );
         }
         break;
     }
@@ -204,13 +238,18 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         );
         for (int i = 0; i < chartDays.length; i++) {
           if (_selectedFilter == FilterType.yearly) {
-            if (t.createdAt.year == chartDays[i].year && t.createdAt.month == chartDays[i].month) {
+            if (t.createdAt.year == chartDays[i].year &&
+                t.createdAt.month == chartDays[i].month) {
               dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
               break;
             }
-          } else if (_selectedFilter == FilterType.custom && chartDays.length > 31) {
-            final nextLimit = i < chartDays.length - 1 ? chartDays[i + 1] : null;
-            if ((tDate.isAfter(chartDays[i]) || tDate.isAtSameMomentAs(chartDays[i])) &&
+          } else if (_selectedFilter == FilterType.custom &&
+              chartDays.length > 31) {
+            final nextLimit = i < chartDays.length - 1
+                ? chartDays[i + 1]
+                : null;
+            if ((tDate.isAfter(chartDays[i]) ||
+                    tDate.isAtSameMomentAs(chartDays[i])) &&
                 (nextLimit == null || tDate.isBefore(nextLimit))) {
               dailySpending[i + 1] = (dailySpending[i + 1] ?? 0.0) + t.amount;
               break;
@@ -320,7 +359,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       displayedPercentage = (touchedItem.amount / totalExpense) * 100;
     }
 
-    final formattedTotalExpense = ref.watch(currencyFormatterProvider).format(totalExpense);
+    final formattedTotalExpense = ref
+        .watch(currencyFormatterProvider)
+        .format(totalExpense);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -392,8 +433,12 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                             break;
                           case FilterType.custom:
                             if (_customDateRange != null) {
-                              final startStr = DateFormat('d/M').format(_customDateRange!.start);
-                              final endStr = DateFormat('d/M').format(_customDateRange!.end);
+                              final startStr = DateFormat(
+                                'd/M',
+                              ).format(_customDateRange!.start);
+                              final endStr = DateFormat(
+                                'd/M',
+                              ).format(_customDateRange!.end);
                               label = '$startStr - $endStr';
                             } else {
                               label = 'insights.filter_custom'.tr();
@@ -418,11 +463,17 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                             },
                             selectedColor: accentColor.withValues(alpha: 0.15),
                             labelStyle: TextStyle(
-                              color: isSelected ? accentColor : (isDark ? Colors.white70 : Colors.black87),
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? accentColor
+                                  : (isDark ? Colors.white70 : Colors.black87),
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               fontSize: 12,
                             ),
-                            backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                            backgroundColor: isDark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : Colors.black.withValues(alpha: 0.03),
                             checkmarkColor: accentColor,
                           ),
                         );
@@ -610,8 +661,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                     interval: chartDays.length <= 7
                                         ? 1.0
                                         : chartDays.length <= 31
-                                            ? (chartDays.length / 6).ceilToDouble()
-                                            : (chartDays.length / 5).ceilToDouble(),
+                                        ? (chartDays.length / 6).ceilToDouble()
+                                        : (chartDays.length / 5).ceilToDouble(),
                                     getTitlesWidget: (value, meta) {
                                       final style = TextStyle(
                                         color: isDark
@@ -621,27 +672,36 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                                         fontWeight: FontWeight.w500,
                                       );
                                       final dayIndex = value.toInt();
-                                      if (dayIndex < 1 || dayIndex > chartDays.length) {
+                                      if (dayIndex < 1 ||
+                                          dayIndex > chartDays.length) {
                                         return const SizedBox.shrink();
                                       }
                                       final date = chartDays[dayIndex - 1];
-                                      final locale = Localizations.localeOf(context).toString();
+                                      final locale = Localizations.localeOf(
+                                        context,
+                                      ).toString();
                                       String label;
                                       switch (_selectedFilter) {
                                         case FilterType.weekly:
-                                          label = DateFormat.E(locale).format(date);
+                                          label = DateFormat.E(
+                                            locale,
+                                          ).format(date);
                                           break;
                                         case FilterType.monthly:
                                           label = '${date.day}';
                                           break;
                                         case FilterType.yearly:
-                                          label = DateFormat.MMM(locale).format(date);
+                                          label = DateFormat.MMM(
+                                            locale,
+                                          ).format(date);
                                           break;
                                         case FilterType.custom:
                                           if (chartDays.length <= 14) {
                                             label = '${date.day}';
                                           } else {
-                                            label = DateFormat('d/M').format(date);
+                                            label = DateFormat(
+                                              'd/M',
+                                            ).format(date);
                                           }
                                           break;
                                       }
@@ -791,7 +851,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = sortedExpenseBreakdown[index];
-                        final formattedAmount = ref.watch(currencyFormatterProvider).format(item.amount);
+                        final formattedAmount = ref
+                            .watch(currencyFormatterProvider)
+                            .format(item.amount);
 
                         return Container(
                           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -859,8 +921,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                   const SizedBox(height: 24),
                   ref.watch(yoyDataProvider).isNotEmpty
                       ? YearOverYearChart(
-                          currentYearData: ref.watch(yoyDataProvider)['current'] ?? [],
-                          previousYearData: ref.watch(yoyDataProvider)['previous'] ?? [],
+                          currentYearData:
+                              ref.watch(yoyDataProvider)['current'] ?? [],
+                          previousYearData:
+                              ref.watch(yoyDataProvider)['previous'] ?? [],
                           currencySymbol: ref.watch(currencySymbolProvider),
                         )
                       : const SizedBox.shrink(),

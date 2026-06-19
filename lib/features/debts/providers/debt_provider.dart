@@ -22,16 +22,17 @@ final debtRepositoryProvider = Provider<DebtRepositoryInterface>((ref) {
 final debtNotifierProvider =
     AsyncNotifierProvider<DebtNotifier, List<DebtModel>>(DebtNotifier.new);
 
-final debtPaymentHistoryProvider = FutureProvider.family<List<DebtPaymentModel>, String>((ref, debtId) async {
-  final repo = ref.watch(debtRepositoryProvider);
-  final result = await repo.getPaymentHistory(debtId);
-  switch (result) {
-    case Success(:final value):
-      return value;
-    case Failure():
-      return [];
-  }
-});
+final debtPaymentHistoryProvider =
+    FutureProvider.family<List<DebtPaymentModel>, String>((ref, debtId) async {
+      final repo = ref.watch(debtRepositoryProvider);
+      final result = await repo.getPaymentHistory(debtId);
+      switch (result) {
+        case Success(:final value):
+          return value;
+        case Failure():
+          return [];
+      }
+    });
 
 class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
   late DebtRepositoryInterface _repository;
@@ -54,24 +55,26 @@ class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
     final completer = Completer<List<DebtModel>>();
     bool isFirst = true;
 
-    _subscription = _repository.watchDebts(user!.id).listen(
-      (debts) {
-        if (isFirst) {
-          completer.complete(debts);
-          isFirst = false;
-        } else {
-          state = AsyncData(debts);
-        }
-      },
-      onError: (e, stack) {
-        if (isFirst) {
-          completer.completeError(e, stack);
-          isFirst = false;
-        } else {
-          state = AsyncError(e, stack);
-        }
-      },
-    );
+    _subscription = _repository
+        .watchDebts(user!.id)
+        .listen(
+          (debts) {
+            if (isFirst) {
+              completer.complete(debts);
+              isFirst = false;
+            } else {
+              state = AsyncData(debts);
+            }
+          },
+          onError: (e, stack) {
+            if (isFirst) {
+              completer.completeError(e, stack);
+              isFirst = false;
+            } else {
+              state = AsyncError(e, stack);
+            }
+          },
+        );
 
     return completer.future;
   }
@@ -122,7 +125,9 @@ class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
     bool deductWallet = true,
   }) async {
     if (amount <= 0) {
-      return Failure(AppError.validation('Payment amount must be greater than zero'));
+      return Failure(
+        AppError.validation('Payment amount must be greater than zero'),
+      );
     }
 
     final debtResult = await _repository.getDebtById(debtId);
@@ -165,7 +170,8 @@ class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
 
       final transactionType = debt.type == 'debt' ? 'expense' : 'income';
       final categoryId = debt.type == 'debt' ? 'bills' : 'salary';
-      final txNotes = 'Pembayaran ${debt.type == 'debt' ? 'utang' : 'piutang'} kepada/dari ${debt.personName}. ${notes ?? ''}';
+      final txNotes =
+          'Pembayaran ${debt.type == 'debt' ? 'utang' : 'piutang'} kepada/dari ${debt.personName}. ${notes ?? ''}';
 
       final transaction = TransactionModel(
         userId: user!.id,
@@ -177,7 +183,9 @@ class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
         walletId: walletId,
       );
 
-      await ref.read(transactionNotifierProvider.notifier).addTransaction(transaction);
+      await ref
+          .read(transactionNotifierProvider.notifier)
+          .addTransaction(transaction);
     }
 
     return const Success(null);
@@ -187,7 +195,9 @@ class DebtNotifier extends AsyncNotifier<List<DebtModel>> {
     return _repository.deleteDebt(debtId);
   }
 
-  Future<Result<List<DebtPaymentModel>, AppError>> getPaymentHistory(String debtId) async {
+  Future<Result<List<DebtPaymentModel>, AppError>> getPaymentHistory(
+    String debtId,
+  ) async {
     return _repository.getPaymentHistory(debtId);
   }
 }

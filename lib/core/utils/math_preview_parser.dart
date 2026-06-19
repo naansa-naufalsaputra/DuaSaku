@@ -2,7 +2,7 @@ class MathPreviewParser {
   /// Cleans the input from currency symbols, spaces, and regional separators.
   static String sanitizeExpression(String input, String currencySymbol) {
     String clean = input.replaceAll(' ', '');
-    
+
     // Remove known currency symbols
     clean = clean.replaceAll(currencySymbol, '');
     clean = clean
@@ -41,7 +41,7 @@ class MathPreviewParser {
       final regex = RegExp(r'(\d+\.?\d*)|([+\-*/])');
       final matches = regex.allMatches(cleanExpr);
       final tokens = <String>[];
-      
+
       for (final match in matches) {
         tokens.add(match.group(0)!);
       }

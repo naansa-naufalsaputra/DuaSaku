@@ -21,7 +21,6 @@ class _ManageCategoriesScreenState
     extends ConsumerState<ManageCategoriesScreen> {
   String _selectedType = 'expense';
 
-
   // 10 premium curated colors
   final List<String> _customColors = [
     'F43F5E', // Rose/Red
@@ -35,7 +34,6 @@ class _ManageCategoriesScreenState
     '8B5CF6', // Purple
     'EC4899', // Pink
   ];
-
 
   Color _getCategoryColor(String? colorHex, String type) {
     if (colorHex == null || colorHex.isEmpty || colorHex == 'system') {
@@ -123,8 +121,11 @@ class _ManageCategoriesScreenState
                               HapticFeedback.lightImpact();
                               setModalState(() {
                                 type = 'expense';
-                                if (!CategoryIconHelper.getExpenseIcons().contains(selectedIcon)) {
-                                  selectedIcon = CategoryIconHelper.getExpenseIcons().first;
+                                if (!CategoryIconHelper.getExpenseIcons()
+                                    .contains(selectedIcon)) {
+                                  selectedIcon =
+                                      CategoryIconHelper.getExpenseIcons()
+                                          .first;
                                 }
                               });
                             },
@@ -145,8 +146,10 @@ class _ManageCategoriesScreenState
                               HapticFeedback.lightImpact();
                               setModalState(() {
                                 type = 'income';
-                                if (!CategoryIconHelper.getIncomeIcons().contains(selectedIcon)) {
-                                  selectedIcon = CategoryIconHelper.getIncomeIcons().first;
+                                if (!CategoryIconHelper.getIncomeIcons()
+                                    .contains(selectedIcon)) {
+                                  selectedIcon =
+                                      CategoryIconHelper.getIncomeIcons().first;
                                 }
                               });
                             },

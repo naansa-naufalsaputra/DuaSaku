@@ -48,9 +48,12 @@ class BackupService {
   }
 
   String decryptBackup(String ciphertextJson, String password) {
-    final Map<String, dynamic> wrapper = jsonDecode(ciphertextJson) as Map<String, dynamic>;
+    final Map<String, dynamic> wrapper =
+        jsonDecode(ciphertextJson) as Map<String, dynamic>;
     if (wrapper['duasaku_encrypted_backup'] != true) {
-      throw const FormatException('File backup tidak terenkripsi atau format tidak dikenali');
+      throw const FormatException(
+        'File backup tidak terenkripsi atau format tidak dikenali',
+      );
     }
 
     final String ivBase64 = wrapper['iv'] as String;
@@ -61,10 +64,15 @@ class BackupService {
     final encrypter = enc.Encrypter(enc.AES(key, mode: enc.AESMode.cbc));
 
     try {
-      final decrypted = encrypter.decrypt(enc.Encrypted.fromBase64(ciphertextBase64), iv: iv);
+      final decrypted = encrypter.decrypt(
+        enc.Encrypted.fromBase64(ciphertextBase64),
+        iv: iv,
+      );
       return decrypted;
     } catch (e) {
-      throw const FormatException('Kata sandi salah atau data file backup rusak');
+      throw const FormatException(
+        'Kata sandi salah atau data file backup rusak',
+      );
     }
   }
 
@@ -145,9 +153,7 @@ class BackupService {
       }
 
       for (final item in transactionsJson) {
-        final transaction = Transaction.fromJson(
-          item as Map<String, dynamic>,
-        );
+        final transaction = Transaction.fromJson(item as Map<String, dynamic>);
         await db
             .into(db.transactions)
             .insert(transaction, mode: InsertMode.insertOrReplace);

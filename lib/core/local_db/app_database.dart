@@ -22,7 +22,8 @@ class Wallets extends Table {
   RealColumn get balance => real().withDefault(const Constant(0.0))();
   TextColumn get icon => text()();
   TextColumn get color => text()();
-  TextColumn get currency => text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
+  TextColumn get currency =>
+      text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -88,7 +89,8 @@ class Transactions extends Table {
   )();
 
   RealColumn get amount => real()();
-  TextColumn get currency => text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
+  TextColumn get currency =>
+      text().withDefault(const Constant('IDR'))(); // ISO 4217 currency code
   TextColumn get notes => text().nullable()();
   DateTimeColumn get date => dateTime()();
   TextColumn get type => text()(); // 'income', 'expense', atau 'transfer'
@@ -274,14 +276,8 @@ class Tags extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@TableIndex(
-  name: 'idx_transaction_tags_transaction',
-  columns: {#transactionId},
-)
-@TableIndex(
-  name: 'idx_transaction_tags_tag',
-  columns: {#tagId},
-)
+@TableIndex(name: 'idx_transaction_tags_transaction', columns: {#transactionId})
+@TableIndex(name: 'idx_transaction_tags_tag', columns: {#tagId})
 class TransactionTags extends Table {
   TextColumn get id => text()();
   IntColumn get transactionId =>
@@ -318,7 +314,8 @@ class Debts extends Table {
 @TableIndex(name: 'idx_debt_payments_debt_id', columns: {#debtId})
 class DebtPayments extends Table {
   TextColumn get id => text()();
-  TextColumn get debtId => text().references(Debts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get debtId =>
+      text().references(Debts, #id, onDelete: KeyAction.cascade)();
   RealColumn get amount => real()();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get paidAt => dateTime()();
@@ -327,7 +324,10 @@ class DebtPayments extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@TableIndex(name: 'idx_transaction_splits_transaction_id', columns: {#transactionId})
+@TableIndex(
+  name: 'idx_transaction_splits_transaction_id',
+  columns: {#transactionId},
+)
 @TableIndex(name: 'idx_transaction_splits_category_id', columns: {#categoryId})
 class TransactionSplits extends Table {
   TextColumn get id => text()();
@@ -352,8 +352,11 @@ class BillReminders extends Table {
   RealColumn get amount => real()();
   TextColumn get currency => text().withDefault(const Constant('IDR'))();
   DateTimeColumn get dueDate => dateTime()();
-  IntColumn get reminderDaysBefore => integer().withDefault(const Constant(3))(); // Days before due date to notify
-  TextColumn get status => text()(); // 'pending', 'reminded', 'snoozed', 'paid', 'dismissed'
+  IntColumn get reminderDaysBefore => integer().withDefault(
+    const Constant(3),
+  )(); // Days before due date to notify
+  TextColumn get status =>
+      text()(); // 'pending', 'reminded', 'snoozed', 'paid', 'dismissed'
   TextColumn get notes => text().nullable()();
   TextColumn get recurringTransactionId => text().nullable().references(
     RecurringTransactions,
@@ -372,11 +375,15 @@ class RecurringTemplates extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get category => text()(); // 'income', 'expense'
-  TextColumn get categoryId => text().references(Categories, #id, onDelete: KeyAction.cascade)();
-  TextColumn get frequency => text()(); // 'daily', 'weekly', 'monthly', 'yearly'
+  TextColumn get categoryId =>
+      text().references(Categories, #id, onDelete: KeyAction.cascade)();
+  TextColumn get frequency =>
+      text()(); // 'daily', 'weekly', 'monthly', 'yearly'
   TextColumn get icon => text().nullable()();
-  IntColumn get suggestedAmount => integer().nullable()(); // Optional suggested amount
-  BoolColumn get isBuiltIn => boolean().withDefault(const Constant(true))(); // Built-in vs user-created
+  IntColumn get suggestedAmount =>
+      integer().nullable()(); // Optional suggested amount
+  BoolColumn get isBuiltIn =>
+      boolean().withDefault(const Constant(true))(); // Built-in vs user-created
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -627,7 +634,7 @@ class AppDatabase extends _$AppDatabase {
 bool _isValidUuid(String? uuid) {
   if (uuid == null) return false;
   final uuidRegex = RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
   );
   return uuidRegex.hasMatch(uuid);
 }
@@ -640,7 +647,7 @@ LazyDatabase _openConnection() {
     // Secure storage setup
     const secureStorage = FlutterSecureStorage();
     String? dbKey = await secureStorage.read(key: 'db_key');
-    
+
     if (dbKey != null && !_isValidUuid(dbKey)) {
       throw ArgumentError('Invalid database key format');
     }
@@ -664,12 +671,12 @@ LazyDatabase _openConnection() {
         if (isPlaintext) {
           // Migrasi plaintext ke SQLCipher
           dbKey = const Uuid().v4();
-          
+
           // Validate key format before SQL execution (prevent SQL injection)
           if (!_isValidUuid(dbKey)) {
             throw ArgumentError('Generated database key has invalid format');
           }
-          
+
           final tempFile = File('${file.path}.tmp_encrypted');
           if (await tempFile.exists()) {
             await tempFile.delete();
@@ -677,7 +684,9 @@ LazyDatabase _openConnection() {
 
           final dbToEncrypt = sqlite.sqlite3.open(file.path);
           try {
-            dbToEncrypt.execute("ATTACH DATABASE '${tempFile.path}' AS encrypted KEY '$dbKey';");
+            dbToEncrypt.execute(
+              "ATTACH DATABASE '${tempFile.path}' AS encrypted KEY '$dbKey';",
+            );
             dbToEncrypt.execute("SELECT sqlcipher_export('encrypted');");
             dbToEncrypt.execute("DETACH DATABASE encrypted;");
           } finally {

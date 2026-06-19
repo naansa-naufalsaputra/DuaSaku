@@ -364,10 +364,12 @@ class _WalletStackedLayoutState extends State<WalletStackedLayout>
                       child: Container(
                         height: cardHeight,
                         decoration: BoxDecoration(
-                           borderRadius: BorderRadius.circular(24),
-                           boxShadow: [
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF4364F7).withValues(alpha: 0.25),
+                              color: const Color(
+                                0xFF4364F7,
+                              ).withValues(alpha: 0.25),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),

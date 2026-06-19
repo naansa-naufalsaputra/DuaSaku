@@ -12,14 +12,15 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   BillReminderRepository(this._db);
 
   @override
-  Future<Result<List<BillReminderModel>, AppError>> getBillReminders(String userId) async {
+  Future<Result<List<BillReminderModel>, AppError>> getBillReminders(
+    String userId,
+  ) async {
     try {
-      final rows = await (_db.select(_db.billReminders)
-            ..where((b) => b.userId.equals(userId))
-            ..orderBy([
-              (b) => OrderingTerm.asc(b.dueDate),
-            ]))
-          .get();
+      final rows =
+          await (_db.select(_db.billReminders)
+                ..where((b) => b.userId.equals(userId))
+                ..orderBy([(b) => OrderingTerm.asc(b.dueDate)]))
+              .get();
 
       return Success(rows.map(_mapToModel).toList());
     } catch (e, stack) {
@@ -29,11 +30,13 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   }
 
   @override
-  Future<Result<BillReminderModel?, AppError>> getBillReminderById(String reminderId) async {
+  Future<Result<BillReminderModel?, AppError>> getBillReminderById(
+    String reminderId,
+  ) async {
     try {
-      final row = await (_db.select(_db.billReminders)
-            ..where((b) => b.id.equals(reminderId)))
-          .getSingleOrNull();
+      final row = await (_db.select(
+        _db.billReminders,
+      )..where((b) => b.id.equals(reminderId))).getSingleOrNull();
 
       if (row == null) return const Success(null);
       return Success(_mapToModel(row));
@@ -44,9 +47,13 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   }
 
   @override
-  Future<Result<void, AppError>> createBillReminder(BillReminderModel reminder) async {
+  Future<Result<void, AppError>> createBillReminder(
+    BillReminderModel reminder,
+  ) async {
     try {
-      await _db.into(_db.billReminders).insert(
+      await _db
+          .into(_db.billReminders)
+          .insert(
             BillRemindersCompanion.insert(
               id: reminder.id,
               userId: reminder.userId,
@@ -70,9 +77,13 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   }
 
   @override
-  Future<Result<void, AppError>> updateBillReminder(BillReminderModel reminder) async {
+  Future<Result<void, AppError>> updateBillReminder(
+    BillReminderModel reminder,
+  ) async {
     try {
-      await (_db.update(_db.billReminders)..where((b) => b.id.equals(reminder.id))).write(
+      await (_db.update(
+        _db.billReminders,
+      )..where((b) => b.id.equals(reminder.id))).write(
         BillRemindersCompanion(
           title: Value(reminder.title),
           amount: Value(reminder.amount),
@@ -94,7 +105,9 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   @override
   Future<Result<void, AppError>> deleteBillReminder(String reminderId) async {
     try {
-      await (_db.delete(_db.billReminders)..where((b) => b.id.equals(reminderId))).go();
+      await (_db.delete(
+        _db.billReminders,
+      )..where((b) => b.id.equals(reminderId))).go();
       return const Success(null);
     } catch (e, stack) {
       developer.log('Error deleting bill reminder', error: e);
@@ -106,9 +119,7 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   Stream<List<BillReminderModel>> watchBillReminders(String userId) {
     return (_db.select(_db.billReminders)
           ..where((b) => b.userId.equals(userId))
-          ..orderBy([
-            (b) => OrderingTerm.asc(b.dueDate),
-          ]))
+          ..orderBy([(b) => OrderingTerm.asc(b.dueDate)]))
         .watch()
         .map((rows) => rows.map(_mapToModel).toList());
   }
@@ -117,9 +128,7 @@ class BillReminderRepository implements BillReminderRepositoryInterface {
   Stream<List<BillReminderModel>> watchPendingBillReminders(String userId) {
     return (_db.select(_db.billReminders)
           ..where((b) => b.userId.equals(userId) & b.status.equals('pending'))
-          ..orderBy([
-            (b) => OrderingTerm.asc(b.dueDate),
-          ]))
+          ..orderBy([(b) => OrderingTerm.asc(b.dueDate)]))
         .watch()
         .map((rows) => rows.map(_mapToModel).toList());
   }

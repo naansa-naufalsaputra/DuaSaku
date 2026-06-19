@@ -20,41 +20,41 @@ class HomeQuickActions extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_top_up'.tr(),
-              onTap: onTopUpTap,
-              theme: theme,
-              isDark: isDark,
-              isActive: true,
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_top_up'.tr(),
+                  onTap: onTopUpTap,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_transfer'.tr(),
+                  onTap: onTransferTap,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildQuickPill(
+                  label: 'home.action_scan_qr'.tr(),
+                  onTap: onScanQrTap,
+                  theme: theme,
+                  isDark: isDark,
+                  isActive: false,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_transfer'.tr(),
-              onTap: onTransferTap,
-              theme: theme,
-              isDark: isDark,
-              isActive: false,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildQuickPill(
-              label: 'home.action_scan_qr'.tr(),
-              onTap: onScanQrTap,
-              theme: theme,
-              isDark: isDark,
-              isActive: false,
-            ),
-          ),
-        ],
-      ),
-    )
+        )
         .animate()
         .fadeIn(duration: 500.ms, delay: 120.ms)
         .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);

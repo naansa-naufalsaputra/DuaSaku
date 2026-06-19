@@ -13,9 +13,11 @@ final userRepositoryProvider = Provider<UserRepositoryInterface>((ref) {
 });
 
 /// Current active user ID provider (persisted in secure storage)
-final activeUserIdProvider = NotifierProvider<ActiveUserIdNotifier, String?>(() {
-  return ActiveUserIdNotifier();
-});
+final activeUserIdProvider = NotifierProvider<ActiveUserIdNotifier, String?>(
+  () {
+    return ActiveUserIdNotifier();
+  },
+);
 
 class ActiveUserIdNotifier extends Notifier<String?> {
   static const _storage = FlutterSecureStorage();
@@ -118,7 +120,9 @@ class UserManagement {
 
     // Prevent deleting active user (must switch first)
     if (userId == activeUserId) {
-      throw Exception('Cannot delete active profile. Switch to another profile first.');
+      throw Exception(
+        'Cannot delete active profile. Switch to another profile first.',
+      );
     }
 
     final result = await repository.deleteUser(userId);

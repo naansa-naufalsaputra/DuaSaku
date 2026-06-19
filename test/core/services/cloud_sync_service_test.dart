@@ -57,7 +57,7 @@ class FakeFilesResource extends Fake implements drive.FilesResource {
   drive.File? createdFile;
   drive.File? updatedFile;
   String? updatedFileId;
-  
+
   bool listCalled = false;
   bool createCalled = false;
   bool updateCalled = false;
@@ -82,7 +82,8 @@ class FakeFilesResource extends Fake implements drive.FilesResource {
     }
     if (invocation.memberName == #get) {
       getCalled = true;
-      final downloadOptions = invocation.namedArguments[#downloadOptions] as drive.DownloadOptions?;
+      final downloadOptions =
+          invocation.namedArguments[#downloadOptions] as drive.DownloadOptions?;
       if (downloadOptions == drive.DownloadOptions.fullMedia) {
         if (downloadedMedia != null) return Future.value(downloadedMedia!);
         throw Exception('No media set to download');
@@ -106,12 +107,12 @@ class FakeBackupService extends Fake implements BackupService {
   String plaintextToGenerate = '{"transactions":[]}';
   String encryptedPayloadToReturn = 'encrypted_data';
   String decryptedPayloadToReturn = 'decrypted_data';
-  
+
   bool generateCalled = false;
   bool encryptCalled = false;
   bool decryptCalled = false;
   bool restoreCalled = false;
-  
+
   String? encryptedWithPin;
   String? decryptedWithPin;
   String? restoredPlaintext;
@@ -146,8 +147,12 @@ class FakeBackupService extends Fake implements BackupService {
 // Subclass to override getDriveApi with our fake
 class TestCloudSyncService extends CloudSyncService {
   final drive.DriveApi mockDriveApi;
-  
-  TestCloudSyncService(super.ref, {required this.mockDriveApi, super.googleSignIn});
+
+  TestCloudSyncService(
+    super.ref, {
+    required this.mockDriveApi,
+    super.googleSignIn,
+  });
 
   @override
   drive.DriveApi getDriveApi(dynamic client) => mockDriveApi;
@@ -181,9 +186,7 @@ void main() {
     fakeBackupService = FakeBackupService();
 
     container = ProviderContainer(
-      overrides: [
-        backupServiceProvider.overrideWithValue(fakeBackupService),
-      ],
+      overrides: [backupServiceProvider.overrideWithValue(fakeBackupService)],
     );
 
     cloudSyncService = container.read(testCloudSyncServiceProvider);
@@ -220,37 +223,43 @@ void main() {
       expect(success, isFalse);
     });
 
-    test('backupToCloud creates new file in Google Drive AppData if not exists', () async {
-      fakeGoogleSignIn.mockUser = fakeUser;
-      fakeGoogleSignIn.signedIn = true;
-      fakeFiles.filesList.clear(); // Empty files list
+    test(
+      'backupToCloud creates new file in Google Drive AppData if not exists',
+      () async {
+        fakeGoogleSignIn.mockUser = fakeUser;
+        fakeGoogleSignIn.signedIn = true;
+        fakeFiles.filesList.clear(); // Empty files list
 
-      final success = await cloudSyncService.backupToCloud('1234');
+        final success = await cloudSyncService.backupToCloud('1234');
 
-      expect(success, isTrue);
-      expect(fakeBackupService.generateCalled, isTrue);
-      expect(fakeBackupService.encryptCalled, isTrue);
-      expect(fakeBackupService.encryptedWithPin, '1234');
-      expect(fakeFiles.listCalled, isTrue);
-      expect(fakeFiles.createCalled, isTrue);
-      expect(fakeFiles.updateCalled, isFalse);
-    });
+        expect(success, isTrue);
+        expect(fakeBackupService.generateCalled, isTrue);
+        expect(fakeBackupService.encryptCalled, isTrue);
+        expect(fakeBackupService.encryptedWithPin, '1234');
+        expect(fakeFiles.listCalled, isTrue);
+        expect(fakeFiles.createCalled, isTrue);
+        expect(fakeFiles.updateCalled, isFalse);
+      },
+    );
 
-    test('backupToCloud updates existing file in Google Drive AppData if exists', () async {
-      fakeGoogleSignIn.mockUser = fakeUser;
-      fakeGoogleSignIn.signedIn = true;
-      fakeFiles.filesList.add(drive.File()..id = 'existing_file_id');
+    test(
+      'backupToCloud updates existing file in Google Drive AppData if exists',
+      () async {
+        fakeGoogleSignIn.mockUser = fakeUser;
+        fakeGoogleSignIn.signedIn = true;
+        fakeFiles.filesList.add(drive.File()..id = 'existing_file_id');
 
-      final success = await cloudSyncService.backupToCloud('1234');
+        final success = await cloudSyncService.backupToCloud('1234');
 
-      expect(success, isTrue);
-      expect(fakeBackupService.generateCalled, isTrue);
-      expect(fakeBackupService.encryptCalled, isTrue);
-      expect(fakeFiles.listCalled, isTrue);
-      expect(fakeFiles.createCalled, isFalse);
-      expect(fakeFiles.updateCalled, isTrue);
-      expect(fakeFiles.updatedFileId, 'existing_file_id');
-    });
+        expect(success, isTrue);
+        expect(fakeBackupService.generateCalled, isTrue);
+        expect(fakeBackupService.encryptCalled, isTrue);
+        expect(fakeFiles.listCalled, isTrue);
+        expect(fakeFiles.createCalled, isFalse);
+        expect(fakeFiles.updateCalled, isTrue);
+        expect(fakeFiles.updatedFileId, 'existing_file_id');
+      },
+    );
   });
 
   group('CloudSyncService Restore Tests', () {
@@ -259,34 +268,40 @@ void main() {
       expect(success, isFalse);
     });
 
-    test('restoreFromCloud returns false if backup file is not found', () async {
-      fakeGoogleSignIn.mockUser = fakeUser;
-      fakeGoogleSignIn.signedIn = true;
-      fakeFiles.filesList.clear(); // File doesn't exist
+    test(
+      'restoreFromCloud returns false if backup file is not found',
+      () async {
+        fakeGoogleSignIn.mockUser = fakeUser;
+        fakeGoogleSignIn.signedIn = true;
+        fakeFiles.filesList.clear(); // File doesn't exist
 
-      final success = await cloudSyncService.restoreFromCloud('1234');
-      expect(success, isFalse);
-    });
+        final success = await cloudSyncService.restoreFromCloud('1234');
+        expect(success, isFalse);
+      },
+    );
 
-    test('restoreFromCloud decrypts and restores backup successfully', () async {
-      fakeGoogleSignIn.mockUser = fakeUser;
-      fakeGoogleSignIn.signedIn = true;
-      fakeFiles.filesList.add(drive.File()..id = 'backup_file_id');
-      
-      const payloadString = 'encrypted_payload_data';
-      fakeFiles.downloadedMedia = drive.Media(
-        Stream.value(utf8.encode(payloadString)),
-        payloadString.length,
-      );
+    test(
+      'restoreFromCloud decrypts and restores backup successfully',
+      () async {
+        fakeGoogleSignIn.mockUser = fakeUser;
+        fakeGoogleSignIn.signedIn = true;
+        fakeFiles.filesList.add(drive.File()..id = 'backup_file_id');
 
-      final success = await cloudSyncService.restoreFromCloud('1234');
+        const payloadString = 'encrypted_payload_data';
+        fakeFiles.downloadedMedia = drive.Media(
+          Stream.value(utf8.encode(payloadString)),
+          payloadString.length,
+        );
 
-      expect(success, isTrue);
-      expect(fakeFiles.listCalled, isTrue);
-      expect(fakeFiles.getCalled, isTrue);
-      expect(fakeBackupService.decryptCalled, isTrue);
-      expect(fakeBackupService.decryptedWithPin, '1234');
-      expect(fakeBackupService.restoreCalled, isTrue);
-    });
+        final success = await cloudSyncService.restoreFromCloud('1234');
+
+        expect(success, isTrue);
+        expect(fakeFiles.listCalled, isTrue);
+        expect(fakeFiles.getCalled, isTrue);
+        expect(fakeBackupService.decryptCalled, isTrue);
+        expect(fakeBackupService.decryptedWithPin, '1234');
+        expect(fakeBackupService.restoreCalled, isTrue);
+      },
+    );
   });
 }

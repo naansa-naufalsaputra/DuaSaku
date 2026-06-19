@@ -14,13 +14,16 @@ import '../domain/models/bill_reminder_model.dart';
 
 const _uuid = Uuid();
 
-final billReminderRepositoryProvider = Provider<BillReminderRepositoryInterface>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return BillReminderRepository(db);
-});
+final billReminderRepositoryProvider =
+    Provider<BillReminderRepositoryInterface>((ref) {
+      final db = ref.watch(appDatabaseProvider);
+      return BillReminderRepository(db);
+    });
 
 final billReminderNotifierProvider =
-    AsyncNotifierProvider<BillReminderNotifier, List<BillReminderModel>>(BillReminderNotifier.new);
+    AsyncNotifierProvider<BillReminderNotifier, List<BillReminderModel>>(
+      BillReminderNotifier.new,
+    );
 
 class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
   late BillReminderRepositoryInterface _repository;
@@ -43,24 +46,26 @@ class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
     final completer = Completer<List<BillReminderModel>>();
     bool isFirst = true;
 
-    _subscription = _repository.watchBillReminders(user!.id).listen(
-      (reminders) {
-        if (isFirst) {
-          completer.complete(reminders);
-          isFirst = false;
-        } else {
-          state = AsyncData(reminders);
-        }
-      },
-      onError: (e, stack) {
-        if (isFirst) {
-          completer.completeError(e, stack);
-          isFirst = false;
-        } else {
-          state = AsyncError(e, stack);
-        }
-      },
-    );
+    _subscription = _repository
+        .watchBillReminders(user!.id)
+        .listen(
+          (reminders) {
+            if (isFirst) {
+              completer.complete(reminders);
+              isFirst = false;
+            } else {
+              state = AsyncData(reminders);
+            }
+          },
+          onError: (e, stack) {
+            if (isFirst) {
+              completer.completeError(e, stack);
+              isFirst = false;
+            } else {
+              state = AsyncError(e, stack);
+            }
+          },
+        );
 
     return completer.future;
   }
@@ -103,7 +108,9 @@ class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
     return _repository.createBillReminder(reminder);
   }
 
-  Future<Result<void, AppError>> updateBillReminder(BillReminderModel reminder) async {
+  Future<Result<void, AppError>> updateBillReminder(
+    BillReminderModel reminder,
+  ) async {
     if (reminder.title.trim().isEmpty) {
       return Failure(AppError.validation('Title cannot be empty'));
     }
@@ -127,7 +134,8 @@ class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
       return Failure((reminderResult as Failure).error as AppError);
     }
 
-    final reminder = (reminderResult as Success<BillReminderModel?, AppError>).value;
+    final reminder =
+        (reminderResult as Success<BillReminderModel?, AppError>).value;
     if (reminder == null) {
       return Failure(AppError.validation('Bill reminder not found'));
     }
@@ -144,8 +152,9 @@ class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
         return Failure(AppError.validation('User not authenticated'));
       }
 
-      final txNotes = 'Pembayaran tagihan: ${reminder.title}. ${reminder.notes ?? ''}';
-      
+      final txNotes =
+          'Pembayaran tagihan: ${reminder.title}. ${reminder.notes ?? ''}';
+
       final transaction = TransactionModel(
         userId: user!.id,
         amount: reminder.amount,
@@ -156,7 +165,9 @@ class BillReminderNotifier extends AsyncNotifier<List<BillReminderModel>> {
         walletId: walletId,
       );
 
-      await ref.read(transactionNotifierProvider.notifier).addTransaction(transaction);
+      await ref
+          .read(transactionNotifierProvider.notifier)
+          .addTransaction(transaction);
     }
 
     return const Success(null);

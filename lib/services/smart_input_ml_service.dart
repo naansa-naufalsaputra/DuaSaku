@@ -135,7 +135,10 @@ class SmartInputMlServiceImpl implements SmartInputMlService {
   }) async {
     if (text.trim().isEmpty) return null;
 
-    final localParsed = LocalDateParser.parse(text, referenceDate: referenceDate);
+    final localParsed = LocalDateParser.parse(
+      text,
+      referenceDate: referenceDate,
+    );
     if (localParsed != null) {
       return localParsed;
     }

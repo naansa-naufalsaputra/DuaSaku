@@ -16,20 +16,17 @@ final tagsProvider = StreamProvider.autoDispose<List<Tag>>((ref) {
   return repo.watchTags(AppConstants.defaultUserId);
 });
 
-final transactionTagsProvider =
-    StreamProvider.autoDispose.family<List<Tag>, int>((ref, transactionId) {
-  final repo = ref.watch(tagRepositoryProvider);
-  return repo.watchTransactionTags(transactionId);
-});
+final transactionTagsProvider = StreamProvider.autoDispose
+    .family<List<Tag>, int>((ref, transactionId) {
+      final repo = ref.watch(tagRepositoryProvider);
+      return repo.watchTransactionTags(transactionId);
+    });
 
 class TagNotifier extends Notifier<void> {
   @override
   void build() {}
 
-  Future<void> createTag({
-    required String name,
-    String? color,
-  }) async {
+  Future<void> createTag({required String name, String? color}) async {
     final repo = ref.read(tagRepositoryProvider);
     final tag = Tag(
       id: DateTime.now().millisecondsSinceEpoch.toString(),

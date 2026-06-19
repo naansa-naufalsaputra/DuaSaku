@@ -246,8 +246,9 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                         child: Row(
                           children: [
                             Text(
-                              SupportedCurrencies.fromCode(selectedCurrency)
-                                      ?.symbol ??
+                              SupportedCurrencies.fromCode(
+                                    selectedCurrency,
+                                  )?.symbol ??
                                   selectedCurrency,
                               style: TextStyle(
                                 fontSize: 20,
@@ -267,12 +268,15 @@ class _ManageWalletsScreenState extends ConsumerState<ManageWalletsScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                SupportedCurrencies.fromCode(selectedCurrency)
-                                        ?.name ??
+                                SupportedCurrencies.fromCode(
+                                      selectedCurrency,
+                                    )?.name ??
                                     '',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: isDark ? Colors.white54 : Colors.black54,
+                                  color: isDark
+                                      ? Colors.white54
+                                      : Colors.black54,
                                 ),
                               ),
                             ),

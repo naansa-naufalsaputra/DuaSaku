@@ -39,7 +39,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+            ),
             child: Text('transaction.delete_confirm_yes'.tr()),
           ),
         ],
@@ -51,7 +53,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
         _isDeleting = true;
       });
 
-      final result = await ref.read(debtNotifierProvider.notifier).deleteDebt(widget.debtId);
+      final result = await ref
+          .read(debtNotifierProvider.notifier)
+          .deleteDebt(widget.debtId);
 
       if (mounted) {
         setState(() {
@@ -98,9 +102,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
 
     final debts = ref.watch(debtNotifierProvider).valueOrNull ?? [];
     final debt = debts.cast<DebtModel?>().firstWhere(
-          (d) => d?.id == widget.debtId,
-          orElse: () => null,
-        );
+      (d) => d?.id == widget.debtId,
+      orElse: () => null,
+    );
 
     if (debt == null) {
       return Scaffold(
@@ -112,7 +116,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
             Center(
               child: Text(
                 'debts.error_loading'.tr(),
-                style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
               ),
             ),
           ],
@@ -121,18 +127,28 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
     }
 
     final isOverdue = debt.isOverdue;
-    final accentColor = debt.type == 'debt' ? theme.colorScheme.error : theme.colorScheme.primary;
+    final accentColor = debt.type == 'debt'
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
     final historyAsync = ref.watch(debtPaymentHistoryProvider(widget.debtId));
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: GlassAppBar(
-        title: Text(debt.type == 'debt' ? 'debts.tab_debts'.tr() : 'debts.tab_loans'.tr()),
+        title: Text(
+          debt.type == 'debt' ? 'debts.tab_debts'.tr() : 'debts.tab_loans'.tr(),
+        ),
         actions: [
           _isDeleting
               ? const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
                 )
               : IconButton(
                   icon: const Icon(Icons.delete_outline_rounded),
@@ -155,10 +171,14 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.2),
+                        color: isDark
+                            ? Colors.white10
+                            : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
-                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.white.withValues(alpha: 0.8),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
@@ -203,8 +223,12 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
-                              value: debt.amount > 0 ? (debt.paidAmount / debt.amount) : 0,
-                              backgroundColor: isDark ? Colors.white10 : Colors.grey[200],
+                              value: debt.amount > 0
+                                  ? (debt.paidAmount / debt.amount)
+                                  : 0,
+                              backgroundColor: isDark
+                                  ? Colors.white10
+                                  : Colors.grey[200],
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 debt.isSettled ? Colors.green : accentColor,
                               ),
@@ -224,7 +248,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                                     'debts.amount'.tr(),
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: isDark ? Colors.white60 : Colors.black54,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
                                     ),
                                   ),
                                   Text(
@@ -244,7 +270,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                                       'debts.due_date'.tr(),
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: isDark ? Colors.white60 : Colors.black54,
+                                        color: isDark
+                                            ? Colors.white60
+                                            : Colors.black54,
                                       ),
                                     ),
                                     Text(
@@ -252,7 +280,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: isOverdue ? theme.colorScheme.error : null,
+                                        color: isOverdue
+                                            ? theme.colorScheme.error
+                                            : null,
                                       ),
                                     ),
                                   ],
@@ -285,7 +315,10 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
 
                 // Payment History Title
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   child: Text(
                     'debts.payment_history'.tr(),
                     style: const TextStyle(
@@ -303,7 +336,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                         return Center(
                           child: Text(
                             'debts.no_payments'.tr(),
-                            style: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
+                            style: TextStyle(
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
                           ),
                         );
                       }
@@ -318,23 +353,33 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
-                                color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
+                                color: isDark
+                                    ? Colors.white10
+                                    : Colors.grey.withValues(alpha: 0.1),
                               ),
                             ),
-                            color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white.withValues(alpha: 0.5),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.02)
+                                : Colors.white.withValues(alpha: 0.5),
                             child: ListTile(
                               title: Text(
                                 formatter.format(payment.amount),
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              subtitle: payment.notes != null && payment.notes!.isNotEmpty
+                              subtitle:
+                                  payment.notes != null &&
+                                      payment.notes!.isNotEmpty
                                   ? Text(payment.notes!)
                                   : null,
                               trailing: Text(
                                 DateFormat.yMMMd().format(payment.paidAt),
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? Colors.white60 : Colors.black54,
+                                  color: isDark
+                                      ? Colors.white60
+                                      : Colors.black54,
                                 ),
                               ),
                             ),
@@ -342,8 +387,10 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                         },
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, s) => Center(child: Text('debts.error_loading'.tr())),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, s) =>
+                        Center(child: Text('debts.error_loading'.tr())),
                   ),
                 ),
 
@@ -382,7 +429,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
       color = Colors.orange;
       text = 'debts.status_partial'.tr();
     } else {
-      color = debt.type == 'debt' ? theme.colorScheme.error : theme.colorScheme.primary;
+      color = debt.type == 'debt'
+          ? theme.colorScheme.error
+          : theme.colorScheme.primary;
       text = 'debts.status_unpaid'.tr();
     }
 
@@ -411,7 +460,8 @@ class _PaymentBottomSheet extends ConsumerStatefulWidget {
   const _PaymentBottomSheet({required this.debt});
 
   @override
-  ConsumerState<_PaymentBottomSheet> createState() => _PaymentBottomSheetState();
+  ConsumerState<_PaymentBottomSheet> createState() =>
+      _PaymentBottomSheetState();
 }
 
 class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
@@ -441,7 +491,11 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
     if (_deductWallet && _selectedWalletId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('bottom_sheet.err_required'.tr() + ': ' + 'bottom_sheet.wallet'.tr()),
+          content: Text(
+            'bottom_sheet.err_required'.tr() +
+                ': ' +
+                'bottom_sheet.wallet'.tr(),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -454,7 +508,9 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
 
-    final result = await ref.read(debtNotifierProvider.notifier).addPayment(
+    final result = await ref
+        .read(debtNotifierProvider.notifier)
+        .addPayment(
           debtId: widget.debt.id,
           amount: amount,
           walletId: _selectedWalletId ?? '',
@@ -494,7 +550,12 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
         color: isDark ? Colors.grey[900] : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -506,7 +567,10 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
               children: [
                 Text(
                   'debts.add_payment'.tr(),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
@@ -519,7 +583,9 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
             // Amount Input
             TextFormField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
               ],
@@ -549,8 +615,13 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
             // Wallet Deduct/Add Switch Toggle
             SwitchListTile.adaptive(
               title: Text(
-                widget.debt.type == 'debt' ? 'Potong saldo dompet' : 'Tambah ke saldo dompet',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                widget.debt.type == 'debt'
+                    ? 'Potong saldo dompet'
+                    : 'Tambah ke saldo dompet',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               value: _deductWallet,
               onChanged: (val) {
@@ -568,10 +639,13 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                   if (wallets.isEmpty) {
                     return Text(
                       'bottom_sheet.no_wallet_warning'.tr(),
-                      style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+                      style: TextStyle(
+                        color: theme.colorScheme.error,
+                        fontSize: 12,
+                      ),
                     );
                   }
-                  
+
                   // Auto-select first wallet if null
                   if (_selectedWalletId == null && wallets.isNotEmpty) {
                     _selectedWalletId = wallets.first.id;
@@ -589,7 +663,9 @@ class _PaymentBottomSheetState extends ConsumerState<_PaymentBottomSheet> {
                     items: wallets.map((w) {
                       return DropdownMenuItem<String>(
                         value: w.id,
-                        child: Text('${w.name} (${formatter.format(w.balance)})'),
+                        child: Text(
+                          '${w.name} (${formatter.format(w.balance)})',
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) {

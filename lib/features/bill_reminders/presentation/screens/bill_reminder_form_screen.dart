@@ -14,10 +14,12 @@ class BillReminderFormScreen extends ConsumerStatefulWidget {
   const BillReminderFormScreen({super.key});
 
   @override
-  ConsumerState<BillReminderFormScreen> createState() => _BillReminderFormScreenState();
+  ConsumerState<BillReminderFormScreen> createState() =>
+      _BillReminderFormScreenState();
 }
 
-class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen> {
+class _BillReminderFormScreenState
+    extends ConsumerState<BillReminderFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -59,7 +61,9 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
     if (_dueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${'bottom_sheet.err_required'.tr()}: ${'bill_reminders.due_date'.tr()}'),
+          content: Text(
+            '${'bottom_sheet.err_required'.tr()}: ${'bill_reminders.due_date'.tr()}',
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -72,7 +76,9 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
 
-    final result = await ref.read(billReminderNotifierProvider.notifier).createBillReminder(
+    final result = await ref
+        .read(billReminderNotifierProvider.notifier)
+        .createBillReminder(
           title: _titleController.text,
           amount: amount,
           dueDate: _dueDate!,
@@ -112,9 +118,7 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('bill_reminders.add'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('bill_reminders.add'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -148,9 +152,13 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
                     // Amount field
                     TextFormField(
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
                       ],
                       decoration: InputDecoration(
                         labelText: 'bill_reminders.amount'.tr(),
@@ -177,7 +185,10 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
                       onTap: () => _selectDueDate(context),
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isDark ? Colors.white30 : Colors.black26,
@@ -198,8 +209,12 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: _dueDate != null
-                                        ? (isDark ? Colors.white : Colors.black87)
-                                        : (isDark ? Colors.white60 : Colors.black54),
+                                        ? (isDark
+                                              ? Colors.white
+                                              : Colors.black87)
+                                        : (isDark
+                                              ? Colors.white60
+                                              : Colors.black54),
                                   ),
                                 ),
                               ],
@@ -224,7 +239,11 @@ class _BillReminderFormScreenState extends ConsumerState<BillReminderFormScreen>
                       items: [1, 2, 3, 5, 7].map((days) {
                         return DropdownMenuItem<int>(
                           value: days,
-                          child: Text('bill_reminders.days_before'.tr(args: [days.toString()])),
+                          child: Text(
+                            'bill_reminders.days_before'.tr(
+                              args: [days.toString()],
+                            ),
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {

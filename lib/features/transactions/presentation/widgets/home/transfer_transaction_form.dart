@@ -85,9 +85,7 @@ class TransferTransactionForm extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           hintText: '0',
-                          hintStyle: const TextStyle(
-                            color: Colors.grey,
-                          ),
+                          hintStyle: const TextStyle(color: Colors.grey),
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -221,10 +219,7 @@ class TransferTransactionForm extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Text(
               'bottom_sheet.save'.tr(),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ),

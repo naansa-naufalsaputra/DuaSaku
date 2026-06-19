@@ -43,20 +43,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Sentry for production crash reporting
-  await SentryFlutter.init(
-    (options) {
-      options.dsn = 'https://your-sentry-dsn@sentry.io/project-id'; // Todo: Replace with actual DSN
-      options.environment = kReleaseMode ? 'production' : 'development';
-      options.tracesSampleRate = 0.1; // 10% performance monitoring
-      options.enableAutoSessionTracking = true;
-      // Only capture in release mode by default
-      options.beforeSend = (event, hint) {
-        if (kDebugMode) return null; // Skip Sentry in debug
-        return event;
-      };
-    },
-    appRunner: _runApp,
-  );
+  await SentryFlutter.init((options) {
+    options.dsn =
+        'https://your-sentry-dsn@sentry.io/project-id'; // Todo: Replace with actual DSN
+    options.environment = kReleaseMode ? 'production' : 'development';
+    options.tracesSampleRate = 0.1; // 10% performance monitoring
+    options.enableAutoSessionTracking = true;
+    // Only capture in release mode by default
+    options.beforeSend = (event, hint) {
+      if (kDebugMode) return null; // Skip Sentry in debug
+      return event;
+    };
+  }, appRunner: _runApp);
 }
 
 void _runApp() async {
@@ -278,10 +276,14 @@ class _DuaSakuAppState extends ConsumerState<DuaSakuApp> {
     try {
       final service = ref.read(balanceIntegrityServiceProvider);
       final discrepancies = await service.checkAllWallets();
-      
+
       if (discrepancies.isNotEmpty) {
-        debugPrint('[BalanceIntegrity] Found ${discrepancies.length} discrepancies, repairing...');
-        final repairedCount = await service.repairAllDiscrepancies(discrepancies);
+        debugPrint(
+          '[BalanceIntegrity] Found ${discrepancies.length} discrepancies, repairing...',
+        );
+        final repairedCount = await service.repairAllDiscrepancies(
+          discrepancies,
+        );
         debugPrint('[BalanceIntegrity] Repaired $repairedCount wallets');
       } else {
         debugPrint('[BalanceIntegrity] No balance discrepancies found');
@@ -432,10 +434,7 @@ void _logGlobalError({
 }) {
   // In release mode, send to Sentry
   if (kReleaseMode) {
-    Sentry.captureException(
-      error,
-      stackTrace: stackTrace,
-    );
+    Sentry.captureException(error, stackTrace: stackTrace);
     return; // Don't log to console in release
   }
 

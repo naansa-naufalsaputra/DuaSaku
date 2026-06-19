@@ -78,7 +78,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
 
-    final result = await ref.read(debtNotifierProvider.notifier).createDebt(
+    final result = await ref
+        .read(debtNotifierProvider.notifier)
+        .createDebt(
           type: _type,
           personName: _personController.text,
           amount: amount,
@@ -120,9 +122,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text(titleKey.tr()),
-      ),
+      appBar: GlassAppBar(title: Text(titleKey.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -153,7 +153,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: _type == 'debt'
                                       ? theme.colorScheme.error
@@ -166,7 +168,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                   style: TextStyle(
                                     color: _type == 'debt'
                                         ? Colors.white
-                                        : (isDark ? Colors.white70 : Colors.black87),
+                                        : (isDark
+                                              ? Colors.white70
+                                              : Colors.black87),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -183,7 +187,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: _type == 'loan'
                                       ? theme.colorScheme.primary
@@ -196,7 +202,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                   style: TextStyle(
                                     color: _type == 'loan'
                                         ? Colors.white
-                                        : (isDark ? Colors.white70 : Colors.black87),
+                                        : (isDark
+                                              ? Colors.white70
+                                              : Colors.black87),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -230,9 +238,13 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                     // Amount Field
                     TextFormField(
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
                       ],
                       decoration: InputDecoration(
                         labelText: 'debts.amount'.tr(),
@@ -259,7 +271,10 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                       onTap: () => _selectDueDate(context),
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isDark ? Colors.white30 : Colors.black26,
@@ -280,8 +295,12 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: _dueDate != null
-                                        ? (isDark ? Colors.white : Colors.black87)
-                                        : (isDark ? Colors.white60 : Colors.black54),
+                                        ? (isDark
+                                              ? Colors.white
+                                              : Colors.black87)
+                                        : (isDark
+                                              ? Colors.white60
+                                              : Colors.black54),
                                   ),
                                 ),
                               ],

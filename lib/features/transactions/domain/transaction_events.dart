@@ -1,7 +1,7 @@
 import 'models/transaction_model.dart';
 
 /// Sealed class representing all transaction domain events.
-/// 
+///
 /// Events are emitted by the repository after successful database operations
 /// and consumed by event handlers to trigger side-effects (balance updates,
 /// alert evaluation, geofence sync).

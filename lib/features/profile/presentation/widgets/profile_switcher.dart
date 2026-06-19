@@ -215,10 +215,9 @@ class ProfileSwitcher extends ConsumerWidget {
               }
 
               try {
-                await ref.read(userManagementProvider).createProfile(
-                      name: name,
-                      email: email,
-                    );
+                await ref
+                    .read(userManagementProvider)
+                    .createProfile(name: name, email: email);
 
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
@@ -228,9 +227,9 @@ class ProfileSwitcher extends ConsumerWidget {
                 }
               } catch (e) {
                 if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    ctx,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               }
             },

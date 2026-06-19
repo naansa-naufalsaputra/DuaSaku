@@ -4,7 +4,7 @@ import '../../local_db/app_database.dart';
 import 'balance_discrepancy.dart';
 
 /// Service responsible for detecting and repairing wallet balance drift.
-/// 
+///
 /// Periodically verifies integrity between stored wallet balance and
 /// computed transaction totals using the same formula as schema v8 migration.
 class BalanceIntegrityService {
@@ -13,7 +13,7 @@ class BalanceIntegrityService {
   BalanceIntegrityService(this._db);
 
   /// Checks all wallets for balance discrepancies.
-  /// 
+  ///
   /// Returns map of wallet ID to discrepancy if difference > 0.01 IDR.
   /// Runs computation in single database transaction for consistency.
   Future<Map<String, BalanceDiscrepancy>> checkAllWallets() async {
@@ -54,17 +54,17 @@ class BalanceIntegrityService {
       ..addColumns([_db.transactions.amount.sum()])
       ..where(_db.transactions.type.equals('income'))
       ..where(_db.transactions.walletId.equals(walletId));
-    
+
     final expenseQuery = _db.selectOnly(_db.transactions)
       ..addColumns([_db.transactions.amount.sum()])
       ..where(_db.transactions.type.equals('expense'))
       ..where(_db.transactions.walletId.equals(walletId));
-    
+
     final transferInQuery = _db.selectOnly(_db.transactions)
       ..addColumns([_db.transactions.amount.sum()])
       ..where(_db.transactions.type.equals('transfer'))
       ..where(_db.transactions.toWalletId.equals(walletId));
-    
+
     final transferOutQuery = _db.selectOnly(_db.transactions)
       ..addColumns([_db.transactions.amount.sum()])
       ..where(_db.transactions.type.equals('transfer'))
@@ -81,29 +81,31 @@ class BalanceIntegrityService {
     final incomeSum = results[0].read(_db.transactions.amount.sum()) ?? 0.0;
     final expenseSum = results[1].read(_db.transactions.amount.sum()) ?? 0.0;
     final transferInSum = results[2].read(_db.transactions.amount.sum()) ?? 0.0;
-    final transferOutSum = results[3].read(_db.transactions.amount.sum()) ?? 0.0;
+    final transferOutSum =
+        results[3].read(_db.transactions.amount.sum()) ?? 0.0;
 
     final computed = incomeSum - expenseSum + transferInSum - transferOutSum;
     return computed;
   }
 
   /// Repairs balance for specific wallet by updating to computed value.
-  /// 
+  ///
   /// Uses atomic transaction to ensure consistency. Logs repair operation.
   Future<void> repairWallet(String walletId) async {
     await _db.transaction(() async {
       final computed = await _computeBalance(walletId);
-      
-      await (_db.update(_db.wallets)..where((w) => w.id.equals(walletId))).write(
-        WalletsCompanion(balance: Value(computed)),
-      );
+
+      await (_db.update(_db.wallets)..where((w) => w.id.equals(walletId)))
+          .write(WalletsCompanion(balance: Value(computed)));
     });
   }
 
   /// Repairs all detected discrepancies in batch.
-  /// 
+  ///
   /// Returns number of wallets repaired. Uses single transaction for atomicity.
-  Future<int> repairAllDiscrepancies(Map<String, BalanceDiscrepancy> discrepancies) async {
+  Future<int> repairAllDiscrepancies(
+    Map<String, BalanceDiscrepancy> discrepancies,
+  ) async {
     if (discrepancies.isEmpty) {
       return 0;
     }
@@ -112,8 +114,9 @@ class BalanceIntegrityService {
     await _db.transaction(() async {
       for (final discrepancy in discrepancies.values) {
         if (discrepancy.isSignificant) {
-          await (_db.update(_db.wallets)
-            ..where((w) => w.id.equals(discrepancy.walletId))).write(
+          await (_db.update(
+            _db.wallets,
+          )..where((w) => w.id.equals(discrepancy.walletId))).write(
             WalletsCompanion(balance: Value(discrepancy.computedBalance)),
           );
           repairedCount++;

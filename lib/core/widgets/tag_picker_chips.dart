@@ -77,11 +77,7 @@ class _TagPickerChipsState extends ConsumerState<TagPickerChips> {
           _buildCreateNewChip(colorScheme)
         else
           ActionChip(
-            avatar: Icon(
-              Icons.add,
-              size: 16,
-              color: colorScheme.primary,
-            ),
+            avatar: Icon(Icons.add, size: 16, color: colorScheme.primary),
             label: Text('transaction.add_tag'.tr()),
             onPressed: () {
               setState(() {
@@ -89,9 +85,7 @@ class _TagPickerChipsState extends ConsumerState<TagPickerChips> {
               });
             },
             backgroundColor: colorScheme.surface,
-            side: BorderSide(
-              color: colorScheme.primary.withValues(alpha: 0.3),
-            ),
+            side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
           ),
       ],
     );
@@ -129,11 +123,7 @@ class _TagPickerChipsState extends ConsumerState<TagPickerChips> {
     return Container(
       constraints: const BoxConstraints(maxWidth: 200),
       child: InputChip(
-        avatar: Icon(
-          Icons.edit,
-          size: 16,
-          color: colorScheme.primary,
-        ),
+        avatar: Icon(Icons.edit, size: 16, color: colorScheme.primary),
         label: SizedBox(
           width: 120,
           child: TextField(
@@ -158,9 +148,7 @@ class _TagPickerChipsState extends ConsumerState<TagPickerChips> {
         deleteIcon: const Icon(Icons.check, size: 18),
         onPressed: () => _createTag(_newTagController.text),
         backgroundColor: colorScheme.surface,
-        side: BorderSide(
-          color: colorScheme.primary.withValues(alpha: 0.3),
-        ),
+        side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
       ),
     );
   }

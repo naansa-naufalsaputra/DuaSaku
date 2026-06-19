@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-final currencySymbolProvider = NotifierProvider<CurrencySymbolNotifier, String>(() {
-  return CurrencySymbolNotifier();
-});
+final currencySymbolProvider = NotifierProvider<CurrencySymbolNotifier, String>(
+  () {
+    return CurrencySymbolNotifier();
+  },
+);
 
 class CurrencySymbolNotifier extends Notifier<String> {
   static const _keyCurrency = 'global_currency_symbol';
@@ -48,9 +50,11 @@ final currencyFormatterProvider = Provider<NumberFormat>((ref) {
   );
 });
 
-final autoGeolocationProvider = NotifierProvider<AutoGeolocationNotifier, bool>(() {
-  return AutoGeolocationNotifier();
-});
+final autoGeolocationProvider = NotifierProvider<AutoGeolocationNotifier, bool>(
+  () {
+    return AutoGeolocationNotifier();
+  },
+);
 
 class AutoGeolocationNotifier extends Notifier<bool> {
   static const _keyAutoGeolocate = 'settings_auto_geolocate';

@@ -5,11 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'liquid_glass_theme.dart';
 
-enum AppThemePreset { 
-  defaultPurple,
-  warmSunset,
-  midnightOcean,
-}
+enum AppThemePreset { defaultPurple, warmSunset, midnightOcean }
 
 class ThemeState {
   final AppThemePreset preset;
@@ -114,12 +110,12 @@ class ThemePresets {
     final Color textColor = isDark
         ? const Color(0xFFF5F5F7)
         : const Color(0xFF1D1D1F);
-    
+
     // Select accent color based on preset
     final Color accentColor;
     final Color glowColor1;
     final Color glowColor2;
-    
+
     switch (preset) {
       case AppThemePreset.warmSunset:
         accentColor = isDark
@@ -128,7 +124,7 @@ class ThemePresets {
         glowColor1 = isDark ? const Color(0x1AF7931E) : const Color(0x1AFF6B35);
         glowColor2 = isDark ? const Color(0x0DFFFFFF) : const Color(0x0D000000);
         break;
-      
+
       case AppThemePreset.midnightOcean:
         accentColor = isDark
             ? const Color(0xFF00D9FF) // Bright cyan for dark mode
@@ -233,14 +229,15 @@ class ThemePresets {
           thickness: 1,
           space: 1,
         ),
-        extensions: [
-          _getLiquidGlassTheme(preset, isDark),
-        ],
+        extensions: [_getLiquidGlassTheme(preset, isDark)],
       ),
     );
   }
 
-  static LiquidGlassTheme _getLiquidGlassTheme(AppThemePreset preset, bool isDark) {
+  static LiquidGlassTheme _getLiquidGlassTheme(
+    AppThemePreset preset,
+    bool isDark,
+  ) {
     switch (preset) {
       case AppThemePreset.warmSunset:
         return isDark

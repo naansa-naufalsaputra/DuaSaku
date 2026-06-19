@@ -65,7 +65,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   if (value.trim().isEmpty) return;
 
                   // Find category ID by name
-                  final categories = await ref.read(categoryNotifierProvider.future);
+                  final categories = await ref.read(
+                    categoryNotifierProvider.future,
+                  );
                   final matchedCategory = categories.firstWhere(
                     (c) => c.name.toLowerCase() == value.trim().toLowerCase(),
                     orElse: () => categories.first,
@@ -109,7 +111,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 labelText: 'Amount Limit',
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 12, top: 14),
-                  child: Text('${ref.watch(currencySymbolProvider)} ', style: const TextStyle(fontSize: 16)),
+                  child: Text(
+                    '${ref.watch(currencySymbolProvider)} ',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

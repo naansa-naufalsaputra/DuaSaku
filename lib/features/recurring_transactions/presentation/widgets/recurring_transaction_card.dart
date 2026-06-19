@@ -66,21 +66,21 @@ class RecurringTransactionCard extends ConsumerWidget {
       },
       // Only allow swipe if not completed
       direction: transaction.status == RecurringStatus.completed
-      ? DismissDirection.none
-      : DismissDirection.horizontal,
+          ? DismissDirection.none
+          : DismissDirection.horizontal,
       movementDuration: const Duration(milliseconds: 250),
       // Swipe-right background (pause/resume)
       background: _SwipeBackground(
         alignment: Alignment.centerLeft,
         color: transaction.status == RecurringStatus.active
-        ? Colors.orange
-        : Colors.green,
+            ? Colors.orange
+            : Colors.green,
         icon: transaction.status == RecurringStatus.active
-        ? Icons.pause_rounded
-        : Icons.play_arrow_rounded,
+            ? Icons.pause_rounded
+            : Icons.play_arrow_rounded,
         label: transaction.status == RecurringStatus.active
-        ? 'recurring.action_pause'.tr()
-        : 'recurring.action_resume'.tr(),
+            ? 'recurring.action_pause'.tr()
+            : 'recurring.action_resume'.tr(),
       ),
       // Swipe-left background (delete)
       secondaryBackground: _SwipeBackground(
@@ -95,22 +95,22 @@ class RecurringTransactionCard extends ConsumerWidget {
           // Navigate to detail view
         },
         child:
-        _CardContent(
-          transaction: transaction,
-          progress: progress,
-          daysRemaining: daysRemaining.clamp(0, 9999),
-          isDark: isDark,
-          colorScheme: colorScheme,
-          theme: theme,
-          formatCurrency: formatCurrency,
-        )
-        .animate(onPlay: (controller) => controller.forward())
-        .scale(
-          begin: const Offset(1.0, 1.0),
-          end: const Offset(1.0, 1.0),
-          duration: 200.ms,
-          curve: Curves.easeOutCubic,
-        ),
+            _CardContent(
+                  transaction: transaction,
+                  progress: progress,
+                  daysRemaining: daysRemaining.clamp(0, 9999),
+                  isDark: isDark,
+                  colorScheme: colorScheme,
+                  theme: theme,
+                  formatCurrency: formatCurrency,
+                )
+                .animate(onPlay: (controller) => controller.forward())
+                .scale(
+                  begin: const Offset(1.0, 1.0),
+                  end: const Offset(1.0, 1.0),
+                  duration: 200.ms,
+                  curve: Curves.easeOutCubic,
+                ),
       ),
     );
   }

@@ -13,15 +13,17 @@ class TagRepository implements TagRepositoryInterface {
   @override
   Future<Result<Tag, AppError>> createTag(Tag tag) async {
     try {
-      await _db.into(_db.tags).insert(
-        db.TagsCompanion.insert(
-          id: tag.id,
-          userId: tag.userId,
-          name: tag.name,
-          color: Value(tag.color),
-          createdAt: tag.createdAt,
-        ),
-      );
+      await _db
+          .into(_db.tags)
+          .insert(
+            db.TagsCompanion.insert(
+              id: tag.id,
+              userId: tag.userId,
+              name: tag.name,
+              color: Value(tag.color),
+              createdAt: tag.createdAt,
+            ),
+          );
       return Success(tag);
     } catch (e) {
       return Failure(AppError.database('Failed to create tag: $e'));
@@ -40,10 +42,11 @@ class TagRepository implements TagRepositoryInterface {
   @override
   Future<Result<List<Tag>, AppError>> getTags(String userId) async {
     try {
-      final rows = await (_db.select(_db.tags)
-            ..where((t) => t.userId.equals(userId))
-            ..orderBy([(t) => OrderingTerm.asc(t.name)]))
-          .get();
+      final rows =
+          await (_db.select(_db.tags)
+                ..where((t) => t.userId.equals(userId))
+                ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+              .get();
       return Success(rows.map(_tagFromRow).toList());
     } catch (e) {
       return Failure(AppError.database('Failed to get tags: $e'));
@@ -67,24 +70,28 @@ class TagRepository implements TagRepositoryInterface {
   }) async {
     try {
       // Check if already attached
-      final existing = await (_db.select(_db.transactionTags)
-            ..where((tt) =>
-                tt.transactionId.equals(transactionId) &
-                tt.tagId.equals(tagId)))
-          .getSingleOrNull();
+      final existing =
+          await (_db.select(_db.transactionTags)..where(
+                (tt) =>
+                    tt.transactionId.equals(transactionId) &
+                    tt.tagId.equals(tagId),
+              ))
+              .getSingleOrNull();
 
       if (existing != null) {
         return const Success(null);
       }
 
-      await _db.into(_db.transactionTags).insert(
-        db.TransactionTagsCompanion.insert(
-          id: _generateId(),
-          transactionId: transactionId,
-          tagId: tagId,
-          createdAt: DateTime.now(),
-        ),
-      );
+      await _db
+          .into(_db.transactionTags)
+          .insert(
+            db.TransactionTagsCompanion.insert(
+              id: _generateId(),
+              transactionId: transactionId,
+              tagId: tagId,
+              createdAt: DateTime.now(),
+            ),
+          );
       return const Success(null);
     } catch (e) {
       return Failure(AppError.database('Failed to attach tag: $e'));
@@ -97,10 +104,10 @@ class TagRepository implements TagRepositoryInterface {
     required String tagId,
   }) async {
     try {
-      await (_db.delete(_db.transactionTags)
-            ..where((tt) =>
-                tt.transactionId.equals(transactionId) &
-                tt.tagId.equals(tagId)))
+      await (_db.delete(_db.transactionTags)..where(
+            (tt) =>
+                tt.transactionId.equals(transactionId) & tt.tagId.equals(tagId),
+          ))
           .go();
       return const Success(null);
     } catch (e) {
@@ -110,15 +117,15 @@ class TagRepository implements TagRepositoryInterface {
 
   @override
   Future<Result<List<Tag>, AppError>> getTransactionTags(
-      int transactionId) async {
+    int transactionId,
+  ) async {
     try {
       final query = _db.select(_db.tags).join([
         innerJoin(
           _db.transactionTags,
           _db.transactionTags.tagId.equalsExp(_db.tags.id),
         ),
-      ])
-        ..where(_db.transactionTags.transactionId.equals(transactionId));
+      ])..where(_db.transactionTags.transactionId.equals(transactionId));
 
       final rows = await query.get();
       final tags = rows.map((row) {
@@ -138,8 +145,7 @@ class TagRepository implements TagRepositoryInterface {
         _db.transactionTags,
         _db.transactionTags.tagId.equalsExp(_db.tags.id),
       ),
-    ])
-      ..where(_db.transactionTags.transactionId.equals(transactionId));
+    ])..where(_db.transactionTags.transactionId.equals(transactionId));
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -150,15 +156,17 @@ class TagRepository implements TagRepositoryInterface {
 
   @override
   Future<Result<List<int>, AppError>> getTransactionIdsByTag(
-      String tagId) async {
+    String tagId,
+  ) async {
     try {
-      final rows = await (_db.select(_db.transactionTags)
-            ..where((tt) => tt.tagId.equals(tagId)))
-          .get();
+      final rows = await (_db.select(
+        _db.transactionTags,
+      )..where((tt) => tt.tagId.equals(tagId))).get();
       return Success(rows.map((row) => row.transactionId).toList());
     } catch (e) {
       return Failure(
-          AppError.database('Failed to get transactions by tag: $e'));
+        AppError.database('Failed to get transactions by tag: $e'),
+      );
     }
   }
 

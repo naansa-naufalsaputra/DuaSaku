@@ -61,8 +61,6 @@ class FakeFailingTransactionRepository
   ) async {
     return Failure(errorToReturn);
   }
-
-
 }
 
 // ---------------------------------------------------------------------------

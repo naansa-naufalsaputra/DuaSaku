@@ -16,12 +16,8 @@ class TestAssetLoader extends AssetLoader {
   @override
   Future<Map<String, dynamic>> load(String path, Locale locale) async {
     return {
-      'profile': {
-        'geofencing_alerts': 'Hotspot Alerts',
-      },
-      'error': {
-        'general': 'An error occurred.',
-      }
+      'profile': {'geofencing_alerts': 'Hotspot Alerts'},
+      'error': {'general': 'An error occurred.'},
     };
   }
 }
@@ -43,8 +39,8 @@ Widget buildTestWidget({
           overrides: [
             geofencingMapHotspotsProvider.overrideWith((ref) {
               if (isLoading) {
-                 final completer = Completer<List<GeofenceHotspot>>();
-                 return completer.future;
+                final completer = Completer<List<GeofenceHotspot>>();
+                return completer.future;
               }
               if (isError) {
                 throw Exception('Test Database error');
@@ -59,7 +55,7 @@ Widget buildTestWidget({
             home: const GeofencingMapScreen(),
           ),
         );
-      }
+      },
     ),
   );
 }
@@ -70,7 +66,9 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   group('GeofencingMapScreen Widget Tests', () {
-    testWidgets('renders loading indicator when state is loading', (tester) async {
+    testWidgets('renders loading indicator when state is loading', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         EasyLocalization(
           supportedLocales: const [Locale('en')],
@@ -94,7 +92,7 @@ void main() async {
                   home: const GeofencingMapScreen(),
                 ),
               );
-            }
+            },
           ),
         ),
       );
@@ -108,7 +106,9 @@ void main() async {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('renders error text when provider throws an error', (tester) async {
+    testWidgets('renders error text when provider throws an error', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestWidget(hotspots: [], isError: true));
       await tester.pump(); // Start easy_localization load
       await tester.idle();
@@ -117,18 +117,25 @@ void main() async {
       expect(find.text('An error occurred.'), findsOneWidget);
     });
 
-    testWidgets('renders empty placeholder when no hotspots are detected', (tester) async {
+    testWidgets('renders empty placeholder when no hotspots are detected', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestWidget(hotspots: []));
       await tester.pump();
       await tester.idle();
       await tester.pumpAndSettle();
 
       expect(find.text('No spending hotspots detected yet.'), findsOneWidget);
-      expect(find.textContaining('Spend money at 3+ locations'), findsOneWidget);
+      expect(
+        find.textContaining('Spend money at 3+ locations'),
+        findsOneWidget,
+      );
       expect(find.byType(FlutterMap), findsNothing);
     });
 
-    testWidgets('renders map and markers when hotspots are detected', (tester) async {
+    testWidgets('renders map and markers when hotspots are detected', (
+      tester,
+    ) async {
       final mockHotspots = [
         const GeofenceHotspot(
           id: 'hotspot_1',
@@ -149,38 +156,44 @@ void main() async {
       expect(find.byIcon(Icons.location_on_rounded), findsOneWidget);
     });
 
-    testWidgets('tapping location marker displays hotspot details bottom sheet', (tester) async {
-      final mockHotspots = [
-        const GeofenceHotspot(
-          id: 'hotspot_1',
-          latitude: -6.200000,
-          longitude: 106.816666,
-          name: 'Grand Indonesia Mall',
-        ),
-      ];
+    testWidgets(
+      'tapping location marker displays hotspot details bottom sheet',
+      (tester) async {
+        final mockHotspots = [
+          const GeofenceHotspot(
+            id: 'hotspot_1',
+            latitude: -6.200000,
+            longitude: 106.816666,
+            name: 'Grand Indonesia Mall',
+          ),
+        ];
 
-      await tester.pumpWidget(buildTestWidget(hotspots: mockHotspots));
-      await tester.pump();
-      await tester.idle();
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildTestWidget(hotspots: mockHotspots));
+        await tester.pump();
+        await tester.idle();
+        await tester.pumpAndSettle();
 
-      // Tap location marker
-      await tester.tap(find.byIcon(Icons.location_on_rounded));
-      await tester.pumpAndSettle(); // Wait for bottom sheet presentation
+        // Tap location marker
+        await tester.tap(find.byIcon(Icons.location_on_rounded));
+        await tester.pumpAndSettle(); // Wait for bottom sheet presentation
 
-      // Verify bottom sheet title and text
-      expect(find.text('Grand Indonesia Mall'), findsOneWidget);
-      expect(find.text('Spending Warning Zone'), findsOneWidget);
-      expect(find.textContaining('Radius: 150m from centroid'), findsOneWidget);
-      expect(find.textContaining('Latitude: -6.200000'), findsOneWidget);
-      expect(find.textContaining('Longitude: 106.816666'), findsOneWidget);
+        // Verify bottom sheet title and text
+        expect(find.text('Grand Indonesia Mall'), findsOneWidget);
+        expect(find.text('Spending Warning Zone'), findsOneWidget);
+        expect(
+          find.textContaining('Radius: 150m from centroid'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('Latitude: -6.200000'), findsOneWidget);
+        expect(find.textContaining('Longitude: 106.816666'), findsOneWidget);
 
-      // Close bottom sheet
-      await tester.tap(find.text('Close'));
-      await tester.pumpAndSettle();
+        // Close bottom sheet
+        await tester.tap(find.text('Close'));
+        await tester.pumpAndSettle();
 
-      // Verify bottom sheet has closed
-      expect(find.text('Spending Warning Zone'), findsNothing);
-    });
+        // Verify bottom sheet has closed
+        expect(find.text('Spending Warning Zone'), findsNothing);
+      },
+    );
   });
 }

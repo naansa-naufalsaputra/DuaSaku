@@ -47,7 +47,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
   }
 
-
   String _getDateGroupName(DateTime date, BuildContext context) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -241,7 +240,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         listItems.addAll(txList);
                       });
 
-                      final notifier = ref.read(transactionNotifierProvider.notifier);
+                      final notifier = ref.read(
+                        transactionNotifierProvider.notifier,
+                      );
 
                       return Column(
                         children: [
@@ -281,7 +282,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       24,
                                       100,
                                     ),
-                                    itemCount: listItems.length + (notifier.hasMorePages ? 1 : 0),
+                                    itemCount:
+                                        listItems.length +
+                                        (notifier.hasMorePages ? 1 : 0),
                                     itemBuilder: (context, index) {
                                       // Show loading indicator at bottom for pagination
                                       if (index == listItems.length) {
@@ -289,12 +292,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                             ? const Center(
                                                 child: Padding(
                                                   padding: EdgeInsets.all(16),
-                                                  child: CircularProgressIndicator(),
+                                                  child:
+                                                      CircularProgressIndicator(),
                                                 ),
                                               )
                                             : const SizedBox.shrink();
                                       }
-                                      
+
                                       final item = listItems[index];
 
                                       if (item is String) {
@@ -352,8 +356,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       final amountPrefix = isExpense
                                           ? '-'
                                           : '+';
-                                      final formattedAmount =
-                                          ref.watch(currencyFormatterProvider).format(tx.amount);
+                                      final formattedAmount = ref
+                                          .watch(currencyFormatterProvider)
+                                          .format(tx.amount);
 
                                       return Column(
                                         children: [

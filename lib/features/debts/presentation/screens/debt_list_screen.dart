@@ -19,7 +19,8 @@ class DebtListScreen extends ConsumerStatefulWidget {
   ConsumerState<DebtListScreen> createState() => _DebtListScreenState();
 }
 
-class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTickerProviderStateMixin {
+class _DebtListScreenState extends ConsumerState<DebtListScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _statusFilter = 'all'; // 'all', 'unpaid', 'paid'
 
@@ -44,9 +45,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: GlassAppBar(
-        title: Text('debts.title'.tr()),
-      ),
+      appBar: GlassAppBar(title: Text('debts.title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -57,7 +56,9 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                   controller: _tabController,
                   indicatorColor: theme.colorScheme.primary,
                   labelColor: isDark ? Colors.white : Colors.black87,
-                  unselectedLabelColor: isDark ? Colors.white60 : Colors.black54,
+                  unselectedLabelColor: isDark
+                      ? Colors.white60
+                      : Colors.black54,
                   tabs: [
                     Tab(text: 'debts.tab_debts'.tr()),
                     Tab(text: 'debts.tab_loans'.tr()),
@@ -69,8 +70,20 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                       return TabBarView(
                         controller: _tabController,
                         children: [
-                          _buildDebtTab(allDebts, 'debt', isDark, theme, currencyFormatter),
-                          _buildDebtTab(allDebts, 'loan', isDark, theme, currencyFormatter),
+                          _buildDebtTab(
+                            allDebts,
+                            'debt',
+                            isDark,
+                            theme,
+                            currencyFormatter,
+                          ),
+                          _buildDebtTab(
+                            allDebts,
+                            'loan',
+                            isDark,
+                            theme,
+                            currencyFormatter,
+                          ),
                         ],
                       );
                     },
@@ -81,11 +94,18 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.error_outline_rounded, size: 48, color: theme.colorScheme.error),
+                            Icon(
+                              Icons.error_outline_rounded,
+                              size: 48,
+                              color: theme.colorScheme.error,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               'debts.error_loading'.tr(),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 16),
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                                fontSize: 16,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -156,7 +176,12 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final debt = filtered[index];
-                    return _buildDebtCard(debt, isDark, theme, formatter).liquidStagger(index);
+                    return _buildDebtCard(
+                      debt,
+                      isDark,
+                      theme,
+                      formatter,
+                    ).liquidStagger(index);
                   },
                 ),
         ),
@@ -170,13 +195,19 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : (theme.brightness == Brightness.dark ? Colors.white70 : Colors.black87),
+          color: isSelected
+              ? Colors.white
+              : (theme.brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.black87),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       selected: isSelected,
       selectedColor: theme.colorScheme.primary,
-      backgroundColor: theme.brightness == Brightness.dark ? Colors.white10 : Colors.grey[200],
+      backgroundColor: theme.brightness == Brightness.dark
+          ? Colors.white10
+          : Colors.grey[200],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: Colors.transparent),
@@ -205,14 +236,18 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                type == 'debt' ? Icons.assignment_late_rounded : Icons.assignment_ind_rounded,
+                type == 'debt'
+                    ? Icons.assignment_late_rounded
+                    : Icons.assignment_ind_rounded,
                 size: 64,
                 color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              type == 'debt' ? 'debts.empty_debts'.tr() : 'debts.empty_loans'.tr(),
+              type == 'debt'
+                  ? 'debts.empty_debts'.tr()
+                  : 'debts.empty_loans'.tr(),
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
                 fontSize: 18,
@@ -234,7 +269,9 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
   ) {
     final progress = debt.amount > 0 ? (debt.paidAmount / debt.amount) : 0.0;
     final isOverdue = debt.isOverdue;
-    final accentColor = debt.type == 'debt' ? theme.colorScheme.error : theme.colorScheme.primary;
+    final accentColor = debt.type == 'debt'
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
 
     return Card(
       elevation: 0,
@@ -245,7 +282,9 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
           color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.2),
         ),
       ),
-      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.8),
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.05)
+          : Colors.white.withValues(alpha: 0.8),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
@@ -347,15 +386,21 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
                         Icon(
                           Icons.calendar_month_rounded,
                           size: 14,
-                          color: isOverdue ? theme.colorScheme.error : (isDark ? Colors.white60 : Colors.black54),
+                          color: isOverdue
+                              ? theme.colorScheme.error
+                              : (isDark ? Colors.white60 : Colors.black54),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           DateFormat.yMMMd().format(debt.dueDate!),
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
-                            color: isOverdue ? theme.colorScheme.error : (isDark ? Colors.white60 : Colors.black54),
+                            fontWeight: isOverdue
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isOverdue
+                                ? theme.colorScheme.error
+                                : (isDark ? Colors.white60 : Colors.black54),
                           ),
                         ),
                       ],
@@ -391,7 +436,9 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
       color = Colors.orange;
       text = 'debts.status_partial'.tr();
     } else {
-      color = debt.type == 'debt' ? theme.colorScheme.error : theme.colorScheme.primary;
+      color = debt.type == 'debt'
+          ? theme.colorScheme.error
+          : theme.colorScheme.primary;
       text = 'debts.status_unpaid'.tr();
     }
 
@@ -421,8 +468,12 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> with SingleTick
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey[300]!,
-            highlightColor: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.grey[100]!,
+            baseColor: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.grey[300]!,
+            highlightColor: isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : Colors.grey[100]!,
             child: Container(
               height: 130,
               decoration: BoxDecoration(

@@ -5,14 +5,14 @@ import 'transaction_filters.dart';
 
 abstract class TransactionRepositoryInterface {
   Stream<List<TransactionModel>> fetchTransactions(String userId);
-  
+
   /// Fetch transactions with filters and dynamic limit for pagination
   Stream<List<TransactionModel>> fetchTransactionsFiltered(
     String userId,
     TransactionFilters filters,
     int limit,
   );
-  
+
   Future<Result<void, AppError>> insertTransaction(
     TransactionModel transaction,
   );

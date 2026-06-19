@@ -30,11 +30,11 @@ class CloudSyncService {
   final GoogleSignIn _googleSignIn;
 
   CloudSyncService(this._ref, {GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ?? GoogleSignIn(
-          scopes: [
-            'https://www.googleapis.com/auth/drive.appdata',
-          ],
-        );
+    : _googleSignIn =
+          googleSignIn ??
+          GoogleSignIn(
+            scopes: ['https://www.googleapis.com/auth/drive.appdata'],
+          );
 
   Future<GoogleSignInAccount?> signIn() async {
     try {
@@ -85,7 +85,10 @@ class CloudSyncService {
       final backupPlaintext = await backupService.generateBackupPlaintext();
 
       // 2. Encrypt using client-side AES-256 (via user security PIN)
-      final encryptedPayload = backupService.encryptBackup(backupPlaintext, pin);
+      final encryptedPayload = backupService.encryptBackup(
+        backupPlaintext,
+        pin,
+      );
 
       // 3. Upload payload to appData folder in Google Drive
       final media = drive.Media(
@@ -112,7 +115,10 @@ class CloudSyncService {
 
       // 4. Update last sync time
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_cloud_sync_time', DateTime.now().toIso8601String());
+      await prefs.setString(
+        'last_cloud_sync_time',
+        DateTime.now().toIso8601String(),
+      );
 
       return true;
     } catch (e) {
@@ -142,17 +148,25 @@ class CloudSyncService {
       final fileId = list.files!.first.id!;
 
       // 2. Download file contents
-      final media = await driveApi.files.get(
-        fileId,
-        downloadOptions: drive.DownloadOptions.fullMedia,
-      ) as drive.Media;
+      final media =
+          await driveApi.files.get(
+                fileId,
+                downloadOptions: drive.DownloadOptions.fullMedia,
+              )
+              as drive.Media;
 
-      final bytes = await media.stream.fold<List<int>>([], (prev, element) => prev..addAll(element));
+      final bytes = await media.stream.fold<List<int>>(
+        [],
+        (prev, element) => prev..addAll(element),
+      );
       final encryptedPayload = utf8.decode(bytes);
 
       // 3. Decrypt payload locally using user PIN
       final backupService = _ref.read(backupServiceProvider);
-      final decryptedPlaintext = backupService.decryptBackup(encryptedPayload, pin);
+      final decryptedPlaintext = backupService.decryptBackup(
+        encryptedPayload,
+        pin,
+      );
 
       // 4. Restore database records atomically
       await backupService.restoreFromPlaintext(decryptedPlaintext);

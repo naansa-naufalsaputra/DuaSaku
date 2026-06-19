@@ -59,10 +59,7 @@ class ExchangeRateService {
   }
 
   /// Convert to base currency (IDR) for aggregation
-  double toBaseCurrency({
-    required double amount,
-    required String from,
-  }) {
+  double toBaseCurrency({required double amount, required String from}) {
     return convert(amount: amount, from: from, to: 'IDR');
   }
 
@@ -90,8 +87,10 @@ class ExchangeRateService {
     final formatted = _formatNumber(amount, currency.decimalDigits);
 
     // Symbol-first currencies (most Western currencies)
-    if (currencyCode == 'USD' || currencyCode == 'EUR' ||
-        currencyCode == 'GBP' || currencyCode == 'AUD' ||
+    if (currencyCode == 'USD' ||
+        currencyCode == 'EUR' ||
+        currencyCode == 'GBP' ||
+        currencyCode == 'AUD' ||
         currencyCode == 'SGD') {
       return '${currency.symbol}$formatted';
     }

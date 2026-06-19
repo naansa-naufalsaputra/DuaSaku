@@ -69,8 +69,6 @@ class _TransactionTypeBottomSheetState
         : TransactionType.income;
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -81,15 +79,19 @@ class _TransactionTypeBottomSheetState
       _latitude = tx.latitude;
       _longitude = tx.longitude;
       _recordLocation = (tx.latitude != null && tx.longitude != null);
-      
+
       if (_isTransferMode) {
-        _transferAmountController.text = NumberFormat.decimalPattern('id_ID').format(tx.amount.toInt());
+        _transferAmountController.text = NumberFormat.decimalPattern(
+          'id_ID',
+        ).format(tx.amount.toInt());
         _transferNotesController.text = tx.notes;
         _transferFromWalletId = tx.fromWalletId;
         _transferToWalletId = tx.toWalletId;
       } else {
         _manualType = tx.type;
-        _manualAmountController.text = NumberFormat.decimalPattern('id_ID').format(tx.amount.toInt());
+        _manualAmountController.text = NumberFormat.decimalPattern(
+          'id_ID',
+        ).format(tx.amount.toInt());
         _manualCategoryController.text = tx.categoryId;
         _manualNotesController.text = tx.notes;
         _manualWalletId = tx.walletId;
@@ -125,9 +127,12 @@ class _TransactionTypeBottomSheetState
       return;
     }
 
-    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final sanitized = MathPreviewParser.sanitizeExpression(
+      text,
+      currencySymbol,
+    );
     final evalResult = MathPreviewParser.evaluate(sanitized);
-    
+
     if (evalResult != null && evalResult > 0) {
       final formatted = ref.read(currencyFormatterProvider).format(evalResult);
       setState(() {
@@ -144,7 +149,10 @@ class _TransactionTypeBottomSheetState
     final text = _manualAmountController.text.trim();
     if (text.isEmpty) return;
     final currencySymbol = ref.read(currencySymbolProvider);
-    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final sanitized = MathPreviewParser.sanitizeExpression(
+      text,
+      currencySymbol,
+    );
     final result = MathPreviewParser.evaluate(sanitized);
     if (result != null && result > 0) {
       final formatted = NumberFormat.decimalPattern(
@@ -161,7 +169,10 @@ class _TransactionTypeBottomSheetState
     final text = _transferAmountController.text.trim();
     if (text.isEmpty) return;
     final currencySymbol = ref.read(currencySymbolProvider);
-    final sanitized = MathPreviewParser.sanitizeExpression(text, currencySymbol);
+    final sanitized = MathPreviewParser.sanitizeExpression(
+      text,
+      currencySymbol,
+    );
     final result = MathPreviewParser.evaluate(sanitized);
     if (result != null && result > 0) {
       final formatted = NumberFormat.decimalPattern(
@@ -283,10 +294,6 @@ class _TransactionTypeBottomSheetState
       });
     }
   }
-
-
-
-
 
   Future<void> _submitManual() async {
     bool hasError = false;
@@ -495,7 +502,9 @@ class _TransactionTypeBottomSheetState
                       ),
                     ),
                     subtitle: Text(
-                      ref.watch(currencyFormatterProvider).format(wallet.balance),
+                      ref
+                          .watch(currencyFormatterProvider)
+                          .format(wallet.balance),
                       style: const TextStyle(color: Colors.grey),
                     ),
                     trailing: isSelected
@@ -615,20 +624,27 @@ class _TransactionTypeBottomSheetState
             } else {
               _isTransferMode = false;
               _manualType = type;
-              
-              final categories = ref.read(categoryNotifierProvider).valueOrNull ?? [];
-              final expenseCategoriesList = categories.where((c) => c.type == 'expense').toList();
-              final incomeCategoriesList = categories.where((c) => c.type == 'income').toList();
+
+              final categories =
+                  ref.read(categoryNotifierProvider).valueOrNull ?? [];
+              final expenseCategoriesList = categories
+                  .where((c) => c.type == 'expense')
+                  .toList();
+              final incomeCategoriesList = categories
+                  .where((c) => c.type == 'income')
+                  .toList();
 
               if (type == 'expense') {
                 if (expenseCategoriesList.isNotEmpty) {
-                  _manualCategoryController.text = expenseCategoriesList.first.name;
+                  _manualCategoryController.text =
+                      expenseCategoriesList.first.name;
                 } else {
                   _manualCategoryController.text = 'Food';
                 }
               } else if (type == 'income') {
                 if (incomeCategoriesList.isNotEmpty) {
-                  _manualCategoryController.text = incomeCategoriesList.first.name;
+                  _manualCategoryController.text =
+                      incomeCategoriesList.first.name;
                 } else {
                   _manualCategoryController.text = 'Salary';
                 }
@@ -788,8 +804,14 @@ class _TransactionTypeBottomSheetState
                         onAmountChanged: _updateMathPreview,
                         onAmountFocusLost: _evaluateTransferAmountField,
                         currencySymbol: ref.watch(currencySymbolProvider),
-                        fromWalletSelectorWidget: _buildWalletSelectorPill(walletsList, isFromWallet: true),
-                        toWalletSelectorWidget: _buildWalletSelectorPill(walletsList, isFromWallet: false),
+                        fromWalletSelectorWidget: _buildWalletSelectorPill(
+                          walletsList,
+                          isFromWallet: true,
+                        ),
+                        toWalletSelectorWidget: _buildWalletSelectorPill(
+                          walletsList,
+                          isFromWallet: false,
+                        ),
                       )
                     : ManualTransactionForm(
                         amountController: _manualAmountController,
@@ -813,7 +835,9 @@ class _TransactionTypeBottomSheetState
                         },
                         transactionType: _manualType,
                         wallets: walletsList,
-                        categories: ref.read(categoryNotifierProvider).valueOrNull ?? [],
+                        categories:
+                            ref.read(categoryNotifierProvider).valueOrNull ??
+                            [],
                         recordLocation: _recordLocation,
                         onRecordLocationChanged: (val) => _toggleLocation(val),
                         isFetchingLocation: _isFetchingLocation,
@@ -822,7 +846,9 @@ class _TransactionTypeBottomSheetState
                         onAmountChanged: _updateMathPreview,
                         onAmountFocusLost: _evaluateManualAmountField,
                         currencySymbol: ref.watch(currencySymbolProvider),
-                        walletSelectorWidget: _buildWalletSelectorPill(walletsList),
+                        walletSelectorWidget: _buildWalletSelectorPill(
+                          walletsList,
+                        ),
                       ),
               ),
             ),
@@ -831,6 +857,4 @@ class _TransactionTypeBottomSheetState
       ),
     );
   }
-
-
 }

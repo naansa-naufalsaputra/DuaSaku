@@ -65,8 +65,6 @@ class _FakeFailingRepository implements TransactionRepositoryInterface {
   ) async {
     return Failure(failureError);
   }
-
-
 }
 
 /// Minimal AsyncNotifier that replicates TransactionNotifier's error handling
