@@ -25,9 +25,11 @@ class _FakeStatusRepo extends Fake
 
 class _FakeBudgetRepo extends Fake implements BudgetRepositoryInterface {}
 
-class _FakeTransactionRepo extends Fake implements TransactionRepositoryInterface {}
+class _FakeTransactionRepo extends Fake
+    implements TransactionRepositoryInterface {}
 
-class _FakeRecurringRepo extends Fake implements RecurringTransactionRepositoryInterface {}
+class _FakeRecurringRepo extends Fake
+    implements RecurringTransactionRepositoryInterface {}
 
 class _FakeNotificationService extends Fake
     implements BudgetNotificationService {}

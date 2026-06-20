@@ -114,7 +114,11 @@ class ProfileSwitcher extends ConsumerWidget {
                                 // Show snackbar
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('profile.switched_to'.tr(args: [user.name])),
+                                    content: Text(
+                                      'profile.switched_to'.tr(
+                                        args: [user.name],
+                                      ),
+                                    ),
                                     duration: const Duration(seconds: 2),
                                   ),
                                 );
@@ -223,14 +227,20 @@ class ProfileSwitcher extends ConsumerWidget {
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('profile.profile_created'.tr(args: [name]))),
+                    SnackBar(
+                      content: Text('profile.profile_created'.tr(args: [name])),
+                    ),
                   );
                 }
               } catch (e) {
                 if (ctx.mounted) {
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text('profile.error_prefix'.tr(args: [e.toString()]))));
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'profile.error_prefix'.tr(args: [e.toString()]),
+                      ),
+                    ),
+                  );
                 }
               }
             },

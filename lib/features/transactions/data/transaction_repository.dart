@@ -214,23 +214,25 @@ class TransactionRepository implements TransactionRepositoryInterface {
                   ..limit(1))
                 .getSingleOrNull();
 
-        cat ??= await (_db.select(_db.categories)
-              ..where(
-                (c) =>
-                    c.name.equals(transaction.categoryId) &
-                    c.userId.equals(transaction.userId),
-              )
-              ..limit(1))
-            .getSingleOrNull();
+        cat ??=
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.name.equals(transaction.categoryId) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
+                .getSingleOrNull();
 
-        cat ??= await (_db.select(_db.categories)
-              ..where(
-                (c) =>
-                    c.id.equals(transaction.categoryId.toLowerCase()) &
-                    c.userId.equals(transaction.userId),
-              )
-              ..limit(1))
-            .getSingleOrNull();
+        cat ??=
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.id.equals(transaction.categoryId.toLowerCase()) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
+                .getSingleOrNull();
 
         if (cat == null) {
           throw AppError.validation(
@@ -300,23 +302,25 @@ class TransactionRepository implements TransactionRepositoryInterface {
                   ..limit(1))
                 .getSingleOrNull();
 
-        cat ??= await (_db.select(_db.categories)
-              ..where(
-                (c) =>
-                    c.name.equals(transaction.categoryId) &
-                    c.userId.equals(transaction.userId),
-              )
-              ..limit(1))
-            .getSingleOrNull();
+        cat ??=
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.name.equals(transaction.categoryId) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
+                .getSingleOrNull();
 
-        cat ??= await (_db.select(_db.categories)
-              ..where(
-                (c) =>
-                    c.id.equals(transaction.categoryId.toLowerCase()) &
-                    c.userId.equals(transaction.userId),
-              )
-              ..limit(1))
-            .getSingleOrNull();
+        cat ??=
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.id.equals(transaction.categoryId.toLowerCase()) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
+                .getSingleOrNull();
 
         if (cat == null) {
           throw AppError.validation(

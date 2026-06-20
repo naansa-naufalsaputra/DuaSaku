@@ -748,7 +748,10 @@ class _ManageCategoriesScreenState
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: Text(
           'categories.add_category'.tr(),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

@@ -11,42 +11,49 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('initializes with empty string when SharedPreferences is empty', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'initializes with empty string when SharedPreferences is empty',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final name = container.read(displayNameProvider);
-      expect(name, isEmpty);
-    });
+        final name = container.read(displayNameProvider);
+        expect(name, isEmpty);
+      },
+    );
 
-    test('initializes with saved name from SharedPreferences correctly', () async {
-      SharedPreferences.setMockInitialValues({
-        'display_name': 'Naufal',
-      });
+    test(
+      'initializes with saved name from SharedPreferences correctly',
+      () async {
+        SharedPreferences.setMockInitialValues({'display_name': 'Naufal'});
 
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      // Trigger evaluation of provider and wait for async init
-      container.read(displayNameProvider);
-      await Future.delayed(const Duration(milliseconds: 50));
+        // Trigger evaluation of provider and wait for async init
+        container.read(displayNameProvider);
+        await Future.delayed(const Duration(milliseconds: 50));
 
-      final name = container.read(displayNameProvider);
-      expect(name, equals('Naufal'));
-    });
+        final name = container.read(displayNameProvider);
+        expect(name, equals('Naufal'));
+      },
+    );
 
-    test('setDisplayName updates state and saves to SharedPreferences', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'setDisplayName updates state and saves to SharedPreferences',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final notifier = container.read(displayNameProvider.notifier);
-      await notifier.setDisplayName('Saputra');
+        final notifier = container.read(displayNameProvider.notifier);
+        await notifier.setDisplayName('Saputra');
 
-      final name = container.read(displayNameProvider);
-      expect(name, equals('Saputra'));
+        final name = container.read(displayNameProvider);
+        expect(name, equals('Saputra'));
 
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('display_name'), equals('Saputra'));
-    });
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('display_name'), equals('Saputra'));
+      },
+    );
   });
 }

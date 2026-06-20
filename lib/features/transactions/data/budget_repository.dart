@@ -134,16 +134,17 @@ class BudgetRepository implements BudgetRepositoryInterface {
     String categoryId,
     String month,
   ) async {
-    final query = _db.select(_db.budgets).join([
-      innerJoin(
-        _db.categories,
-        _db.categories.id.equalsExp(_db.budgets.categoryId),
-      ),
-    ])..where(
-        _db.budgets.userId.equals(userId) &
-        _db.budgets.categoryId.equals(categoryId) &
-        _db.budgets.month.equals(month),
-      );
+    final query =
+        _db.select(_db.budgets).join([
+          innerJoin(
+            _db.categories,
+            _db.categories.id.equalsExp(_db.budgets.categoryId),
+          ),
+        ])..where(
+          _db.budgets.userId.equals(userId) &
+              _db.budgets.categoryId.equals(categoryId) &
+              _db.budgets.month.equals(month),
+        );
 
     final row = await query.getSingleOrNull();
     if (row == null) return null;
@@ -166,8 +167,7 @@ class BudgetRepository implements BudgetRepositoryInterface {
     final query = _db.selectOnly(_db.budgets)
       ..addColumns([sumExpr])
       ..where(
-        _db.budgets.userId.equals(userId) &
-        _db.budgets.month.equals(month),
+        _db.budgets.userId.equals(userId) & _db.budgets.month.equals(month),
       );
 
     final row = await query.getSingle();

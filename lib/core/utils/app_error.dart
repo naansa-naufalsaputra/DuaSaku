@@ -28,7 +28,6 @@ sealed class AppError {
   @override
   String toString() => message;
 
-
   /// Human-readable error message.
   final String message;
 

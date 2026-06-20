@@ -18,7 +18,11 @@ class TransactionEventHandlers {
   final TransactionRepositoryInterface _transactionRepo;
   final BudgetAlertEvaluator _budgetEvaluator;
 
-  TransactionEventHandlers(this._walletRepo, this._transactionRepo, this._budgetEvaluator);
+  TransactionEventHandlers(
+    this._walletRepo,
+    this._transactionRepo,
+    this._budgetEvaluator,
+  );
 
   /// Register handlers to listen to the event stream.
   void registerHandlers(Stream<TransactionEvent> eventStream) {
@@ -64,7 +68,10 @@ class TransactionEventHandlers {
 
       // 2. Trigger geofence sync (async, non-blocking)
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(
+          _transactionRepo,
+          transaction.userId,
+        ),
       );
 
       // 3. Evaluate budget alerts for expenses
@@ -99,7 +106,10 @@ class TransactionEventHandlers {
 
       // 3. Trigger geofence sync
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(
+          _transactionRepo,
+          transaction.userId,
+        ),
       );
 
       // 4. Re-evaluate budget alerts
@@ -146,7 +156,10 @@ class TransactionEventHandlers {
 
       // 2. Trigger geofence sync
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(
+          _transactionRepo,
+          transaction.userId,
+        ),
       );
 
       // 3. Re-evaluate budget alerts

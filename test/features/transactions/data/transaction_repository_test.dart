@@ -214,61 +214,67 @@ void main() {
       expect(wallet.balance, equals(600.0));
     });
 
-    test('insertTransaction - resolves category by name and case-insensitive ID', () async {
-      const String customCatId = 'custom-ent';
-      const String customCatName = 'Entertainment';
+    test(
+      'insertTransaction - resolves category by name and case-insensitive ID',
+      () async {
+        const String customCatId = 'custom-ent';
+        const String customCatName = 'Entertainment';
 
-      // Seed unique custom category
-      await db.into(db.categories).insert(
-            CategoriesCompanion.insert(
-              id: customCatId,
-              userId: userId,
-              name: customCatName,
-              type: 'expense',
-              icon: const Value('movie'),
-              color: const Value('#9C27B0'),
-              createdAt: DateTime.now(),
-            ),
-          );
+        // Seed unique custom category
+        await db
+            .into(db.categories)
+            .insert(
+              CategoriesCompanion.insert(
+                id: customCatId,
+                userId: userId,
+                name: customCatName,
+                type: 'expense',
+                icon: const Value('movie'),
+                color: const Value('#9C27B0'),
+                createdAt: DateTime.now(),
+              ),
+            );
 
-      // Test category name resolution ('Entertainment')
-      final txByName = TransactionModel(
-        userId: userId,
-        amount: 100.0,
-        categoryId: customCatName, // This matches c.name
-        type: 'expense',
-        notes: 'Test name resolution',
-        walletId: walletId,
-        createdAt: DateTime.now(),
-      );
+        // Test category name resolution ('Entertainment')
+        final txByName = TransactionModel(
+          userId: userId,
+          amount: 100.0,
+          categoryId: customCatName, // This matches c.name
+          type: 'expense',
+          notes: 'Test name resolution',
+          walletId: walletId,
+          createdAt: DateTime.now(),
+        );
 
-      final result1 = await repository.insertTransaction(txByName);
-      expect(result1, isA<Success<void, dynamic>>());
+        final result1 = await repository.insertTransaction(txByName);
+        expect(result1, isA<Success<void, dynamic>>());
 
-      final insertedTx1 = await (db.select(db.transactions)
-            ..where((t) => t.notes.equals('Test name resolution')))
-          .getSingle();
-      expect(insertedTx1.categoryId, equals(customCatId));
+        final insertedTx1 = await (db.select(
+          db.transactions,
+        )..where((t) => t.notes.equals('Test name resolution'))).getSingle();
+        expect(insertedTx1.categoryId, equals(customCatId));
 
-      // Test category ID case-insensitive resolution ('CUSTOM-ENT')
-      final txByLowerId = TransactionModel(
-        userId: userId,
-        amount: 100.0,
-        categoryId: 'CUSTOM-ENT', // This matches c.id when lowercased
-        type: 'expense',
-        notes: 'Test ID lowercase resolution',
-        walletId: walletId,
-        createdAt: DateTime.now(),
-      );
+        // Test category ID case-insensitive resolution ('CUSTOM-ENT')
+        final txByLowerId = TransactionModel(
+          userId: userId,
+          amount: 100.0,
+          categoryId: 'CUSTOM-ENT', // This matches c.id when lowercased
+          type: 'expense',
+          notes: 'Test ID lowercase resolution',
+          walletId: walletId,
+          createdAt: DateTime.now(),
+        );
 
-      final result2 = await repository.insertTransaction(txByLowerId);
-      expect(result2, isA<Success<void, dynamic>>());
+        final result2 = await repository.insertTransaction(txByLowerId);
+        expect(result2, isA<Success<void, dynamic>>());
 
-      final insertedTx2 = await (db.select(db.transactions)
-            ..where((t) => t.notes.equals('Test ID lowercase resolution')))
-          .getSingle();
-      expect(insertedTx2.categoryId, equals(customCatId));
-    });
+        final insertedTx2 =
+            await (db.select(
+                  db.transactions,
+                )..where((t) => t.notes.equals('Test ID lowercase resolution')))
+                .getSingle();
+        expect(insertedTx2.categoryId, equals(customCatId));
+      },
+    );
   });
 }
-

@@ -17,7 +17,11 @@ final transactionEventHandlersProvider = Provider<TransactionEventHandlers>((
   final budgetEvaluator = ref.watch(budgetAlertEvaluatorProvider);
   final eventController = ref.watch(transactionEventBusProvider);
 
-  final handlers = TransactionEventHandlers(walletRepo, transactionRepo, budgetEvaluator);
+  final handlers = TransactionEventHandlers(
+    walletRepo,
+    transactionRepo,
+    budgetEvaluator,
+  );
 
   // Register handlers to listen to event stream
   handlers.registerHandlers(eventController.stream);

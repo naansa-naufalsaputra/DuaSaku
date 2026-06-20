@@ -96,9 +96,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
-                    'budget.suggested_amount'.tr(args: [
-                      ref.watch(currencyFormatterProvider).format(_suggestedAmount!),
-                    ]),
+                    'budget.suggested_amount'.tr(
+                      args: [
+                        ref
+                            .watch(currencyFormatterProvider)
+                            .format(_suggestedAmount!),
+                      ],
+                    ),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,
@@ -236,7 +240,11 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'budget.of'.tr(args: [formatter.format(bp.budget.amountLimit)]),
+                                  'budget.of'.tr(
+                                    args: [
+                                      formatter.format(bp.budget.amountLimit),
+                                    ],
+                                  ),
                                   style: TextStyle(
                                     color: isDark
                                         ? Colors.white60

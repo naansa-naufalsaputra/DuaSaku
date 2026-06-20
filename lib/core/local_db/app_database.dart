@@ -731,7 +731,9 @@ LazyDatabase _openConnection() {
       try {
         final backupFile = File('${file.path}.backup');
         await file.copy(backupFile.path);
-        debugPrint('[AppDatabase] Created database backup before opening at: ${backupFile.path}');
+        debugPrint(
+          '[AppDatabase] Created database backup before opening at: ${backupFile.path}',
+        );
       } catch (e) {
         debugPrint('[AppDatabase] Failed to create database backup: $e');
       }

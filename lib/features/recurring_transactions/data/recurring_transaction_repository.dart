@@ -343,16 +343,17 @@ class RecurringTransactionRepository
     DateTime start,
     DateTime end,
   ) async {
-    final rows = await (_db.select(_db.recurringTransactions)
-      ..where(
-        (t) =>
-            t.userId.equals(userId) &
-            t.categoryId.equals(categoryId) &
-            t.type.equals('expense') &
-            t.status.equals('active') &
-            t.nextExecutionDate.isBiggerOrEqualValue(start) &
-            t.nextExecutionDate.isSmallerOrEqualValue(end),
-      )).get();
+    final rows =
+        await (_db.select(_db.recurringTransactions)..where(
+              (t) =>
+                  t.userId.equals(userId) &
+                  t.categoryId.equals(categoryId) &
+                  t.type.equals('expense') &
+                  t.status.equals('active') &
+                  t.nextExecutionDate.isBiggerOrEqualValue(start) &
+                  t.nextExecutionDate.isSmallerOrEqualValue(end),
+            ))
+            .get();
     return rows.map(_rowToModel).toList();
   }
 }

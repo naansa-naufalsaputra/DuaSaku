@@ -29,7 +29,9 @@ class GeofenceSyncHelper {
         case Success(:final value):
           transactions = value;
         case Failure(:final error):
-          debugPrint('[GeofenceSync] Failed to fetch transactions: ${error.message}');
+          debugPrint(
+            '[GeofenceSync] Failed to fetch transactions: ${error.message}',
+          );
           return;
       }
 
