@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:drift/drift.dart';
-import '../../../core/local_db/app_database.dart';
 import '../../transactions/domain/models/transaction_model.dart';
+import '../../transactions/domain/transaction_repository_interface.dart';
+import '../../../core/utils/result.dart';
 import 'location_clustering_service.dart';
 import 'geofence_service.dart';
 
 class GeofenceSyncHelper {
   /// Fetches all user transactions from local DB, clusters them, and registers hotspots to GeofenceService.
   static Future<void> syncGeofenceHotspots(
-    AppDatabase db,
+    TransactionRepositoryInterface transactionRepo,
     String userId,
   ) async {
     try {
@@ -22,34 +22,16 @@ class GeofenceSyncHelper {
         return;
       }
 
-      // 2. Fetch all transactions for this user with category names
-      final query = db.select(db.transactions).join([
-        leftOuterJoin(
-          db.categories,
-          db.categories.id.equalsExp(db.transactions.categoryId),
-        ),
-      ]);
-      query.where(db.transactions.userId.equals(userId));
-
-      final rows = await query.get();
-      final transactions = rows.map((row) {
-        final tx = row.readTable(db.transactions);
-
-        return TransactionModel(
-          id: tx.id,
-          userId: tx.userId,
-          amount: tx.amount,
-          categoryId: tx.categoryId ?? 'uncategorized',
-          type: tx.type,
-          notes: tx.notes ?? '',
-          createdAt: tx.date,
-          walletId: tx.walletId,
-          fromWalletId: tx.fromWalletId,
-          toWalletId: tx.toWalletId,
-          latitude: tx.latitude,
-          longitude: tx.longitude,
-        );
-      }).toList();
+      // 2. Fetch all transactions for this user
+      final result = await transactionRepo.getTransactionsOnce(userId);
+      final List<TransactionModel> transactions;
+      switch (result) {
+        case Success(:final value):
+          transactions = value;
+        case Failure(:final error):
+          debugPrint('[GeofenceSync] Failed to fetch transactions: ${error.message}');
+          return;
+      }
 
       // 3. Detect hotspots using Clustering Service
       final clusteringService = LocationClusteringService();

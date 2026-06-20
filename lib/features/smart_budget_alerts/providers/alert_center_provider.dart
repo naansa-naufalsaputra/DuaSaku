@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/local_db/app_database_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../transactions/data/budget_repository.dart';
+import '../../recurring_transactions/providers/recurring_transaction_provider.dart';
+import '../../transactions/providers/transaction_provider.dart';
 import '../data/alert_preferences_repository.dart';
 import '../data/alert_repository.dart';
 import '../data/alert_threshold_status_repository.dart';
@@ -43,7 +44,10 @@ final alertThresholdStatusRepositoryProvider =
 final budgetNotificationServiceProvider = Provider<BudgetNotificationService>((
   ref,
 ) {
-  return BudgetNotificationService(db: ref.watch(appDatabaseProvider));
+  return BudgetNotificationService(
+    prefsRepo: ref.watch(alertPreferencesRepositoryProvider),
+    alertRepo: ref.watch(alertRepositoryProvider),
+  );
 });
 
 /// Provides the AlertEngineService for threshold evaluation.
@@ -52,7 +56,8 @@ final alertEngineProvider = Provider<AlertEngineService>((ref) {
     alertRepo: ref.watch(alertRepositoryProvider),
     prefsRepo: ref.watch(alertPreferencesRepositoryProvider),
     statusRepo: ref.watch(alertThresholdStatusRepositoryProvider),
-    db: ref.watch(appDatabaseProvider),
+    budgetRepository: ref.watch(budgetRepositoryProvider),
+    transactionRepository: ref.watch(transactionRepositoryProvider),
     notificationService: ref.watch(budgetNotificationServiceProvider),
   );
 });
@@ -63,8 +68,9 @@ final predictionEngineProvider = Provider<PredictionEngineService>((ref) {
     alertRepo: ref.watch(alertRepositoryProvider),
     prefsRepo: ref.watch(alertPreferencesRepositoryProvider),
     statusRepo: ref.watch(alertThresholdStatusRepositoryProvider),
-    budgetRepo: ref.watch(budgetRepositoryProvider) as BudgetRepository,
-    db: ref.watch(appDatabaseProvider),
+    budgetRepo: ref.watch(budgetRepositoryProvider),
+    transactionRepo: ref.watch(transactionRepositoryProvider),
+    recurringRepo: ref.watch(recurringTransactionRepositoryProvider),
     notificationService: ref.watch(budgetNotificationServiceProvider),
   );
 });

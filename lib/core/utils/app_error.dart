@@ -25,6 +25,10 @@
 sealed class AppError {
   const AppError(this.message, {this.stackTrace});
 
+  @override
+  String toString() => message;
+
+
   /// Human-readable error message.
   final String message;
 

@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
-import '../../../core/local_db/app_database.dart';
 import '../../wallets/domain/wallet_repository_interface.dart';
 import '../../geofencing/services/geofence_sync_helper.dart';
 import '../domain/transaction_events.dart';
 import '../domain/models/transaction_model.dart';
+import '../domain/transaction_repository_interface.dart';
 import '../../smart_budget_alerts/services/budget_alert_evaluator.dart';
 
 /// Handles side-effects triggered by transaction events.
@@ -15,10 +15,10 @@ import '../../smart_budget_alerts/services/budget_alert_evaluator.dart';
 /// - Budget alert evaluation (future)
 class TransactionEventHandlers {
   final WalletRepositoryInterface _walletRepo;
-  final AppDatabase _db;
+  final TransactionRepositoryInterface _transactionRepo;
   final BudgetAlertEvaluator _budgetEvaluator;
 
-  TransactionEventHandlers(this._walletRepo, this._db, this._budgetEvaluator);
+  TransactionEventHandlers(this._walletRepo, this._transactionRepo, this._budgetEvaluator);
 
   /// Register handlers to listen to the event stream.
   void registerHandlers(Stream<TransactionEvent> eventStream) {
@@ -64,7 +64,7 @@ class TransactionEventHandlers {
 
       // 2. Trigger geofence sync (async, non-blocking)
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
       );
 
       // 3. Evaluate budget alerts for expenses
@@ -99,7 +99,7 @@ class TransactionEventHandlers {
 
       // 3. Trigger geofence sync
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
       );
 
       // 4. Re-evaluate budget alerts
@@ -146,7 +146,7 @@ class TransactionEventHandlers {
 
       // 2. Trigger geofence sync
       unawaited(
-        GeofenceSyncHelper.syncGeofenceHotspots(_db, transaction.userId),
+        GeofenceSyncHelper.syncGeofenceHotspots(_transactionRepo, transaction.userId),
       );
 
       // 3. Re-evaluate budget alerts

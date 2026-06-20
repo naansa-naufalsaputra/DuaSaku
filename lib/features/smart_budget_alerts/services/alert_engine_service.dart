@@ -1,11 +1,12 @@
 import 'dart:developer' as developer;
 
-import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/local_db/app_database.dart';
 import '../../../core/utils/app_error.dart';
 import '../../../core/utils/result.dart';
+import '../../transactions/domain/budget_repository_interface.dart';
+import '../../transactions/domain/transaction_repository_interface.dart';
+import '../../transactions/domain/models/budget_model.dart';
 import '../domain/alert_preferences_repository_interface.dart';
 import '../domain/alert_repository_interface.dart';
 import '../domain/alert_threshold_status_repository_interface.dart';
@@ -25,7 +26,8 @@ class AlertEngineService {
   final AlertRepositoryInterface _alertRepo;
   final AlertPreferencesRepositoryInterface _prefsRepo;
   final AlertThresholdStatusRepositoryInterface _statusRepo;
-  final AppDatabase _db;
+  final BudgetRepositoryInterface _budgetRepository;
+  final TransactionRepositoryInterface _transactionRepository;
   final BudgetNotificationService _notificationService;
   final Uuid _uuid;
 
@@ -33,7 +35,8 @@ class AlertEngineService {
     required this._alertRepo,
     required this._prefsRepo,
     required this._statusRepo,
-    required this._db,
+    required this._budgetRepository,
+    required this._transactionRepository,
     required this._notificationService,
     Uuid? uuid,
   }) : _uuid = uuid ?? const Uuid();
@@ -98,7 +101,7 @@ class AlertEngineService {
     );
 
     // 5. Calculate percentage
-    final budgetLimit = budget.amount;
+    final budgetLimit = budget.amountLimit;
     if (budgetLimit <= 0) {
       return const Success([]);
     }
@@ -372,7 +375,7 @@ class AlertEngineService {
       return const Success(null);
     }
 
-    final budgetLimit = budget.amount;
+    final budgetLimit = budget.amountLimit;
     if (budgetLimit <= 0) {
       return const Success(null);
     }
@@ -429,19 +432,18 @@ class AlertEngineService {
 
   /// Fetches the budget row for a specific category and month.
   /// Returns null if no budget is configured.
-  Future<Budget?> _getBudgetForCategory(
+  /// Fetches the budget row for a specific category and month.
+  /// Returns null if no budget is configured.
+  Future<BudgetModel?> _getBudgetForCategory(
     String userId,
     String categoryId,
     String budgetMonth,
   ) async {
-    final query = _db.select(_db.budgets)
-      ..where(
-        (b) =>
-            b.userId.equals(userId) &
-            b.categoryId.equals(categoryId) &
-            b.month.equals(budgetMonth),
-      );
-    return query.getSingleOrNull();
+    return _budgetRepository.getBudgetByCategoryAndMonth(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
   }
 
   /// Calculates total expense spending for a category in a given month.
@@ -453,22 +455,11 @@ class AlertEngineService {
     String categoryId,
     String budgetMonth,
   ) async {
-    final monthStart = DateTime.parse('$budgetMonth-01');
-    final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
-
-    final sumExpr = _db.transactions.amount.sum();
-    final query = _db.selectOnly(_db.transactions)
-      ..addColumns([sumExpr])
-      ..where(
-        _db.transactions.userId.equals(userId) &
-            _db.transactions.categoryId.equals(categoryId) &
-            _db.transactions.type.equals('expense') &
-            _db.transactions.date.isBiggerOrEqualValue(monthStart) &
-            _db.transactions.date.isSmallerThanValue(monthEnd),
-      );
-
-    final row = await query.getSingle();
-    return row.read(sumExpr) ?? 0.0;
+    return _transactionRepository.getTotalSpendingForCategory(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
   }
 
   /// Calculates total expense spending across ALL categories for a month.
@@ -476,21 +467,10 @@ class AlertEngineService {
     String userId,
     String budgetMonth,
   ) async {
-    final monthStart = DateTime.parse('$budgetMonth-01');
-    final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
-
-    final sumExpr = _db.transactions.amount.sum();
-    final query = _db.selectOnly(_db.transactions)
-      ..addColumns([sumExpr])
-      ..where(
-        _db.transactions.userId.equals(userId) &
-            _db.transactions.type.equals('expense') &
-            _db.transactions.date.isBiggerOrEqualValue(monthStart) &
-            _db.transactions.date.isSmallerThanValue(monthEnd),
-      );
-
-    final row = await query.getSingle();
-    return row.read(sumExpr) ?? 0.0;
+    return _transactionRepository.getTotalSpendingAllCategories(
+      userId,
+      budgetMonth,
+    );
   }
 
   /// Gets the overall budget limit (sum of all category budgets for the month).
@@ -498,16 +478,7 @@ class AlertEngineService {
     String userId,
     String budgetMonth,
   ) async {
-    final sumExpr = _db.budgets.amount.sum();
-    final query = _db.selectOnly(_db.budgets)
-      ..addColumns([sumExpr])
-      ..where(
-        _db.budgets.userId.equals(userId) &
-            _db.budgets.month.equals(budgetMonth),
-      );
-
-    final row = await query.getSingle();
-    return row.read(sumExpr);
+    return _budgetRepository.getOverallBudgetLimit(userId, budgetMonth);
   }
 
   /// Gets the global thresholds from preferences, falling back to defaults.

@@ -1,9 +1,9 @@
-import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/local_db/app_database.dart';
 import '../../../core/utils/result.dart';
-import '../../transactions/data/budget_repository.dart';
+import '../../transactions/domain/budget_repository_interface.dart';
+import '../../transactions/domain/transaction_repository_interface.dart';
+import '../../recurring_transactions/domain/recurring_transaction_repository_interface.dart';
 import '../domain/alert_preferences_repository_interface.dart';
 import '../domain/alert_repository_interface.dart';
 import '../domain/alert_threshold_status_repository_interface.dart';
@@ -20,13 +20,11 @@ import 'budget_notification_service.dart';
 class PredictionEngineService {
   final AlertRepositoryInterface _alertRepo;
   final AlertPreferencesRepositoryInterface _prefsRepo;
-  // Required by design doc interface for API compatibility.
   // ignore: unused_field
   final AlertThresholdStatusRepositoryInterface _statusRepo;
-  // Required by design doc interface for API compatibility.
-  // ignore: unused_field
-  final BudgetRepository _budgetRepo;
-  final AppDatabase _db;
+  final BudgetRepositoryInterface _budgetRepo;
+  final TransactionRepositoryInterface _transactionRepo;
+  final RecurringTransactionRepositoryInterface _recurringRepo;
   final BudgetNotificationService _notificationService;
 
   PredictionEngineService({
@@ -34,7 +32,8 @@ class PredictionEngineService {
     required this._prefsRepo,
     required this._statusRepo,
     required this._budgetRepo,
-    required this._db,
+    required this._transactionRepo,
+    required this._recurringRepo,
     required this._notificationService,
   });
 
@@ -97,19 +96,15 @@ class PredictionEngineService {
     required String budgetMonth,
   }) async {
     // 1. Get budget for category+month — if none, return null silently (Req 6.4)
-    // Query the budget directly from the Budgets table by categoryId
-    final budgetRow =
-        await (_db.select(_db.budgets)..where(
-              (b) =>
-                  b.userId.equals(userId) &
-                  b.categoryId.equals(categoryId) &
-                  b.month.equals(budgetMonth),
-            ))
-            .getSingleOrNull();
+    final budgetRow = await _budgetRepo.getBudgetByCategoryAndMonth(
+      userId,
+      categoryId,
+      budgetMonth,
+    );
 
     if (budgetRow == null) return null;
 
-    final budgetLimit = budgetRow.amount;
+    final budgetLimit = budgetRow.amountLimit;
 
     // 2. Check master toggle and predictions enabled in preferences
     final prefsResult = await _prefsRepo.getGlobalPreferences(userId);
@@ -228,31 +223,11 @@ class PredictionEngineService {
     required String categoryId,
     required String budgetMonth,
   }) async {
-    final periodStart = _parseBudgetMonth(budgetMonth);
-    final periodEnd = DateTime(
-      periodStart.year,
-      periodStart.month + 1,
-      0,
-      23,
-      59,
-      59,
+    return _transactionRepo.getTotalSpendingForCategory(
+      userId,
+      categoryId,
+      budgetMonth,
     );
-
-    final query = _db.selectOnly(_db.transactions)
-      ..addColumns([_db.transactions.amount.sum()])
-      ..where(
-        _db.transactions.userId.equals(userId) &
-            _db.transactions.categoryId.equals(categoryId) &
-            _db.transactions.type.equals('expense') &
-            _db.transactions.date.isBiggerOrEqualValue(periodStart) &
-            _db.transactions.date.isSmallerOrEqualValue(periodEnd),
-      );
-
-    final result = await query.getSingleOrNull();
-    if (result == null) return 0.0;
-
-    final sum = result.read(_db.transactions.amount.sum());
-    return sum ?? 0.0;
   }
 
   /// Fetches the total amount of upcoming recurring expense transactions
@@ -263,20 +238,12 @@ class PredictionEngineService {
     required DateTime periodEnd,
   }) async {
     final now = DateTime.now();
-
-    final query = _db.select(_db.recurringTransactions)
-      ..where(
-        (t) =>
-            t.userId.equals(userId) &
-            t.categoryId.equals(categoryId) &
-            t.type.equals('expense') &
-            t.status.equals('active') &
-            t.nextExecutionDate.isBiggerOrEqualValue(now) &
-            t.nextExecutionDate.isSmallerOrEqualValue(periodEnd),
-      );
-
-    final upcomingTransactions = await query.get();
-
+    final upcomingTransactions = await _recurringRepo.getUpcomingByCategory(
+      userId,
+      categoryId,
+      now,
+      periodEnd,
+    );
     return upcomingTransactions.fold<double>(0.0, (sum, tx) => sum + tx.amount);
   }
 

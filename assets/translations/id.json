@@ -171,8 +171,18 @@
     "upload_cloud": "Unggah Cadangan",
     "upload_cloud_desc": "Enkripsi & unggah data saat ini ke Google Drive",
     "restore_cloud": "Pulihkan Cadangan",
-    "restore_cloud_desc": "Unduh & dekap cadangan dari Google Drive",
-    "biometric_confirm": "Konfirmasi biometrik untuk mengaktifkan kunci"
+    "biometric_confirm": "Konfirmasi biometrik untuk mengaktifkan kunci",
+    "switch_profile": "Ganti Profil",
+    "no_profiles": "Profil tidak ditemukan",
+    "switched_to": "Beralih ke {}",
+    "error_loading_profiles": "Gagal memuat profil: {}",
+    "create_new_profile": "Buat Profil Baru",
+    "please_fill_fields": "Harap isi semua kolom",
+    "profile_created": "Profil \"{}\" berhasil dibuat",
+    "error_prefix": "Kesalahan: {}",
+    "name": "Nama",
+    "email": "Email",
+    "btn_create": "Buat"
   },
   "pin_auth": {
     "enter_old_pin": "Masukkan PIN Lama Anda",
@@ -354,7 +364,21 @@
     "transport": "Transportasi",
     "salary": "Gaji",
     "bills": "Tagihan",
-    "shopping": "Belanja"
+    "shopping": "Belanja",
+    "manage_title": "Kelola Kategori",
+    "add_category": "Tambah Kategori",
+    "edit_category": "Edit Kategori",
+    "category_name": "Nama Kategori",
+    "expense": "Pengeluaran",
+    "income": "Pemasukan",
+    "category_color": "Warna Kategori",
+    "follow_system": "Ikuti Sistem",
+    "custom_color": "Warna Sendiri",
+    "slide_spectrum": "Geser Spektrum Warna",
+    "select_icon": "Pilih Ikon Kategori",
+    "create_category": "Buat Kategori",
+    "save_changes": "Simpan Perubahan",
+    "no_custom_categories": "Belum ada kategori kustom."
   },
   "insights": {
     "title": "Wawasan Keuangan",
@@ -467,5 +491,17 @@
     "manage_debts_desc": "Kelola utang piutang dan riwayat pelunasan",
     "bill_reminders": "Pengingat Tagihan",
     "bill_reminders_desc": "Set pengingat untuk tagihan bulanan"
+  },
+  "budget": {
+    "title": "Anggaran Bulanan",
+    "set_monthly_budget": "Atur Anggaran Bulanan",
+    "category_hint": "Kategori (misal: Makanan)",
+    "suggested_amount": "Disarankan: {} (rata-rata 3 bulan)",
+    "amount_limit": "Batas Jumlah",
+    "save_budget": "Simpan Anggaran",
+    "set_budget": "Atur Anggaran",
+    "no_budgets": "Belum ada anggaran untuk bulan ini.",
+    "of": "dari {}",
+    "exceeded": "Anggaran terlampaui!"
   }
 }

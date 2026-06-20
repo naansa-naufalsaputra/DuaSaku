@@ -35,4 +35,14 @@ abstract class BudgetRepositoryInterface {
   /// Returns suggested budget amount (average of last 3 months spending).
   /// Returns null if no transaction history exists.
   Future<double?> getSuggestedBudget(String userId, String categoryId);
+
+  /// Retrieves a budget for a specific category and month.
+  Future<BudgetModel?> getBudgetByCategoryAndMonth(
+    String userId,
+    String categoryId,
+    String month,
+  );
+
+  /// Retrieves the sum of all budget limits for a specific user and month.
+  Future<double?> getOverallBudgetLimit(String userId, String month);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/category_provider.dart';
 import '../../domain/models/category_model.dart';
 import '../../../../core/theme/premium_background.dart';
@@ -96,7 +97,9 @@ class _ManageCategoriesScreenState
                   children: [
                     // Modal Title
                     Text(
-                      categoryToEdit == null ? 'Add Category' : 'Edit Category',
+                      categoryToEdit == null
+                          ? 'categories.add_category'.tr()
+                          : 'categories.edit_category'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: isDark ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
@@ -108,7 +111,7 @@ class _ManageCategoriesScreenState
                     // Category Name Field
                     GlassInputField(
                       controller: nameCtrl,
-                      labelText: 'Category Name',
+                      labelText: 'categories.category_name'.tr(),
                     ),
                     const SizedBox(height: 16),
 
@@ -129,9 +132,9 @@ class _ManageCategoriesScreenState
                                 }
                               });
                             },
-                            child: const Text(
-                              'Expense',
-                              style: TextStyle(
+                            child: Text(
+                              'categories.expense'.tr(),
+                              style: const TextStyle(
                                 color: Color(0xFFF43F5E),
                                 fontWeight: FontWeight.bold,
                               ),
@@ -153,9 +156,9 @@ class _ManageCategoriesScreenState
                                 }
                               });
                             },
-                            child: const Text(
-                              'Income',
-                              style: TextStyle(
+                            child: Text(
+                              'categories.income'.tr(),
+                              style: const TextStyle(
                                 color: Color(0xFF10B981),
                                 fontWeight: FontWeight.bold,
                               ),
@@ -168,7 +171,7 @@ class _ManageCategoriesScreenState
 
                     // Color Mode Choice
                     Text(
-                      'Category Color',
+                      'categories.category_color'.tr(),
                       style: TextStyle(
                         color: isDark ? Colors.white70 : Colors.black54,
                         fontWeight: FontWeight.bold,
@@ -180,7 +183,7 @@ class _ManageCategoriesScreenState
                       children: [
                         Expanded(
                           child: ChoiceChip(
-                            label: const Text('Ikuti Sistem'),
+                            label: Text('categories.follow_system'.tr()),
                             selected: !isCustomColor,
                             onSelected: (selected) {
                               HapticFeedback.lightImpact();
@@ -193,7 +196,7 @@ class _ManageCategoriesScreenState
                         const SizedBox(width: 12),
                         Expanded(
                           child: ChoiceChip(
-                            label: const Text('Warna Sendiri'),
+                            label: Text('categories.custom_color'.tr()),
                             selected: isCustomColor,
                             onSelected: (selected) {
                               HapticFeedback.lightImpact();
@@ -274,7 +277,7 @@ class _ManageCategoriesScreenState
                       const SizedBox(height: 16),
                       // Spectrum Hue Slider
                       Text(
-                        'Geser Spektrum Warna',
+                        'categories.slide_spectrum'.tr(),
                         style: TextStyle(
                           color: isDark ? Colors.white60 : Colors.black54,
                           fontSize: 12,
@@ -347,7 +350,7 @@ class _ManageCategoriesScreenState
 
                     // Icon Grid Selector
                     Text(
-                      'Select Category Icon',
+                      'categories.select_icon'.tr(),
                       style: TextStyle(
                         color: isDark ? Colors.white70 : Colors.black54,
                         fontWeight: FontWeight.bold,
@@ -457,8 +460,8 @@ class _ManageCategoriesScreenState
                       },
                       child: Text(
                         categoryToEdit == null
-                            ? 'Create Category'
-                            : 'Save Changes',
+                            ? 'categories.create_category'.tr()
+                            : 'categories.save_changes'.tr(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -486,9 +489,9 @@ class _ManageCategoriesScreenState
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: GlassAppBar(
-        title: const Text(
-          'Manage Categories',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'categories.manage_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -545,7 +548,7 @@ class _ManageCategoriesScreenState
                                     : null,
                               ),
                               child: Text(
-                                'Expense',
+                                'categories.expense'.tr(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: _selectedType == 'expense'
@@ -587,7 +590,7 @@ class _ManageCategoriesScreenState
                                     : null,
                               ),
                               child: Text(
-                                'Income',
+                                'categories.income'.tr(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: _selectedType == 'income'
@@ -616,7 +619,7 @@ class _ManageCategoriesScreenState
                       if (filtered.isEmpty) {
                         return Center(
                           child: Text(
-                            'No custom categories yet.',
+                            'categories.no_custom_categories'.tr(),
                             style: TextStyle(
                               color: isDark ? Colors.white70 : Colors.black87,
                             ),
@@ -743,9 +746,9 @@ class _ManageCategoriesScreenState
           _showCategoryModal();
         },
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Add Category',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        label: Text(
+          'categories.add_category'.tr(),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

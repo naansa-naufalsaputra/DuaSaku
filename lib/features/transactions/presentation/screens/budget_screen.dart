@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/budget_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../data/budget_repository.dart';
@@ -51,7 +52,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Set Monthly Budget',
+                'budget.set_monthly_budget'.tr(),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: isDark ? Colors.white : Colors.black87,
                 ),
@@ -60,7 +61,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               const SizedBox(height: 16),
               GlassInputField(
                 controller: catCtrl,
-                labelText: 'Category (e.g. Food)',
+                labelText: 'budget.category_hint'.tr(),
                 onChanged: (value) async {
                   if (value.trim().isEmpty) return;
 
@@ -95,7 +96,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
-                    'Suggested: ${ref.watch(currencyFormatterProvider).format(_suggestedAmount!)} (3-month avg)',
+                    'budget.suggested_amount'.tr(args: [
+                      ref.watch(currencyFormatterProvider).format(_suggestedAmount!),
+                    ]),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,
@@ -108,7 +111,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 controller: amountCtrl,
                 keyboardType: TextInputType.number,
                 inputFormatters: [ThousandsFormatter()],
-                labelText: 'Amount Limit',
+                labelText: 'budget.amount_limit'.tr(),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 12, top: 14),
                   child: Text(
@@ -129,7 +132,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Save Budget'),
+                child: Text('budget.save_budget'.tr()),
               ),
               const SizedBox(height: 24),
             ],
@@ -148,7 +151,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: const GlassAppBar(title: Text('Monthly Budgets')),
+      appBar: GlassAppBar(title: Text('budget.title'.tr())),
       body: Stack(
         children: [
           const PremiumBackground(),
@@ -158,7 +161,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 if (budgets.isEmpty) {
                   return Center(
                     child: Text(
-                      'No budgets set for this month.',
+                      'budget.no_budgets'.tr(),
                       style: TextStyle(
                         color: isDark ? Colors.white70 : Colors.black87,
                       ),
@@ -233,7 +236,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'of ${formatter.format(bp.budget.amountLimit)}',
+                                  'budget.of'.tr(args: [formatter.format(bp.budget.amountLimit)]),
                                   style: TextStyle(
                                     color: isDark
                                         ? Colors.white60
@@ -254,9 +257,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                             ),
                             if (isOver) ...[
                               const SizedBox(height: 4),
-                              const Text(
-                                'Budget exceeded!',
-                                style: TextStyle(
+                              Text(
+                                'budget.exceeded'.tr(),
+                                style: const TextStyle(
                                   color: Colors.red,
                                   fontSize: 12,
                                 ),
@@ -286,7 +289,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           _showSetBudgetModal();
         },
         icon: const Icon(Icons.add),
-        label: const Text('Set Budget'),
+        label: Text('budget.set_budget'.tr()),
       ),
     );
   }

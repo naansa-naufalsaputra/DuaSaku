@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/user_provider.dart';
 
 /// Profile switcher bottom sheet
@@ -33,7 +34,7 @@ class ProfileSwitcher extends ConsumerWidget {
             child: Row(
               children: [
                 Text(
-                  'Switch Profile',
+                  'profile.switch_profile'.tr(),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -55,7 +56,7 @@ class ProfileSwitcher extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text(
-                    'No profiles found',
+                    'profile.no_profiles'.tr(),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
@@ -113,7 +114,7 @@ class ProfileSwitcher extends ConsumerWidget {
                                 // Show snackbar
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Switched to ${user.name}'),
+                                    content: Text('profile.switched_to'.tr(args: [user.name])),
                                     duration: const Duration(seconds: 2),
                                   ),
                                 );
@@ -133,7 +134,7 @@ class ProfileSwitcher extends ConsumerWidget {
             error: (error, stack) => Padding(
               padding: const EdgeInsets.all(32),
               child: Text(
-                'Error loading profiles: $error',
+                'profile.error_loading_profiles'.tr(args: [error.toString()]),
                 style: TextStyle(color: theme.colorScheme.error),
               ),
             ),
@@ -151,7 +152,7 @@ class ProfileSwitcher extends ConsumerWidget {
               ),
             ),
             title: Text(
-              'Create New Profile',
+              'profile.create_new_profile'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.primary,
@@ -174,24 +175,24 @@ class ProfileSwitcher extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Create New Profile'),
+        title: Text('profile.create_new_profile'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: 'profile.name'.tr(),
+                border: const OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: 'profile.email'.tr(),
+                border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -200,7 +201,7 @@ class ProfileSwitcher extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text('profile.btn_cancel'.tr()),
           ),
           FilledButton(
             onPressed: () async {
@@ -209,7 +210,7 @@ class ProfileSwitcher extends ConsumerWidget {
 
               if (name.isEmpty || email.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please fill all fields')),
+                  SnackBar(content: Text('profile.please_fill_fields'.tr())),
                 );
                 return;
               }
@@ -222,18 +223,18 @@ class ProfileSwitcher extends ConsumerWidget {
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Profile "$name" created')),
+                    SnackBar(content: Text('profile.profile_created'.tr(args: [name]))),
                   );
                 }
               } catch (e) {
                 if (ctx.mounted) {
                   ScaffoldMessenger.of(
                     ctx,
-                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  ).showSnackBar(SnackBar(content: Text('profile.error_prefix'.tr(args: [e.toString()]))));
                 }
               }
             },
-            child: const Text('Create'),
+            child: Text('profile.btn_create'.tr()),
           ),
         ],
       ),

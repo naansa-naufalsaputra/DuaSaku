@@ -1,4 +1,5 @@
 import 'package:duasaku_app/features/gamification/providers/gamification_provider.dart';
+import 'package:duasaku_app/features/gamification/domain/gamification_models.dart';
 import 'package:duasaku_app/features/goals/domain/models/goal_model.dart';
 import 'package:duasaku_app/features/goals/domain/models/goal_status.dart';
 import 'package:duasaku_app/features/goals/providers/goal_gamification_provider.dart';

@@ -13,6 +13,7 @@ import '../../features/transactions/presentation/screens/manage_categories_scree
 import '../../features/insights/presentation/screens/insights_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../security/security_service.dart';
 import '../../features/wallets/presentation/screens/manage_wallets_screen.dart';
 import '../../features/wallets/presentation/screens/wallet_detail_screen.dart';
@@ -37,7 +38,7 @@ import '../../features/bill_reminders/presentation/screens/bill_reminder_form_sc
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Use AuthRepository directly as refreshListenable (it's a ChangeNotifier now)
-  final authRepo = ref.read(authRepositoryProvider);
+  final authRepo = ref.read(authRepositoryProvider) as AuthRepository;
 
   // Listen to securityProvider changes and notify the router via authRepo
   ref.listen(securityProvider, (previous, next) {

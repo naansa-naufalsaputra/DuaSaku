@@ -2,9 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../features/transactions/data/transaction_repository.dart';
+import '../../features/geofencing/services/geofence_sync_helper.dart';
 import '../../features/recurring_transactions/services/recurring_notification_service.dart';
 import '../../features/smart_budget_alerts/services/budget_notification_service.dart';
-import '../../features/geofencing/services/geofence_sync_helper.dart';
+import '../../features/smart_budget_alerts/data/alert_preferences_repository.dart';
+import '../../features/smart_budget_alerts/data/alert_repository.dart';
 import '../constants/app_constants.dart';
 import '../local_db/app_database.dart';
 import 'recurring_executor.dart';
@@ -113,7 +116,10 @@ Future<bool> _handleBudgetAlertQueueProcessing() async {
       debugPrint('[BackgroundTask] Notification init failed (non-fatal): $e');
     }
 
-    final notificationService = BudgetNotificationService(db: db);
+    final notificationService = BudgetNotificationService(
+      prefsRepo: AlertPreferencesRepository(db),
+      alertRepo: AlertRepository(db),
+    );
 
     // Process queued notifications for the default local user.
     // In background isolate, Riverpod is not available, so we use
@@ -136,8 +142,9 @@ Future<bool> _handleGeofenceSync() async {
   AppDatabase? db;
   try {
     db = AppDatabase();
+    final transactionRepo = TransactionRepository(db);
     await GeofenceSyncHelper.syncGeofenceHotspots(
-      db,
+      transactionRepo,
       AppConstants.defaultUserId,
     );
     debugPrint('[BackgroundTask] Geofence sync task completed successfully');

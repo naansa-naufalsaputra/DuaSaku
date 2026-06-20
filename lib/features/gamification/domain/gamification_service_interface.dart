@@ -1,4 +1,4 @@
-import '../providers/gamification_provider.dart';
+import 'gamification_models.dart';
 
 /// Abstract interface for gamification operations.
 /// Follows the dependency inversion principle — presentation and provider layers

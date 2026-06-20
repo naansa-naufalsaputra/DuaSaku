@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:duasaku_app/core/constants/app_constants.dart';
@@ -58,6 +59,10 @@ class Categories extends Table {
 }
 
 @TableIndex(name: 'idx_transactions_user_date', columns: {#userId, #date})
+@TableIndex(name: 'idx_transactions_wallet_id', columns: {#walletId})
+@TableIndex(name: 'idx_transactions_category_id', columns: {#categoryId})
+@TableIndex(name: 'idx_transactions_from_wallet_id', columns: {#fromWalletId})
+@TableIndex(name: 'idx_transactions_to_wallet_id', columns: {#toWalletId})
 class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get userId => text()();
@@ -421,7 +426,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -627,6 +632,13 @@ class AppDatabase extends _$AppDatabase {
             ('tpl_gym', 'Gym Membership', 'expense', 'shopping', 'monthly', 'fitness_center', NULL, 1, datetime('now'))
         ''');
       }
+      if (from < 18) {
+        // Schema v18: Add indexes on foreign keys in Transactions table
+        await m.createIndex(idxTransactionsWalletId);
+        await m.createIndex(idxTransactionsCategoryId);
+        await m.createIndex(idxTransactionsFromWalletId);
+        await m.createIndex(idxTransactionsToWalletId);
+      }
     },
   );
 }
@@ -711,6 +723,17 @@ LazyDatabase _openConnection() {
       if (dbKey == null) {
         dbKey = const Uuid().v4();
         await secureStorage.write(key: 'db_key', value: dbKey);
+      }
+    }
+
+    // Auto-Backup before opening (e.g. in case of migrations)
+    if (await file.exists()) {
+      try {
+        final backupFile = File('${file.path}.backup');
+        await file.copy(backupFile.path);
+        debugPrint('[AppDatabase] Created database backup before opening at: ${backupFile.path}');
+      } catch (e) {
+        debugPrint('[AppDatabase] Failed to create database backup: $e');
       }
     }
 

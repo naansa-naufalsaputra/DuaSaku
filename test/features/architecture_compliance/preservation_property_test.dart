@@ -16,7 +16,7 @@ import 'package:duasaku_app/features/wallets/domain/models/wallet_model.dart';
 import 'package:duasaku_app/features/transactions/domain/transaction_repository_interface.dart';
 import 'package:duasaku_app/features/wallets/data/wallet_repository.dart';
 import 'package:duasaku_app/features/wallets/domain/wallet_repository_interface.dart';
-import 'package:duasaku_app/features/auth/data/auth_repository.dart';
+import 'package:duasaku_app/features/auth/domain/auth_models.dart';
 
 void main() {
   // =========================================================================

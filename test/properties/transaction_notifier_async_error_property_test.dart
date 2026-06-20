@@ -14,7 +14,7 @@ import 'package:duasaku_app/features/transactions/domain/transaction_repository_
 import 'package:duasaku_app/features/transactions/domain/transaction_filters.dart';
 import 'package:duasaku_app/features/transactions/providers/transaction_provider.dart';
 import 'package:duasaku_app/features/auth/providers/auth_provider.dart';
-import 'package:duasaku_app/features/auth/data/auth_repository.dart';
+import 'package:duasaku_app/features/auth/domain/auth_models.dart';
 import 'package:duasaku_app/services/service_providers.dart';
 import 'package:duasaku_app/services/transaction_parser_service.dart';
 
@@ -60,6 +60,30 @@ class FakeFailingTransactionRepository
     TransactionModel oldTransaction,
   ) async {
     return Failure(errorToReturn);
+  }
+
+  @override
+  Future<Result<List<TransactionModel>, AppError>> getTransactionsOnce(
+    String userId,
+  ) async {
+    return const Success([]);
+  }
+
+  @override
+  Future<double> getTotalSpendingForCategory(
+    String userId,
+    String categoryId,
+    String budgetMonth,
+  ) async {
+    return 0.0;
+  }
+
+  @override
+  Future<double> getTotalSpendingAllCategories(
+    String userId,
+    String budgetMonth,
+  ) async {
+    return 0.0;
   }
 }
 

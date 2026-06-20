@@ -10253,6 +10253,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_transactions_user_date',
     'CREATE INDEX idx_transactions_user_date ON transactions (user_id, date)',
   );
+  late final Index idxTransactionsWalletId = Index(
+    'idx_transactions_wallet_id',
+    'CREATE INDEX idx_transactions_wallet_id ON transactions (wallet_id)',
+  );
+  late final Index idxTransactionsCategoryId = Index(
+    'idx_transactions_category_id',
+    'CREATE INDEX idx_transactions_category_id ON transactions (category_id)',
+  );
+  late final Index idxTransactionsFromWalletId = Index(
+    'idx_transactions_from_wallet_id',
+    'CREATE INDEX idx_transactions_from_wallet_id ON transactions (from_wallet_id)',
+  );
+  late final Index idxTransactionsToWalletId = Index(
+    'idx_transactions_to_wallet_id',
+    'CREATE INDEX idx_transactions_to_wallet_id ON transactions (to_wallet_id)',
+  );
   late final Index idxBudgetsUserId = Index(
     'idx_budgets_user_id',
     'CREATE INDEX idx_budgets_user_id ON budgets (user_id)',
@@ -10380,6 +10396,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxWalletsUserId,
     idxCategoriesUserId,
     idxTransactionsUserDate,
+    idxTransactionsWalletId,
+    idxTransactionsCategoryId,
+    idxTransactionsFromWalletId,
+    idxTransactionsToWalletId,
     idxBudgetsUserId,
     idxRecurringUserId,
     idxRecurringNextExecution,

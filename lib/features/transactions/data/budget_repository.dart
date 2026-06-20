@@ -127,4 +127,50 @@ class BudgetRepository implements BudgetRepositoryInterface {
     // Round up to nearest 10k for cleaner suggestion
     return (averagePerMonth / 10000).ceil() * 10000.0;
   }
+
+  @override
+  Future<BudgetModel?> getBudgetByCategoryAndMonth(
+    String userId,
+    String categoryId,
+    String month,
+  ) async {
+    final query = _db.select(_db.budgets).join([
+      innerJoin(
+        _db.categories,
+        _db.categories.id.equalsExp(_db.budgets.categoryId),
+      ),
+    ])..where(
+        _db.budgets.userId.equals(userId) &
+        _db.budgets.categoryId.equals(categoryId) &
+        _db.budgets.month.equals(month),
+      );
+
+    final row = await query.getSingleOrNull();
+    if (row == null) return null;
+
+    final b = row.readTable(_db.budgets);
+    final c = row.readTable(_db.categories);
+    return BudgetModel(
+      id: b.id,
+      userId: b.userId,
+      category: c.name,
+      amountLimit: b.amount,
+      month: b.month,
+      createdAt: b.createdAt,
+    );
+  }
+
+  @override
+  Future<double?> getOverallBudgetLimit(String userId, String month) async {
+    final sumExpr = _db.budgets.amount.sum();
+    final query = _db.selectOnly(_db.budgets)
+      ..addColumns([sumExpr])
+      ..where(
+        _db.budgets.userId.equals(userId) &
+        _db.budgets.month.equals(month),
+      );
+
+    final row = await query.getSingle();
+    return row.read(sumExpr);
+  }
 }

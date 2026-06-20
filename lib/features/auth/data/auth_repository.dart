@@ -9,36 +9,8 @@ import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:pointycastle/export.dart' as pc;
+import '../domain/auth_models.dart';
 import '../domain/auth_repository_interface.dart';
-
-class User {
-  final String id;
-  final String email;
-
-  User({required this.id, required this.email});
-}
-
-class Session {
-  final User user;
-  final String accessToken;
-
-  Session({required this.user, required this.accessToken});
-}
-
-class AuthResponse {
-  final Session? session;
-  final User? user;
-
-  AuthResponse({this.session, this.user});
-}
-
-class AuthState {
-  final Session? session;
-
-  AuthState({this.session});
-
-  bool get isAuthenticated => session != null;
-}
 
 /// AuthRepository extends ChangeNotifier so GoRouter can use it
 /// directly as a refreshListenable — eliminating stream timing issues.
@@ -66,6 +38,7 @@ class AuthRepository extends ChangeNotifier implements AuthRepositoryInterface {
   final _authStateController = StreamController<AuthState>.broadcast();
 
   /// Stream of auth state changes. Emits on every notifyListeners() call.
+  @override
   Stream<AuthState> get authStateStream => _authStateController.stream;
 
   AuthRepository() {

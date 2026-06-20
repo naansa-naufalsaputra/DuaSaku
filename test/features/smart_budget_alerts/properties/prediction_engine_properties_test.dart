@@ -1,10 +1,11 @@
-import 'package:duasaku_app/core/local_db/app_database.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/alert_preferences_repository_interface.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/alert_repository_interface.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/domain/alert_threshold_status_repository_interface.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/services/budget_notification_service.dart';
 import 'package:duasaku_app/features/smart_budget_alerts/services/prediction_engine_service.dart';
-import 'package:duasaku_app/features/transactions/data/budget_repository.dart';
+import 'package:duasaku_app/features/transactions/domain/budget_repository_interface.dart';
+import 'package:duasaku_app/features/transactions/domain/transaction_repository_interface.dart';
+import 'package:duasaku_app/features/recurring_transactions/domain/recurring_transaction_repository_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glados/glados.dart'
     hide expect, group, test, setUp, setUpAll, tearDown, tearDownAll;
@@ -22,9 +23,11 @@ class _FakePrefsRepo extends Fake
 class _FakeStatusRepo extends Fake
     implements AlertThresholdStatusRepositoryInterface {}
 
-class _FakeBudgetRepo extends Fake implements BudgetRepository {}
+class _FakeBudgetRepo extends Fake implements BudgetRepositoryInterface {}
 
-class _FakeDb extends Fake implements AppDatabase {}
+class _FakeTransactionRepo extends Fake implements TransactionRepositoryInterface {}
+
+class _FakeRecurringRepo extends Fake implements RecurringTransactionRepositoryInterface {}
 
 class _FakeNotificationService extends Fake
     implements BudgetNotificationService {}
@@ -45,7 +48,8 @@ void main() {
         prefsRepo: _FakePrefsRepo(),
         statusRepo: _FakeStatusRepo(),
         budgetRepo: _FakeBudgetRepo(),
-        db: _FakeDb(),
+        transactionRepo: _FakeTransactionRepo(),
+        recurringRepo: _FakeRecurringRepo(),
         notificationService: _FakeNotificationService(),
       );
     });
@@ -124,7 +128,8 @@ void main() {
         prefsRepo: _FakePrefsRepo(),
         statusRepo: _FakeStatusRepo(),
         budgetRepo: _FakeBudgetRepo(),
-        db: _FakeDb(),
+        transactionRepo: _FakeTransactionRepo(),
+        recurringRepo: _FakeRecurringRepo(),
         notificationService: _FakeNotificationService(),
       );
     });

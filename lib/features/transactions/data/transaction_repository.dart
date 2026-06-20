@@ -49,6 +49,47 @@ class TransactionRepository implements TransactionRepositoryInterface {
   }
 
   @override
+  Future<Result<List<TransactionModel>, AppError>> getTransactionsOnce(
+    String userId,
+  ) async {
+    try {
+      final query = _db.select(_db.transactions).join([
+        leftOuterJoin(
+          _db.categories,
+          _db.categories.id.equalsExp(_db.transactions.categoryId),
+        ),
+      ]);
+      query.where(_db.transactions.userId.equals(userId));
+      query.orderBy([OrderingTerm.desc(_db.transactions.date)]);
+
+      final rows = await query.get();
+      final list = rows.map((row) {
+        final tx = row.readTable(_db.transactions);
+
+        return TransactionModel(
+          id: tx.id,
+          userId: tx.userId,
+          amount: tx.amount,
+          currency: tx.currency,
+          categoryId: tx.categoryId ?? 'uncategorized',
+          type: tx.type,
+          notes: tx.notes ?? '',
+          createdAt: tx.date,
+          walletId: tx.walletId,
+          fromWalletId: tx.fromWalletId,
+          toWalletId: tx.toWalletId,
+          latitude: tx.latitude,
+          longitude: tx.longitude,
+        );
+      }).toList();
+
+      return Success(list);
+    } catch (e, stack) {
+      return Failure(AppError.database(e.toString(), stackTrace: stack));
+    }
+  }
+
+  @override
   Stream<List<TransactionModel>> fetchTransactionsFiltered(
     String userId,
     TransactionFilters filters,
@@ -160,21 +201,44 @@ class TransactionRepository implements TransactionRepositoryInterface {
     TransactionModel transaction,
   ) async {
     try {
+      late final String resolvedCategoryId;
       await _db.transaction(() async {
-        // 1. Validate Category ID exists
-        final cat =
-            await (_db.select(_db.categories)..where(
-                  (c) =>
-                      c.id.equals(transaction.categoryId) &
-                      c.userId.equals(transaction.userId),
-                ))
+        // 1. Validate Category ID exists or resolve via Name
+        var cat =
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.id.equals(transaction.categoryId) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
                 .getSingleOrNull();
+
+        cat ??= await (_db.select(_db.categories)
+              ..where(
+                (c) =>
+                    c.name.equals(transaction.categoryId) &
+                    c.userId.equals(transaction.userId),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+
+        cat ??= await (_db.select(_db.categories)
+              ..where(
+                (c) =>
+                    c.id.equals(transaction.categoryId.toLowerCase()) &
+                    c.userId.equals(transaction.userId),
+              )
+              ..limit(1))
+            .getSingleOrNull();
 
         if (cat == null) {
           throw AppError.validation(
             'Invalid category ID: ${transaction.categoryId}',
           );
         }
+
+        resolvedCategoryId = cat.id;
 
         // 2. Insert Transaction into Drift DB
         await _db
@@ -185,7 +249,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
                 walletId: Value(transaction.walletId),
                 fromWalletId: Value(transaction.fromWalletId),
                 toWalletId: Value(transaction.toWalletId),
-                categoryId: Value(transaction.categoryId),
+                categoryId: Value(resolvedCategoryId),
                 amount: transaction.amount,
                 currency: Value(transaction.currency),
                 notes: Value(transaction.notes),
@@ -198,12 +262,18 @@ class TransactionRepository implements TransactionRepositoryInterface {
 
         // 3. If no event sink (test mode), apply balance updates inline
         if (_eventSink == null) {
-          await _applyBalanceChangesInline(transaction);
+          await _applyBalanceChangesInline(
+            transaction.copyWith(categoryId: resolvedCategoryId),
+          );
         }
       });
 
       // Emit event for side-effect handlers (balance update, alerts, geofence)
-      _eventSink?.add(TransactionCreated.now(transaction));
+      _eventSink?.add(
+        TransactionCreated.now(
+          transaction.copyWith(categoryId: resolvedCategoryId),
+        ),
+      );
 
       return const Success(null);
     } catch (e, stack) {
@@ -217,21 +287,44 @@ class TransactionRepository implements TransactionRepositoryInterface {
     TransactionModel oldTransaction,
   ) async {
     try {
+      late final String resolvedCategoryId;
       await _db.transaction(() async {
-        // 1. Validate Category ID exists
-        final cat =
-            await (_db.select(_db.categories)..where(
-                  (c) =>
-                      c.id.equals(transaction.categoryId) &
-                      c.userId.equals(transaction.userId),
-                ))
+        // 1. Validate Category ID exists or resolve via Name
+        var cat =
+            await (_db.select(_db.categories)
+                  ..where(
+                    (c) =>
+                        c.id.equals(transaction.categoryId) &
+                        c.userId.equals(transaction.userId),
+                  )
+                  ..limit(1))
                 .getSingleOrNull();
+
+        cat ??= await (_db.select(_db.categories)
+              ..where(
+                (c) =>
+                    c.name.equals(transaction.categoryId) &
+                    c.userId.equals(transaction.userId),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+
+        cat ??= await (_db.select(_db.categories)
+              ..where(
+                (c) =>
+                    c.id.equals(transaction.categoryId.toLowerCase()) &
+                    c.userId.equals(transaction.userId),
+              )
+              ..limit(1))
+            .getSingleOrNull();
 
         if (cat == null) {
           throw AppError.validation(
             'Invalid category ID: ${transaction.categoryId}',
           );
         }
+
+        resolvedCategoryId = cat.id;
 
         // 2. Update the transaction row
         await (_db.update(
@@ -241,7 +334,7 @@ class TransactionRepository implements TransactionRepositoryInterface {
             walletId: Value(transaction.walletId),
             fromWalletId: Value(transaction.fromWalletId),
             toWalletId: Value(transaction.toWalletId),
-            categoryId: Value(transaction.categoryId),
+            categoryId: Value(resolvedCategoryId),
             amount: Value(transaction.amount),
             currency: Value(transaction.currency),
             notes: Value(transaction.notes),
@@ -255,12 +348,19 @@ class TransactionRepository implements TransactionRepositoryInterface {
         // 3. If no event sink (test mode), apply balance updates inline
         if (_eventSink == null) {
           await _revertBalanceChangesInline(oldTransaction);
-          await _applyBalanceChangesInline(transaction);
+          await _applyBalanceChangesInline(
+            transaction.copyWith(categoryId: resolvedCategoryId),
+          );
         }
       });
 
       // Emit event for side-effect handlers (balance revert + apply)
-      _eventSink?.add(TransactionUpdated.now(transaction, oldTransaction));
+      _eventSink?.add(
+        TransactionUpdated.now(
+          transaction.copyWith(categoryId: resolvedCategoryId),
+          oldTransaction,
+        ),
+      );
 
       return const Success(null);
     } catch (e, stack) {
@@ -414,5 +514,51 @@ class TransactionRepository implements TransactionRepositoryInterface {
         }
       }
     }
+  }
+
+  @override
+  Future<double> getTotalSpendingForCategory(
+    String userId,
+    String categoryId,
+    String budgetMonth,
+  ) async {
+    final monthStart = DateTime.parse('$budgetMonth-01');
+    final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
+
+    final sumExpr = _db.transactions.amount.sum();
+    final query = _db.selectOnly(_db.transactions)
+      ..addColumns([sumExpr])
+      ..where(
+        _db.transactions.userId.equals(userId) &
+            _db.transactions.categoryId.equals(categoryId) &
+            _db.transactions.type.equals('expense') &
+            _db.transactions.date.isBiggerOrEqualValue(monthStart) &
+            _db.transactions.date.isSmallerThanValue(monthEnd),
+      );
+
+    final row = await query.getSingle();
+    return row.read(sumExpr) ?? 0.0;
+  }
+
+  @override
+  Future<double> getTotalSpendingAllCategories(
+    String userId,
+    String budgetMonth,
+  ) async {
+    final monthStart = DateTime.parse('$budgetMonth-01');
+    final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);
+
+    final sumExpr = _db.transactions.amount.sum();
+    final query = _db.selectOnly(_db.transactions)
+      ..addColumns([sumExpr])
+      ..where(
+        _db.transactions.userId.equals(userId) &
+            _db.transactions.type.equals('expense') &
+            _db.transactions.date.isBiggerOrEqualValue(monthStart) &
+            _db.transactions.date.isSmallerThanValue(monthEnd),
+      );
+
+    final row = await query.getSingle();
+    return row.read(sumExpr) ?? 0.0;
   }
 }

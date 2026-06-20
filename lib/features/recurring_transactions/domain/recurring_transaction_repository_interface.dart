@@ -47,6 +47,14 @@ abstract class RecurringTransactionRepositoryInterface {
     int limit,
   );
 
+  /// Get upcoming recurring transactions for a specific category within a period.
+  Future<List<RecurringTransactionModel>> getUpcomingByCategory(
+    String userId,
+    String categoryId,
+    DateTime start,
+    DateTime end,
+  );
+
   // ─── Execution State ────────────────────────────────────────────────────────
 
   /// Update the next execution date for a recurring transaction.

@@ -65,6 +65,30 @@ class _FakeFailingRepository implements TransactionRepositoryInterface {
   ) async {
     return Failure(failureError);
   }
+
+  @override
+  Future<Result<List<TransactionModel>, AppError>> getTransactionsOnce(
+    String userId,
+  ) async {
+    return const Success([]);
+  }
+
+  @override
+  Future<double> getTotalSpendingForCategory(
+    String userId,
+    String categoryId,
+    String budgetMonth,
+  ) async {
+    return 0.0;
+  }
+
+  @override
+  Future<double> getTotalSpendingAllCategories(
+    String userId,
+    String budgetMonth,
+  ) async {
+    return 0.0;
+  }
 }
 
 /// Minimal AsyncNotifier that replicates TransactionNotifier's error handling

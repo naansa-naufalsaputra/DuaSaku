@@ -1,7 +1,9 @@
+// ignore_for_file: prefer_initializing_formals
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:drift/drift.dart';
-import '../../../core/local_db/app_database.dart';
+import '../../../core/utils/result.dart';
+import '../domain/alert_preferences_repository_interface.dart';
+import '../domain/alert_repository_interface.dart';
 import '../domain/models/budget_alert_model.dart';
 
 /// Service responsible for sending push notifications for budget alerts.
@@ -11,13 +13,16 @@ import '../domain/models/budget_alert_model.dart';
 class BudgetNotificationService {
   BudgetNotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
-    AppDatabase? db,
+    required AlertPreferencesRepositoryInterface prefsRepo,
+    required AlertRepositoryInterface alertRepo,
   }) : _notifications =
            notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
-       _db = db ?? AppDatabase();
+       _prefsRepo = prefsRepo,
+       _alertRepo = alertRepo;
 
   final FlutterLocalNotificationsPlugin _notifications;
-  final AppDatabase _db;
+  final AlertPreferencesRepositoryInterface _prefsRepo;
+  final AlertRepositoryInterface _alertRepo;
 
   static const String channelId = 'budget_alerts';
   static const String channelName = 'Budget Alerts';
@@ -115,23 +120,23 @@ class BudgetNotificationService {
     required String userId,
   }) async {
     try {
-      final query = _db.select(_db.budgetAlertPreferences)
-        ..where((t) => t.userId.equals(userId) & t.categoryId.isNull());
-      final prefsRow = await query.getSingleOrNull();
-
-      if (prefsRow != null) {
-        if (!prefsRow.isEnabled) {
-          return;
-        }
-
-        final quietHoursStart = prefsRow.quietHoursStart;
-        final quietHoursEnd = prefsRow.quietHoursEnd;
-        if (quietHoursStart != null && quietHoursEnd != null) {
-          final now = DateTime.now();
-          if (isTimeInQuietHours(now, quietHoursStart, quietHoursEnd)) {
+      final prefsResult = await _prefsRepo.getGlobalPreferences(userId);
+      switch (prefsResult) {
+        case Success(:final value):
+          if (!value.isEnabled) {
             return;
           }
-        }
+
+          final quietHoursStart = value.quietHoursStart;
+          final quietHoursEnd = value.quietHoursEnd;
+          if (quietHoursStart != null && quietHoursEnd != null) {
+            final now = DateTime.now();
+            if (isTimeInQuietHours(now, quietHoursStart, quietHoursEnd)) {
+              return;
+            }
+          }
+        case Failure():
+          break;
       }
     } catch (_) {}
 
@@ -156,24 +161,29 @@ class BudgetNotificationService {
   /// If queue <= 3: sends individual notifications with 10s interval.
   Future<void> processQueuedNotifications(String userId) async {
     try {
-      final query = _db.select(_db.budgetAlertPreferences)
-        ..where((t) => t.userId.equals(userId) & t.categoryId.isNull());
-      final prefsRow = await query.getSingleOrNull();
-
-      if (prefsRow != null) {
-        final quietHoursStart = prefsRow.quietHoursStart;
-        final quietHoursEnd = prefsRow.quietHoursEnd;
-        if (quietHoursStart != null && quietHoursEnd != null) {
-          final now = DateTime.now();
-          if (isTimeInQuietHours(now, quietHoursStart, quietHoursEnd)) {
-            return;
+      final prefsResult = await _prefsRepo.getGlobalPreferences(userId);
+      switch (prefsResult) {
+        case Success(:final value):
+          final quietHoursStart = value.quietHoursStart;
+          final quietHoursEnd = value.quietHoursEnd;
+          if (quietHoursStart != null && quietHoursEnd != null) {
+            final now = DateTime.now();
+            if (isTimeInQuietHours(now, quietHoursStart, quietHoursEnd)) {
+              return;
+            }
           }
-        }
+        case Failure():
+          break;
       }
 
-      final alertsQuery = _db.select(_db.budgetAlerts)
-        ..where((t) => t.userId.equals(userId) & t.isRead.equals(false));
-      final alertRows = await alertsQuery.get();
+      final alertsResult = await _alertRepo.getAlerts(userId);
+      final List<BudgetAlertModel> alertRows;
+      switch (alertsResult) {
+        case Success(:final value):
+          alertRows = value.where((a) => !a.isRead).toList();
+        case Failure():
+          return;
+      }
 
       final notifiedIds = await _getNotifiedAlertIds();
       final queuedAlerts = alertRows

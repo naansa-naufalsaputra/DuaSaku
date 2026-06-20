@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
+import '../domain/auth_models.dart';
+import '../domain/auth_repository_interface.dart';
 
 /// Single instance of AuthRepository.
 /// AuthRepository still extends ChangeNotifier for GoRouter's refreshListenable.
 /// Only the provider wrapper changes from ChangeNotifierProvider to Provider.
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
+final authRepositoryProvider = Provider<AuthRepositoryInterface>((ref) {
   final repo = AuthRepository();
   ref.onDispose(() => repo.dispose());
   return repo;

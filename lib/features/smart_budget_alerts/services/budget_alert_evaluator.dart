@@ -11,6 +11,8 @@ import 'alert_engine_service.dart';
 import 'budget_notification_service.dart';
 import 'prediction_engine_service.dart';
 import '../../../features/transactions/data/budget_repository.dart';
+import '../../../features/transactions/data/transaction_repository.dart';
+import '../../../features/recurring_transactions/data/recurring_transaction_repository.dart';
 
 /// Orchestrates budget alert evaluation after transaction changes.
 ///
@@ -45,13 +47,19 @@ class BudgetAlertEvaluator {
     final prefsRepo = AlertPreferencesRepository(db);
     final statusRepo = AlertThresholdStatusRepository(db);
     final budgetRepo = BudgetRepository(db);
-    final notificationService = BudgetNotificationService();
+    final transactionRepo = TransactionRepository(db);
+    final recurringRepo = RecurringTransactionRepository(db);
+    final notificationService = BudgetNotificationService(
+      prefsRepo: prefsRepo,
+      alertRepo: alertRepo,
+    );
 
     final alertEngine = AlertEngineService(
       alertRepo: alertRepo,
       prefsRepo: prefsRepo,
       statusRepo: statusRepo,
-      db: db,
+      budgetRepository: budgetRepo,
+      transactionRepository: transactionRepo,
       notificationService: notificationService,
     );
 
@@ -60,7 +68,8 @@ class BudgetAlertEvaluator {
       prefsRepo: prefsRepo,
       statusRepo: statusRepo,
       budgetRepo: budgetRepo,
-      db: db,
+      transactionRepo: transactionRepo,
+      recurringRepo: recurringRepo,
       notificationService: notificationService,
     );
 

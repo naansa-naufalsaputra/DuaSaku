@@ -1,4 +1,4 @@
-import '../data/auth_repository.dart';
+import 'auth_models.dart';
 
 /// Abstract interface for authentication operations.
 /// Follows the dependency inversion principle — presentation and provider layers
@@ -9,6 +9,9 @@ abstract class AuthRepositoryInterface {
 
   /// Returns the currently authenticated user, or null if not authenticated.
   User? get currentUser;
+
+  /// Stream of auth state changes.
+  Stream<AuthState> get authStateStream;
 
   /// Check if a PIN has been set by the user.
   Future<bool> hasPinSet();

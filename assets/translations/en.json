@@ -170,8 +170,18 @@
     "upload_cloud": "Upload Backup",
     "upload_cloud_desc": "Encrypt and upload current data to Google Drive",
     "restore_cloud": "Restore Backup",
-    "restore_cloud_desc": "Download and decrypt backup from Google Drive",
-    "biometric_confirm": "Confirm biometric to enable lock"
+    "biometric_confirm": "Confirm biometric to enable lock",
+    "switch_profile": "Switch Profile",
+    "no_profiles": "No profiles found",
+    "switched_to": "Switched to {}",
+    "error_loading_profiles": "Error loading profiles: {}",
+    "create_new_profile": "Create New Profile",
+    "please_fill_fields": "Please fill all fields",
+    "profile_created": "Profile \"{}\" created",
+    "error_prefix": "Error: {}",
+    "name": "Name",
+    "email": "Email",
+    "btn_create": "Create"
   },
   "pin_auth": {
     "enter_old_pin": "Enter your Old PIN",
@@ -353,7 +363,21 @@
     "transport": "Transport",
     "salary": "Salary",
     "bills": "Bills",
-    "shopping": "Shopping"
+    "shopping": "Shopping",
+    "manage_title": "Manage Categories",
+    "add_category": "Add Category",
+    "edit_category": "Edit Category",
+    "category_name": "Category Name",
+    "expense": "Expense",
+    "income": "Income",
+    "category_color": "Category Color",
+    "follow_system": "Follow System",
+    "custom_color": "Custom Color",
+    "slide_spectrum": "Slide Color Spectrum",
+    "select_icon": "Select Category Icon",
+    "create_category": "Create Category",
+    "save_changes": "Save Changes",
+    "no_custom_categories": "No custom categories yet."
   },
   "insights": {
     "title": "Financial Insights",
@@ -466,5 +490,17 @@
     "manage_debts_desc": "Manage debts, loans and payment history",
     "bill_reminders": "Bill Reminders",
     "bill_reminders_desc": "Set reminders for monthly bills"
+  },
+  "budget": {
+    "title": "Monthly Budgets",
+    "set_monthly_budget": "Set Monthly Budget",
+    "category_hint": "Category (e.g. Food)",
+    "suggested_amount": "Suggested: {} (3-month avg)",
+    "amount_limit": "Amount Limit",
+    "save_budget": "Save Budget",
+    "set_budget": "Set Budget",
+    "no_budgets": "No budgets set for this month.",
+    "of": "of {}",
+    "exceeded": "Budget exceeded!"
   }
 }
